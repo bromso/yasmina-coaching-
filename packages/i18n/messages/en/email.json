@@ -189,6 +189,7 @@
     "body": "Your {offeringLabel} is booked for {when}, {where}.",
     "extraSessionsHeading": "Further sessions",
     "button": "Manage your booking",
+    "memberBooking": "Once you have started, book your sessions here: ",
     "footer": "You can cancel online until {hours} hours before a session from that link. Reply to this email to reschedule."
   },
   "bookingRequestReceived": {

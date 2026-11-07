@@ -189,6 +189,7 @@
     "body": "Vi har bokat din {offeringLabel} {when}, {where}.",
     "extraSessionsHeading": "Ytterligare tillfällen",
     "button": "Hantera din bokning",
+    "memberBooking": "När du är igång bokar du dina samtal här: ",
     "footer": "Du kan avboka online via den länken fram till {hours} timmar före ett tillfälle. Svara på det här mejlet om du vill boka om."
   },
   "bookingRequestReceived": {

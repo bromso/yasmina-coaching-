@@ -112,6 +112,7 @@ import {
   cancellableAt,
   mailBasics,
   manageUrlFor,
+  memberBookingUrlFor,
   newBookingMailProps,
   newManageToken,
   offeringLabel,
@@ -4434,6 +4435,7 @@ export const router = api.router({
               ? rest.map((s) => formatWhen(s.startsAt, s.endsAt, locale))
               : undefined,
             cancelCutoffHours: BOOKING_CANCEL_CUTOFF_HOURS,
+            memberBookingUrl: memberBookingUrlFor(context.wwwUrl, input.offering),
           },
           { tx, locale, replyTo: context.bookingEmail }
         )

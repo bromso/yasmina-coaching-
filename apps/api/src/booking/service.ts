@@ -116,6 +116,18 @@ export function newManageToken() {
 export const manageUrlFor = (wwwUrl: string, token: string) =>
   `${wwwUrl}/book/manage/${encodeURIComponent(token)}`
 
+/** Where a member books their sessions once a start call is booked (none for other offerings). */
+const MEMBER_BOOKING_AFTER: Partial<Record<OfferingKey, OfferingKey>> = {
+  inner_start_coaching: "inner_session",
+  inner_start_lifestyle: "inner_session",
+  inner_start_mentoring: "inner_mentoring_session",
+}
+
+export function memberBookingUrlFor(wwwUrl: string, offering: OfferingKey): string | undefined {
+  const next = MEMBER_BOOKING_AFTER[offering]
+  return next ? `${wwwUrl}/book/${next}` : undefined
+}
+
 /** The offering's name in the recipient's language (the catalog's `label` is the English one). */
 export function offeringLabel(key: OfferingKey, locale: Locale): string {
   if (locale !== "sv") return OFFERINGS[key].label

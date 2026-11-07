@@ -202,6 +202,39 @@ describe("booking.book", () => {
     expect(manage.package?.sessionsBooked).toBe(2)
   })
 
+  test("a start call's confirmation links to the member booking page; other offerings' do not", async () => {
+    const cases = [
+      { offering: "inner_start_coaching", link: "/book/inner_session" },
+      { offering: "inner_start_lifestyle", link: "/book/inner_session" },
+      { offering: "inner_start_mentoring", link: "/book/inner_mentoring_session" },
+      { offering: "inner_session", link: undefined },
+      { offering: "session", link: undefined },
+    ] as const
+    for (const [index, { offering, link }] of cases.entries()) {
+      const email = `member-${index}@example.com`
+      const day = (
+        await anon().booking.availability({ offering, from: "2026-02-02", to: "2026-02-06" })
+      ).days.find((d) => d.slots.length > 0)
+      const slot = day?.slots[0]?.startsAt
+      expect(slot).toBeDefined()
+      const result = await anon().booking.book({
+        offering,
+        slots: [slot as string],
+        audience: "private",
+        customer: { ...customer, email },
+        location: "video",
+      })
+      const [mail] = await mailsTo(app, email, bookingConfirmedSubject(result.reference))
+      if (link) {
+        expect(mail?.text).toContain("Once you have started, book your sessions here:")
+        expect(mail?.text).toMatch(new RegExp(`https?://[^\\s]+${link}(?![\\w/])`))
+      } else {
+        expect(mail?.text).not.toContain("book your sessions here")
+        expect(mail?.text).not.toContain("/book/inner_")
+      }
+    }
+  })
+
   test("two slots of one order that overlap each other are refused together", async () => {
     const [error] = await safeCall(() =>
       anon().booking.book({

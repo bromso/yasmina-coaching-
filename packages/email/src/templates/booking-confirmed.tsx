@@ -17,6 +17,8 @@ export type BookingConfirmedProps = {
   name?: string
   extraSessions?: string[]
   cancelCutoffHours: number
+  /** Where a member books their sessions after a start call (`/book/inner_session`, …). */
+  memberBookingUrl?: string
   brand?: string
   locale?: Locale
 }
@@ -34,6 +36,7 @@ export function BookingConfirmed({
   name,
   extraSessions,
   cancelCutoffHours,
+  memberBookingUrl,
   brand,
   locale = DEFAULT_LOCALE,
 }: BookingConfirmedProps) {
@@ -62,6 +65,12 @@ export function BookingConfirmed({
         {t("layout.orLink")}
         <Link href={manageUrl}>{manageUrl}</Link>
       </Text>
+      {memberBookingUrl ? (
+        <Text>
+          {t("bookingConfirmed.memberBooking")}
+          <Link href={memberBookingUrl}>{memberBookingUrl}</Link>
+        </Text>
+      ) : null}
       <Text>{t("bookingConfirmed.footer", { hours: cancelCutoffHours })}</Text>
     </Layout>
   )

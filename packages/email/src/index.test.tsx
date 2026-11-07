@@ -517,6 +517,19 @@ describe("bookingConfirmed", () => {
     expect(mail.text).toContain("Hi,")
     expect(mail.text).not.toContain("Ada")
   })
+
+  test("points to the member booking page when given, in the booking's language", async () => {
+    const memberBookingUrl = "https://www.example.com/book/inner_session"
+    const en = await emails.bookingConfirmed({ ...props, memberBookingUrl })
+    for (const part of [en.html, en.text]) expect(part).toContain(memberBookingUrl)
+    expect(en.text).toContain("Once you have started, book your sessions here:")
+    const sv = await emails.bookingConfirmed({ ...props, memberBookingUrl }, "sv")
+    for (const part of [sv.html, sv.text]) expect(part).toContain(memberBookingUrl)
+    expect(sv.text).toContain("När du är igång bokar du dina samtal här:")
+    const plain = await emails.bookingConfirmed(props)
+    expect(plain.text).not.toContain("book your sessions here")
+    expect(plain.html).not.toContain("/book/inner_session")
+  })
 })
 
 describe("bookingRequestReceived", () => {

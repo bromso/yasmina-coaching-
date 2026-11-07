@@ -67,3 +67,22 @@ export const Swedish: Story = {
     )
   },
 }
+
+export const AfterAStartCall: Story = {
+  args: {
+    render: () =>
+      emails.bookingConfirmed({
+        ...props,
+        offeringLabel: "Start call, transformative coaching",
+        memberBookingUrl: "https://www.brand.com/book/inner_session",
+      }),
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await waitFor(() =>
+      expect(canvas.getByTestId("text")).toHaveTextContent(
+        "Once you have started, book your sessions here: https://www.brand.com/book/inner_session"
+      )
+    )
+  },
+}
