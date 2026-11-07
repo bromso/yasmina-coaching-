@@ -4494,6 +4494,8 @@ export const router = api.router({
           if (event.seats_taken >= event.capacity) return "full" as const
           events.push(event)
         }
+        // One reservation, one offering: events of different offerings are never booked together.
+        if (new Set(events.map((e) => e.offering)).size > 1) return "missing" as const
         const ids: number[] = []
         for (const event of events) {
           const { id } = await tx.booking.create({

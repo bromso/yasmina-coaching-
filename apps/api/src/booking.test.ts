@@ -618,6 +618,40 @@ describe("group events per offering", () => {
     })
     expect(seat.bookings[0]?.offering).toBe("inner_group")
   })
+
+  test("a reservation spanning two offerings' events is NOT_FOUND and books nothing", async () => {
+    const root = await admin()
+    const base = {
+      description: "",
+      durationMinutes: 120,
+      capacity: 6,
+      location: "varberg" as const,
+      repeatWeeks: 1,
+    }
+    const plain = await root.admin.bookings.groupEvents.create({
+      ...base,
+      startsAt: "2026-02-12T16:00:00.000Z",
+      title: "Mixed plain",
+    })
+    const inner = await root.admin.bookings.groupEvents.create({
+      ...base,
+      startsAt: "2026-02-13T16:00:00.000Z",
+      title: "Mixed inner",
+      offering: "inner_group",
+    })
+    const [error] = await safeCall(() =>
+      anon().booking.reserve({
+        eventIds: [plain.ids[0] as number, inner.ids[0] as number],
+        audience: "private",
+        customer: { name: "Mixed", email: "mixed@example.com" },
+      })
+    )
+    expect(error?.code).toBe("NOT_FOUND")
+    const seats = (await anon().booking.groupEvents({})).events.find(
+      (e) => e.id === plain.ids[0]
+    )?.seatsLeft
+    expect(seats).toBe(6)
+  })
 })
 
 describe("limits", () => {
