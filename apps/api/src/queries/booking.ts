@@ -30,6 +30,7 @@ export type GroupEventRow = {
   id: number
   title: string
   description: string | null
+  offering: OfferingKey
   starts_at: string
   ends_at: string
   location: BookingLocation
@@ -256,6 +257,7 @@ export function bookingQueries(sql: SQL) {
       async create(input: {
         title: string
         description: string | null
+        offering: OfferingKey
         startsAt: string
         endsAt: string
         location: BookingLocation
@@ -266,9 +268,10 @@ export function bookingQueries(sql: SQL) {
       }): Promise<{ id: number }> {
         const [row]: Array<{ id: number }> = await sql`
           INSERT INTO group_events
-            (title, description, starts_at, ends_at, location, capacity, series_key, status,
-              created_by, created_at)
-          VALUES (${input.title}, ${input.description}, ${input.startsAt}, ${input.endsAt},
+            (title, description, offering, starts_at, ends_at, location, capacity, series_key,
+              status, created_by, created_at)
+          VALUES (${input.title}, ${input.description}, ${input.offering}, ${input.startsAt},
+            ${input.endsAt},
             ${input.location}, ${input.capacity}, ${input.seriesKey}, 'scheduled',
             ${input.createdBy}, ${input.createdAt})
           RETURNING id`
@@ -288,13 +291,13 @@ export function bookingQueries(sql: SQL) {
           await sql`UPDATE group_events SET title = title WHERE id = ${id} RETURNING id`
         return rows.length > 0
       },
-      /** Scheduled events starting after `nowIso`, soonest first. */
-      async upcoming(nowIso: string): Promise<GroupEventWithSeats[]> {
+      /** One offering's scheduled events starting after `nowIso`, soonest first. */
+      async upcoming(nowIso: string, offering: OfferingKey): Promise<GroupEventWithSeats[]> {
         const rows: GroupEventWithSeats[] = await sql`
           SELECT e.*, (SELECT COUNT(*) FROM bookings b
             WHERE b.group_event_id = e.id AND b.status = 'confirmed') AS seats_taken
           FROM group_events e
-          WHERE e.status = 'scheduled' AND e.starts_at > ${nowIso}
+          WHERE e.status = 'scheduled' AND e.offering = ${offering} AND e.starts_at > ${nowIso}
           ORDER BY e.starts_at`
         return rows.map(toEvent)
       },

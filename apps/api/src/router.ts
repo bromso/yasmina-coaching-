@@ -4330,8 +4330,11 @@ export const router = api.router({
       }
     }),
 
-    groupEvents: api.booking.groupEvents.handler(async ({ context }) => {
-      const rows = await context.db.booking.events.upcoming(context.now().toISOString())
+    groupEvents: api.booking.groupEvents.handler(async ({ input, context }) => {
+      const rows = await context.db.booking.events.upcoming(
+        context.now().toISOString(),
+        input.offering
+      )
       return { events: rows.map(toGroupEvent) }
     }),
 
@@ -4492,7 +4495,7 @@ export const router = api.router({
         const ids: number[] = []
         for (const event of events) {
           const { id } = await tx.booking.create({
-            offering: "group",
+            offering: event.offering,
             kind: "group",
             status: "confirmed",
             audience: input.audience,
@@ -4544,7 +4547,7 @@ export const router = api.router({
           context.bookingEmail,
           newBookingMailProps({
             reference,
-            offering: "group",
+            offering: firstEvent.offering,
             kind: "group",
             eventTitle: firstEvent.title,
             customer: input.customer,
@@ -5634,6 +5637,7 @@ export const router = api.router({
                 const { id } = await tx.booking.events.create({
                   title: input.title,
                   description: input.description || null,
+                  offering: input.offering,
                   startsAt: slot.startsAt,
                   endsAt: slot.endsAt,
                   location: input.location,

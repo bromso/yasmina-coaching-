@@ -33,6 +33,7 @@ import workspaceInviteDomains from "./0031_workspace_invite_domains"
 import notifications from "./0032_notifications"
 import notificationPreferences from "./0033_notification_preferences"
 import booking from "./0034_booking"
+import groupEventOffering from "./0035_group_event_offering"
 
 /** Every migration, in order. A new file goes here too — nothing is picked up by accident. */
 export const migrations: readonly Migration[] = [
@@ -70,4 +71,5 @@ export const migrations: readonly Migration[] = [
   notifications,
   notificationPreferences,
   booking,
+  groupEventOffering,
 ]

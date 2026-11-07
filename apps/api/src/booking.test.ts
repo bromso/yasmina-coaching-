@@ -551,6 +551,42 @@ describe("group events", () => {
   })
 })
 
+describe("group events per offering", () => {
+  test("group events are listed per offering", async () => {
+    const root = await admin()
+    const base = {
+      description: "",
+      startsAt: "2026-02-05T16:00:00.000Z",
+      durationMinutes: 120,
+      capacity: 6,
+      location: "varberg" as const,
+      repeatWeeks: 1,
+    }
+    const plain = await root.admin.bookings.groupEvents.create({ ...base, title: "Plain group" })
+    const inner = await root.admin.bookings.groupEvents.create({
+      ...base,
+      startsAt: "2026-02-06T16:00:00.000Z",
+      title: "Inner group",
+      offering: "inner_group",
+    })
+    const ids = (r: { events: Array<{ id: number }> }) => r.events.map((e) => e.id)
+    const defaults = await anon().booking.groupEvents({})
+    expect(ids(defaults)).toContain(plain.ids[0] as number)
+    expect(ids(defaults)).not.toContain(inner.ids[0] as number)
+    expect(defaults.events.every((e) => e.offering === "group")).toBe(true)
+    const listed = await anon().booking.groupEvents({ offering: "inner_group" })
+    expect(ids(listed)).toEqual([inner.ids[0] as number])
+    expect(listed.events[0]?.offering).toBe("inner_group")
+
+    const seat = await anon().booking.reserve({
+      eventIds: inner.ids,
+      audience: "private",
+      customer,
+    })
+    expect(seat.bookings[0]?.offering).toBe("inner_group")
+  })
+})
+
 describe("limits", () => {
   test("the per-client limiter refuses with the translated message", async () => {
     const strict = await start({

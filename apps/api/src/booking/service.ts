@@ -90,8 +90,7 @@ export function toGroupEvent(row: GroupEventWithSeats): GroupEvent {
     reference: groupEventReference(row.id),
     title: row.title,
     description: row.description,
-    // Stored per event from Task 2's migration on; until then every event is the plain group.
-    offering: "group",
+    offering: row.offering,
     startsAt: row.starts_at,
     endsAt: row.ends_at,
     location: row.location,
