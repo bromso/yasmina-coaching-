@@ -413,9 +413,29 @@ describe("createGroupEventCore", () => {
           capacity: 8,
           location: "varberg",
           repeatWeeks: 3,
+          offering: "group",
         },
       },
     ])
+  })
+
+  test("createGroupEventCore forwards the offering", async () => {
+    const base = {
+      title: "Inifrån",
+      startsAt: "2026-09-01T18:00",
+      durationMinutes: "120",
+      capacity: "8",
+      location: "varberg",
+      repeatWeeks: "1",
+    }
+    const d = groupDeps()
+    await createGroupEventCore(d, form({ ...base, offering: "inner_group" }))
+    expect((d.calls[0] as { input: { offering: string } }).input.offering).toBe("inner_group")
+    const bad = groupDeps({ create: unreachable })
+    expect(await createGroupEventCore(bad, form({ ...base, offering: "coaching" }))).toMatchObject({
+      ok: false,
+      fieldErrors: { offering: expect.any(String) },
+    })
   })
 
   test("one id reads as a single event; a blank repeat defaults to 1", async () => {

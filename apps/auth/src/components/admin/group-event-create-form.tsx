@@ -3,6 +3,7 @@
 import {
   GROUP_EVENT_MAX_CAPACITY,
   GROUP_EVENT_MAX_REPEATS,
+  GROUP_OFFERING_KEYS,
   OFFERINGS,
 } from "@repo/api-contract/booking-limits"
 import { Button } from "@repo/ui/components/button"
@@ -50,6 +51,22 @@ export function GroupEventCreateForm() {
           {...fieldAria("description", state, undefined, { idPrefix })}
         />
         <FieldError name="description" state={state} idPrefix={idPrefix} />
+      </div>
+      <div className="grid gap-1.5">
+        <Label htmlFor="event-offering">Offering</Label>
+        <NativeSelect
+          id="event-offering"
+          name="offering"
+          defaultValue={values?.offering ?? "group"}
+          {...fieldAria("offering", state, undefined, { idPrefix })}
+        >
+          {GROUP_OFFERING_KEYS.map((key) => (
+            <option key={key} value={key}>
+              {OFFERINGS[key].label}
+            </option>
+          ))}
+        </NativeSelect>
+        <FieldError name="offering" state={state} idPrefix={idPrefix} />
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="grid gap-1.5">

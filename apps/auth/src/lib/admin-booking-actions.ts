@@ -216,6 +216,7 @@ export async function createGroupEventCore(deps: GroupEventDeps, fd: FormData): 
     capacity: str(fd, "capacity"),
     location: str(fd, "location"),
     repeatWeeks: str(fd, "repeatWeeks"),
+    offering: str(fd, "offering"),
   }
   const startsAt = stockholmLocalToUtc(values.startsAt)
   if (!startsAt) return { ok: false, fieldErrors: { startsAt: DATETIME_MESSAGE }, values }
@@ -227,6 +228,7 @@ export async function createGroupEventCore(deps: GroupEventDeps, fd: FormData): 
     capacity: values.capacity,
     location: values.location,
     repeatWeeks: optional(values.repeatWeeks),
+    offering: optional(values.offering),
   })
   if (!parsed.success) return { ok: false, fieldErrors: fieldErrors(parsed.error.issues), values }
   try {

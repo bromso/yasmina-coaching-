@@ -1,4 +1,5 @@
 import type { GroupEvent } from "@repo/api-contract"
+import { OFFERINGS } from "@repo/api-contract/booking-limits"
 import { Badge } from "@repo/ui/components/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/card"
 import { AdminNav } from "@/components/admin/admin-nav"
@@ -41,6 +42,7 @@ export function AdminBookingGroupsView({
                           <span className="font-mono text-xs text-muted-foreground">
                             {e.reference}
                           </span>
+                          <Badge variant="outline">{OFFERINGS[e.offering].label}</Badge>
                           <Badge variant={e.seatsLeft === 0 ? "destructive" : "secondary"}>
                             {booked}/{e.capacity} seats
                           </Badge>
