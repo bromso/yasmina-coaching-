@@ -19,6 +19,10 @@ describe("Ledarskap inifrån offerings", () => {
       expect(OFFERINGS[key].sessions).toBe(1)
     }
   })
+  test("the mentoring session is a 90-minute instant offering", () => {
+    expect(OFFERINGS.inner_mentoring_session.kind).toBe("instant")
+    expect(OFFERINGS.inner_mentoring_session.durationMinutes).toBe(90)
+  })
   test("the inner group is a two-hour group offering", () => {
     expect(OFFERINGS.inner_group.kind).toBe("group")
     expect(OFFERINGS.inner_group.durationMinutes).toBe(120)

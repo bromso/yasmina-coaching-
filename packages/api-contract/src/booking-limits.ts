@@ -156,7 +156,7 @@ export const OFFERINGS: Record<OfferingKey, Offering> = {
     key: "inner_mentoring_session",
     kind: "instant",
     label: "Mentoring session",
-    durationMinutes: 60,
+    durationMinutes: 90,
     sessions: 1,
     audiences: ["private", "organisation"],
     locations: ["varberg", "video"],

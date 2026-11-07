@@ -180,8 +180,8 @@ const sv: BookingContent = {
     },
     inner_mentoring_session: {
       title: "Mentorssamtal",
-      description: "Ett mentorssamtal på 60 minuter för dig som är medlem i Ledarskap inifrån.",
-      included: ["60 minuter, i Varberg eller på video"],
+      description: "Ett mentorssamtal på 90 minuter för dig som är medlem i Ledarskap inifrån.",
+      included: ["90 minuter, i Varberg eller på video"],
     },
     inner_group: {
       title: "Inifrån-gruppen",
@@ -360,8 +360,8 @@ const en: BookingContent = {
     },
     inner_mentoring_session: {
       title: "Mentoring session",
-      description: "A 60-minute mentoring session for members of Leadership from within.",
-      included: ["60 minutes, in Varberg or by video"],
+      description: "A 90-minute mentoring session for members of Leadership from within.",
+      included: ["90 minutes, in Varberg or by video"],
     },
     inner_group: {
       title: "Inifrån group",
