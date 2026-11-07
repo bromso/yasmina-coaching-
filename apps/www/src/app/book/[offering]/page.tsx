@@ -1,5 +1,6 @@
 import {
   type BookingAudience,
+  MEMBER_OFFERING_KEYS,
   OFFERING_KEYS,
   OFFERINGS,
   type OfferingKey,
@@ -25,7 +26,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const key = keyOf((await params).offering)
   if (!key) return {}
   const copy = bookingFor(await getLocale()).offerings[key]
-  return { title: copy.title, description: copy.description }
+  const metadata: Metadata = { title: copy.title, description: copy.description }
+  // Members' session pages are open but unlisted: linked only from the service pages and the
+  // start call's confirmation mail, never indexed.
+  if (MEMBER_OFFERING_KEYS.includes(key)) metadata.robots = { index: false }
+  return metadata
 }
 
 /**

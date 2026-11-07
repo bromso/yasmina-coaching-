@@ -242,7 +242,7 @@ const sv: BookingContent = {
     inner_group: {
       title: "Inifrån-gruppen",
       description:
-        "En träff i den löpande gruppen: ett tema ur yogans filosofi, en övning tillsammans och samtal om ledarskap och liv.",
+        "En träff i den löpande gruppen: ett tema ur yogans filosofi, en övning tillsammans och samtal om ledarskap och liv. Månadspriset gäller månadens träffar, och du bokar varje datum i kalendern.",
       included: [`${minutes("inner_group")} minuter, i Varberg eller på video`],
     },
   },
@@ -453,7 +453,7 @@ const en: BookingContent = {
     inner_group: {
       title: "The Inifrån group",
       description:
-        "One session of the ongoing group: a theme from yoga philosophy, an exercise together and conversation about leadership and life.",
+        "One session of the ongoing group: a theme from yoga philosophy, an exercise together and conversation about leadership and life. The monthly price covers the month's sessions, and you book each date in the calendar.",
       included: [`${minutes("inner_group")} minutes, in Varberg or by video`],
     },
   },

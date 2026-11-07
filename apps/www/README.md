@@ -132,7 +132,7 @@ is in `src/content/booking.tsx`; the catalog itself (`OFFERINGS`, kinds, limits)
 
 ## Ledarskap inifrån
 
-The "Leadership from the inside" track (Swedish slugs in both languages). Every word, both
+The "Leading from within" track (Swedish slugs in both languages). Every word, both
 languages, is in `src/content/inner.tsx`; prices come from `src/content/inner-pricing.ts` (an
 hourly rate with discount tiers, private clients incl. VAT, organisations excl.), never typed into
 the copy. Pages are dynamic per locale like the rest of www.

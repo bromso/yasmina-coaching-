@@ -118,7 +118,7 @@ export type InnerLabels = {
     vatOrganisation: string
     ending: string
   }
-  book: { start: string; member: string; memberHint: string; group: string }
+  book: { start: string; member: string; group: string }
   research: {
     meta: { title: string; description: string }
     eyebrow: string
@@ -630,7 +630,6 @@ const sv: InnerContent = {
     book: {
       start: "Boka startsamtal",
       member: "Är du redan med? Boka ditt nästa samtal",
-      memberHint: "För dig som redan är med",
       group: "Boka en plats i gruppen",
     },
     research: {
@@ -1024,7 +1023,6 @@ const en: InnerContent = {
     book: {
       start: "Book a start call",
       member: "Are you already a member? Book your next session",
-      memberHint: "If you are already a member",
       group: "Book a seat in the group",
     },
     research: {

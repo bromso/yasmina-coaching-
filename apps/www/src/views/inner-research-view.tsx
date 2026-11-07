@@ -91,9 +91,7 @@ export function InnerResearchView({ locale }: { locale: Locale }) {
                 value={ref.n}
                 className="flex scroll-mt-24 gap-3 break-words"
               >
-                <span aria-hidden="true" className="w-6 shrink-0 font-display text-base">
-                  {ref.n}.
-                </span>
+                <span className="w-6 shrink-0 font-display text-base">{ref.n}.</span>
                 <span className="min-w-0">
                   {ref.text}{" "}
                   <a
