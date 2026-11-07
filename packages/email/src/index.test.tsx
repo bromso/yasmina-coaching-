@@ -8,6 +8,11 @@ import {
   accountSuspendedSubject,
   accountUnsuspendedSubject,
   BRAND,
+  bookingCancelledSubject,
+  bookingConfirmedSubject,
+  bookingDeclinedSubject,
+  bookingNewSubject,
+  bookingRequestReceivedSubject,
   dataExportReadySubject,
   emailChangeConfirmSubject,
   emailChangedSubject,
@@ -462,6 +467,263 @@ describe("supportReceived", () => {
     // @ts-expect-error: nor a free-text name
     const named = await emails.supportReceived({ reference: "HELP-1", name: "Visit evil.example" })
     expect(named.text).not.toContain("evil.example")
+  })
+})
+
+describe("bookingConfirmed", () => {
+  const props = {
+    reference: "BK-2041",
+    offeringLabel: "coaching session",
+    when: "Tuesday 12 May 2026, 10:00",
+    where: "online",
+    manageUrl: "https://www.example.com/bookings/BK-2041?token=abc",
+    name: "Ada",
+    cancelCutoffHours: 24,
+  }
+
+  test("renders the subject, greeting, booking line, link and cancel cutoff", async () => {
+    const mail = await emails.bookingConfirmed(props)
+    expect(mail.subject).toBe("Your booking is confirmed (BK-2041)")
+    expect(bookingConfirmedSubject("BK-2041")).toBe(mail.subject)
+    for (const part of [mail.html, mail.text]) {
+      expect(part).toContain("Tuesday 12 May 2026, 10:00")
+      expect(part).toContain(props.manageUrl)
+    }
+    expect(mail.text).toContain("Hi Ada,")
+    expect(mail.text).toContain(
+      "Your coaching session is booked for Tuesday 12 May 2026, 10:00, online."
+    )
+    expect(mail.text).toContain("Manage your booking")
+    expect(mail.text).toContain("You can cancel online until 24 hours before a session")
+    expect(mail.text).toContain("Reply to this email to reschedule.")
+    expect(mail.text).not.toContain("Further sessions")
+    expect(mail.text).not.toMatch(/<[a-z][\s\S]*>/i)
+  })
+
+  test("lists further sessions under their own heading when given", async () => {
+    const mail = await emails.bookingConfirmed({
+      ...props,
+      extraSessions: ["Tuesday 19 May 2026, 10:00", "Tuesday 26 May 2026, 10:00"],
+    })
+    expect(mail.text).toMatch(/Further sessions/i)
+    expect(mail.text).toContain("Tuesday 19 May 2026, 10:00")
+    expect(mail.text).toContain("Tuesday 26 May 2026, 10:00")
+    const empty = await emails.bookingConfirmed({ ...props, extraSessions: [] })
+    expect(empty.text).not.toMatch(/Further sessions/i)
+  })
+
+  test("greets generically without a name", async () => {
+    const mail = await emails.bookingConfirmed({ ...props, name: undefined })
+    expect(mail.text).toContain("Hi,")
+    expect(mail.text).not.toContain("Ada")
+  })
+})
+
+describe("bookingRequestReceived", () => {
+  const props = {
+    reference: "BK-2042",
+    offeringLabel: "leadership programme",
+    manageUrl: "https://www.example.com/bookings/BK-2042?token=abc",
+    name: "Ada",
+  }
+
+  test("renders the subject, the promise of a reply and the link", async () => {
+    const mail = await emails.bookingRequestReceived(props)
+    expect(mail.subject).toBe("We've received your request (BK-2042)")
+    expect(bookingRequestReceivedSubject("BK-2042")).toBe(mail.subject)
+    for (const part of [mail.html, mail.text]) expect(part).toContain(props.manageUrl)
+    expect(mail.text).toContain("Hi Ada,")
+    expect(mail.text).toContain(
+      "Yasmina will reply to this address within a few days with a proposed time for your leadership programme."
+    )
+    expect(mail.text).toContain("View your request")
+    expect(mail.text).not.toMatch(/<[a-z][\s\S]*>/i)
+  })
+
+  test("its props carry no customer message (the recipient is any typed address)", async () => {
+    // @ts-expect-error: the confirmation must not accept the customer's text
+    const mail = await emails.bookingRequestReceived({ ...props, message: "Buy pills" })
+    expect(mail.text).not.toContain("Buy pills")
+  })
+})
+
+describe("bookingDeclined", () => {
+  const props = { reference: "BK-2043", offeringLabel: "workshop", name: "Ada" }
+
+  test("renders the subject, the decline and the footer", async () => {
+    const mail = await emails.bookingDeclined(props)
+    expect(mail.subject).toBe("About your request (BK-2043)")
+    expect(bookingDeclinedSubject("BK-2043")).toBe(mail.subject)
+    expect(mail.text).toContain("Hi Ada,")
+    expect(mail.text).toContain(
+      "Unfortunately Yasmina cannot take on your workshop at the dates you proposed."
+    )
+    expect(mail.text).toContain("Reply to this email if you would like to look at other dates.")
+    expect(mail.text).not.toMatch(/<[a-z][\s\S]*>/i)
+  })
+
+  test("renders the admin's note as its own escaped paragraph when given", async () => {
+    const mail = await emails.bookingDeclined({
+      ...props,
+      note: "I am fully booked in May.\nJune <b>works</b>.",
+    })
+    expect(mail.text).toContain("I am fully booked in May.")
+    expect(mail.text).toContain("June <b>works</b>.")
+    expect(mail.html).toContain("&lt;b&gt;works&lt;/b&gt;")
+    expect(mail.html).not.toContain("<b>works</b>")
+    expect(mail.html).toContain("white-space:pre-wrap")
+    const without = await emails.bookingDeclined(props)
+    expect(without.text).not.toContain("fully booked")
+  })
+})
+
+describe("bookingCancelled", () => {
+  const props = {
+    reference: "BK-2044",
+    offeringLabel: "coaching session",
+    when: "Tuesday 12 May 2026, 10:00",
+    byCustomer: true,
+    name: "Ada",
+  }
+
+  test("renders the subject and the customer's own cancellation", async () => {
+    const mail = await emails.bookingCancelled(props)
+    expect(mail.subject).toBe("Your booking is cancelled (BK-2044)")
+    expect(bookingCancelledSubject("BK-2044")).toBe(mail.subject)
+    expect(mail.text).toContain("Hi Ada,")
+    expect(mail.text).toContain(
+      "As requested, your coaching session on Tuesday 12 May 2026, 10:00 is cancelled."
+    )
+    expect(mail.text).not.toContain("Yasmina has had to cancel")
+    expect(mail.text).toContain("Reply to this email to find a new time.")
+    expect(mail.text).not.toMatch(/<[a-z][\s\S]*>/i)
+  })
+
+  test("byCustomer false switches to Yasmina's cancellation", async () => {
+    const mail = await emails.bookingCancelled({ ...props, byCustomer: false })
+    expect(mail.text).toContain(
+      "Yasmina has had to cancel your coaching session on Tuesday 12 May 2026, 10:00. She is sorry for the trouble."
+    )
+    expect(mail.text).not.toContain("As requested")
+  })
+
+  test("renders the admin's note as its own escaped paragraph when given", async () => {
+    const mail = await emails.bookingCancelled({
+      ...props,
+      byCustomer: false,
+      note: "Yasmina is unwell <script>alert(1)</script>",
+    })
+    expect(mail.text).toContain("Yasmina is unwell <script>alert(1)</script>")
+    expect(mail.html).not.toContain("<script>")
+    expect(mail.html).toContain("&lt;script&gt;")
+  })
+})
+
+describe("bookingNew", () => {
+  const props = {
+    reference: "BK-2045",
+    offeringLabel: "Leadership workshop",
+    kind: "group" as const,
+    name: "Ada Lovelace",
+    email: "ada@example.com",
+    organisation: "Analytical Engines AB",
+    phone: "+46 70 123 45 67",
+    audience: "organisation" as const,
+    location: "On site",
+    when: "Tuesday 12 May 2026, 09:00",
+    extraSessions: ["Tuesday 19 May 2026, 09:00"],
+    preferredDates: ["Week 22", "Week 23"],
+    attendees: 12,
+    venue: "Our office in Stockholm",
+    message: "We would like a focus on feedback.\n\nThanks!",
+    adminUrl: "https://auth.example.com/admin/bookings/BK-2045",
+  }
+
+  test("renders the subject, every provided field and the admin link", async () => {
+    const mail = await emails.bookingNew(props)
+    expect(mail.subject).toBe("New booking: Leadership workshop (BK-2045)")
+    expect(bookingNewSubject("BK-2045", "Leadership workshop", "group")).toBe(mail.subject)
+    for (const part of [mail.html, mail.text]) {
+      expect(part).toContain("BK-2045")
+      expect(part).toContain("Leadership workshop")
+      expect(part).toContain("Ada Lovelace")
+      expect(part).toContain("ada@example.com")
+      expect(part).toContain("Analytical Engines AB")
+      expect(part).toContain("+46 70 123 45 67")
+      expect(part).toContain("On site")
+      expect(part).toContain("Tuesday 12 May 2026, 09:00")
+      expect(part).toContain("Tuesday 19 May 2026, 09:00")
+      expect(part).toContain("Week 22")
+      expect(part).toContain("Week 23")
+      expect(part).toContain("12")
+      expect(part).toContain("Our office in Stockholm")
+      expect(part).toContain("We would like a focus on feedback.")
+      expect(part).toContain(props.adminUrl)
+    }
+    expect(mail.text).toContain("Audience: Organisation")
+    expect(mail.text).toContain("Attendees: 12")
+    expect(mail.text).toContain("Further sessions:")
+    expect(mail.text).toContain("Proposed dates:")
+    expect(mail.text).toContain("Open in admin")
+    expect(mail.html).toContain("white-space:pre-wrap")
+    expect(mail.text).not.toMatch(/<[a-z][\s\S]*>/i)
+  })
+
+  test("a request gets the request subject and heading, instant the booking one", async () => {
+    const request = await emails.bookingNew({ ...props, kind: "request" })
+    expect(request.subject).toBe("New request: Leadership workshop (BK-2045)")
+    expect(bookingNewSubject("BK-2045", "Leadership workshop", "request")).toBe(request.subject)
+    expect(request.text).toMatch(/NEW REQUEST/)
+    const instant = await emails.bookingNew({ ...props, kind: "instant" })
+    expect(instant.subject).toBe("New booking: Leadership workshop (BK-2045)")
+    expect(bookingNewSubject("BK-2045", "Leadership workshop", "instant")).toBe(instant.subject)
+  })
+
+  test("omits the optional fields that are not given", async () => {
+    const mail = await emails.bookingNew({
+      reference: "BK-2046",
+      offeringLabel: "Coaching session",
+      kind: "instant",
+      name: "Ada",
+      email: "ada@example.com",
+      audience: "private",
+      location: "Online",
+      adminUrl: props.adminUrl,
+    })
+    expect(mail.text).toContain("Audience: Private individual")
+    expect(mail.text).toContain("Location: Online")
+    for (const label of [
+      "Organisation:",
+      "Phone:",
+      "When:",
+      "Further sessions:",
+      "Proposed dates:",
+      "Attendees:",
+      "Venue:",
+      "Message:",
+    ]) {
+      expect(mail.text).not.toContain(label)
+    }
+    const emptyLists = await emails.bookingNew({
+      ...props,
+      extraSessions: [],
+      preferredDates: [],
+    })
+    expect(emptyLists.text).not.toContain("Further sessions:")
+    expect(emptyLists.text).not.toContain("Proposed dates:")
+  })
+
+  test("a <script> in a customer field is escaped in html and verbatim in text", async () => {
+    const mail = await emails.bookingNew({
+      ...props,
+      name: "Ada <script>alert(1)</script>",
+      message: "Hello <b>there</b>",
+    })
+    expect(mail.html).not.toContain("<script>")
+    expect(mail.html).toContain("&lt;script&gt;")
+    expect(mail.html).toContain("&lt;b&gt;there&lt;/b&gt;")
+    expect(mail.text).toContain("Ada <script>alert(1)</script>")
+    expect(mail.text).toContain("Hello <b>there</b>")
   })
 })
 
@@ -1130,6 +1392,109 @@ describe("Swedish rendering", () => {
     expect(mail.subject).toBe(sv("supportReceived.subject", { reference: "HELP-123" }))
     expect(mail.subject).toContain("HELP-123")
     expect(mail.text).toContain(sv("supportReceived.body", { reference: "HELP-123" }))
+  })
+
+  test("bookingConfirmed: Swedish subject and body, link and dates still present", async () => {
+    const manageUrl = "https://www.example.com/bookings/BK-2041?token=abc"
+    const mail = await emails.bookingConfirmed(
+      {
+        reference: "BK-2041",
+        offeringLabel: "coachingsession",
+        when: "tisdag 12 maj 2026 kl. 10.00",
+        where: "online",
+        manageUrl,
+        name: "Ada",
+        extraSessions: ["tisdag 19 maj 2026 kl. 10.00"],
+        cancelCutoffHours: 24,
+      },
+      "sv"
+    )
+    expect(mail.subject).toBe(sv("bookingConfirmed.subject", { reference: "BK-2041" }))
+    expect(mail.subject).not.toBe("Your booking is confirmed (BK-2041)")
+    expect(mail.subject).toContain("BK-2041")
+    expect(mail.text).toContain("Hej Ada,")
+    expect(mail.text).toContain(
+      sv("bookingConfirmed.body", {
+        offeringLabel: "coachingsession",
+        when: "tisdag 12 maj 2026 kl. 10.00",
+        where: "online",
+      })
+    )
+    expect(mail.text).toMatch(/Ytterligare tillfällen/i)
+    expect(mail.text).toContain("tisdag 19 maj 2026 kl. 10.00")
+    expect(mail.text).toContain(sv("bookingConfirmed.footer", { hours: 24 }))
+    expect(mail.text).toContain(manageUrl)
+  })
+
+  test("bookingRequestReceived: Swedish subject and body, link still present", async () => {
+    const manageUrl = "https://www.example.com/bookings/BK-2042?token=abc"
+    const mail = await emails.bookingRequestReceived(
+      { reference: "BK-2042", offeringLabel: "ledarskapsprogram", manageUrl },
+      "sv"
+    )
+    expect(mail.subject).toBe(sv("bookingRequestReceived.subject", { reference: "BK-2042" }))
+    expect(mail.subject).not.toBe("We've received your request (BK-2042)")
+    expect(mail.text).toContain(
+      sv("bookingRequestReceived.body", { offeringLabel: "ledarskapsprogram" })
+    )
+    expect(mail.text).toContain(manageUrl)
+  })
+
+  test("bookingDeclined: Swedish subject and body, note still present", async () => {
+    const mail = await emails.bookingDeclined(
+      { reference: "BK-2043", offeringLabel: "workshop", note: "Maj är fullbokad." },
+      "sv"
+    )
+    expect(mail.subject).toBe(sv("bookingDeclined.subject", { reference: "BK-2043" }))
+    expect(mail.subject).not.toBe("About your request (BK-2043)")
+    expect(mail.text).toContain(sv("bookingDeclined.body", { offeringLabel: "workshop" }))
+    expect(mail.text).toContain("Maj är fullbokad.")
+    expect(mail.text).toContain(sv("bookingDeclined.footer"))
+  })
+
+  test("bookingCancelled: Swedish subject and both wordings", async () => {
+    const props = {
+      reference: "BK-2044",
+      offeringLabel: "coachingsession",
+      when: "tisdag 12 maj 2026 kl. 10.00",
+    }
+    const byCustomer = await emails.bookingCancelled({ ...props, byCustomer: true }, "sv")
+    expect(byCustomer.subject).toBe(sv("bookingCancelled.subject", { reference: "BK-2044" }))
+    expect(byCustomer.subject).not.toBe("Your booking is cancelled (BK-2044)")
+    expect(byCustomer.text).toContain(sv("bookingCancelled.bodyByCustomer", props))
+    const byYasmina = await emails.bookingCancelled({ ...props, byCustomer: false }, "sv")
+    expect(byYasmina.text).toContain(sv("bookingCancelled.bodyByYasmina", props))
+    expect(byYasmina.text).not.toContain(sv("bookingCancelled.bodyByCustomer", props))
+  })
+
+  test("bookingNew: Swedish subject per kind, fields and admin link still present", async () => {
+    const props = {
+      reference: "BK-2045",
+      offeringLabel: "Ledarskapsworkshop",
+      kind: "request" as const,
+      name: "Ada Lovelace",
+      email: "ada@example.com",
+      audience: "organisation" as const,
+      location: "På plats",
+      preferredDates: ["Vecka 22"],
+      adminUrl: "https://auth.example.com/admin/bookings/BK-2045",
+    }
+    const mail = await emails.bookingNew(props, "sv")
+    expect(mail.subject).toBe(
+      sv("bookingNew.subject", {
+        reference: "BK-2045",
+        offeringLabel: "Ledarskapsworkshop",
+        kind: "request",
+      })
+    )
+    expect(mail.subject).not.toBe("New request: Ledarskapsworkshop (BK-2045)")
+    expect(mail.subject).toContain("BK-2045")
+    expect(mail.text).toContain("Ada Lovelace")
+    expect(mail.text).toContain("ada@example.com")
+    expect(mail.text).toContain("Vecka 22")
+    expect(mail.text).toContain(props.adminUrl)
+    const booking = await emails.bookingNew({ ...props, kind: "instant" }, "sv")
+    expect(booking.subject).not.toBe(mail.subject)
   })
 
   test("jobApplication: Swedish subject and body, reference and role still present", async () => {

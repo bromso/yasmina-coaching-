@@ -52,7 +52,8 @@ export type ApplicationActionDeps = {
 
 export const UNAVAILABLE = "The admin service is unavailable right now. Try again in a moment."
 
-const str = (fd: FormData, key: string) => {
+/** A form field as a string (empty when missing or a file). Shared with the booking cores. */
+export const str = (fd: FormData, key: string) => {
   const v = fd.get(key)
   return typeof v === "string" ? v : ""
 }
@@ -62,7 +63,7 @@ const str = (fd: FormData, key: string) => {
  * NOT_FOUND counts even undeclared: the `superadmin` middleware throws it for a caller who is no
  * longer an admin, and that caller should read "Not found", not an outage.
  */
-function apiError(error: unknown, codes: string[]) {
+export function apiError(error: unknown, codes: string[]) {
   if (!(error instanceof ORPCError) || !codes.includes(error.code)) return undefined
   return error.defined || error.code === "NOT_FOUND" ? error : undefined
 }

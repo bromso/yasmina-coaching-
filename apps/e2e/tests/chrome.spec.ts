@@ -17,21 +17,50 @@ for (const app of apps) {
   })
 }
 
+// www defaults to Swedish (English only once picked); the other apps render their chrome in
+// English for an anonymous visitor.
+const english = { nav: "Site", skip: "Skip to content" }
+const swedish = { nav: "Webbplats", skip: "Hoppa till innehållet" }
+const chrome = { www: swedish, app: english, auth: english, docs: english, blog: english } as const
+
 for (const app of ["www", "app", "auth", "docs", "blog"] as const) {
   test(`${app}: site nav and skip link`, async ({ page }) => {
     await page.goto(URLS[app])
-    await expect(page.getByRole("navigation", { name: "Site" })).toBeVisible()
-    await expect(page.getByRole("link", { name: "Skip to content" })).toBeAttached()
+    await expect(page.getByRole("navigation", { name: chrome[app].nav })).toBeVisible()
+    await expect(page.getByRole("link", { name: chrome[app].skip })).toBeAttached()
   })
 }
 
-test("www: the mobile navigation sheet opens behind the hamburger", async ({ page }) => {
+test("www: the navigation opens behind Utforska, on a phone, and closes on Escape", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto(URLS.www)
-  await page.getByRole("button", { name: "Open menu" }).click()
-  const sheet = page.getByRole("dialog", { name: "Menu" })
-  await expect(sheet).toBeVisible()
-  await expectAccessible(page, { label: "www mobile nav sheet", route: "www:/" })
-  await sheet.getByRole("button", { name: "Close" }).click()
-  await expect(sheet).toBeHidden()
+  // Let the hero's entrance animation finish: axe would read its half-faded text as low contrast.
+  await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished)))
+  const nav = page.getByRole("navigation", { name: "Webbplats" })
+  const toggle = nav.getByRole("button", { name: "Utforska" })
+  await expect(toggle).toHaveAttribute("aria-expanded", "false")
+  await toggle.click()
+  const close = nav.getByRole("button", { name: "Stäng menyn" })
+  await expect(close).toHaveAttribute("aria-expanded", "true")
+  await expect(nav.getByRole("link", { name: "Om Yasmina" })).toBeVisible()
+  await expect(nav.getByRole("link", { name: /Coachingsamtal/ })).toBeVisible()
+  // The panel's pieces spring in; let them settle before axe reads their contrast.
+  await expect
+    .poll(() =>
+      nav.evaluate((root) =>
+        [...root.querySelectorAll("a, b, p")].every((el) => {
+          for (let node: Element | null = el; node && node !== root; node = node.parentElement) {
+            if (getComputedStyle(node).opacity !== "1") return false
+          }
+          return true
+        })
+      )
+    )
+    .toBe(true)
+  await expectAccessible(page, { label: "www navigation open", route: "www:/" })
+  await page.keyboard.press("Escape")
+  await expect(nav.getByRole("link", { name: "Om Yasmina" })).toBeHidden()
+  await expect(nav.getByRole("button", { name: "Utforska" })).toBeFocused()
 })

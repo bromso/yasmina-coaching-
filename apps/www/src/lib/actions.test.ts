@@ -1,12 +1,7 @@
 import { describe, expect, test } from "bun:test"
 import { ORPCError } from "@orpc/client"
-import {
-  GENERIC_FAILURE,
-  JOINED,
-  joinWaitlistCore,
-  resolveWaitlistLocale,
-  TOO_MANY_REQUESTS,
-} from "./actions"
+import { GENERIC_FAILURE, JOINED, joinWaitlistCore, TOO_MANY_REQUESTS } from "./actions"
+import { localeFromCookie } from "./site-locale"
 
 const fd = (email: string) => {
   const f = new FormData()
@@ -38,14 +33,14 @@ describe("joinWaitlistCore", () => {
         { api: { join: async () => ({ joined: true as const }) } },
         fd("ada@example.com")
       )
-    ).toEqual({ ok: true, message: JOINED })
+    ).toEqual({ ok: true, message: JOINED.sv })
   })
 
-  test("the limiter's refusal is the page's own English constant; anything else is generic", async () => {
-    // The api answers in the x-locale it was sent: its Swedish text must not reach an English page.
+  test("the limiter's refusal is the page's own constant (Swedish by default); anything else is generic", async () => {
+    // Never the api's own text: the page keeps its own wording, whatever the api says.
     const limited = new ORPCError("TOO_MANY_REQUESTS", {
       defined: true,
-      message: "För många förfrågningar, försök igen om några minuter",
+      message: "Too many requests, try again in a few minutes.",
     })
     expect(
       await joinWaitlistCore(
@@ -58,7 +53,7 @@ describe("joinWaitlistCore", () => {
         },
         fd("a@example.com")
       )
-    ).toEqual({ ok: false, message: TOO_MANY_REQUESTS, values: { email: "a@example.com" } })
+    ).toEqual({ ok: false, message: TOO_MANY_REQUESTS.sv, values: { email: "a@example.com" } })
     expect(
       await joinWaitlistCore(
         {
@@ -70,7 +65,7 @@ describe("joinWaitlistCore", () => {
         },
         fd("a@example.com")
       )
-    ).toEqual({ ok: false, message: GENERIC_FAILURE, values: { email: "a@example.com" } })
+    ).toEqual({ ok: false, message: GENERIC_FAILURE.sv, values: { email: "a@example.com" } })
   })
 
   test("a defined ORPCError with a different code maps to the generic failure", async () => {
@@ -89,28 +84,64 @@ describe("joinWaitlistCore", () => {
         },
         fd("a@example.com")
       )
-    ).toEqual({ ok: false, message: GENERIC_FAILURE, values: { email: "a@example.com" } })
+    ).toEqual({ ok: false, message: GENERIC_FAILURE.sv, values: { email: "a@example.com" } })
   })
 })
 
-describe("resolveWaitlistLocale", () => {
-  test("Cookie: locale=sv sends x-locale: sv", () => {
-    expect(resolveWaitlistLocale({ cookie: "sv" })).toBe("sv")
+describe("joinWaitlistCore in English", () => {
+  test("success, the limiter and a crash all answer in the page's language", async () => {
+    expect(
+      await joinWaitlistCore(
+        { locale: "en", api: { join: async () => ({ joined: true as const }) } },
+        fd("ada@example.com")
+      )
+    ).toEqual({ ok: true, message: JOINED.en })
+    const limited = new ORPCError("TOO_MANY_REQUESTS", { defined: true, message: "x" })
+    expect(
+      await joinWaitlistCore(
+        {
+          locale: "en",
+          api: {
+            join: async () => {
+              throw limited
+            },
+          },
+        },
+        fd("a@example.com")
+      )
+    ).toMatchObject({ ok: false, message: TOO_MANY_REQUESTS.en })
+    expect(
+      await joinWaitlistCore(
+        {
+          locale: "en",
+          api: {
+            join: async () => {
+              throw new Error("down")
+            },
+          },
+        },
+        fd("a@example.com")
+      )
+    ).toMatchObject({ ok: false, message: GENERIC_FAILURE.en })
   })
 
-  test("Accept-Language: de sends no x-locale (unsupported, falls to the English default)", () => {
-    expect(resolveWaitlistLocale({ acceptLanguage: "de" })).toBeUndefined()
+  test("every message exists in both languages, without an exclamation mark", () => {
+    for (const messages of [JOINED, GENERIC_FAILURE, TOO_MANY_REQUESTS]) {
+      for (const text of [messages.sv, messages.en]) {
+        expect(text.length).toBeGreaterThan(0)
+        expect(text).not.toContain("!")
+      }
+      expect(messages.en).not.toBe(messages.sv)
+    }
   })
+})
 
-  test("Accept-Language: sv-SE sends x-locale: sv", () => {
-    expect(resolveWaitlistLocale({ acceptLanguage: "sv-SE" })).toBe("sv")
-  })
-
-  test("the cookie wins over Accept-Language", () => {
-    expect(resolveWaitlistLocale({ cookie: "en", acceptLanguage: "sv" })).toBe("en")
-  })
-
-  test("nothing at all: no x-locale", () => {
-    expect(resolveWaitlistLocale({})).toBeUndefined()
+describe("localeFromCookie", () => {
+  test("English only when the cookie says so; anything else is Swedish", () => {
+    expect(localeFromCookie("en")).toBe("en")
+    expect(localeFromCookie("sv")).toBe("sv")
+    expect(localeFromCookie(undefined)).toBe("sv")
+    expect(localeFromCookie("de")).toBe("sv")
+    expect(localeFromCookie("en-US")).toBe("sv")
   })
 })

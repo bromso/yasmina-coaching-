@@ -98,5 +98,10 @@
   "webhookUrlBlocked": "Adressen pekar på en privat eller reserverad adress. Använd en offentlig mottagare.",
   "webhookUrlUnresolved": "Vi hittade inte adressens värd. Kontrollera adressen och försök igen.",
   "webhookTestDisabled": "Slå på mottagaren innan du skickar en testhändelse.",
-  "webhookTestRate": "För många testhändelser – försök igen senare."
+  "webhookTestRate": "För många testhändelser – försök igen senare.",
+  "bookingRate": "För många bokningsförsök, försök igen senare.",
+  "bookingSlotTaken": "Den tiden är inte längre ledig. Välj en annan tid.",
+  "bookingSeatsFull": "Det tillfället är fullbokat.",
+  "bookingCancelLate": "Sessioner kan avbokas online fram till {hours} timmar innan de börjar. Svara på din bokningsbekräftelse i stället.",
+  "bookingNotFound": "Vi hittade inte den bokningslänken."
 }

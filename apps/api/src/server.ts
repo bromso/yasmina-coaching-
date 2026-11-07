@@ -153,6 +153,14 @@ export type ServerOptions = {
   jobsGlobalLimiter?: RateLimiter
   /** Where job applications are mailed (HIRING_EMAIL, else `supportEmail`). */
   hiringEmail?: string
+  /** Throttles booking writes per x-api-client-id (an ip hash). Defaults to 10 per hour. */
+  bookingLimiter?: RateLimiter
+  /** Throttles booking writes per typed (normalised) email. Defaults to 5 per day. */
+  bookingRecipientLimiter?: RateLimiter
+  /** Caps booking writes api-wide, whatever the client id. Defaults to 200 per hour. */
+  bookingGlobalLimiter?: RateLimiter
+  /** Where new bookings and requests are mailed (BOOKING_EMAIL, else `supportEmail`). */
+  bookingEmail?: string
   /** Caps sign-ups api-wide, whatever the client id. Defaults to 30 per 10 minutes. */
   signUpLimiter?: RateLimiter
   /** Caps sign-ups per normalised email. Defaults to 3 per hour. */
@@ -401,6 +409,14 @@ export async function createServer(options: ServerOptions) {
   const jobsGlobalLimiter =
     options.jobsGlobalLimiter ?? createMemoryRateLimiter({ limit: 50, windowMs: 60 * 60_000 })
   const hiringEmail = options.hiringEmail ?? supportEmail
+  const bookingLimiter =
+    options.bookingLimiter ?? createMemoryRateLimiter({ limit: 10, windowMs: 60 * 60_000 })
+  const bookingRecipientLimiter =
+    options.bookingRecipientLimiter ??
+    createMemoryRateLimiter({ limit: 5, windowMs: 24 * 60 * 60_000 })
+  const bookingGlobalLimiter =
+    options.bookingGlobalLimiter ?? createMemoryRateLimiter({ limit: 200, windowMs: 60 * 60_000 })
+  const bookingEmail = options.bookingEmail ?? supportEmail
   const inviteLimiter =
     options.inviteLimiter ?? createMemoryRateLimiter({ limit: 20, windowMs: 60 * 60_000 })
   const inviterLimiter =
@@ -647,6 +663,10 @@ export async function createServer(options: ServerOptions) {
         jobsRecipientLimiter,
         jobsGlobalLimiter,
         hiringEmail,
+        bookingLimiter,
+        bookingRecipientLimiter,
+        bookingGlobalLimiter,
+        bookingEmail,
         signUpLimiter,
         signUpEmailLimiter,
         inviteLimiter,

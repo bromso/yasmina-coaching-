@@ -1,7 +1,7 @@
 {
   "name": "@repo/www",
   "version": "1.1.0",
-  "description": "Marketing site shell — frontend boilerplate",
+  "description": "Marketing site — leadership coaching by Yasmina Petersson",
   "private": true,
   "browserslist": [
     "chrome >= 109",

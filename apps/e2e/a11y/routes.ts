@@ -3,7 +3,7 @@
 // page.tsx in one of the eight Next apps fails that test until it is listed here or in EXCLUDED.
 
 export type AppId = "www" | "app" | "auth" | "account" | "docs" | "help" | "jobs" | "blog"
-export type Variant = "light" | "dark" | "sv-light" | "sv-dark"
+export type Variant = "light" | "dark" | "sv-light" | "sv-dark" | "en-light" | "en-dark"
 
 export type A11yPage = {
   app: AppId
@@ -15,7 +15,7 @@ export type A11yPage = {
   /** Overrides `variantsFor`'s default. */
   variants?: Variant[]
   /** A page whose path is only known at run time (an id), resolved by the sweep. */
-  setup?: "adminUser" | "adminWorkspace"
+  setup?: "adminUser" | "adminWorkspace" | "adminBooking"
 }
 
 const APPS: AppId[] = ["www", "app", "auth", "account", "docs", "help", "jobs", "blog"]
@@ -29,10 +29,19 @@ const notFound = (app: AppId, auth: A11yPage["auth"] = "none"): A11yPage => ({
 })
 
 export const A11Y_PAGES: A11yPage[] = [
-  // www
-  { app: "www", path: "/", auth: "none" },
+  // www (Swedish by default; the landing page is also checked in English, the `locale` cookie set)
+  { app: "www", path: "/", auth: "none", variants: ["light", "dark", "en-light", "en-dark"] },
   { app: "www", path: "/terms", auth: "none" },
   { app: "www", path: "/privacy", auth: "none" },
+  // The booking journey: the catalog, one page per kind of offering (the same route), the
+  // confirmation. The token manage page is excluded below.
+  { app: "www", path: "/book", auth: "none" },
+  { app: "www", path: "/book?for=organisation", route: "/book", auth: "none" },
+  { app: "www", path: "/book/session", route: "/book/[offering]", auth: "none" },
+  { app: "www", path: "/book/package_6", route: "/book/[offering]", auth: "none" },
+  { app: "www", path: "/book/group", route: "/book/[offering]", auth: "none" },
+  { app: "www", path: "/book/workshop", route: "/book/[offering]", auth: "none" },
+  { app: "www", path: "/book/done?ref=BK-1&kind=request", auth: "none" },
   notFound("www"),
   // app (signed in, with a workspace and a note)
   { app: "app", path: "/", auth: "user" },
@@ -71,6 +80,10 @@ export const A11Y_PAGES: A11yPage[] = [
   { app: "auth", path: "/admin/analytics", auth: "superadmin" },
   { app: "auth", path: "/admin/support", auth: "superadmin" },
   { app: "auth", path: "/admin/applications", auth: "superadmin" },
+  { app: "auth", path: "/admin/bookings", auth: "superadmin" },
+  { app: "auth", path: "/admin/bookings/[id]", auth: "superadmin", setup: "adminBooking" },
+  { app: "auth", path: "/admin/bookings/availability", auth: "superadmin" },
+  { app: "auth", path: "/admin/bookings/groups", auth: "superadmin" },
   // account (signed in)
   { app: "account", path: "/", auth: "user" },
   { app: "account", path: "/personal-info", auth: "user" },
@@ -150,6 +163,11 @@ export const EXCLUDED: Array<{ app: AppId; route: string; reason: string }> = [
     app: "auth",
     route: "/admin/stop",
     reason: "renders only while impersonating; checked as a state in admin.spec",
+  },
+  {
+    app: "www",
+    route: "/book/manage/[token]",
+    reason: "renders only behind a real manage token from a booking; checked in booking.spec",
   },
   {
     app: "blog",

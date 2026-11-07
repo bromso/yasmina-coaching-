@@ -4,17 +4,23 @@ import { expectAccessible } from "../fixtures/a11y"
 import { uniqueEmail } from "../fixtures/accounts"
 import { latestMail } from "../fixtures/mail"
 
-const JOINED = "You're on the list — check your inbox."
+// www is Swedish: the copy below is `apps/www/src/content/home.tsx` and `src/lib/actions.ts`.
+const JOINED = "Tack. En bekräftelse är på väg, och Yasmina hör av sig."
 
-test("home: header, footer, pricing tiers", async ({ page }) => {
+test("home: header, footer, the four coaching formats", async ({ page }) => {
   await page.goto(URLS.www)
   // A fresh visitor (no consent cookie yet) sees the banner before anything else.
-  await expect(page.getByRole("region", { name: "Cookie consent" })).toBeVisible()
+  await expect(page.getByRole("region", { name: "Samtycke till kakor" })).toBeVisible()
   await expectAccessible(page, { label: "www cookie banner", route: "www:/" })
   await expect(page.getByRole("banner")).toBeVisible()
   await expect(page.getByRole("contentinfo")).toBeVisible()
-  for (const plan of ["Free", "Pro", "Team"]) {
-    await expect(page.getByRole("heading", { name: plan, exact: true }).first()).toBeVisible()
+  for (const offer of [
+    "Ledarskapscoaching, en till en",
+    "Teamutveckling",
+    "Handledning för team inom socialt arbete",
+    "Föreläsningar och workshoppar",
+  ]) {
+    await expect(page.getByRole("heading", { name: offer, exact: true })).toBeVisible()
   }
 })
 
@@ -29,17 +35,18 @@ test.describe("waitlist", () => {
   test("accepts an email with JavaScript", async ({ page }) => {
     const email = uniqueEmail("wait")
     await page.goto(URLS.www)
-    await page.getByRole("textbox", { name: "Email", exact: true }).fill(email)
-    await page.getByRole("button", { name: "Join the waitlist", exact: true }).click()
+    await page.getByRole("textbox", { name: "E-post", exact: true }).fill(email)
+    await page.getByRole("button", { name: "Be om ett introsamtal", exact: true }).click()
     await expect(page.getByRole("status").filter({ hasText: JOINED })).toBeVisible()
-    await latestMail(email, /^You're on the list$/)
+    // The action sends `x-locale: sv`, so the api's welcome mail is Swedish.
+    await latestMail(email, /^Du står på listan$/)
   })
 
   test.describe("without JavaScript", () => {
     test.use({ javaScriptEnabled: false })
     test("accepts an email", async ({ page }) => {
       await page.goto(URLS.www)
-      const field = page.getByRole("textbox", { name: "Email", exact: true })
+      const field = page.getByRole("textbox", { name: "E-post", exact: true })
       await field.fill(uniqueEmail("wait-nojs"))
       // Enter submits the form natively. A click never lands here: with scripts off, Playwright's
       // stability check on the button (requestAnimationFrame-based) never settles.

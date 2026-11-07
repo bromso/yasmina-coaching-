@@ -23,6 +23,10 @@
       "/admin/analytics": 489.5,
       "/admin/applications": 295.6,
       "/admin/audit": 284,
+      "/admin/bookings": 291.8,
+      "/admin/bookings/[id]": 298,
+      "/admin/bookings/availability": 298,
+      "/admin/bookings/groups": 298.2,
       "/admin/stop": 283.1,
       "/admin/support": 285.4,
       "/admin/users": 284,
@@ -65,6 +69,10 @@
     },
     "www": {
       "/": 259.2,
+      "/book": 263.8,
+      "/book/[offering]": 296.4,
+      "/book/done": 263.9,
+      "/book/manage/[token]": 270.1,
       "/privacy": 255.9,
       "/terms": 255.9
     }

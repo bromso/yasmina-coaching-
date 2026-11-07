@@ -122,6 +122,9 @@ const EnvSchema = z.object({
   // Where job applications are mailed. Unset → where support requests go (SUPPORT_EMAIL, else
   // MAIL_FROM's address).
   HIRING_EMAIL: optionalString.pipe(z.email().optional()),
+  // Where new bookings and booking requests are mailed (Yasmina's inbox). Unset → where support
+  // requests go.
+  BOOKING_EMAIL: optionalString.pipe(z.email().optional()),
   SMTP_URL: optionalString,
   RESEND_API_KEY: optionalString,
   MAIL_DIR: optionalString,
@@ -277,6 +280,10 @@ export const supportEmailOf = (env: Pick<Env, "SUPPORT_EMAIL" | "MAIL_FROM">) =>
 /** Where job applications go: HIRING_EMAIL, else wherever support requests go. */
 export const hiringEmailOf = (env: Pick<Env, "HIRING_EMAIL" | "SUPPORT_EMAIL" | "MAIL_FROM">) =>
   env.HIRING_EMAIL ?? supportEmailOf(env)
+
+/** Where new bookings go: BOOKING_EMAIL, else wherever support requests go. */
+export const bookingEmailOf = (env: Pick<Env, "BOOKING_EMAIL" | "SUPPORT_EMAIL" | "MAIL_FROM">) =>
+  env.BOOKING_EMAIL ?? supportEmailOf(env)
 
 export type Env = Omit<
   z.infer<typeof EnvSchema>,

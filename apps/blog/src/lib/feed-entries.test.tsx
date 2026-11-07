@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test"
 import type { Blog, Post } from "@repo/content/posts"
+import { BRAND_NAME } from "@repo/sites/brand"
 import { mdxStaticComponents } from "@repo/ui/components/mdx/static"
 import { createElement } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
@@ -45,7 +46,7 @@ describe("feedEntries", () => {
 
   test("uses the author's display name from content/authors.ts", () => {
     const entries = feedEntries(blogOf([post("hello", { author: "team" })]), () => "<p>x</p>")
-    expect(entries[0]?.authorName).toBe("Boilerplate team")
+    expect(entries[0]?.authorName).toBe(`${BRAND_NAME} team`)
   })
 
   test("falls back to the author key when it is unknown", () => {

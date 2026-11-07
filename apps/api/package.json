@@ -46,6 +46,8 @@
     "@repo/sites": "workspace:*",
     "@simplewebauthn/server": "catalog:",
     "arctic": "catalog:",
+    "date-fns": "catalog:",
+    "date-fns-tz": "catalog:",
     "nodemailer": "catalog:",
     "stripe": "catalog:",
     "zod": "catalog:"

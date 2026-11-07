@@ -1,7 +1,7 @@
 import { createMemoryRateLimiter, isDevLike } from "@repo/service-kit"
 import type { AnalyticsProvider } from "./analytics/providers/provider"
 import { createBillingFactory } from "./billing/create-provider"
-import { type Env, hiringEmailOf, supportEmailOf } from "./env"
+import { bookingEmailOf, type Env, hiringEmailOf, supportEmailOf } from "./env"
 import type { Mailer } from "./mail/mailer"
 import { createProviders } from "./oauth/providers"
 import type { ServerOptions } from "./server"
@@ -40,6 +40,7 @@ export function serverOptionsFromEnv(env: Env, deps: ServerDeps): ServerOptions 
     appUrl: env.APP_URL,
     supportEmail: supportEmailOf(env),
     hiringEmail: hiringEmailOf(env),
+    bookingEmail: bookingEmailOf(env),
     twoFactorEncryptionKey: env.TWO_FACTOR_ENCRYPTION_KEY,
     passkeyRpId: env.PASSKEY_RP_ID,
     passkeyRpName: env.PASSKEY_RP_NAME,

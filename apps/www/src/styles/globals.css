@@ -4,13 +4,71 @@
 /* Import typography plugin for www */
 @plugin "@tailwindcss/typography";
 
-/* www-specific font extensions (uses design system fonts from @repo/ui) */
+/*
+ * www's own look, layered over the shared tokens: a warm cream page, charcoal type and buttons,
+ * one blue call to action and a "sun" glow for the editorial sections. Every pair below clears
+ * WCAG 1.4.3 (4.5:1 for text) and 1.4.11 (3:1 for the ring) in both themes — keep it that way
+ * when retuning. The other apps keep the shared palette; only this stylesheet overrides it.
+ */
 :root {
-  /* StyleGlide provides a better abstraction for fonts */
-  --display-family: var(--font-sans);
+  --background: oklch(0.985 0.008 90);
+  --foreground: oklch(0.24 0.012 200);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.24 0.012 200);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.24 0.012 200);
+  --primary: oklch(0.27 0.012 200);
+  --primary-foreground: oklch(0.985 0.008 90);
+  --secondary: oklch(0.955 0.012 95);
+  --secondary-foreground: oklch(0.24 0.012 200);
+  --muted: oklch(0.955 0.012 95);
+  --muted-foreground: oklch(0.45 0.015 200);
+  --accent: oklch(0.93 0.07 98);
+  --accent-foreground: oklch(0.24 0.012 200);
+  --border: oklch(0.88 0.012 90);
+  --input: oklch(0.88 0.012 90);
+  --ring: oklch(0.5 0.13 235);
+  --radius: 0.875rem;
+
+  /* www-only tokens */
+  --brand-blue: oklch(0.5 0.13 235);
+  --brand-blue-foreground: oklch(1 0 0);
+  --sun: oklch(0.96 0.09 100);
+  --sun-soft: oklch(0.975 0.045 97);
+
+  /* Headlines set in the display serif (`fontDisplay` from @repo/ui/lib/fonts), body in the sans. */
+  --display-family: var(--font-display), Georgia, "Times New Roman", serif;
   --text-family: var(--font-sans);
-  --display-weight: 600;
+  --display-weight: 400;
   --text-weight: 400;
+
+  /* The one easing every entrance and reveal on the site uses. */
+  --ease-out-soft: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.dark {
+  --background: oklch(0.21 0.012 200);
+  --foreground: oklch(0.95 0.01 90);
+  --card: oklch(0.26 0.012 200);
+  --card-foreground: oklch(0.95 0.01 90);
+  --popover: oklch(0.26 0.012 200);
+  --popover-foreground: oklch(0.95 0.01 90);
+  --primary: oklch(0.95 0.01 90);
+  --primary-foreground: oklch(0.21 0.012 200);
+  --secondary: oklch(0.27 0.012 200);
+  --secondary-foreground: oklch(0.95 0.01 90);
+  --muted: oklch(0.27 0.012 200);
+  --muted-foreground: oklch(0.76 0.012 90);
+  --accent: oklch(0.34 0.05 95);
+  --accent-foreground: oklch(0.95 0.01 90);
+  --border: oklch(0.36 0.012 200);
+  --input: oklch(0.36 0.012 200);
+  --ring: oklch(0.74 0.11 235);
+
+  --brand-blue: oklch(0.74 0.11 235);
+  --brand-blue-foreground: oklch(0.21 0.012 200);
+  --sun: oklch(0.33 0.06 95);
+  --sun-soft: oklch(0.26 0.03 95);
 }
 
 /* www-specific theme extensions */
@@ -26,6 +84,11 @@
   --breakpoint-xl: 1280px;
   --breakpoint-2xl: 1400px;
 
+  --color-brand-blue: var(--brand-blue);
+  --color-brand-blue-foreground: var(--brand-blue-foreground);
+  --color-sun: var(--sun);
+  --color-sun-soft: var(--sun-soft);
+
   --font-display: var(--display-family);
   --font-text: var(--text-family);
   --font-weight-display: var(--display-weight);
@@ -33,6 +96,29 @@
 
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
+  /* The hero's entrance: each piece rises 16 px into place, staggered with `[animation-delay:…]`. */
+  --animate-rise: rise 0.6s var(--ease-out-soft) both;
+  /* The current step's ring, once, when it becomes current. */
+  --animate-ring-pulse: ring-pulse 0.6s ease-out 1;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes ring-pulse {
+    from {
+      box-shadow: 0 0 0 0 color-mix(in oklch, var(--primary) 45%, transparent);
+    }
+    to {
+      box-shadow: 0 0 0 10px transparent;
+    }
+  }
 
   @keyframes accordion-down {
     from {
@@ -59,15 +145,28 @@
     font-family: var(--font-text);
     font-weight: var(--text-weight);
   }
-  h1,
-  h2,
   .font-display {
     font-family: var(--font-display);
     font-weight: var(--display-weight);
+    font-variation-settings: "SOFT" 30;
   }
   .font-mono {
     font-family: var(--font-mono), monospace;
   }
+}
+
+/*
+ * Every h1 and h2 on the site is set in the display serif at its own weight. Unlayered on
+ * purpose: the shared blocks put `font-semibold` on their headings, and a rule inside a layer
+ * could never override a Tailwind utility.
+ */
+h1,
+h2 {
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-variation-settings: "SOFT" 30;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
 }
 
 /* www-specific component styles */
@@ -80,17 +179,52 @@
   }
 }
 
-/* www-specific base styles */
-html,
-body {
-  scroll-behavior: smooth;
+/*
+ * Motion. Everything here is behind `prefers-reduced-motion: no-preference`: with motion
+ * reduced none of it applies, and the page is the server's HTML, still.
+ *
+ * `.reveal` / `.reveal-hidden` are `src/components/motion/reveal.tsx`'s two states: an element
+ * below the fold is put in `.reveal-hidden` right after hydration (no transition, so nothing
+ * blinks) and rises when `.reveal-hidden` is removed as it scrolls into view, after
+ * `--reveal-delay` (its place in a stagger). The buttons' press is the one global touch.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal {
+    transition:
+      opacity 0.55s var(--ease-out-soft),
+      transform 0.55s var(--ease-out-soft);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+  .reveal-hidden {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: none;
+  }
+  [data-slot="button"]:active:not(:disabled),
+  .arrow-link:active {
+    transform: scale(0.98);
+  }
+  html,
+  body {
+    scroll-behavior: smooth;
+  }
 }
+
+/* www-specific base styles */
 html {
   /* Ensure focused elements aren't hidden behind sticky header */
   scroll-padding-top: 6rem;
+  /* Keeps body's own overflow below from propagating to the viewport (CSS Overflow: a root with
+     `visible` hands body's value up, where `clip` becomes `hidden` — the document then still
+     measures wider than 320 px and pans sideways on touch). With the root set, body clips
+     itself. */
+  overflow-x: clip;
 }
 body {
   position: relative;
+  /* Glows (the steps' sun) may spill past their section; clip them at the viewport, never scroll
+     sideways. `clip`, not `hidden`: no scroll container, so the sticky header keeps working. */
+  overflow-x: clip;
 }
 
 /* Windows High Contrast Mode support */

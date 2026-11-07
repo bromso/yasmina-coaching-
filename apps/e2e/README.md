@@ -99,9 +99,10 @@ they stop at one app's boundary:
   Swedish (no locale cookie of its own — the saved preference carries over); on `account`, the
   sidebar and Personal info are Swedish, changing the name shows the Swedish success message, and
   the Language card switches the whole page to English and back to Swedish again. A separate,
-  cookie-less browser context then picks Svenska with `www`'s static switcher — the page stays
-  English, and a "Saved — signed-in pages will use it." note shows — and a fresh visit of the
-  header's "Sign in" link already lands on `auth/login` in Swedish, over the shared cookie domain.
+  cookie-less browser context then opens `www` (Swedish by default), picks English behind
+  "Utforska" — the page reloads with `lang="en"`, the English hero and the nav's "Explore" — picks
+  Svenska again, and a fresh visit of the header's "Logga in" link already lands on `auth/login` in
+  Swedish, over the shared cookie domain.
   With JavaScript disabled, the switcher's plain form submit still changes the language. At phone
   width with a Swedish cookie, `auth/login`'s footer (its nav, a group title, a cross-app link)
   and the header's mobile menu (the hamburger, the sheet's title, its nav and links, its close
@@ -196,7 +197,8 @@ they stop at one app's boundary:
   after sign-out; offline, an uncached page shows
   the offline page, a visited public page still opens, and "Try again" loads it back online.
 - `a11y-pages.spec.ts` — a page sweep over the manifest in `a11y/routes.ts`: one test per page ×
-  variant (light/dark, plus Swedish on `auth`, `app` and `account` outside `/admin`), each run
+  variant (light/dark, plus Swedish on `auth`, `app` and `account` outside `/admin`, and English
+  on `www`'s `/`, whose default is Swedish), each run
   through axe (`@axe-core/playwright`, WCAG 2.0–2.2 A/AA, whatever the rule's impact) via
   `expectAccessible` (`fixtures/a11y.ts`), failing on anything the reviewed allowlist
   (`a11y.allowlist.json`) does not cover, plus one test that fails on an allowlist entry no longer

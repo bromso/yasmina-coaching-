@@ -12,6 +12,11 @@ import {
   type AuditEntry,
   auditExportCapMessage,
   type BillingStatus,
+  BOOKING_AVAILABILITY_MAX_DAYS,
+  BOOKING_CANCEL_CUTOFF_HOURS,
+  BOOKING_TIMEZONE,
+  type BookingSlot,
+  bookingReference,
   contract,
   DEFAULT_PAGE_SIZE,
   DELETION_GRACE_MS,
@@ -31,6 +36,7 @@ import {
   MAX_WEBHOOK_ENDPOINTS,
   NOTIFICATION_UNREAD_CAP,
   normalizeInviteDomains,
+  OFFERINGS,
   OWNER_TWO_FACTOR_REASON,
   type Passkey,
   type PlanKey,
@@ -92,6 +98,29 @@ import {
 import { isMockBilling } from "./billing/mock"
 import type { BillingProvider } from "./billing/provider"
 import {
+  daysBetween as bookingDays,
+  endOf,
+  isOfferedSlot,
+  overlaps,
+  shiftDay as shiftBookingDay,
+  slotsForDay,
+  zonedDay,
+  zonedInstant,
+} from "./booking/availability"
+import { formatWhen, formatWhere } from "./booking/format"
+import {
+  cancellableAt,
+  mailBasics,
+  manageUrlFor,
+  newBookingMailProps,
+  newManageToken,
+  offeringLabel,
+  toAdminBooking,
+  toBlock,
+  toSummary as toBookingSummary,
+  toGroupEvent,
+} from "./booking/service"
+import {
   DUMMY_HASH,
   EMAIL_CHANGE_REVERT_TTL_MS,
   EMAIL_CHANGE_TTL_MS,
@@ -138,6 +167,7 @@ import type { AdminUserRow, AdminWorkspaceRow } from "./queries/admin"
 import type { ApiKeyListRow, ApiKeyRow } from "./queries/api-keys"
 import type { AdminApplicationRow } from "./queries/applications"
 import type { AuditDetailRow } from "./queries/audit"
+import type { GroupEventWithSeats } from "./queries/booking"
 import type { IdentityRow, ProviderId } from "./queries/identities"
 import type { InvitationDetailRow } from "./queries/invitations"
 import { isDedupeConflict, type JobRow } from "./queries/jobs"
@@ -246,6 +276,14 @@ export type Context = {
   jobsGlobalLimiter: RateLimiter
   /** Where job applications are mailed: HIRING_EMAIL, else `supportEmail`. */
   hiringEmail: string
+  /** Throttles booking writes per calling client (`booking:<ip hash>`); checked first. */
+  bookingLimiter: RateLimiter
+  /** Throttles booking writes per typed address (`booking-to:<normalised email>`); second. */
+  bookingRecipientLimiter: RateLimiter
+  /** Caps booking writes api-wide (rotating client ids); checked last of the three. */
+  bookingGlobalLimiter: RateLimiter
+  /** Where new bookings and requests are mailed: BOOKING_EMAIL, else `supportEmail`. */
+  bookingEmail: string
   /** Caps sign-ups api-wide: the client id is not trusted for this (it is ip-derived). */
   signUpLimiter: RateLimiter
   /** Caps sign-ups per normalised email, before anything is checked or mailed. */
@@ -942,6 +980,26 @@ const toAdminApplication = (row: AdminApplicationRow): AdminApplication => ({
 })
 
 /** One page of rows (fetched as `limit + 1`) → items and the keyset cursor. */
+/**
+ * The three booking limiters, in the same order as support's: per client, per typed address,
+ * api-wide. Each refusal is the translated `bookingRate`; nothing is stored before all three pass.
+ */
+async function bookingLimits(context: Context, email: string): Promise<void> {
+  const refuse = () =>
+    new ORPCError("TOO_MANY_REQUESTS", { message: apiMessage(context, "bookingRate") })
+  const perClient = await context.bookingLimiter.hit(`booking:${context.clientId ?? "unknown"}`)
+  if (!perClient.allowed) throw refuse()
+  const perRecipient = await context.bookingRecipientLimiter.hit(
+    `booking-to:${normalizeEmail(email)}`
+  )
+  if (!perRecipient.allowed) throw refuse()
+  const global = await context.bookingGlobalLimiter.hit("booking:global")
+  if (!global.allowed) {
+    context.noteCapTripped("booking:global")
+    throw refuse()
+  }
+}
+
 function page<T extends { id: number }>(rows: T[], limit: number) {
   const items = rows.slice(0, limit)
   return { items, nextCursor: rows.length > limit ? (items.at(-1)?.id ?? null) : null }
@@ -4234,6 +4292,458 @@ export const router = api.router({
       return { reference }
     }),
   },
+  // The coaching site's booking calendar (see docs/architecture/booking.md). Anonymous like
+  // `support.create`: the three limiters run before anything is stored, every slot a visitor sends
+  // is re-derived from the rules inside the transaction (never trusted), and the row, the
+  // customer's mail and the owner's mail commit together.
+  booking: {
+    availability: api.booking.availability.handler(async ({ input, context }) => {
+      const days = bookingDays(input.from, input.to)
+      if (days.length > BOOKING_AVAILABILITY_MAX_DAYS) {
+        throw new ORPCError("BAD_REQUEST", {
+          message: `At most ${BOOKING_AVAILABILITY_MAX_DAYS} days per call`,
+        })
+      }
+      const offering = OFFERINGS[input.offering]
+      const now = context.now()
+      const [rules, blocks, busy] = await Promise.all([
+        context.db.booking.rules.effective(),
+        context.db.booking.blocks.inRange(input.from, input.to),
+        context.db.booking.busy(
+          zonedInstant(input.from, "00:00").toISOString(),
+          zonedInstant(shiftBookingDay(input.to, 1), "00:00").toISOString()
+        ),
+      ])
+      const engine = {
+        durationMinutes: offering.durationMinutes,
+        rules,
+        blocks: blocks.map((b) => ({ from: b.from_date, to: b.to_date })),
+        busy,
+        now,
+      }
+      return {
+        timezone: BOOKING_TIMEZONE,
+        durationMinutes: offering.durationMinutes,
+        days: days
+          .map((day) => ({ day, slots: slotsForDay({ ...engine, day }) }))
+          .map(({ day, slots }) => ({ date: day, slots })),
+      }
+    }),
+
+    groupEvents: api.booking.groupEvents.handler(async ({ context }) => {
+      const rows = await context.db.booking.events.upcoming(context.now().toISOString())
+      return { events: rows.map(toGroupEvent) }
+    }),
+
+    book: api.booking.book.handler(async ({ input, context, errors }) => {
+      await bookingLimits(context, input.customer.email)
+      const offering = OFFERINGS[input.offering]
+      const now = context.now()
+      const locale = context.requestedLocale ?? DEFAULT_LOCALE
+      const { token, hash } = newManageToken()
+      const createdAt = now.toISOString()
+      const sorted = [...input.slots].sort()
+      const result = await context.db.transaction(async (tx) => {
+        await tx.booking.rules.lock()
+        const first = sorted[0] as string
+        const last = sorted[sorted.length - 1] as string
+        const [rules, blocks, busy] = await Promise.all([
+          tx.booking.rules.effective(),
+          tx.booking.blocks.inRange(zonedDay(new Date(first)), zonedDay(new Date(last))),
+          tx.booking.busy(
+            new Date(Date.parse(first) - DAY_MS).toISOString(),
+            new Date(Date.parse(last) + DAY_MS).toISOString()
+          ),
+        ])
+        const engine = {
+          durationMinutes: offering.durationMinutes,
+          rules,
+          blocks: blocks.map((b) => ({ from: b.from_date, to: b.to_date })),
+          busy: [...busy],
+          now,
+        }
+        const slots = sorted.map((startsAt) => ({
+          startsAt,
+          endsAt: endOf(startsAt, offering.durationMinutes),
+        }))
+        for (const slot of slots) {
+          if (!isOfferedSlot(slot, engine)) return null
+          // The next slot of the same order must not collide with this one either.
+          engine.busy.push(slot)
+        }
+        const pkg =
+          offering.sessions > 1
+            ? await tx.booking.packages.create({
+                offering: input.offering,
+                customerEmail: input.customer.email,
+                sessionsTotal: offering.sessions,
+                manageTokenHash: hash,
+                createdAt,
+              })
+            : null
+        const ids: number[] = []
+        for (const slot of slots) {
+          const { id } = await tx.booking.create({
+            offering: input.offering,
+            kind: "instant",
+            status: "confirmed",
+            audience: input.audience,
+            customerName: input.customer.name,
+            customerEmail: input.customer.email,
+            organisation: input.customer.organisation || null,
+            phone: input.customer.phone || null,
+            location: input.location,
+            startsAt: slot.startsAt,
+            endsAt: slot.endsAt,
+            notes: input.notes || null,
+            preferredDates: "[]",
+            attendees: null,
+            venue: null,
+            packageId: pkg?.id ?? null,
+            groupEventId: null,
+            manageTokenHash: hash,
+            ipHash: context.clientId,
+            locale,
+            createdAt,
+          })
+          ids.push(id)
+        }
+        const reference = bookingReference(ids[0] as number)
+        const manageUrl = manageUrlFor(context.wwwUrl, token)
+        const label = offeringLabel(input.offering, locale)
+        const [firstSlot, ...rest] = slots
+        await enqueueMail(
+          context.enqueue,
+          "bookingConfirmed",
+          input.customer.email,
+          {
+            reference,
+            offeringLabel: label,
+            when: formatWhen(
+              (firstSlot as BookingSlot).startsAt,
+              (firstSlot as BookingSlot).endsAt,
+              locale
+            ),
+            where: formatWhere(input.location, locale),
+            manageUrl,
+            name: input.customer.name,
+            extraSessions: rest.length
+              ? rest.map((s) => formatWhen(s.startsAt, s.endsAt, locale))
+              : undefined,
+            cancelCutoffHours: BOOKING_CANCEL_CUTOFF_HOURS,
+          },
+          { tx, locale, replyTo: context.bookingEmail }
+        )
+        await enqueueMail(
+          context.enqueue,
+          "bookingNew",
+          context.bookingEmail,
+          newBookingMailProps({
+            reference,
+            offering: input.offering,
+            kind: "instant",
+            customer: input.customer,
+            audience: input.audience,
+            location: input.location,
+            slots,
+            message: input.notes,
+            adminUrl: `${context.authUrl}/admin/bookings/${ids[0]}`,
+          }),
+          { tx, replyTo: input.customer.email }
+        )
+        return { ids, pkg, reference, manageUrl }
+      })
+      if (!result) throw errors.CONFLICT({ message: apiMessage(context, "bookingSlotTaken") })
+      const rows = await context.db.booking.byToken(hash)
+      return {
+        reference: result.reference,
+        manageUrl: result.manageUrl,
+        bookings: rows.map((row) => toBookingSummary(row, now)),
+        package: result.pkg
+          ? {
+              id: result.pkg.id,
+              offering: input.offering,
+              sessionsTotal: offering.sessions,
+              sessionsBooked: result.ids.length,
+            }
+          : null,
+      }
+    }),
+
+    reserve: api.booking.reserve.handler(async ({ input, context, errors }) => {
+      await bookingLimits(context, input.customer.email)
+      const now = context.now()
+      const locale = context.requestedLocale ?? DEFAULT_LOCALE
+      const { token, hash } = newManageToken()
+      const createdAt = now.toISOString()
+      const eventIds = [...new Set(input.eventIds)].sort((a, b) => a - b)
+      const outcome = await context.db.transaction(async (tx) => {
+        const events: GroupEventWithSeats[] = []
+        for (const id of eventIds) {
+          // Lock each event row before counting its seats: two reservations serialise here.
+          if (!(await tx.booking.events.lock(id))) return "missing" as const
+          const event = await tx.booking.events.find(id)
+          if (event?.status !== "scheduled" || Date.parse(event.starts_at) <= now.getTime()) {
+            return "missing" as const
+          }
+          if (event.seats_taken >= event.capacity) return "full" as const
+          events.push(event)
+        }
+        const ids: number[] = []
+        for (const event of events) {
+          const { id } = await tx.booking.create({
+            offering: "group",
+            kind: "group",
+            status: "confirmed",
+            audience: input.audience,
+            customerName: input.customer.name,
+            customerEmail: input.customer.email,
+            organisation: input.customer.organisation || null,
+            phone: input.customer.phone || null,
+            location: event.location,
+            startsAt: event.starts_at,
+            endsAt: event.ends_at,
+            notes: input.notes || null,
+            preferredDates: "[]",
+            attendees: null,
+            venue: null,
+            packageId: null,
+            groupEventId: event.id,
+            manageTokenHash: hash,
+            ipHash: context.clientId,
+            locale,
+            createdAt,
+          })
+          ids.push(id)
+        }
+        const reference = bookingReference(ids[0] as number)
+        const manageUrl = manageUrlFor(context.wwwUrl, token)
+        const [first, ...rest] = events
+        const firstEvent = first as GroupEventWithSeats
+        await enqueueMail(
+          context.enqueue,
+          "bookingConfirmed",
+          input.customer.email,
+          {
+            reference,
+            offeringLabel: firstEvent.title,
+            when: formatWhen(firstEvent.starts_at, firstEvent.ends_at, locale),
+            where: formatWhere(firstEvent.location, locale),
+            manageUrl,
+            name: input.customer.name,
+            extraSessions: rest.length
+              ? rest.map((e) => `${e.title}: ${formatWhen(e.starts_at, e.ends_at, locale)}`)
+              : undefined,
+            cancelCutoffHours: BOOKING_CANCEL_CUTOFF_HOURS,
+          },
+          { tx, locale, replyTo: context.bookingEmail }
+        )
+        await enqueueMail(
+          context.enqueue,
+          "bookingNew",
+          context.bookingEmail,
+          newBookingMailProps({
+            reference,
+            offering: "group",
+            kind: "group",
+            eventTitle: firstEvent.title,
+            customer: input.customer,
+            audience: input.audience,
+            location: firstEvent.location,
+            slots: events.map((e) => ({ startsAt: e.starts_at, endsAt: e.ends_at })),
+            message: input.notes,
+            adminUrl: `${context.authUrl}/admin/bookings/${ids[0]}`,
+          }),
+          { tx, replyTo: input.customer.email }
+        )
+        return { reference, manageUrl }
+      })
+      if (outcome === "missing") throw errors.NOT_FOUND()
+      if (outcome === "full")
+        throw errors.CONFLICT({ message: apiMessage(context, "bookingSeatsFull") })
+      const rows = await context.db.booking.byToken(hash)
+      return {
+        reference: outcome.reference,
+        manageUrl: outcome.manageUrl,
+        bookings: rows.map((row) => toBookingSummary(row, now)),
+        package: null,
+      }
+    }),
+
+    request: api.booking.request.handler(async ({ input, context }) => {
+      await bookingLimits(context, input.customer.email)
+      const now = context.now()
+      const locale = context.requestedLocale ?? DEFAULT_LOCALE
+      const { token, hash } = newManageToken()
+      const { reference, manageUrl } = await context.db.transaction(async (tx) => {
+        const { id } = await tx.booking.create({
+          offering: input.offering,
+          kind: "request",
+          status: "pending",
+          audience: "organisation",
+          customerName: input.customer.name,
+          customerEmail: input.customer.email,
+          organisation: input.customer.organisation,
+          phone: input.customer.phone || null,
+          location: input.location,
+          startsAt: null,
+          endsAt: null,
+          notes: input.message,
+          preferredDates: JSON.stringify(input.preferredDates),
+          attendees: input.attendees ?? null,
+          venue: input.venue || null,
+          packageId: null,
+          groupEventId: null,
+          manageTokenHash: hash,
+          ipHash: context.clientId,
+          locale,
+          createdAt: now.toISOString(),
+        })
+        const reference = bookingReference(id)
+        const manageUrl = manageUrlFor(context.wwwUrl, token)
+        await enqueueMail(
+          context.enqueue,
+          "bookingRequestReceived",
+          input.customer.email,
+          {
+            reference,
+            offeringLabel: offeringLabel(input.offering, locale),
+            manageUrl,
+            name: input.customer.name,
+          },
+          { tx, locale, replyTo: context.bookingEmail }
+        )
+        await enqueueMail(
+          context.enqueue,
+          "bookingNew",
+          context.bookingEmail,
+          newBookingMailProps({
+            reference,
+            offering: input.offering,
+            kind: "request",
+            customer: input.customer,
+            audience: "organisation",
+            location: input.location,
+            preferredDates: input.preferredDates,
+            attendees: input.attendees,
+            venue: input.venue,
+            message: input.message,
+            adminUrl: `${context.authUrl}/admin/bookings/${id}`,
+          }),
+          { tx, replyTo: input.customer.email }
+        )
+        return { reference, manageUrl }
+      })
+      return { reference, manageUrl }
+    }),
+
+    manage: {
+      // Reads are throttled per client only (a token is 256 bits; the limiter is for scrapers).
+      get: api.booking.manage.get.handler(async ({ input, context, errors }) => {
+        const hit = await context.bookingLimiter.hit(
+          `booking-manage:${context.clientId ?? "unknown"}`
+        )
+        if (!hit.allowed)
+          throw errors.TOO_MANY_REQUESTS({ message: apiMessage(context, "bookingRate") })
+        const hash = tokenHash(input.token)
+        const [rows, pkg] = await Promise.all([
+          context.db.booking.byToken(hash),
+          context.db.booking.packages.byToken(hash),
+        ])
+        const first = rows[0]
+        if (!first) throw errors.NOT_FOUND({ message: apiMessage(context, "bookingNotFound") })
+        const now = context.now()
+        return {
+          customer: {
+            name: first.customer_name,
+            email: first.customer_email,
+            organisation: first.organisation,
+          },
+          bookings: rows.map((row) => toBookingSummary(row, now)),
+          package: pkg
+            ? {
+                id: pkg.id,
+                offering: pkg.offering,
+                sessionsTotal: pkg.sessions_total,
+                sessionsBooked: await context.db.booking.packages.sessionsBooked(pkg.id),
+              }
+            : null,
+        }
+      }),
+
+      cancel: api.booking.manage.cancel.handler(async ({ input, context, errors }) => {
+        const hit = await context.bookingLimiter.hit(
+          `booking-manage:${context.clientId ?? "unknown"}`
+        )
+        if (!hit.allowed)
+          throw errors.TOO_MANY_REQUESTS({ message: apiMessage(context, "bookingRate") })
+        const hash = tokenHash(input.token)
+        const now = context.now()
+        const outcome = await context.db.transaction(async (tx) => {
+          const row = await tx.booking.find(input.bookingId)
+          if (!row || row.manage_token_hash !== hash) return "missing" as const
+          if (!cancellableAt(row, now)) return "late" as const
+          if (
+            !(await tx.booking.cancel({
+              id: row.id,
+              adminNote: null,
+              by: null,
+              at: now.toISOString(),
+            }))
+          )
+            return "late" as const
+          const locale = isLocale(row.locale) ? row.locale : DEFAULT_LOCALE
+          const basics = mailBasics(row, locale)
+          await enqueueMail(
+            context.enqueue,
+            "bookingCancelled",
+            row.customer_email,
+            { ...basics, when: basics.when ?? "", byCustomer: true },
+            { tx, locale, replyTo: context.bookingEmail }
+          )
+          await enqueueMail(
+            context.enqueue,
+            "bookingNew",
+            context.bookingEmail,
+            {
+              ...newBookingMailProps({
+                reference: basics.reference,
+                offering: row.offering,
+                kind: row.kind,
+                customer: {
+                  name: row.customer_name,
+                  email: row.customer_email,
+                  organisation: row.organisation ?? undefined,
+                  phone: row.phone ?? undefined,
+                },
+                audience: row.audience,
+                location: row.location,
+                slots:
+                  row.starts_at && row.ends_at
+                    ? [{ startsAt: row.starts_at, endsAt: row.ends_at }]
+                    : [],
+                eventTitle: row.group_event_title ?? undefined,
+                message: `Cancelled by the customer from the manage link.`,
+                adminUrl: `${context.authUrl}/admin/bookings/${row.id}`,
+              }),
+              offeringLabel: `Cancelled: ${row.group_event_title ?? OFFERINGS[row.offering].label}`,
+            },
+            { tx, replyTo: row.customer_email }
+          )
+          return "ok" as const
+        })
+        if (outcome === "missing")
+          throw errors.NOT_FOUND({ message: apiMessage(context, "bookingNotFound") })
+        if (outcome === "late")
+          throw errors.CONFLICT({
+            message: apiMessage(context, "bookingCancelLate", {
+              hours: BOOKING_CANCEL_CUTOFF_HOURS,
+            }),
+          })
+        return { ok: true as const }
+      }),
+    },
+  },
   jobs: {
     // Anonymous like `support.create` (service token only). All three limits run before anything
     // is read or stored; then the CV is checked as a PDF, written, and the row and both mails
@@ -4893,6 +5403,302 @@ export const router = api.router({
         })
         return { ok: true as const }
       }),
+    },
+    bookings: {
+      calendar: adminApi.admin.bookings.calendar.handler(async ({ input, context }) => {
+        const days = bookingDays(input.from, input.to)
+        if (days.length > BOOKING_AVAILABILITY_MAX_DAYS) {
+          throw new ORPCError("BAD_REQUEST", {
+            message: `At most ${BOOKING_AVAILABILITY_MAX_DAYS} days per call`,
+          })
+        }
+        const fromIso = zonedInstant(input.from, "00:00").toISOString()
+        const toIso = zonedInstant(shiftBookingDay(input.to, 1), "00:00").toISOString()
+        const now = context.now()
+        const [bookings, events, blocks] = await Promise.all([
+          context.db.booking.inRange(fromIso, toIso),
+          context.db.booking.events.inRange(fromIso, toIso),
+          context.db.booking.blocks.inRange(input.from, input.to),
+        ])
+        return {
+          timezone: BOOKING_TIMEZONE,
+          bookings: bookings.map((row) => toAdminBooking(row, now)),
+          groupEvents: events.map(toGroupEvent),
+          blocks: blocks.map(toBlock),
+        }
+      }),
+
+      pending: adminApi.admin.bookings.pending.handler(async ({ context }) => {
+        const rows = await context.db.booking.pending()
+        const now = context.now()
+        return { items: rows.map((row) => toAdminBooking(row, now)) }
+      }),
+
+      get: adminApi.admin.bookings.get.handler(async ({ input, context, errors }) => {
+        const row = await context.db.booking.find(input.id)
+        if (!row) throw errors.NOT_FOUND()
+        return toAdminBooking(row, context.now())
+      }),
+
+      // pending → confirmed at the chosen time. The overlap check runs under the calendar lock,
+      // like `booking.book`'s; the customer's mail commits with the row.
+      confirm: adminApi.admin.bookings.confirm.handler(async ({ input, context, errors }) => {
+        const now = context.now()
+        const outcome = await context.db.transaction(async (tx) => {
+          const row = await tx.booking.find(input.id)
+          if (row?.status !== "pending") return "missing" as const
+          await tx.booking.rules.lock()
+          const minutes = input.durationMinutes ?? OFFERINGS[row.offering].durationMinutes
+          const slot = { startsAt: input.startsAt, endsAt: endOf(input.startsAt, minutes) }
+          const busy = await tx.booking.busy(slot.startsAt, slot.endsAt)
+          if (busy.some((b) => overlaps(b, slot))) return "conflict" as const
+          const location = input.location ?? row.location
+          // A fresh manage link: the stored hash cannot be turned back into the first link.
+          const { token, hash } = newManageToken()
+          await tx.booking.rotateToken(row.id, hash)
+          const confirmed = await tx.booking.confirm({
+            id: row.id,
+            startsAt: slot.startsAt,
+            endsAt: slot.endsAt,
+            location,
+            adminNote: input.note || null,
+            decidedBy: context.user.id,
+            decidedAt: now.toISOString(),
+          })
+          if (!confirmed) return "missing" as const
+          const locale = isLocale(row.locale) ? row.locale : DEFAULT_LOCALE
+          await enqueueMail(
+            context.enqueue,
+            "bookingConfirmed",
+            row.customer_email,
+            {
+              reference: bookingReference(row.id),
+              offeringLabel: offeringLabel(row.offering, locale),
+              when: formatWhen(slot.startsAt, slot.endsAt, locale),
+              where: formatWhere(location, locale),
+              manageUrl: manageUrlFor(context.wwwUrl, token),
+              name: row.customer_name,
+              cancelCutoffHours: BOOKING_CANCEL_CUTOFF_HOURS,
+            },
+            { tx, locale, replyTo: context.bookingEmail }
+          )
+          return "ok" as const
+        })
+        if (outcome === "missing") throw errors.NOT_FOUND()
+        if (outcome === "conflict") throw errors.CONFLICT()
+        await audit(context, {
+          action: "booking.confirmed",
+          targetType: "booking",
+          targetId: input.id,
+          metadata: { startsAt: input.startsAt },
+        })
+        return { ok: true as const }
+      }),
+
+      decline: adminApi.admin.bookings.decline.handler(async ({ input, context, errors }) => {
+        const now = context.now()
+        const declined = await context.db.transaction(async (tx) => {
+          const row = await tx.booking.find(input.id)
+          if (!row) return false
+          const ok = await tx.booking.decline({
+            id: row.id,
+            adminNote: input.note || null,
+            decidedBy: context.user.id,
+            decidedAt: now.toISOString(),
+          })
+          if (!ok) return false
+          const locale = isLocale(row.locale) ? row.locale : DEFAULT_LOCALE
+          await enqueueMail(
+            context.enqueue,
+            "bookingDeclined",
+            row.customer_email,
+            {
+              reference: bookingReference(row.id),
+              offeringLabel: offeringLabel(row.offering, locale),
+              note: input.note || undefined,
+              name: row.customer_name,
+            },
+            { tx, locale, replyTo: context.bookingEmail }
+          )
+          return true
+        })
+        if (!declined) throw errors.NOT_FOUND()
+        await audit(context, {
+          action: "booking.declined",
+          targetType: "booking",
+          targetId: input.id,
+        })
+        return { ok: true as const }
+      }),
+
+      cancel: adminApi.admin.bookings.cancel.handler(async ({ input, context, errors }) => {
+        const now = context.now()
+        const cancelled = await context.db.transaction(async (tx) => {
+          const row = await tx.booking.find(input.id)
+          if (!row) return false
+          const ok = await tx.booking.cancel({
+            id: row.id,
+            adminNote: input.note || null,
+            by: context.user.id,
+            at: now.toISOString(),
+          })
+          if (!ok) return false
+          const locale = isLocale(row.locale) ? row.locale : DEFAULT_LOCALE
+          const basics = mailBasics(row, locale)
+          await enqueueMail(
+            context.enqueue,
+            "bookingCancelled",
+            row.customer_email,
+            {
+              ...basics,
+              when: basics.when ?? "",
+              byCustomer: false,
+              note: input.note || undefined,
+            },
+            { tx, locale, replyTo: context.bookingEmail }
+          )
+          return true
+        })
+        if (!cancelled) throw errors.NOT_FOUND()
+        await audit(context, {
+          action: "booking.cancelled",
+          targetType: "booking",
+          targetId: input.id,
+        })
+        return { ok: true as const }
+      }),
+
+      availability: {
+        get: adminApi.admin.bookings.availability.get.handler(async ({ context }) => {
+          const [rules, blocks] = await Promise.all([
+            context.db.booking.rules.effective(),
+            context.db.booking.blocks.list(),
+          ])
+          return { timezone: BOOKING_TIMEZONE, rules, blocks: blocks.map(toBlock) }
+        }),
+        set: adminApi.admin.bookings.availability.set.handler(async ({ input, context }) => {
+          await context.db.transaction((tx) => tx.booking.rules.replace(input.rules))
+          await audit(context, {
+            action: "booking.availability_set",
+            targetType: "booking_rules",
+            metadata: { rules: input.rules.length },
+          })
+          return { ok: true as const }
+        }),
+        block: adminApi.admin.bookings.availability.block.handler(async ({ input, context }) => {
+          const { id } = await context.db.booking.blocks.add({
+            from: input.from,
+            to: input.to,
+            reason: input.reason || null,
+            createdBy: context.user.id,
+            createdAt: context.now().toISOString(),
+          })
+          await audit(context, {
+            action: "booking.blocked",
+            targetType: "booking_block",
+            targetId: id,
+            metadata: { from: input.from, to: input.to },
+          })
+          return { ok: true as const }
+        }),
+        unblock: adminApi.admin.bookings.availability.unblock.handler(
+          async ({ input, context, errors }) => {
+            if (!(await context.db.booking.blocks.remove(input.id))) throw errors.NOT_FOUND()
+            await audit(context, {
+              action: "booking.unblocked",
+              targetType: "booking_block",
+              targetId: input.id,
+            })
+            return { ok: true as const }
+          }
+        ),
+      },
+
+      groupEvents: {
+        // One event, or a weekly series sharing a `series_key`; each date is checked for overlap
+        // under the calendar lock, and nothing is created if any date collides.
+        create: adminApi.admin.bookings.groupEvents.create.handler(
+          async ({ input, context, errors }) => {
+            const now = context.now()
+            const seriesKey = input.repeatWeeks > 1 ? newToken().slice(0, 12) : null
+            const ids = await context.db.transaction(async (tx) => {
+              await tx.booking.rules.lock()
+              const created: number[] = []
+              for (let week = 0; week < input.repeatWeeks; week++) {
+                const startsAt = new Date(
+                  Date.parse(input.startsAt) + week * 7 * DAY_MS
+                ).toISOString()
+                const slot = { startsAt, endsAt: endOf(startsAt, input.durationMinutes) }
+                const busy = await tx.booking.busy(slot.startsAt, slot.endsAt)
+                if (busy.some((b) => overlaps(b, slot))) return null
+                const { id } = await tx.booking.events.create({
+                  title: input.title,
+                  description: input.description || null,
+                  startsAt: slot.startsAt,
+                  endsAt: slot.endsAt,
+                  location: input.location,
+                  capacity: input.capacity,
+                  seriesKey,
+                  createdBy: context.user.id,
+                  createdAt: now.toISOString(),
+                })
+                created.push(id)
+              }
+              return created
+            })
+            if (!ids) throw errors.CONFLICT()
+            await audit(context, {
+              action: "booking.group_event_created",
+              targetType: "group_event",
+              targetId: ids[0],
+              metadata: { ids, repeatWeeks: input.repeatWeeks },
+            })
+            return { ids }
+          }
+        ),
+
+        // Cancels the event and every confirmed seat on it, mailing each holder, in one transaction.
+        cancel: adminApi.admin.bookings.groupEvents.cancel.handler(
+          async ({ input, context, errors }) => {
+            const now = context.now()
+            const cancelled = await context.db.transaction(async (tx) => {
+              const event = await tx.booking.events.find(input.id)
+              if (!event) return false
+              if (!(await tx.booking.events.cancel(event.id, now.toISOString()))) return false
+              for (const seat of await tx.booking.seatHolders(event.id)) {
+                await tx.booking.cancel({
+                  id: seat.id,
+                  adminNote: input.note || null,
+                  by: context.user.id,
+                  at: now.toISOString(),
+                })
+                const locale = isLocale(seat.locale) ? seat.locale : DEFAULT_LOCALE
+                const basics = mailBasics(seat, locale)
+                await enqueueMail(
+                  context.enqueue,
+                  "bookingCancelled",
+                  seat.customer_email,
+                  {
+                    ...basics,
+                    when: basics.when ?? "",
+                    byCustomer: false,
+                    note: input.note || undefined,
+                  },
+                  { tx, locale, replyTo: context.bookingEmail }
+                )
+              }
+              return true
+            })
+            if (!cancelled) throw errors.NOT_FOUND()
+            await audit(context, {
+              action: "booking.group_event_cancelled",
+              targetType: "group_event",
+              targetId: input.id,
+            })
+            return { ok: true as const }
+          }
+        ),
+      },
     },
     applications: {
       list: adminApi.admin.applications.list.handler(async ({ input, context }) => {
