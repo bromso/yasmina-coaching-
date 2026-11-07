@@ -92,7 +92,7 @@ All copy lives in data files; the views and pages only arrange sections.
   `src/components/*-section.tsx` (hero, statement, offers, manifesto, why, steps, credentials)
   next to the small `ArrowLink` and `Eyebrow` pieces; the FAQ and the contact form reuse the
   shared `Faq` and `Newsletter` blocks from `@repo/ui`.
-- Photos and the two clips live under `public/media/` (JPEG + WebP at full size and an `-800`
+- Photos and the five clips live under `public/media/` (JPEG + WebP at full size and an `-800`
   width, MP4 without audio plus posters), described in `src/content/media.ts` (`MEDIA`, `CLIPS`,
   `OFFERING_MEDIA`, alt texts in both languages: `mediaFor(locale)`, `clipsFor(locale)`). `<Picture>` (`src/components/picture.tsx`) renders them
   with explicit sizes; `MediaClip` plays a clip once, only where motion is welcome, behind a

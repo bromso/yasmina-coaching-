@@ -227,6 +227,13 @@ body {
   overflow-x: clip;
 }
 
+/* `Picture` renders `<picture class="contents">` so its `<img>` is the grid or flex item. Browsers
+   do not hide `<source>` by default, so without this it becomes an item too, takes a grid cell and
+   pushes the photo onto the next row. */
+picture > source {
+  display: none;
+}
+
 /* Windows High Contrast Mode support */
 @media (forced-colors: active) {
   /* Ensure borders remain visible */

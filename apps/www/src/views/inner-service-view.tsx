@@ -143,7 +143,7 @@ export function InnerServiceView({ id, locale }: InnerServiceViewProps) {
                 image={media[service.image]}
                 priority
                 sizes="(min-width: 1024px) 50vw, 100vw"
-                className={`${frame} object-cover object-[50%_25%]`}
+                className={`${frame} object-cover object-[58%_30%]`}
               />
             )}
           </div>

@@ -126,6 +126,30 @@ const IMAGES = {
     height: 672,
     small: { width: 1280, height: 672 },
   },
+  innerMeditation: {
+    name: "inner-meditation",
+    width: 1600,
+    height: 1200,
+    small: { width: 800, height: 600 },
+  },
+  innerGreenhouse: {
+    name: "inner-greenhouse",
+    width: 1600,
+    height: 1200,
+    small: { width: 800, height: 600 },
+  },
+  innerCafe: {
+    name: "inner-cafe",
+    width: 1600,
+    height: 1200,
+    small: { width: 800, height: 600 },
+  },
+  portraitLibrary: {
+    name: "portrait-library",
+    width: 1289,
+    height: 1600,
+    small: { width: 644, height: 800 },
+  },
 } as const satisfies Record<string, Omit<MediaImage, "alt">>
 
 export type MediaKey = keyof typeof IMAGES
@@ -160,6 +184,14 @@ const ALT: Record<Locale, Record<MediaKey, string>> = {
       "Yasmina Petersson talar i en mikrofon till en liten grupp som sitter och lyssnar i en ljus lokal.",
     keynotePoster:
       "Yasmina Petersson talar i en mikrofon på en scen inför publik i en sal med träpanel.",
+    innerMeditation:
+      "Yasmina Petersson sitter med korslagda ben på en dyna i ett ljust rum med trähyllor och en bonsai, med slutna ögon och händerna vilande på knäna.",
+    innerGreenhouse:
+      "Yasmina Petersson ler mot en klient vid ett träbord i ett växthus fullt av gröna växter, med en anteckningsbok i händerna.",
+    innerCafe:
+      "Yasmina Petersson lyssnar och ler mot en person mittemot sig vid ett bord på ett kafé, med en kaffekopp i handen.",
+    portraitLibrary:
+      "Yasmina Petersson i mörkblå kavaj ler mot kameran i ett ljust bibliotek med bokhyllor och läsbord.",
   },
   en: {
     portraitOffice:
@@ -190,6 +222,14 @@ const ALT: Record<Locale, Record<MediaKey, string>> = {
       "Yasmina Petersson speaks into a microphone to a small seated group listening in a bright room.",
     keynotePoster:
       "Yasmina Petersson speaks into a microphone on a stage before an audience in a wood-panelled hall.",
+    innerMeditation:
+      "Yasmina Petersson sits cross-legged on a cushion in a bright room with wooden shelves and a bonsai, eyes closed and hands resting on her knees.",
+    innerGreenhouse:
+      "Yasmina Petersson smiles at a client across a wooden table in a greenhouse full of plants, holding a notebook.",
+    innerCafe:
+      "Yasmina Petersson listens and smiles at the person opposite her at a café table, a coffee cup in her hand.",
+    portraitLibrary:
+      "Yasmina Petersson in a navy blazer smiles at the camera in a bright library with bookshelves and reading tables.",
   },
 }
 
@@ -263,8 +303,8 @@ export const OFFERING_MEDIA: Record<OfferingKey, MediaKey> = {
   enterprise: "workshopStanding",
   keynote: "keynoteStage",
   inner_start_coaching: "portraitPark",
-  inner_start_mentoring: "portraitOutdoors",
-  inner_start_lifestyle: "sessionLounge",
+  inner_start_mentoring: "innerCafe",
+  inner_start_lifestyle: "innerGreenhouse",
   inner_session: "portraitStudy",
   inner_mentoring_session: "portraitOffice",
   inner_group: "workshopTable",

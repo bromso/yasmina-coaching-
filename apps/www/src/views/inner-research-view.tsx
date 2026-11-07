@@ -2,7 +2,9 @@ import { Icon } from "@repo/ui/components/icon"
 import { ArrowLink } from "@/components/arrow-link"
 import { Eyebrow } from "@/components/eyebrow"
 import { Reveal } from "@/components/motion/reveal"
+import { Picture } from "@/components/picture"
 import { INNER_HREF, innerFor } from "@/content/inner"
+import { mediaFor } from "@/content/media"
 import type { Locale } from "@/lib/site-locale"
 
 /**
@@ -12,6 +14,7 @@ import type { Locale } from "@/lib/site-locale"
 export function InnerResearchView({ locale }: { locale: Locale }) {
   const { research, labels } = innerFor(locale)
   const text = labels.research
+  const media = mediaFor(locale)
   return (
     <main id="main">
       <article aria-labelledby="research-title" className="container max-w-4xl py-16 lg:py-24">
@@ -22,14 +25,24 @@ export function InnerResearchView({ locale }: { locale: Locale }) {
           <Icon icon="lucide:arrow-left" aria-hidden="true" />
           {text.back}
         </a>
-        <Eyebrow className="mt-8">{text.eyebrow}</Eyebrow>
-        <h1
-          id="research-title"
-          className="mt-5 hyphens-auto text-balance break-words text-4xl sm:text-5xl lg:text-6xl"
-        >
-          {text.title}
-        </h1>
-        <p className="mt-6 text-pretty text-lg text-muted-foreground">{research.intro}</p>
+        <div className="mt-8 grid grid-cols-1 gap-10 md:grid-cols-[minmax(0,1fr)_14rem] md:items-end lg:grid-cols-[minmax(0,1fr)_16rem]">
+          <div>
+            <Eyebrow>{text.eyebrow}</Eyebrow>
+            <h1
+              id="research-title"
+              className="mt-5 hyphens-auto text-balance break-words text-4xl sm:text-5xl md:hyphens-manual lg:text-6xl"
+            >
+              {text.title}
+            </h1>
+            <p className="mt-6 text-pretty text-lg text-muted-foreground">{research.intro}</p>
+          </div>
+          <Picture
+            image={media[research.image]}
+            small
+            priority
+            className="aspect-[4/5] w-full max-w-xs rounded-4xl object-cover object-[50%_30%] md:max-w-none"
+          />
+        </div>
 
         <section aria-labelledby="findings-title" className="mt-16">
           <h2 id="findings-title" className="text-balance text-3xl sm:text-4xl">

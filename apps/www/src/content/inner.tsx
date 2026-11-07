@@ -91,6 +91,8 @@ export type InnerService = {
 
 export type InnerResearch = {
   intro: string
+  /** The portrait beside the page's title. */
+  image: MediaKey
   /** Each claim cites `references[].n`. */
   findings: { claim: string; sources: number[] }[]
   limits: string[]
@@ -267,7 +269,7 @@ const sv: InnerContent = {
       title: "Starkt ledarskap börjar från insidan",
       description:
         "Personlig utveckling med yogans filosofi som ram och samtalet som verktyg, för dig som leder andra och för dig som vill leda ditt eget liv. Du sätter målen, och ni följer upp dem så länge du vill.",
-      image: "portraitStudy",
+      image: "innerMeditation",
       primary: { label: "Se de fyra vägarna", href: "#services" },
       secondary: { label: "Så vet vi", href: INNER_RESEARCH_HREF },
     },
@@ -460,7 +462,7 @@ const sv: InnerContent = {
       },
       startOffering: "inner_start_mentoring",
       memberOffering: "inner_mentoring_session",
-      image: "portraitOutdoors",
+      image: "innerCafe",
       faq: [
         { question: "Vad kostar det?", answer: priceAnswer("mentoring", "sv") },
         {
@@ -499,7 +501,7 @@ const sv: InnerContent = {
       },
       startOffering: "inner_start_lifestyle",
       memberOffering: "inner_session",
-      image: "sessionLounge",
+      image: "innerGreenhouse",
       faq: [
         { question: "Vad kostar det?", answer: priceAnswer("lifestyle", "sv") },
         {
@@ -549,6 +551,7 @@ const sv: InnerContent = {
   },
 
   research: {
+    image: "portraitLibrary",
     intro:
       "Här är vad forskningen säger om det som Ledarskap inifrån bygger på, och var den slutar. Siffrorna hänvisar till källorna längst ned på sidan.",
     findings: [
@@ -660,7 +663,7 @@ const en: InnerContent = {
       title: "Strong leadership starts on the inside",
       description:
         "Personal development with yoga philosophy as the frame and conversation as the tool, for people who lead others and for anyone who wants to take the lead in their own life. You set the goals, and you follow them up together for as long as you want.",
-      image: "portraitStudy",
+      image: "innerMeditation",
       primary: { label: "See the four paths", href: "#services" },
       secondary: { label: "How we know", href: INNER_RESEARCH_HREF },
     },
@@ -853,7 +856,7 @@ const en: InnerContent = {
       },
       startOffering: "inner_start_mentoring",
       memberOffering: "inner_mentoring_session",
-      image: "portraitOutdoors",
+      image: "innerCafe",
       faq: [
         { question: "What does it cost?", answer: priceAnswer("mentoring", "en") },
         {
@@ -892,7 +895,7 @@ const en: InnerContent = {
       },
       startOffering: "inner_start_lifestyle",
       memberOffering: "inner_session",
-      image: "sessionLounge",
+      image: "innerGreenhouse",
       faq: [
         { question: "What does it cost?", answer: priceAnswer("lifestyle", "en") },
         {
@@ -942,6 +945,7 @@ const en: InnerContent = {
   },
 
   research: {
+    image: "portraitLibrary",
     intro:
       "This is what research says about what Leading from within builds on, and where it stops. The numbers refer to the sources at the bottom of the page.",
     findings: [

@@ -34,9 +34,9 @@ export function HomeView({ locale }: { locale: Locale }) {
       <section aria-labelledby="inner-title" className="container pb-24 lg:pb-32">
         <Reveal className="grid grid-cols-1 overflow-hidden rounded-4xl bg-sun-soft md:grid-cols-12">
           <Picture
-            image={media.portraitStudy}
+            image={media.innerMeditation}
             small
-            className="aspect-[4/3] w-full object-cover object-[50%_30%] md:col-span-5 md:aspect-auto md:h-full"
+            className="aspect-[4/3] w-full object-cover object-[62%_40%] md:col-span-5 md:aspect-auto md:h-full"
           />
           <div className="flex flex-col justify-center gap-6 px-6 py-10 sm:px-10 md:col-span-7 lg:px-14 lg:py-16">
             <Eyebrow>{home.inner.eyebrow}</Eyebrow>

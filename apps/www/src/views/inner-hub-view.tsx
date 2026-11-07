@@ -60,7 +60,7 @@ export function InnerHubView({ locale }: { locale: Locale }) {
             image={media[hub.hero.image]}
             priority
             sizes="(min-width: 1024px) 50vw, 100vw"
-            className="aspect-[4/3] w-full object-cover object-[50%_30%] sm:aspect-[16/10] lg:aspect-auto lg:h-full"
+            className="aspect-[4/3] w-full object-cover object-[62%_40%] sm:aspect-[16/10] lg:aspect-auto lg:h-full"
           />
         </div>
       </section>
