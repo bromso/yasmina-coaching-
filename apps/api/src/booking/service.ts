@@ -143,7 +143,7 @@ export function offeringLabel(key: OfferingKey, locale: Locale): string {
     inner_start_mentoring: "Startsamtal – mentorskap",
     inner_start_lifestyle: "Startsamtal – livsstilsförändring",
     inner_session: "Samtal för medlemmar",
-    inner_mentoring_session: "Mentorssamtal",
+    inner_mentoring_session: "Mentorssamtal för medlemmar",
     inner_group: "Inifrån-gruppen",
   }
   return sv[key]
