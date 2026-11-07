@@ -73,6 +73,9 @@
       "/book/[offering]": 296.4,
       "/book/done": 263.9,
       "/book/manage/[token]": 270.1,
+      "/inifran": 266,
+      "/inifran/[service]": 266.6,
+      "/inifran/forskning": 265.3,
       "/privacy": 255.9,
       "/terms": 255.9
     }

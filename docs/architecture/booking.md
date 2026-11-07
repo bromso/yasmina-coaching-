@@ -12,9 +12,17 @@ browser can import it through `@repo/api-contract/booking-limits`). Each offerin
 
 | Kind | Offerings | How it is booked |
 |---|---|---|
-| `instant` | `session`, `package_6`, `package_10` | Pick free slots on the calendar; confirmed at once. A package books one or more sessions now; the rest are placed later from the manage link. |
-| `group` | `group` | Reserve seats at a `group_events` row Yasmina scheduled, one date or several of a weekly series. |
+| `instant` | `session`, `package_6`, `package_10`, `inner_start_coaching`, `inner_start_mentoring`, `inner_start_lifestyle`, `inner_session`, `inner_mentoring_session` | Pick free slots on the calendar; confirmed at once. A package books one or more sessions now; the rest are placed later from the manage link. |
+| `group` | `group`, `inner_group` | Reserve seats at a `group_events` row Yasmina scheduled, one date or several of a weekly series. |
 | `request` | `workshop`, `enterprise`, `keynote` | Propose up to three dates (morning / afternoon / full day), attendees, venue and a message; Yasmina confirms a time from `/admin/bookings`. Every request kind is B2B: an organisation is required. |
+
+The `inner_*` keys belong to the Ledarskap inifrån track (`apps/www`'s `/inifran`). The three
+`inner_start_*` keys are the 90-minute start calls and `inner_group` is the Inifrån group.
+`inner_session` and `inner_mentoring_session` are the members' sessions: `MEMBER_OFFERING_KEYS`
+hides them from `/book` and the site nav, but `/book/<key>` still works for anyone holding the link
+(they are in `OFFERINGS`, so the contract accepts them). The inner offerings show a fixed price on
+`/book` and their service pages (`apps/www/src/content/inner-pricing.ts`) instead of the written
+quote; the system itself still stores no prices.
 
 Audiences (`private`, `organisation`) and locations (`varberg`, `video`, `on_site`) are per
 offering; the contract refuses a combination the catalog does not list. Prices are not in the
@@ -67,7 +75,12 @@ link, so the confirmation mail carries a fresh one and the old link stops workin
 
 ### Group events
 
-`group_events` (title, description, time, `location`, `capacity`, `series_key`, `status`). A seat
+`group_events` (title, description, time, `location`, `capacity`, `series_key`, `status`, and
+`offering`, `group` by default, set to `inner_group` for the Inifrån group; migration 0035). The
+public list is per offering: `booking.groupEvents({ offering })` (default `group`) returns only that
+offering's events, and www's `/api/booking/group-events?offering=` passes it through, so
+`/book/group` and `/book/inner_group` never show each other's dates. `admin.bookings.groupEvents.create`
+takes `offering` (a group offering only; the admin form at `/admin/bookings/groups` has a select). A seat
 is a `bookings` row with `group_event_id`; `seatsLeft` is capacity minus confirmed seats.
 `booking.reserve` locks each event row, re-counts, and refuses with `CONFLICT` (`bookingSeatsFull`)
 or `NOT_FOUND` (cancelled, past, unknown) before inserting any seat. Cancelling an event

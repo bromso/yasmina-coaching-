@@ -33,6 +33,18 @@ export const A11Y_PAGES: A11yPage[] = [
   { app: "www", path: "/", auth: "none", variants: ["light", "dark", "en-light", "en-dark"] },
   { app: "www", path: "/terms", auth: "none" },
   { app: "www", path: "/privacy", auth: "none" },
+  // Ledarskap inifrån: the hub (also in English), the four services (one route) and the research.
+  {
+    app: "www",
+    path: "/inifran",
+    auth: "none",
+    variants: ["light", "dark", "en-light"],
+  },
+  { app: "www", path: "/inifran/coachning", route: "/inifran/[service]", auth: "none" },
+  { app: "www", path: "/inifran/mentorskap", route: "/inifran/[service]", auth: "none" },
+  { app: "www", path: "/inifran/livsstil", route: "/inifran/[service]", auth: "none" },
+  { app: "www", path: "/inifran/grupp", route: "/inifran/[service]", auth: "none" },
+  { app: "www", path: "/inifran/forskning", auth: "none" },
   // The booking journey: the catalog, one page per kind of offering (the same route), the
   // confirmation. The token manage page is excluded below.
   { app: "www", path: "/book", auth: "none" },
@@ -40,6 +52,8 @@ export const A11Y_PAGES: A11yPage[] = [
   { app: "www", path: "/book/session", route: "/book/[offering]", auth: "none" },
   { app: "www", path: "/book/package_6", route: "/book/[offering]", auth: "none" },
   { app: "www", path: "/book/group", route: "/book/[offering]", auth: "none" },
+  { app: "www", path: "/book/inner_start_coaching", route: "/book/[offering]", auth: "none" },
+  { app: "www", path: "/book/inner_group", route: "/book/[offering]", auth: "none" },
   { app: "www", path: "/book/workshop", route: "/book/[offering]", auth: "none" },
   { app: "www", path: "/book/done?ref=BK-1&kind=request", auth: "none" },
   notFound("www"),

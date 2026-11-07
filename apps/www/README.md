@@ -67,6 +67,9 @@ bun --filter @repo/www analyze   # bundle report in .next/analyze/
 | `/book/[offering]` | http://www.brand.localhost:3000/book/session (one page per `OFFERING_KEYS` entry) |
 | `/book/done` | the confirmation after a booking or request (`?ref=`, `?manage=`, `?kind=`) |
 | `/book/manage/[token]` | the manage page behind the link in the confirmation mail |
+| `/inifran` | the Ledarskap inifrån hub (see **Ledarskap inifrån**) |
+| `/inifran/[service]` | one of `coachning`, `mentorskap`, `livsstil`, `grupp` |
+| `/inifran/forskning` | the research behind the track |
 | `/terms` | http://www.brand.localhost:3000/terms |
 | `/privacy` | http://www.brand.localhost:3000/privacy |
 
@@ -126,6 +129,24 @@ is in `src/content/booking.tsx`; the catalog itself (`OFFERINGS`, kinds, limits)
   `src/lib/booking-dates.ts`); the api stores UTC.
 - Every booking action sends `x-locale` = the page's language, so the api's own refusals shown on
   the form (a taken slot, a full event, the cutoff, the rate limit) and the mails match the page.
+
+## Ledarskap inifrån
+
+The "Leadership from the inside" track (Swedish slugs in both languages). Every word, both
+languages, is in `src/content/inner.tsx`; prices come from `src/content/inner-pricing.ts` (an
+hourly rate with discount tiers, private clients incl. VAT, organisations excl.), never typed into
+the copy. Pages are dynamic per locale like the rest of www.
+
+- `/inifran` is the hub: the four services, how it works, the FAQ. `/inifran/<slug>` is one
+  service (`coachning`, `mentorskap`, `livsstil`, `grupp`) with its fixed prices, a "Boka
+  startsamtal" link to `/book/inner_start_<kind>` and, for the three one-to-one services, the
+  members' session key (`inner_session` / `inner_mentoring_session`) for returning clients.
+  `/inifran/forskning` lists the references.
+- The group's dates are `inner_group` events (`/book/inner_group`); the members' sessions are
+  bookable by link but hidden from `/book` and the nav (see `docs/architecture/booking.md`).
+- Three silent clips for the track live in `public/media/` with the others (see `src/content/media.ts`).
+- Checks: `views.test.tsx`, `inner.test.ts`, `inner-pricing.test.ts`; the journey is
+  `apps/e2e/tests/inner.spec.ts`; the pages are in the a11y manifest and `perf/budgets.json`.
 
 ## Look
 
