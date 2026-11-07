@@ -38,7 +38,7 @@ export function AdminBookingGroupsView({
                   return (
                     <li key={e.id} className="rounded-lg border p-4">
                       <div className="flex flex-wrap items-baseline justify-between gap-2">
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <span className="font-mono text-xs text-muted-foreground">
                             {e.reference}
                           </span>
