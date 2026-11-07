@@ -1,7 +1,7 @@
 "use client"
 
 import type { GroupEvent } from "@repo/api-contract"
-import type { BookingAudience } from "@repo/api-contract/booking-limits"
+import type { BookingAudience, OfferingKey } from "@repo/api-contract/booking-limits"
 import { Button } from "@repo/ui/components/button"
 import { FieldError, FormMessage } from "@repo/ui/components/form-feedback"
 import { useActionState, useCallback, useEffect, useRef, useState } from "react"
@@ -21,6 +21,8 @@ import { formatDay, formatTime } from "@/lib/booking-dates"
 import { groupBySeries } from "@/lib/group-events"
 
 type GroupBookingProps = {
+  /** Which group offering's events to list (`group` or `inner_group`). */
+  offering: OfferingKey
   audiences: readonly BookingAudience[]
   initialAudience: BookingAudience
 }
@@ -33,11 +35,11 @@ type Events =
 const initialState: BookingFormState = { ok: false }
 
 /**
- * Upcoming group dates from this origin's `/api/booking/group-events`, grouped by series, with a
+ * Upcoming dates of one group offering from this origin's `/api/booking/group-events`, grouped by series, with a
  * checkbox each; then the same details form as an instant booking. The list needs JavaScript
  * (a `<noscript>` points at the contact form); the form is a plain `<form action>`.
  */
-export function GroupBooking({ audiences, initialAudience }: GroupBookingProps) {
+export function GroupBooking({ offering, audiences, initialAudience }: GroupBookingProps) {
   const copy = useBookingCopy()
   const locale = useLocale()
   const text = copy.group
@@ -54,7 +56,9 @@ export function GroupBooking({ audiences, initialAudience }: GroupBookingProps) 
   const load = useCallback(() => {
     const n = ++seq.current
     setEvents({ status: "loading" })
-    fetch("/api/booking/group-events", { headers: { accept: "application/json" } })
+    fetch(`/api/booking/group-events?offering=${encodeURIComponent(offering)}`, {
+      headers: { accept: "application/json" },
+    })
       .then((res) =>
         res.ok ? (res.json() as Promise<{ events: GroupEvent[] }>) : Promise.reject(res.status)
       )
@@ -64,7 +68,7 @@ export function GroupBooking({ audiences, initialAudience }: GroupBookingProps) 
       .catch(() => {
         if (seq.current === n) setEvents({ status: "error" })
       })
-  }, [])
+  }, [offering])
 
   useEffect(() => load(), [load])
 

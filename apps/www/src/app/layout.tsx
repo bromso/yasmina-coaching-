@@ -1,4 +1,4 @@
-import { OFFERING_KEYS, OFFERINGS } from "@repo/api-contract/booking-limits"
+import { MEMBER_OFFERING_KEYS, OFFERING_KEYS, OFFERINGS } from "@repo/api-contract/booking-limits"
 import { LOCALE_NAMES, LOCALES, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
 import { BRAND_NAME, footerGroups, relabelFooter, siteUrl } from "@repo/sites"
@@ -68,7 +68,10 @@ const cookieDomain =
   process.env.BUILD_COOKIE_DOMAIN ||
   (process.env.NODE_ENV === "production" ? undefined : ".brand.localhost")
 
-/** The navigation carousel's cards: one per offering, its name and a short hint in `locale`. */
+/**
+ * The navigation carousel's cards: one per offering the catalog lists (members' sessions are
+ * left out, as on `/book`), its name and a short hint in `locale`.
+ */
 function navOfferings(locale: Locale): ExploreNavOffering[] {
   const booking = bookingFor(locale)
   const media = mediaFor(locale)
@@ -80,7 +83,7 @@ function navOfferings(locale: Locale): ExploreNavOffering[] {
       ? booking.navHints.sessions(offering.sessions)
       : `${offering.durationMinutes} min`
   }
-  return OFFERING_KEYS.map((key) => {
+  return OFFERING_KEYS.filter((key) => !MEMBER_OFFERING_KEYS.includes(key)).map((key) => {
     const image = media[OFFERING_MEDIA[key]]
     return {
       key,

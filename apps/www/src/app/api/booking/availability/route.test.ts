@@ -92,5 +92,28 @@ describe("GET /api/booking/group-events", () => {
     expect(res.status).toBe(200)
     expect(res.headers.get("cache-control")).toBe("private, no-store")
     expect(seen.at(-1)?.path).toContain("/booking/groupEvents")
+    expect(seen.at(-1)?.body).toMatchObject({ json: { offering: "group" } })
+  })
+
+  test("forwards a group offering from the query", async () => {
+    const res = await GROUP(
+      new Request("http://www.brand.localhost:3000/api/booking/group-events?offering=inner_group")
+    )
+    expect(res.status).toBe(200)
+    expect(seen.at(-1)?.path).toContain("/booking/groupEvents")
+    expect(seen.at(-1)?.body).toMatchObject({ json: { offering: "inner_group" } })
+  })
+
+  test("an offering that is not a group kind is a 400 and no api call", async () => {
+    const before = seen.length
+    for (const offering of ["session", "inner_session", "nope"]) {
+      const res = await GROUP(
+        new Request(`http://www.brand.localhost:3000/api/booking/group-events?offering=${offering}`)
+      )
+      expect(res.status).toBe(400)
+      expect(res.headers.get("cache-control")).toBe("private, no-store")
+    }
+    await Bun.sleep(20)
+    expect(seen.length).toBe(before)
   })
 })

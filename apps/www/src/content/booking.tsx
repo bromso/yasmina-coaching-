@@ -1,4 +1,5 @@
 import {
+  type BookingAudience,
   type BookingStatus,
   MEMBER_OFFERING_KEYS,
   OFFERING_KEYS,
@@ -8,6 +9,8 @@ import {
 } from "@repo/api-contract/booking-limits"
 import type { Locale } from "@repo/i18n/locales"
 import { BOOKING_FORMS, type BookingFormCopy } from "@/content/booking-forms"
+import { INNER, INNER_SERVICE_IDS } from "@/content/inner"
+import { formatKr, INNER_PRICES, type InnerServiceId } from "@/content/inner-pricing"
 
 /**
  * Every word on the booking pages (`/book`, `/book/<offering>`, `/book/done`, `/book/manage/…`),
@@ -49,6 +52,17 @@ export type BookingContent = {
   /** Page titles for the metadata. */
   meta: { catalog: string; done: string; manage: string }
   priceNote: string
+  /**
+   * Ledarskap inifrån's fixed prices, shown in place of `priceNote` (see `priceLineFor`): the
+   * start calls, the group per person and month, and the members' sessions the membership covers.
+   */
+  innerPrice: {
+    start: (amount: string, vat: string) => string
+    groupMonthly: (amount: string, vat: string) => string
+    member: string
+    /** Private clients pay incl. VAT; organisations the same amount excl. VAT. */
+    vat: Record<BookingAudience, string>
+  }
   statusLabels: Record<BookingStatus, string>
   /** One line on each catalog card explaining what happens when you click. */
   kindLines: Record<OfferingKind, string>
@@ -97,6 +111,12 @@ const sv: BookingContent = {
   form: BOOKING_FORMS.sv,
   meta: { catalog: "Boka", done: "Bokad", manage: "Hantera din bokning" },
   priceNote: "Priset bekräftas skriftligt före det första tillfället.",
+  innerPrice: {
+    start: (amount, vat) => `Startsamtalet kostar ${amount}, ${vat}.`,
+    groupMonthly: (amount, vat) => `${amount} per person och månad, ${vat}.`,
+    member: "Ingår i ditt medlemskap.",
+    vat: { private: "inkl. moms", organisation: "exkl. moms" },
+  },
   statusLabels: {
     pending: "Väntar på bekräftelse",
     confirmed: "Bekräftad",
@@ -305,6 +325,12 @@ const en: BookingContent = {
   form: BOOKING_FORMS.en,
   meta: { catalog: "Book", done: "Booked", manage: "Manage your booking" },
   priceNote: "The price is confirmed in writing before the first session.",
+  innerPrice: {
+    start: (amount, vat) => `The start call costs ${amount}, ${vat}.`,
+    groupMonthly: (amount, vat) => `${amount} per person a month, ${vat}.`,
+    member: "Included in your membership.",
+    vat: { private: "incl. VAT", organisation: "excl. VAT" },
+  },
   statusLabels: {
     pending: "Awaiting confirmation",
     confirmed: "Confirmed",
@@ -510,3 +536,31 @@ export const BOOKING: Record<Locale, BookingContent> = { sv, en }
 
 /** The booking pages' copy in `locale`. */
 export const bookingFor = (locale: Locale): BookingContent => BOOKING[locale]
+
+/** Which Ledarskap inifrån service each start call and group offering belongs to. */
+const INNER_SERVICE_OF = new Map<OfferingKey, InnerServiceId>(
+  INNER_SERVICE_IDS.flatMap((id) => {
+    const service = INNER.sv.services[id]
+    const keys = [service.startOffering, service.groupOffering].filter(
+      (key): key is OfferingKey => key !== undefined
+    )
+    return keys.map((key) => [key, id] as const)
+  })
+)
+
+/**
+ * The price line under an offering on `/book` and `/book/<key>`: the fixed price for a
+ * Ledarskap inifrån start call or group (with VAT as `audience` pays it), the membership note for
+ * a members' session, and the written quote (`priceNote`) for everything else.
+ */
+export function priceLineFor(key: OfferingKey, audience: BookingAudience, locale: Locale): string {
+  const booking = BOOKING[locale]
+  if (memberKeys.includes(key)) return booking.innerPrice.member
+  const id = INNER_SERVICE_OF.get(key)
+  if (!id) return booking.priceNote
+  const prices = INNER_PRICES[id]
+  const vat = booking.innerPrice.vat[audience]
+  return prices.start === undefined
+    ? booking.innerPrice.groupMonthly(formatKr(prices.monthly, locale), vat)
+    : booking.innerPrice.start(formatKr(prices.start, locale), vat)
+}

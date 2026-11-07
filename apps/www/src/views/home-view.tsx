@@ -1,6 +1,8 @@
 import type { Locale } from "@repo/i18n/locales"
 import { Faq } from "@repo/ui/blocks/faq"
+import { ArrowLink } from "@/components/arrow-link"
 import { CredentialsSection } from "@/components/credentials-section"
+import { Eyebrow } from "@/components/eyebrow"
 import { HeroSection } from "@/components/hero-section"
 import { ManifestoSection } from "@/components/manifesto-section"
 import { Reveal } from "@/components/motion/reveal"
@@ -28,6 +30,27 @@ export function HomeView({ locale }: { locale: Locale }) {
         caption={text.statementCaption}
       />
       <OffersSection id="coaching" {...home.offers} media={media} />
+      {/* Ledarskap inifrån in a few lines: what it is, and the way to its hub. */}
+      <section aria-labelledby="inner-title" className="container pb-24 lg:pb-32">
+        <Reveal className="grid grid-cols-1 overflow-hidden rounded-4xl bg-sun-soft md:grid-cols-12">
+          <Picture
+            image={media.portraitStudy}
+            small
+            className="aspect-[4/3] w-full object-cover object-[50%_30%] md:col-span-5 md:aspect-auto md:h-full"
+          />
+          <div className="flex flex-col justify-center gap-6 px-6 py-10 sm:px-10 md:col-span-7 lg:px-14 lg:py-16">
+            <Eyebrow>{home.inner.eyebrow}</Eyebrow>
+            <h2
+              id="inner-title"
+              className="hyphens-auto text-balance break-words text-4xl sm:text-5xl"
+            >
+              {home.inner.title}
+            </h2>
+            <p className="text-pretty text-lg text-muted-foreground">{home.inner.description}</p>
+            <ArrowLink href={home.inner.link.href} label={home.inner.link.label} />
+          </div>
+        </Reveal>
+      </section>
       <ManifestoSection {...home.manifesto} label={text.manifestoLabel} />
       <WhySection
         id="about"
