@@ -1,4 +1,11 @@
-import type { BookingStatus, OfferingKey, OfferingKind } from "@repo/api-contract/booking-limits"
+import {
+  type BookingStatus,
+  MEMBER_OFFERING_KEYS,
+  OFFERING_KEYS,
+  OFFERINGS,
+  type OfferingKey,
+  type OfferingKind,
+} from "@repo/api-contract/booking-limits"
 import type { Locale } from "@repo/i18n/locales"
 import { BOOKING_FORMS, type BookingFormCopy } from "@/content/booking-forms"
 
@@ -17,6 +24,24 @@ export type OfferingCopy = {
   included: readonly string[]
 }
 
+/** The catalog's two headed groups: which offerings each lists. */
+export type CatalogGroup = {
+  id: "leadership" | "inner"
+  title: string
+  description: string
+  keys: readonly OfferingKey[]
+}
+
+const isInner = (key: OfferingKey) => key.startsWith("inner_")
+const memberKeys: readonly OfferingKey[] = MEMBER_OFFERING_KEYS
+/** Leadership coaching: every offering outside Ledarskap inifrån. */
+const LEADERSHIP_KEYS = OFFERING_KEYS.filter((key) => !isInner(key))
+/** Ledarskap inifrån's start calls and group; members' sessions are never listed. */
+const INNER_KEYS = OFFERING_KEYS.filter((key) => isInner(key) && !memberKeys.includes(key))
+
+/** Minutes of one session of `key`, from the contract. */
+const minutes = (key: OfferingKey) => OFFERINGS[key].durationMinutes
+
 export type BookingContent = {
   /** The forms' copy (labels, steps, field names), shared with the client components. */
   form: BookingFormCopy
@@ -30,6 +55,8 @@ export type BookingContent = {
   /** What each card in the header's carousel says under its name. */
   navHints: { request: string; group: string; sessions: (n: number) => string }
   offerings: Record<OfferingKey, OfferingCopy>
+  /** `/book` lists these groups under their own headings, in this order. */
+  catalogGroups: CatalogGroup[]
   catalog: {
     eyebrow: string
     title: string
@@ -156,39 +183,63 @@ const sv: BookingContent = {
       ],
     },
     inner_start_coaching: {
-      title: "Startsamtal – transformativ coachning",
-      description:
-        "Ett första samtal på 90 minuter för dig som vill utforska transformativ coachning i Ledarskap inifrån.",
-      included: ["90 minuter, i Varberg eller på video"],
+      title: "Startsamtal, transformativ coachning",
+      description: `Första steget i transformativ coachning: ${minutes("inner_start_coaching")} minuter där ni sätter dina mål, skriver ned dem och gör en plan för uppföljning.`,
+      included: [
+        `${minutes("inner_start_coaching")} minuter, i Varberg eller på video`,
+        "Dina mål nedskrivna, och en plan för uppföljning",
+      ],
     },
     inner_start_mentoring: {
-      title: "Startsamtal – mentorskap",
-      description:
-        "Ett första samtal på 90 minuter för dig som vill utforska mentorskap i Ledarskap inifrån.",
-      included: ["90 minuter, i Varberg eller på video"],
+      title: "Startsamtal, mentorskap",
+      description: `Första steget i mentorskapet: ${minutes("inner_start_mentoring")} minuter där ni sätter dina mål, skriver ned dem och gör en plan för uppföljning.`,
+      included: [
+        `${minutes("inner_start_mentoring")} minuter, i Varberg eller på video`,
+        "Dina mål nedskrivna, och en plan för uppföljning",
+      ],
     },
     inner_start_lifestyle: {
-      title: "Startsamtal – livsstilsförändring",
-      description:
-        "Ett första samtal på 90 minuter för dig som vill utforska livsstilsförändring i Ledarskap inifrån.",
-      included: ["90 minuter, i Varberg eller på video"],
+      title: "Startsamtal, livsstilsförändring",
+      description: `Första steget i livsstilsförändringen: ${minutes("inner_start_lifestyle")} minuter där ni sätter dina mål och du får en personlig övningsplan.`,
+      included: [
+        `${minutes("inner_start_lifestyle")} minuter, i Varberg eller på video`,
+        "En personlig övningsplan med andning, yin yoga, meditation och visualisering",
+      ],
     },
     inner_session: {
       title: "Samtal för medlemmar",
-      description: "Ett samtal på 60 minuter för dig som är medlem i Ledarskap inifrån.",
-      included: ["60 minuter, i Varberg eller på video"],
+      description:
+        "Ditt löpande samtal i transformativ coachning eller livsstilsförändring, för dig som redan är med och har gjort ditt startsamtal.",
+      included: [`${minutes("inner_session")} minuter, i Varberg eller på video`],
     },
     inner_mentoring_session: {
-      title: "Mentorssamtal",
-      description: "Ett mentorssamtal på 90 minuter för dig som är medlem i Ledarskap inifrån.",
-      included: ["90 minuter, i Varberg eller på video"],
+      title: "Mentorssamtal för medlemmar",
+      description:
+        "Ditt löpande samtal i mentorskapet, för dig som redan är med och har gjort ditt startsamtal.",
+      included: [`${minutes("inner_mentoring_session")} minuter, i Varberg eller på video`],
     },
     inner_group: {
       title: "Inifrån-gruppen",
-      description: "En grupp som träffas regelbundet för att arbeta med ledarskap inifrån.",
-      included: ["Två timmar, i Varberg eller på video"],
+      description:
+        "En träff i den löpande gruppen: ett tema ur yogans filosofi, en övning tillsammans och samtal om ledarskap och liv.",
+      included: [`${minutes("inner_group")} minuter, i Varberg eller på video`],
     },
   },
+  catalogGroups: [
+    {
+      id: "leadership",
+      title: "Ledarskapscoaching",
+      description: "Samtal, program och uppdrag för chefer, ledningsgrupper och organisationer.",
+      keys: LEADERSHIP_KEYS,
+    },
+    {
+      id: "inner",
+      title: "Ledarskap inifrån",
+      description:
+        "Personlig utveckling med yogans filosofi som grund. De enskilda tjänsterna börjar med ett startsamtal, och i gruppen bokar du en plats per träff.",
+      keys: INNER_KEYS,
+    },
+  ],
   catalog: {
     eyebrow: "Boka",
     title: "Välj hur du vill arbeta med Yasmina",
@@ -337,38 +388,64 @@ const en: BookingContent = {
       ],
     },
     inner_start_coaching: {
-      title: "Start call – transformative coaching",
-      description:
-        "A 90-minute first call for exploring transformative coaching in Leadership from within.",
-      included: ["90 minutes, in Varberg or by video"],
+      title: "Start call, transformative coaching",
+      description: `The first step in transformative coaching: ${minutes("inner_start_coaching")} minutes where you set your goals, write them down and make a plan for following them up.`,
+      included: [
+        `${minutes("inner_start_coaching")} minutes, in Varberg or by video`,
+        "Your goals in writing, and a plan for following them up",
+      ],
     },
     inner_start_mentoring: {
-      title: "Start call – mentoring",
-      description: "A 90-minute first call for exploring mentoring in Leadership from within.",
-      included: ["90 minutes, in Varberg or by video"],
+      title: "Start call, mentoring",
+      description: `The first step in mentoring: ${minutes("inner_start_mentoring")} minutes where you set your goals, write them down and make a plan for following them up.`,
+      included: [
+        `${minutes("inner_start_mentoring")} minutes, in Varberg or by video`,
+        "Your goals in writing, and a plan for following them up",
+      ],
     },
     inner_start_lifestyle: {
-      title: "Start call – lifestyle change",
-      description:
-        "A 90-minute first call for exploring lifestyle change in Leadership from within.",
-      included: ["90 minutes, in Varberg or by video"],
+      title: "Start call, lifestyle change",
+      description: `The first step in lifestyle change: ${minutes("inner_start_lifestyle")} minutes where you set your goals and get a personal practice plan.`,
+      included: [
+        `${minutes("inner_start_lifestyle")} minutes, in Varberg or by video`,
+        "A personal practice plan with breathing, yin yoga, meditation and visualisation",
+      ],
     },
     inner_session: {
       title: "Member session",
-      description: "A 60-minute session for members of Leadership from within.",
-      included: ["60 minutes, in Varberg or by video"],
+      description:
+        "Your ongoing session in transformative coaching or lifestyle change, for you who are already a member and have had your start call.",
+      included: [`${minutes("inner_session")} minutes, in Varberg or by video`],
     },
     inner_mentoring_session: {
-      title: "Mentoring session",
-      description: "A 90-minute mentoring session for members of Leadership from within.",
-      included: ["90 minutes, in Varberg or by video"],
+      title: "Member mentoring session",
+      description:
+        "Your ongoing session in mentoring, for you who are already a member and have had your start call.",
+      included: [`${minutes("inner_mentoring_session")} minutes, in Varberg or by video`],
     },
     inner_group: {
-      title: "Inifrån group",
-      description: "A group that meets regularly to work on leadership from within.",
-      included: ["Two hours, in Varberg or by video"],
+      title: "The Inifrån group",
+      description:
+        "One session of the ongoing group: a theme from yoga philosophy, an exercise together and conversation about leadership and life.",
+      included: [`${minutes("inner_group")} minutes, in Varberg or by video`],
     },
   },
+  catalogGroups: [
+    {
+      id: "leadership",
+      title: "Leadership coaching",
+      description:
+        "Sessions, programmes and assignments for managers, management teams and organisations.",
+      keys: LEADERSHIP_KEYS,
+    },
+    {
+      id: "inner",
+      title: "Leading from within",
+      description:
+        "Personal development grounded in yoga philosophy. The one-to-one services begin with a start call, and in the group you book a seat per session.",
+      keys: INNER_KEYS,
+    },
+  ],
   catalog: {
     eyebrow: "Book",
     title: "Choose how you want to work with Yasmina",

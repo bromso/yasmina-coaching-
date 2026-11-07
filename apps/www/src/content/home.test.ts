@@ -3,6 +3,7 @@ import { LOCALES } from "@repo/i18n/locales"
 import { BOOKING, bookingFor } from "./booking"
 import { BOOKING_FORMS } from "./booking-forms"
 import { BOOK_HREF, HOME, homeFor, SECTION_IDS } from "./home"
+import { INNER_HREF } from "./inner"
 import { MEDIA_TEXT, mediaFor } from "./media"
 import { SITE } from "./site"
 import { STATUS } from "./status"
@@ -13,9 +14,9 @@ for (const locale of LOCALES) {
   describe(`the landing page in ${locale}`, () => {
     const home = homeFor(locale)
 
-    test("every header link scrolls to a section the page renders, or opens the booking catalog", () => {
+    test("every header link scrolls to a section the page renders, or opens the booking catalog or the Inifrån hub", () => {
       for (const link of home.nav) {
-        if (link.href === BOOK_HREF) continue
+        if (link.href === BOOK_HREF || link.href === INNER_HREF) continue
         expect(ids).toContain(link.href.replace("/#", ""))
       }
       expect(home.nav.map((l) => l.href)).toContain(BOOK_HREF)
@@ -145,6 +146,7 @@ describe("Yasmina's voice", () => {
       "Om Yasmina",
       "Så går det till",
       "Frågor",
+      "Inifrån",
       "Boka",
     ])
     expect(HOME.sv.hero.primary.label).toBe("Boka ett samtal")
@@ -158,6 +160,7 @@ describe("Yasmina's voice", () => {
       "About",
       "How it works",
       "Questions",
+      "From within",
       "Book",
     ])
     expect(HOME.en.hero.title).toBe("Lead the way you would want to be led")

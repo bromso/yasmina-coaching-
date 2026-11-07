@@ -59,7 +59,9 @@ export function CredentialsSection({
               {education.map((item, i) => (
                 <RevealItem key={item.title} as="li" index={i} className="py-4">
                   <div className="font-medium">{item.title}</div>
-                  <div className="text-muted-foreground text-sm">{item.place}</div>
+                  {item.place ? (
+                    <div className="text-muted-foreground text-sm">{item.place}</div>
+                  ) : null}
                 </RevealItem>
               ))}
             </Reveal>

@@ -8,7 +8,16 @@ export const DISCOUNT = { single: 0, monthly: 0.1, quarter: 0.15 } as const
 export type DiscountTier = keyof typeof DISCOUNT
 export type InnerServiceId = "coaching" | "mentoring" | "lifestyle" | "group"
 
-const START_HOURS = 1.5
+/** The start call's length in hours (90 minutes), the same for every one-to-one service. */
+export const START_HOURS = 1.5
+
+/** Hours of sessions per month in each service's membership; the group's are shared hours. */
+export const INNER_HOURS: Record<InnerServiceId, number> = {
+  coaching: 2,
+  mentoring: 1.5,
+  lifestyle: 2,
+  group: 4,
+}
 
 /**
  * Price for `hours` at `rate`. `single` and `monthly` are one month or session; `quarter` is the
@@ -26,22 +35,22 @@ export const INNER_PRICES: Record<
 > = {
   coaching: {
     start: priceFor(START_HOURS, "single"),
-    monthly: priceFor(2, "monthly"),
-    quarter: priceFor(2, "quarter"),
+    monthly: priceFor(INNER_HOURS.coaching, "monthly"),
+    quarter: priceFor(INNER_HOURS.coaching, "quarter"),
   },
   mentoring: {
     start: priceFor(START_HOURS, "single"),
-    monthly: priceFor(1.5, "monthly"),
-    quarter: priceFor(1.5, "quarter"),
+    monthly: priceFor(INNER_HOURS.mentoring, "monthly"),
+    quarter: priceFor(INNER_HOURS.mentoring, "quarter"),
   },
   lifestyle: {
     start: priceFor(START_HOURS, "single"),
-    monthly: priceFor(2, "monthly"),
-    quarter: priceFor(2, "quarter"),
+    monthly: priceFor(INNER_HOURS.lifestyle, "monthly"),
+    quarter: priceFor(INNER_HOURS.lifestyle, "quarter"),
   },
   group: {
-    monthly: priceFor(4, "monthly", GROUP_HOURLY_RATE),
-    quarter: priceFor(4, "quarter", GROUP_HOURLY_RATE),
+    monthly: priceFor(INNER_HOURS.group, "monthly", GROUP_HOURLY_RATE),
+    quarter: priceFor(INNER_HOURS.group, "quarter", GROUP_HOURLY_RATE),
   },
 }
 

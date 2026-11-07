@@ -1,5 +1,6 @@
 import type { Locale } from "@repo/i18n/locales"
 import type { FaqItem } from "@repo/ui/blocks/faq"
+import { INNER_HREF } from "@/content/inner"
 
 /**
  * Every word on the landing page, in Swedish and English. Rewrite the pitch, reorder the offers
@@ -16,20 +17,24 @@ export type SectionId = (typeof SECTION_IDS)[number]
 /** The booking pages' entry, the one header link that leaves the landing page. */
 export const BOOK_HREF = "/book"
 
-export type NavLink = { label: string; href: `/#${SectionId}` | typeof BOOK_HREF }
+export type NavLink = {
+  label: string
+  href: `/#${SectionId}` | typeof BOOK_HREF | typeof INNER_HREF
+}
 export type Stat = { value: string; label: string }
 export type Offer = { number: string; title: string; description: string }
 export type Step = { number: string; title: string; description: string }
 export type Reason = { title: string; description: string }
 export type Role = { period: string; title: string; place: string; detail?: string }
-export type Credential = { title: string; place: string }
+/** `place` is left out where the title already says it all (the yoga certification). */
+export type Credential = { title: string; place?: string }
 type Link = { label: string; href: string }
 type Heading = { eyebrow: string; title: string; description?: string }
 
 export type HomeContent = {
   /** The page title's tail (`Yasmina Petersson · …`) and the meta description. */
   meta: { title: string; description: string }
-  /** The header's links: in-page anchors, plus the booking catalog. */
+  /** The header's links: in-page anchors, the Ledarskap inifrån hub and the booking catalog. */
   nav: NavLink[]
   hero: {
     eyebrow: string
@@ -41,6 +46,13 @@ export type HomeContent = {
   }
   statement: { title: string; body: string; link: Link }
   offers: { heading: Heading; items: Offer[] }
+  /** The short section that introduces Ledarskap inifrån and links to its hub. */
+  inner: {
+    eyebrow: string
+    title: string
+    description: string
+    link: { label: string; href: typeof INNER_HREF }
+  }
   manifesto: { lead: string; rest: string }
   why: { heading: Heading; reasons: Reason[] }
   steps: { heading: Heading; items: Step[] }
@@ -68,6 +80,7 @@ const sv: HomeContent = {
     { label: "Om Yasmina", href: "/#about" },
     { label: "Så går det till", href: "/#how" },
     { label: "Frågor", href: "/#faq" },
+    { label: "Inifrån", href: INNER_HREF },
     { label: "Boka", href: BOOK_HREF },
   ],
 
@@ -122,6 +135,14 @@ const sv: HomeContent = {
           "Om förebyggande ledarskap, emotionell intelligens på jobbet och att leda i förändring, för en ledningsdag eller en hel förvaltning.",
       },
     ],
+  },
+
+  inner: {
+    eyebrow: "Ledarskap inifrån",
+    title: "Personlig utveckling med yogans filosofi som grund",
+    description:
+      "Coachning, mentorskap, livsstilsförändring och en löpande grupp, för ledare och för dig som vill utvecklas som person. Du sätter målen, och ni följer upp dem så länge du vill.",
+    link: { label: "Läs om Ledarskap inifrån", href: INNER_HREF },
   },
 
   manifesto: {
@@ -225,6 +246,10 @@ const sv: HomeContent = {
       { title: "UL, Utvecklande ledarskap", place: "Falkenberg" },
       { title: "Coachande ledarskap", place: "Falkenberg" },
       { title: "Morgondagens ledare", place: "Halmstad" },
+      {
+        title:
+          "Certifierad yogalärare, registrerad hos Yoga Alliance (200 timmar), med 50 timmar fördjupning i yin yoga",
+      },
     ],
   },
 
@@ -282,6 +307,7 @@ const en: HomeContent = {
     { label: "About", href: "/#about" },
     { label: "How it works", href: "/#how" },
     { label: "Questions", href: "/#faq" },
+    { label: "From within", href: INNER_HREF },
     { label: "Book", href: BOOK_HREF },
   ],
 
@@ -336,6 +362,14 @@ const en: HomeContent = {
           "On preventive leadership, emotional intelligence at work and leading through change, for a leadership day or a whole department.",
       },
     ],
+  },
+
+  inner: {
+    eyebrow: "Leading from within",
+    title: "Personal development grounded in yoga philosophy",
+    description:
+      "Coaching, mentoring, lifestyle change and an ongoing group, for leaders and for you who want to grow as a person. You set the goals, and you follow them up together for as long as you want.",
+    link: { label: "Read about Leading from within", href: INNER_HREF },
   },
 
   manifesto: {
@@ -440,6 +474,10 @@ const en: HomeContent = {
       { title: "UL, Developmental Leadership", place: "Falkenberg" },
       { title: "Coaching leadership", place: "Falkenberg" },
       { title: "Leaders of Tomorrow", place: "Halmstad" },
+      {
+        title:
+          "Certified yoga teacher, registered with Yoga Alliance (200 hours), with 50 hours of further training in yin yoga",
+      },
     ],
   },
 
