@@ -30,6 +30,12 @@ export const OFFERING_KEYS = [
   "workshop",
   "enterprise",
   "keynote",
+  "inner_start_coaching",
+  "inner_start_mentoring",
+  "inner_start_lifestyle",
+  "inner_session",
+  "inner_mentoring_session",
+  "inner_group",
 ] as const
 export type OfferingKey = (typeof OFFERING_KEYS)[number]
 
@@ -110,6 +116,60 @@ export const OFFERINGS: Record<OfferingKey, Offering> = {
     audiences: ["organisation"],
     locations: ["on_site", "video"],
   },
+  inner_start_coaching: {
+    key: "inner_start_coaching",
+    kind: "instant",
+    label: "Inner leadership: start (coaching)",
+    durationMinutes: 90,
+    sessions: 1,
+    audiences: ["private", "organisation"],
+    locations: ["varberg", "video"],
+  },
+  inner_start_mentoring: {
+    key: "inner_start_mentoring",
+    kind: "instant",
+    label: "Inner leadership: start (mentoring)",
+    durationMinutes: 90,
+    sessions: 1,
+    audiences: ["private", "organisation"],
+    locations: ["varberg", "video"],
+  },
+  inner_start_lifestyle: {
+    key: "inner_start_lifestyle",
+    kind: "instant",
+    label: "Inner leadership: start (lifestyle)",
+    durationMinutes: 90,
+    sessions: 1,
+    audiences: ["private", "organisation"],
+    locations: ["varberg", "video"],
+  },
+  inner_session: {
+    key: "inner_session",
+    kind: "instant",
+    label: "Inner leadership session",
+    durationMinutes: 60,
+    sessions: 1,
+    audiences: ["private", "organisation"],
+    locations: ["varberg", "video"],
+  },
+  inner_mentoring_session: {
+    key: "inner_mentoring_session",
+    kind: "instant",
+    label: "Mentoring session",
+    durationMinutes: 60,
+    sessions: 1,
+    audiences: ["private", "organisation"],
+    locations: ["varberg", "video"],
+  },
+  inner_group: {
+    key: "inner_group",
+    kind: "group",
+    label: "Inifrån group",
+    durationMinutes: 120,
+    sessions: 1,
+    audiences: ["private", "organisation"],
+    locations: ["varberg", "video"],
+  },
 }
 
 export const INSTANT_OFFERING_KEYS = OFFERING_KEYS.filter(
@@ -118,6 +178,16 @@ export const INSTANT_OFFERING_KEYS = OFFERING_KEYS.filter(
 export const REQUEST_OFFERING_KEYS = OFFERING_KEYS.filter(
   (key) => OFFERINGS[key].kind === "request"
 ) as readonly OfferingKey[]
+
+/** Offerings booked as seats at a group event Yasmina schedules. */
+export const GROUP_OFFERING_KEYS = OFFERING_KEYS.filter(
+  (key) => OFFERINGS[key].kind === "group"
+) as readonly OfferingKey[]
+/** Member-only sessions booked from a member link: bookable, but never listed in the catalog. */
+export const MEMBER_OFFERING_KEYS = [
+  "inner_session",
+  "inner_mentoring_session",
+] as const satisfies readonly OfferingKey[] as readonly OfferingKey[]
 
 /** The week the calendar offers while `booking_rules` is empty (never stored; see migration 0034). */
 export const DEFAULT_AVAILABILITY_RULES: ReadonlyArray<{

@@ -476,7 +476,7 @@ describe("group events", () => {
       repeatWeeks: 2,
     })
     expect(ids).toHaveLength(2)
-    const events = (await anon().booking.groupEvents()).events.filter((e) => ids.includes(e.id))
+    const events = (await anon().booking.groupEvents({})).events.filter((e) => ids.includes(e.id))
     expect(events.map((e) => e.startsAt)).toEqual([
       "2026-01-22T16:00:00.000Z",
       "2026-01-29T16:00:00.000Z",
@@ -501,7 +501,7 @@ describe("group events", () => {
       customer: bob,
     })
     expect(
-      (await anon().booking.groupEvents()).events.find((e) => e.id === ids[0])?.seatsLeft
+      (await anon().booking.groupEvents({})).events.find((e) => e.id === ids[0])?.seatsLeft
     ).toBe(0)
     const [full] = await safeCall(() =>
       anon().booking.reserve({
@@ -543,10 +543,10 @@ describe("group events", () => {
     )
     expect(cancelledSeats.every((b) => b.status === "cancelled")).toBe(true)
     expect(cancelledSeats).toHaveLength(2)
-    expect((await anon().booking.groupEvents()).events.map((e) => e.id)).not.toContain(ids[0])
+    expect((await anon().booking.groupEvents({})).events.map((e) => e.id)).not.toContain(ids[0])
     // The second date is untouched.
     expect(
-      (await anon().booking.groupEvents()).events.find((e) => e.id === ids[1])?.seatsLeft
+      (await anon().booking.groupEvents({})).events.find((e) => e.id === ids[1])?.seatsLeft
     ).toBe(1)
   })
 })

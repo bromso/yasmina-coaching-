@@ -550,6 +550,7 @@ describe("groupBySeries", () => {
     reference: `GE-${id}`,
     title: seriesKey ? "Tuesday group" : `Single ${id}`,
     description: null,
+    offering: "group",
     startsAt,
     endsAt: startsAt,
     location: "video",

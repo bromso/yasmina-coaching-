@@ -92,6 +92,7 @@ describe("AdminBookingsView", () => {
             reference: "GE-5",
             title: "Breathing",
             description: null,
+            offering: "group",
             startsAt: "2026-06-12T16:00:00.000Z",
             endsAt: "2026-06-12T18:00:00.000Z",
             location: "varberg",

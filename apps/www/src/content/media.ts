@@ -198,6 +198,12 @@ export const OFFERING_MEDIA: Record<OfferingKey, MediaKey> = {
   workshop: "workshopWhiteboard",
   enterprise: "workshopStanding",
   keynote: "keynoteStage",
+  inner_start_coaching: "portraitPark",
+  inner_start_mentoring: "portraitOutdoors",
+  inner_start_lifestyle: "sessionLounge",
+  inner_session: "portraitStudy",
+  inner_mentoring_session: "portraitOffice",
+  inner_group: "workshopTable",
 }
 
 /** The strings the media and section components show. */

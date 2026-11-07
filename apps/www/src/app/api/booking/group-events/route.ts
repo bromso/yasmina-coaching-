@@ -15,7 +15,7 @@ export async function GET(req: Request): Promise<Response> {
   const { ip } = requestInfo(req.headers)
   const client = await anonymousApi(ip, undefined, req.headers.get(REQUEST_ID_HEADER))
   try {
-    const result = await client.booking.groupEvents()
+    const result = await client.booking.groupEvents({})
     return Response.json(result, { headers: NO_STORE })
   } catch (error) {
     logger.error("booking.groupEvents failed", { error })

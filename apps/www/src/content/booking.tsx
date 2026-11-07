@@ -155,6 +155,39 @@ const sv: BookingContent = {
         "Anpassad till din publik i ett kort samtal",
       ],
     },
+    inner_start_coaching: {
+      title: "Startsamtal – transformativ coachning",
+      description:
+        "Ett första samtal på 90 minuter för dig som vill utforska transformativ coachning i Ledarskap inifrån.",
+      included: ["90 minuter, i Varberg eller på video"],
+    },
+    inner_start_mentoring: {
+      title: "Startsamtal – mentorskap",
+      description:
+        "Ett första samtal på 90 minuter för dig som vill utforska mentorskap i Ledarskap inifrån.",
+      included: ["90 minuter, i Varberg eller på video"],
+    },
+    inner_start_lifestyle: {
+      title: "Startsamtal – livsstilsförändring",
+      description:
+        "Ett första samtal på 90 minuter för dig som vill utforska livsstilsförändring i Ledarskap inifrån.",
+      included: ["90 minuter, i Varberg eller på video"],
+    },
+    inner_session: {
+      title: "Samtal för medlemmar",
+      description: "Ett samtal på 60 minuter för dig som är medlem i Ledarskap inifrån.",
+      included: ["60 minuter, i Varberg eller på video"],
+    },
+    inner_mentoring_session: {
+      title: "Mentorssamtal",
+      description: "Ett mentorssamtal på 60 minuter för dig som är medlem i Ledarskap inifrån.",
+      included: ["60 minuter, i Varberg eller på video"],
+    },
+    inner_group: {
+      title: "Inifrån-gruppen",
+      description: "En grupp som träffas regelbundet för att arbeta med ledarskap inifrån.",
+      included: ["Två timmar, i Varberg eller på video"],
+    },
   },
   catalog: {
     eyebrow: "Boka",
@@ -302,6 +335,38 @@ const en: BookingContent = {
         "45 to 60 minutes, questions included",
         "Tailored to your audience in a short conversation",
       ],
+    },
+    inner_start_coaching: {
+      title: "Start call – transformative coaching",
+      description:
+        "A 90-minute first call for exploring transformative coaching in Leadership from within.",
+      included: ["90 minutes, in Varberg or by video"],
+    },
+    inner_start_mentoring: {
+      title: "Start call – mentoring",
+      description: "A 90-minute first call for exploring mentoring in Leadership from within.",
+      included: ["90 minutes, in Varberg or by video"],
+    },
+    inner_start_lifestyle: {
+      title: "Start call – lifestyle change",
+      description:
+        "A 90-minute first call for exploring lifestyle change in Leadership from within.",
+      included: ["90 minutes, in Varberg or by video"],
+    },
+    inner_session: {
+      title: "Member session",
+      description: "A 60-minute session for members of Leadership from within.",
+      included: ["60 minutes, in Varberg or by video"],
+    },
+    inner_mentoring_session: {
+      title: "Mentoring session",
+      description: "A 60-minute mentoring session for members of Leadership from within.",
+      included: ["60 minutes, in Varberg or by video"],
+    },
+    inner_group: {
+      title: "Inifrån group",
+      description: "A group that meets regularly to work on leadership from within.",
+      included: ["Two hours, in Varberg or by video"],
     },
   },
   catalog: {

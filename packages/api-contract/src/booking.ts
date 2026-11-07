@@ -39,9 +39,11 @@ import {
   GROUP_EVENT_MAX_CAPACITY,
   GROUP_EVENT_MAX_REPEATS,
   GROUP_EVENT_TITLE_MAX,
+  GROUP_OFFERING_KEYS,
   GROUP_RESERVE_MAX_EVENTS,
   groupEventReference,
   INSTANT_OFFERING_KEYS,
+  MEMBER_OFFERING_KEYS,
   OFFERING_KEYS,
   OFFERING_KINDS,
   OFFERINGS,
@@ -99,9 +101,11 @@ export {
   GROUP_EVENT_MAX_CAPACITY,
   GROUP_EVENT_MAX_REPEATS,
   GROUP_EVENT_TITLE_MAX,
+  GROUP_OFFERING_KEYS,
   GROUP_RESERVE_MAX_EVENTS,
   groupEventReference,
   INSTANT_OFFERING_KEYS,
+  MEMBER_OFFERING_KEYS,
   OFFERING_KEYS,
   OFFERING_KINDS,
   OFFERINGS,
@@ -122,6 +126,7 @@ export const InstantOfferingKeySchema = z.enum(
 export const RequestOfferingKeySchema = z.enum(
   REQUEST_OFFERING_KEYS as [OfferingKey, ...OfferingKey[]]
 )
+export const GroupOfferingKeySchema = z.enum(GROUP_OFFERING_KEYS as [OfferingKey, ...OfferingKey[]])
 export const BookingAudienceSchema = z.enum(BOOKING_AUDIENCES)
 export const BookingLocationSchema = z.enum(BOOKING_LOCATIONS)
 export const BookingStatusSchema = z.enum(BOOKING_STATUSES)
@@ -233,6 +238,7 @@ export const GroupEventSchema = z.object({
   reference: z.string(),
   title: z.string(),
   description: z.string().nullable(),
+  offering: OfferingKeySchema,
   startsAt: Iso,
   endsAt: Iso,
   location: BookingLocationSchema,
@@ -242,6 +248,11 @@ export const GroupEventSchema = z.object({
   seriesKey: z.string().nullable(),
 })
 export type GroupEvent = z.infer<typeof GroupEventSchema>
+/** `booking.groupEvents` lists one group offering's events; the plain group is the default. */
+export const BookingGroupEventsSchema = z.object({
+  offering: GroupOfferingKeySchema.default("group"),
+})
+export type BookingGroupEventsInput = z.infer<typeof BookingGroupEventsSchema>
 export const GroupEventsResultSchema = z.object({ events: z.array(GroupEventSchema) })
 
 export const BookingReserveSchema = z.object({
@@ -407,6 +418,7 @@ export const AdminAvailabilityBlockSchema = z
 export const AdminGroupEventCreateSchema = z.object({
   title: z.string().trim().min(2).max(GROUP_EVENT_TITLE_MAX),
   description: z.string().trim().max(GROUP_EVENT_DESCRIPTION_MAX).optional(),
+  offering: GroupOfferingKeySchema.default("group"),
   startsAt: Iso,
   durationMinutes: z.coerce.number().int().min(30).max(600),
   capacity: z.coerce.number().int().min(1).max(GROUP_EVENT_MAX_CAPACITY),

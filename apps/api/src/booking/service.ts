@@ -90,6 +90,8 @@ export function toGroupEvent(row: GroupEventWithSeats): GroupEvent {
     reference: groupEventReference(row.id),
     title: row.title,
     description: row.description,
+    // Stored per event from Task 2's migration on; until then every event is the plain group.
+    offering: "group",
     startsAt: row.starts_at,
     endsAt: row.ends_at,
     location: row.location,
@@ -126,6 +128,12 @@ export function offeringLabel(key: OfferingKey, locale: Locale): string {
     workshop: "Workshop eller teamdag",
     enterprise: "Företagsprogram",
     keynote: "Föreläsning",
+    inner_start_coaching: "Startsamtal – transformativ coachning",
+    inner_start_mentoring: "Startsamtal – mentorskap",
+    inner_start_lifestyle: "Startsamtal – livsstilsförändring",
+    inner_session: "Samtal för medlemmar",
+    inner_mentoring_session: "Mentorssamtal",
+    inner_group: "Inifrån-gruppen",
   }
   return sv[key]
 }

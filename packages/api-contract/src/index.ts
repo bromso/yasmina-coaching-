@@ -120,6 +120,7 @@ import {
   BookingCancelSchema,
   BookingCreateResultSchema,
   BookingCreateSchema,
+  BookingGroupEventsSchema,
   BookingManageResultSchema,
   BookingManageSchema,
   BookingRequestResultSchema,
@@ -1459,7 +1460,7 @@ export const contract = {
         path: "/booking/group-events",
         summary: "Upcoming group coaching events with seats left",
       })
-      .input(empty)
+      .input(BookingGroupEventsSchema)
       .output(GroupEventsResultSchema),
     book: oc
       .route({ method: "POST", path: "/booking", summary: "Book a session or a programme" })
