@@ -229,3 +229,22 @@ timmar fördjupning i yin yoga". Inget år och ingen skola anges.
   1 500 kr/h gäller enskilt.
 - 1 500 kr/h tolkas som priset privatpersoner betalar, inklusive moms.
 - Rabattnivåerna 10 % och 15 % är mitt förslag.
+
+## Referenser
+
+Kontrollerade mot Crossref 2026-11-07. Årtalen är tryckår; i texten ovan står ibland år för publicering online.
+
+1. Wang, Q., Lai, Y.-L., Xu, X. & McDowall, A. (2022). The effectiveness of workplace coaching: a meta-analysis of contemporary psychologically informed coaching approaches. Journal of Work-Applied Management, 14(1), 77–101. <https://doi.org/10.1108/JWAM-04-2021-0030>
+2. de Haan, E. & Nilsson, V. O. (2023). What can we know about the effectiveness of coaching? A meta-analysis based only on randomized controlled trials. Academy of Management Learning & Education, 22(4), 641–661. <https://doi.org/10.5465/amle.2022.0107>
+3. Theeboom, T., Beersma, B. & van Vianen, A. E. M. (2014). Does coaching work? A meta-analysis on the effects of coaching on individual level outcomes in an organizational context. The Journal of Positive Psychology, 9(1), 1–18. <https://doi.org/10.1080/17439760.2013.837499>
+4. Jones, R. J., Woods, S. A. & Guillaume, Y. R. F. (2016). The effectiveness of workplace coaching: a meta-analysis of learning and performance outcomes from coaching. Journal of Occupational and Organizational Psychology, 89(2), 249–277. <https://doi.org/10.1111/joop.12119>
+5. Nicolau, A., Candel, O. S., Constantin, T. & Kleingeld, A. (2023). The effects of executive coaching on behaviors, attitudes, and personal characteristics: a meta-analysis of randomized control trial studies. Frontiers in Psychology, 14, 1089797. <https://doi.org/10.3389/fpsyg.2023.1089797>
+6. Bartlett, L., Martin, A., Neil, A. L., Memish, K., Otahal, P., Kilpatrick, M. & Sanderson, K. (2019). A systematic review and meta-analysis of workplace mindfulness training randomized controlled trials. Journal of Occupational Health Psychology, 24(1), 108–126. <https://doi.org/10.1037/ocp0000146>
+7. Della Valle, E., Palermi, S., Aloe, I., Marcantonio, R., Spera, R., Montagnani, S. & Sirico, F. (2020). Effectiveness of workplace yoga interventions to reduce perceived stress in employees: a systematic review and meta-analysis. Journal of Functional Morphology and Kinesiology, 5(2), 33. <https://doi.org/10.3390/jfmk5020033>
+8. Tenschert, J., Liegl, S., Peters, M. & Furtner, M. (2026). Mindfulness-based self-leadership training to enhance leaders' self-efficacy and resilience: a randomised controlled intervention study. Leadership & Organization Development Journal, 47(8), 1565–1589. <https://doi.org/10.1108/lodj-05-2025-0394>
+9. Donaldson-Feilder, E., Lewis, R. & Yarker, J. (2019). What outcomes have mindfulness and meditation interventions for managers and leaders achieved? A systematic review. European Journal of Work and Organizational Psychology, 28(1), 11–29. <https://doi.org/10.1080/1359432X.2018.1542379>
+10. Urrila, L. I. (2022). From personal wellbeing to relationships: a systematic review on the impact of mindfulness interventions and practices on leaders. Human Resource Management Review, 32(3), 100837. <https://doi.org/10.1016/j.hrmr.2021.100837>
+11. Tenschert, J., Furtner, M. & Peters, M. (2025). The effects of self-leadership and mindfulness training on leadership development: a systematic review. Management Review Quarterly, 75(4), 2811–2862. <https://doi.org/10.1007/s11301-024-00448-7>
+12. Sutton, A. (2020). Living the good life: a meta-analysis of authenticity, well-being and engagement. Personality and Individual Differences, 153, 109645. <https://doi.org/10.1016/j.paid.2019.109645>
+13. Sheldon, K. M. & Houser-Marko, L. (2001). Self-concordance, goal attainment, and the pursuit of happiness: can there be an upward spiral? Journal of Personality and Social Psychology, 80(1), 152–165. <https://doi.org/10.1037/0022-3514.80.1.152>
+14. Jongman-Sereno, K. P. & Leary, M. R. (2019). The enigma of being yourself: a critical examination of the concept of authenticity. Review of General Psychology, 23(1), 133–142. <https://doi.org/10.1037/gpr0000157>

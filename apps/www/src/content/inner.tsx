@@ -361,7 +361,7 @@ const sv: InnerContent = {
             "Nej. Övningarna anpassas efter dig och din kropp, och det mesta av arbetet sker i samtalet.",
         },
         {
-          question: "Vad gör jag om jag mår dåligt?",
+          question: "Är det här terapi?",
           answer:
             "Ledarskap inifrån är coachning och personlig utveckling, och ingen terapi eller vård. Behöver du behandling för stress, utmattning, ångest eller depression är vården rätt ställe att börja, och Yasmina hjälper dig gärna att hitta dit.",
         },
@@ -755,7 +755,7 @@ const en: InnerContent = {
             "No. The exercises are adapted to you and your body, and most of the work happens in conversation.",
         },
         {
-          question: "What if I am not feeling well?",
+          question: "Is this therapy?",
           answer:
             "Leading from within is coaching and personal development, and neither therapy nor healthcare. If you need treatment for stress, burnout, anxiety or depression, healthcare is the right place to start, and Yasmina is glad to help you find your way there.",
         },

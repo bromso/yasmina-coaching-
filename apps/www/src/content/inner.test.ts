@@ -188,7 +188,7 @@ describe("Ledarskap inifrån: Yasmina's voice", () => {
       for (const text of copy) expect(text).not.toContain("!")
     })
 
-    test(`${locale}: health, cure and therapy words appear once, in the healthcare referral`, () => {
+    test(`${locale}: health, cure and therapy words appear only in the therapy question and its healthcare answer`, () => {
       const health = /bota|cure|behandl|treat|läk|heal|lindr|terapi|therap/i
       const referral = INNER[locale].hub.faq.items.find(
         (item) => typeof item.answer === "string" && /vården|healthcare/.test(item.answer)
@@ -198,7 +198,7 @@ describe("Ledarskap inifrån: Yasmina's voice", () => {
       // Psychology", which are citations, not Yasmina's words.
       const citations = new Set(INNER[locale].research.references.map((ref) => ref.text))
       const matches = trackCopy(locale).filter((text) => !citations.has(text) && health.test(text))
-      expect(matches).toEqual([referral?.answer as string])
+      expect(matches).toEqual([referral?.question as string, referral?.answer as string])
     })
   }
 
