@@ -14,8 +14,9 @@ import { BOOKING_FORMS, type BookingFormCopy } from "@/content/booking-forms"
  * in Swedish and English, one shape (`BookingContent`); `bookingFor(locale)` picks one per
  * request. The catalog itself — kinds, durations, audiences, locations — is the api contract's
  * `OFFERINGS`; this file only says how each one reads to a visitor. What the client forms say
- * lives in `src/content/booking-forms.ts` (client-safe) and comes back here as `form`. Prices
- * are never written here: every offering is quoted in writing before the first session.
+ * lives in `src/content/booking-forms.ts` (client-safe) and comes back here as `form`. The
+ * Ledarskap inifrån offerings have fixed prices, set in `src/content/inner-pricing.ts`; every
+ * other offering is quoted in writing before the first session, so no price is written here.
  */
 
 export type OfferingCopy = {
@@ -414,13 +415,13 @@ const en: BookingContent = {
     inner_session: {
       title: "Member session",
       description:
-        "Your ongoing session in transformative coaching or lifestyle change, for you who are already a member and have had your start call.",
+        "Your ongoing session in transformative coaching or lifestyle change, once you are a member and have had your start call.",
       included: [`${minutes("inner_session")} minutes, in Varberg or by video`],
     },
     inner_mentoring_session: {
       title: "Member mentoring session",
       description:
-        "Your ongoing session in mentoring, for you who are already a member and have had your start call.",
+        "Your ongoing session in mentoring, once you are a member and have had your start call.",
       included: [`${minutes("inner_mentoring_session")} minutes, in Varberg or by video`],
     },
     inner_group: {

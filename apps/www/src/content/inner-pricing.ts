@@ -1,6 +1,9 @@
 import type { Locale } from "@/lib/site-locale"
 
-/** Price model for Ledarskap inifrån. Amounts are whole kronor, excl. VAT. */
+/**
+ * Price model for Ledarskap inifrån. Amounts are whole kronor. Private clients see them incl. VAT,
+ * organisations the same amount excl. VAT.
+ */
 export const HOURLY_RATE = 1500
 export const GROUP_HOURLY_RATE = 550
 export const DISCOUNT = { single: 0, monthly: 0.1, quarter: 0.15 } as const

@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test"
-import { MEMBER_OFFERING_KEYS, OFFERING_KEYS } from "@repo/api-contract/booking-limits"
+import { MEMBER_OFFERING_KEYS, OFFERING_KEYS, OFFERINGS } from "@repo/api-contract/booking-limits"
 import { LOCALES } from "@repo/i18n/locales"
 import { BOOKING } from "./booking"
 import { HOME } from "./home"
-import { INNER, INNER_HREF, INNER_SERVICE_IDS, innerFor } from "./inner"
-import { formatKr, INNER_PRICES } from "./inner-pricing"
+import { INNER, INNER_HREF, INNER_SERVICE_IDS, innerFor, perMonth } from "./inner"
+import { formatKr, INNER_PRICES, START_HOURS } from "./inner-pricing"
 
 /** Every string in a value, functions called with sample numbers. */
 function strings(value: unknown): string[] {
@@ -109,6 +109,27 @@ describe("Ledarskap inifrån: services", () => {
     expect(services.group.package.start).toBeUndefined()
   })
 
+  test("each start call books as long as the price model says, and the hours fill whole sessions", () => {
+    for (const id of INNER_SERVICE_IDS) {
+      const service = INNER.sv.services[id]
+      if (service.startOffering) {
+        expect(OFFERINGS[service.startOffering].durationMinutes, id).toBe(START_HOURS * 60)
+      }
+      const key = service.memberOffering ?? service.groupOffering
+      expect(key, id).toBeDefined()
+      if (key) expect(Number.isInteger(perMonth(id, key)), id).toBe(true)
+    }
+  })
+
+  test("session counts are words, not digits", () => {
+    expect(INNER.sv.services.mentoring.package.monthly).toStartWith("Ett samtal à 90 minuter")
+    expect(INNER.en.services.mentoring.package.monthly).toStartWith("One 90-minute session a month")
+    expect(INNER.sv.services.coaching.package.monthly).toStartWith("Två samtal à 60 minuter")
+    expect(INNER.en.services.coaching.package.monthly).toStartWith("Two 60-minute sessions")
+    expect(INNER.sv.services.group.package.monthly).toStartWith("Två gruppträffar à 120 minuter")
+    expect(INNER.en.services.group.package.monthly).toStartWith("Two 120-minute group sessions")
+  })
+
   for (const locale of LOCALES) {
     test(`${locale}: every offering a service names is a real offering key`, () => {
       const keys: readonly string[] = OFFERING_KEYS
@@ -167,10 +188,17 @@ describe("Ledarskap inifrån: Yasmina's voice", () => {
       for (const text of copy) expect(text).not.toContain("!")
     })
 
-    test(`${locale}: no cure or treatment words, except where the copy points to healthcare`, () => {
-      const referrals = trackCopy(locale).filter((text) => /bota|cure|behandl|treat/i.test(text))
-      expect(referrals.length, "the healthcare referral itself").toBeGreaterThan(0)
-      for (const text of referrals) expect(text).toMatch(/vården|healthcare/i)
+    test(`${locale}: health, cure and therapy words appear once, in the healthcare referral`, () => {
+      const health = /bota|cure|behandl|treat|läk|heal|lindr|terapi|therap/i
+      const referral = INNER[locale].hub.faq.items.find(
+        (item) => typeof item.answer === "string" && /vården|healthcare/.test(item.answer)
+      )
+      expect(referral).toBeDefined()
+      // Reference entries are excluded: they quote journal names such as "Occupational Health
+      // Psychology", which are citations, not Yasmina's words.
+      const citations = new Set(INNER[locale].research.references.map((ref) => ref.text))
+      const matches = trackCopy(locale).filter((text) => !citations.has(text) && health.test(text))
+      expect(matches).toEqual([referral?.answer as string])
     })
   }
 

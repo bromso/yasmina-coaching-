@@ -368,7 +368,7 @@ const en: HomeContent = {
     eyebrow: "Leading from within",
     title: "Personal development grounded in yoga philosophy",
     description:
-      "Coaching, mentoring, lifestyle change and an ongoing group, for leaders and for you who want to grow as a person. You set the goals, and you follow them up together for as long as you want.",
+      "Coaching, mentoring, lifestyle change and an ongoing group, for leaders and for anyone who wants to grow as a person. You set the goals, and you follow them up together for as long as you want.",
     link: { label: "Read about Leading from within", href: INNER_HREF },
   },
 

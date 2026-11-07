@@ -142,7 +142,30 @@ const minutes = (key: OfferingKey) => OFFERINGS[key].durationMinutes
 /** The start call in minutes. */
 const START_MINUTES = START_HOURS * 60
 /** Sessions of `key` a month in `id`'s membership. */
-const perMonth = (id: InnerServiceId, key: OfferingKey) => (INNER_HOURS[id] * 60) / minutes(key)
+export const perMonth = (id: InnerServiceId, key: OfferingKey) =>
+  (INNER_HOURS[id] * 60) / minutes(key)
+
+/** 1–4 as a word: Swedish takes the noun's gender ("ett samtal", "en gruppträff"). */
+function countWord(n: number, locale: Locale, gender: "en" | "ett" = "ett"): string {
+  const words = locale === "sv" ? [gender, "två", "tre", "fyra"] : ["one", "two", "three", "four"]
+  const word = Number.isInteger(n) ? words[n - 1] : undefined
+  return word ?? String(n)
+}
+
+const capitalise = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
+
+/** "Två samtal à 60 minuter" / "Two 60-minute sessions": the membership's sessions a month. */
+function sessions(id: InnerServiceId, key: OfferingKey, locale: Locale): string {
+  const n = perMonth(id, key)
+  const length = minutes(key)
+  if (locale === "sv") {
+    const noun = key === "inner_group" ? (n === 1 ? "gruppträff" : "gruppträffar") : "samtal"
+    const word = countWord(n, locale, key === "inner_group" ? "en" : "ett")
+    return capitalise(`${word} ${noun} à ${length} minuter`)
+  }
+  const noun = key === "inner_group" ? "group session" : "session"
+  return capitalise(`${countWord(n, locale)} ${length}-minute ${noun}${n === 1 ? "" : "s"}`)
+}
 
 /** The "what does it cost" answer for a service, built from the price model. */
 function priceAnswer(id: InnerServiceId, locale: Locale): string {
@@ -249,20 +272,20 @@ const sv: InnerContent = {
       secondary: { label: "Så vet vi", href: INNER_RESEARCH_HREF },
     },
     statement:
-      "Du ska gå härifrån stärkt, mer grundad i dina beslut och med en större tro på dig själv och din förmåga.",
+      "Målet är att du går därifrån stärkt, mer grundad i dina beslut och med en större tro på dig själv och din förmåga.",
     outcomes: {
       heading: {
-        eyebrow: "Vad du går därifrån med",
-        title: "Det här arbetar ni mot",
+        eyebrow: "Det du arbetar mot",
+        title: "Det här kan dina mål handla om",
         description: "Exakt hur det ser ut för dig formulerar ni i dina mål vid startsamtalet.",
       },
       items: [
-        "Du känner dig stärkt och självsäkrare.",
-        "Du tror mer på dig själv och på din egen förmåga.",
-        "Du har hittat din egen kärna, det du står på när det blåser.",
-        "Du är mer grundad i dina beslut.",
-        "Det du gör hänger ihop med det du värderar.",
-        "Du har hittat ditt eget sätt, och du litar på det.",
+        "Att känna dig stärkt och självsäkrare",
+        "Att tro mer på dig själv och på din egen förmåga",
+        "Att hitta din egen kärna, det du står på när det blåser",
+        "Att bli mer grundad i dina beslut",
+        "Att det du gör hänger ihop med det du värderar",
+        "Att hitta ditt eget sätt och lita på det",
       ],
     },
     services: {
@@ -282,7 +305,7 @@ const sv: InnerContent = {
       },
       body: "Yogans filosofi ger ord åt sådant som annars är svårt att få grepp om. Yamas och niyamas, yogans riktlinjer för hur du förhåller dig till andra och till dig själv, blir ett sätt att arbeta med dina värderingar. Svadhyaya, självstudier, blir reflektionen mellan samtalen. Dharma, din riktning, hjälper dig att se vart du är på väg.",
       practices: ["Andning", "Kort rörelse", "Yin yoga", "Meditation", "Visualisering"],
-      note: "Övningarna används när de hjälper dig att landa och känna efter, och aldrig som en prestation.",
+      note: "Övningarna används när de hjälper dig att landa och känna efter. Det är ingen prestation.",
     },
     model: {
       heading: {
@@ -317,7 +340,7 @@ const sv: InnerContent = {
       eyebrow: "Om Yasmina",
       title: "Utbildad i samtal och i yoga",
       line: "Certifierad yogalärare, registrerad hos Yoga Alliance (200 timmar), med 50 timmar fördjupning i yin yoga",
-      body: "Yasmina är socionom, har steg 1 i psykoterapi och tvåårig systemisk utbildning med narrativ inriktning, och var enhetschef i åtta år. Samtalen bygger på den erfarenheten, och yogan ger dem en ram.",
+      body: "Yasmina är socionom med tvåårig systemisk utbildning med narrativ inriktning, har tjugo år i yrket och var enhetschef i åtta av dem. Samtalen bygger på den erfarenheten, och yogan ger dem en ram.",
     },
     research: {
       title: "Så vet vi",
@@ -338,9 +361,9 @@ const sv: InnerContent = {
             "Nej. Övningarna anpassas efter dig och din kropp, och det mesta av arbetet sker i samtalet.",
         },
         {
-          question: "Är det här terapi?",
+          question: "Vad gör jag om jag mår dåligt?",
           answer:
-            "Nej, Ledarskap inifrån är coachning och personlig utveckling. Behöver du behandling för stress, utmattning, ångest eller depression är vården rätt ställe att börja, och Yasmina hjälper dig gärna att hitta dit.",
+            "Ledarskap inifrån är coachning och personlig utveckling, och ingen terapi eller vård. Behöver du behandling för stress, utmattning, ångest eller depression är vården rätt ställe att börja, och Yasmina hjälper dig gärna att hitta dit.",
         },
         {
           question: "Kan min arbetsgivare betala?",
@@ -355,7 +378,7 @@ const sv: InnerContent = {
         {
           question: "Hur länge håller det på?",
           answer:
-            "Så länge du vill och målen inte är nådda. Var tredje månad stämmer ni av och ser om målen behöver ändras.",
+            "Så länge du vill fortsätta, eller tills målen är nådda. Var tredje månad stämmer ni av och ser om målen behöver ändras.",
         },
       ],
     },
@@ -386,14 +409,14 @@ const sv: InnerContent = {
       ],
       howItWorks: [
         `Ett startsamtal på ${START_MINUTES} minuter där ni sätter dina mål och skriver ned dem`,
-        `${perMonth("coaching", "inner_session")} samtal à ${minutes("inner_session")} minuter i månaden, i Varberg eller på video`,
+        `${sessions("coaching", "inner_session", "sv")} i månaden, i Varberg eller på video`,
         "Små saker att pröva mellan samtalen",
         "Avstämning mot målen var tredje månad",
       ],
       yoga: "Yamas och niyamas, yogans riktlinjer för hur du förhåller dig till andra och till dig själv, blir ett sätt att undersöka dina värderingar. Svadhyaya, självstudier, blir en vana att reflektera mellan samtalen. En kort andningsövning i början hjälper dig att landa.",
       package: {
         start: `Startsamtal, ${START_MINUTES} minuter: ni sätter dina mål, skriver ned dem och gör en plan för uppföljning.`,
-        monthly: `${perMonth("coaching", "inner_session")} samtal à ${minutes("inner_session")} minuter i månaden.`,
+        monthly: `${sessions("coaching", "inner_session", "sv")} i månaden.`,
         review: "Avstämning mot målen var tredje månad, där målen kan revideras.",
       },
       startOffering: "inner_start_coaching",
@@ -402,9 +425,9 @@ const sv: InnerContent = {
       faq: [
         { question: "Vad kostar det?", answer: priceAnswer("coaching", "sv") },
         {
-          question: "Hur skiljer det sig från ledarskapscoachningen?",
+          question: "Hur skiljer det sig från ledarskapscoachingen?",
           answer:
-            "Ledarskapscoachningen utgår från ditt team och din vardag som chef. Här börjar arbetet i dig: dina värderingar, din kärna och hur du fattar beslut.",
+            "Ledarskapscoachingen utgår från ditt team och din vardag som chef. Här börjar arbetet i dig: dina värderingar, din kärna och hur du fattar beslut.",
         },
       ],
     },
@@ -425,14 +448,14 @@ const sv: InnerContent = {
       ],
       howItWorks: [
         `Ett startsamtal på ${START_MINUTES} minuter där ni sätter dina mål och skriver ned dem`,
-        `${perMonth("mentoring", "inner_mentoring_session")} samtal à ${minutes("inner_mentoring_session")} minuter i månaden, i Varberg eller på video`,
+        `${sessions("mentoring", "inner_mentoring_session", "sv")} i månaden, i Varberg eller på video`,
         "Kontakt via mejl mellan träffarna",
         "Avstämning mot målen var tredje månad",
       ],
       yoga: "Dharma, din riktning, är en tråd genom mentorskapet: vart är du på väg, och stämmer vägen med det du värderar? Om du vill börjar träffarna med några minuters andning eller stillhet.",
       package: {
         start: `Startsamtal, ${START_MINUTES} minuter: ni sätter dina mål, skriver ned dem och gör en plan för uppföljning.`,
-        monthly: `${perMonth("mentoring", "inner_mentoring_session")} samtal à ${minutes("inner_mentoring_session")} minuter i månaden, och kontakt via mejl mellan träffarna.`,
+        monthly: `${sessions("mentoring", "inner_mentoring_session", "sv")} i månaden, och kontakt via mejl mellan träffarna.`,
         review: "Avstämning mot målen var tredje månad, där målen kan revideras.",
       },
       startOffering: "inner_start_mentoring",
@@ -464,14 +487,14 @@ const sv: InnerContent = {
       ],
       howItWorks: [
         `Ett startsamtal på ${START_MINUTES} minuter där ni sätter dina mål och du får din övningsplan`,
-        `${perMonth("lifestyle", "inner_session")} samtal à ${minutes("inner_session")} minuter i månaden, i Varberg eller på video`,
+        `${sessions("lifestyle", "inner_session", "sv")} i månaden, i Varberg eller på video`,
         "Planen ses över i samtalen och ändras efter hand",
         "Avstämning mot målen var tredje månad",
       ],
       yoga: "Här får yogans praktik mest plats. Andning, yin yoga, meditation och visualisering blir din övningsplan, i den längd som går att få in i din vecka. Övningarna är till för att du ska landa och känna efter.",
       package: {
         start: `Startsamtal, ${START_MINUTES} minuter, och en personlig övningsplan.`,
-        monthly: `${perMonth("lifestyle", "inner_session")} samtal à ${minutes("inner_session")} minuter i månaden, och planen revideras.`,
+        monthly: `${sessions("lifestyle", "inner_session", "sv")} i månaden, och planen revideras.`,
         review: "Avstämning mot målen var tredje månad, där målen kan revideras.",
       },
       startOffering: "inner_start_lifestyle",
@@ -502,14 +525,14 @@ const sv: InnerContent = {
         "Ord för dina värderingar och för hur du vill leva dem",
       ],
       howItWorks: [
-        `${perMonth("group", "inner_group")} gruppträffar à ${minutes("inner_group")} minuter i månaden`,
+        `${sessions("group", "inner_group", "sv")} i månaden`,
         "Varje träff har ett tema ur yogans filosofi, en övning och ett samtal",
         "Du bokar din plats i kalendern, en träff i taget",
         "Ingen bindningstid",
       ],
       yoga: "Varje träff utgår från ett tema ur yogans filosofi, till exempel yamas och niyamas, yogans riktlinjer för hur du förhåller dig till andra och till dig själv. Ni gör en övning tillsammans och pratar om vad temat betyder i ditt ledarskap och ditt liv.",
       package: {
-        monthly: `${perMonth("group", "inner_group")} gruppträffar à ${minutes("inner_group")} minuter i månaden.`,
+        monthly: `${sessions("group", "inner_group", "sv")} i månaden.`,
         review: "Du är med så länge du vill och kan sluta när du vill.",
       },
       groupOffering: "inner_group",
@@ -606,7 +629,7 @@ const sv: InnerContent = {
     },
     book: {
       start: "Boka startsamtal",
-      member: "Redan med? Boka nästa samtal",
+      member: "Är du redan med? Boka ditt nästa samtal",
       memberHint: "För dig som redan är med",
       group: "Boka en plats i gruppen",
     },
@@ -637,26 +660,26 @@ const en: InnerContent = {
       eyebrow: "Leading from within · Varberg and by video",
       title: "Strong leadership starts on the inside",
       description:
-        "Personal development with yoga philosophy as the frame and conversation as the tool, for you who lead others and for you who want to lead your own life. You set the goals, and you follow them up together for as long as you want.",
+        "Personal development with yoga philosophy as the frame and conversation as the tool, for people who lead others and for anyone who wants to take the lead in their own life. You set the goals, and you follow them up together for as long as you want.",
       image: "portraitStudy",
       primary: { label: "See the four paths", href: "#services" },
       secondary: { label: "How we know", href: INNER_RESEARCH_HREF },
     },
     statement:
-      "You should leave stronger, more grounded in your decisions and with a greater belief in yourself and what you can do.",
+      "The aim is that you leave stronger, more grounded in your decisions and with a greater belief in yourself and what you can do.",
     outcomes: {
       heading: {
-        eyebrow: "What you leave with",
-        title: "What you work towards",
+        eyebrow: "What you work towards",
+        title: "What your goals might be about",
         description: "Exactly what this looks like for you goes into your goals at the start call.",
       },
       items: [
-        "You feel stronger and more self-assured.",
-        "You believe more in yourself and in what you can do.",
-        "You have found your own core, what you stand on when things get rough.",
-        "You are more grounded in your decisions.",
-        "What you do fits with what you value.",
-        "You have found your own way, and you trust it.",
+        "Feeling stronger and more self-assured",
+        "Believing more in yourself and in what you can do",
+        "Finding your own core, what you stand on when things get rough",
+        "Becoming more grounded in your decisions",
+        "Making what you do fit with what you value",
+        "Finding your own way and trusting it",
       ],
     },
     services: {
@@ -676,7 +699,7 @@ const en: InnerContent = {
       },
       body: "Yoga philosophy puts words to things that are otherwise hard to get hold of. The yamas and niyamas, yoga's guidelines for how you relate to others and to yourself, become a way to work with your values. Svadhyaya, self-study, becomes the reflection between sessions. Dharma, your direction, helps you see where you are heading.",
       practices: ["Breathing", "Short movement", "Yin yoga", "Meditation", "Visualisation"],
-      note: "The exercises are used when they help you settle and notice how you feel, and never as a performance.",
+      note: "The exercises are used when they help you settle and notice how you feel. It is not a performance.",
     },
     model: {
       heading: {
@@ -711,7 +734,7 @@ const en: InnerContent = {
       eyebrow: "About Yasmina",
       title: "Trained in conversation and in yoga",
       line: "Certified yoga teacher, registered with Yoga Alliance (200 hours), with 50 hours of further training in yin yoga",
-      body: "Yasmina is a qualified social worker with Level 1 psychotherapy training and two years of systemic training with a narrative focus, and was a unit manager for eight years. The conversations build on that experience, and yoga gives them a frame.",
+      body: "Yasmina is a qualified social worker with two years of systemic training with a narrative focus, twenty years in the field and eight of them as a unit manager. The conversations build on that experience, and yoga gives them a frame.",
     },
     research: {
       title: "How we know",
@@ -732,14 +755,14 @@ const en: InnerContent = {
             "No. The exercises are adapted to you and your body, and most of the work happens in conversation.",
         },
         {
-          question: "Is this therapy?",
+          question: "What if I am not feeling well?",
           answer:
-            "No, Leading from within is coaching and personal development. If you need treatment for stress, burnout, anxiety or depression, healthcare is the right place to start, and Yasmina is glad to help you find your way there.",
+            "Leading from within is coaching and personal development, and neither therapy nor healthcare. If you need treatment for stress, burnout, anxiety or depression, healthcare is the right place to start, and Yasmina is glad to help you find your way there.",
         },
         {
           question: "Can my employer pay?",
           answer:
-            "Yes. The services suit both you who pay yourself and you whose employer pays. For organisations, prices are excluding VAT.",
+            "Yes. The services work whether you pay yourself or your employer pays. For organisations, prices are excluding VAT.",
         },
         {
           question: "Where do we meet?",
@@ -749,12 +772,12 @@ const en: InnerContent = {
         {
           question: "How long does it go on?",
           answer:
-            "For as long as you want and your goals are not yet reached. Every third month you check in and see whether the goals need to change.",
+            "For as long as you want to continue, or until your goals are reached. Every third month you check in and see whether the goals need to change.",
         },
       ],
     },
     cta: {
-      title: "Start with a start call",
+      title: "Begin with a start call",
       description:
         "Choose the path that sounds most like you. You book the start call and the group's sessions straight in the calendar.",
       button: { label: "See available times", href: BOOK },
@@ -765,7 +788,7 @@ const en: InnerContent = {
     coaching: {
       slug: "coachning",
       title: "Transformative coaching",
-      lead: "One-to-one conversations for you who want to find your own core: what you value, what you stand for and how it shows in your decisions. For leaders and for you who want to grow as a person.",
+      lead: "One-to-one conversations about finding your own core: what you value, what you stand for and how it shows in your decisions. For leaders, and for anyone who wants to grow as a person.",
       forWhom: [
         "lead others and want to make decisions you can stand behind",
         "face a choice of direction at work or in life",
@@ -780,14 +803,14 @@ const en: InnerContent = {
       ],
       howItWorks: [
         `A ${START_MINUTES}-minute start call where you set your goals and write them down`,
-        `${perMonth("coaching", "inner_session")} sessions of ${minutes("inner_session")} minutes a month, in Varberg or by video`,
+        `${sessions("coaching", "inner_session", "en")} a month, in Varberg or by video`,
         "Small things to try between sessions",
         "A review against your goals every third month",
       ],
       yoga: "The yamas and niyamas, yoga's guidelines for how you relate to others and to yourself, become a way to look into your values. Svadhyaya, self-study, becomes a habit of reflecting between sessions. A short breathing exercise at the start helps you settle.",
       package: {
         start: `Start call, ${START_MINUTES} minutes: you set your goals, write them down and make a plan for following them up.`,
-        monthly: `${perMonth("coaching", "inner_session")} sessions of ${minutes("inner_session")} minutes a month.`,
+        monthly: `${sessions("coaching", "inner_session", "en")} a month.`,
         review: "A review against your goals every third month, where the goals can be revised.",
       },
       startOffering: "inner_start_coaching",
@@ -805,7 +828,7 @@ const en: InnerContent = {
     mentoring: {
       slug: "mentorskap",
       title: "Mentoring",
-      lead: "A longer relationship with fewer, longer meetings, for you who want someone at your side over time. Yasmina shares from twenty years of experience in social work and leadership, and you stay in touch by email between meetings.",
+      lead: "A longer relationship with fewer, longer meetings, if you want someone at your side over time. Yasmina shares from twenty years of experience in social work and leadership, and you stay in touch by email between meetings.",
       forWhom: [
         "are new as a manager or moving into a bigger role",
         "want a sounding board who has been where you are",
@@ -819,14 +842,14 @@ const en: InnerContent = {
       ],
       howItWorks: [
         `A ${START_MINUTES}-minute start call where you set your goals and write them down`,
-        `${perMonth("mentoring", "inner_mentoring_session")} session of ${minutes("inner_mentoring_session")} minutes a month, in Varberg or by video`,
+        `${sessions("mentoring", "inner_mentoring_session", "en")} a month, in Varberg or by video`,
         "Contact by email between meetings",
         "A review against your goals every third month",
       ],
       yoga: "Dharma, your direction, is a thread through the mentoring: where are you heading, and does the path fit what you value? If you like, meetings begin with a few minutes of breathing or stillness.",
       package: {
         start: `Start call, ${START_MINUTES} minutes: you set your goals, write them down and make a plan for following them up.`,
-        monthly: `${perMonth("mentoring", "inner_mentoring_session")} session of ${minutes("inner_mentoring_session")} minutes a month, and contact by email between meetings.`,
+        monthly: `${sessions("mentoring", "inner_mentoring_session", "en")} a month, and contact by email between meetings.`,
         review: "A review against your goals every third month, where the goals can be revised.",
       },
       startOffering: "inner_start_mentoring",
@@ -844,7 +867,7 @@ const en: InnerContent = {
     lifestyle: {
       slug: "livsstil",
       title: "Lifestyle change",
-      lead: "For you who want to change habits around rest, stress and everyday life, and make them last. You get a personal practice plan with breathing, yin yoga, meditation and visualisation, which you adjust together as you go.",
+      lead: "For people who want to change habits around rest, stress and everyday life, and make them last. You get a personal practice plan with breathing, yin yoga, meditation and visualisation, which you adjust together as you go.",
       forWhom: [
         "notice that you rarely get time to recover",
         "want habits that hold up when things get busy",
@@ -858,14 +881,14 @@ const en: InnerContent = {
       ],
       howItWorks: [
         `A ${START_MINUTES}-minute start call where you set your goals and get your practice plan`,
-        `${perMonth("lifestyle", "inner_session")} sessions of ${minutes("inner_session")} minutes a month, in Varberg or by video`,
+        `${sessions("lifestyle", "inner_session", "en")} a month, in Varberg or by video`,
         "The plan is looked at in the sessions and adjusted as you go",
         "A review against your goals every third month",
       ],
       yoga: "Here yoga practice gets the most room. Breathing, yin yoga, meditation and visualisation become your practice plan, in a length that fits into your week. The exercises are there to help you settle and notice how you feel.",
       package: {
         start: `Start call, ${START_MINUTES} minutes, and a personal practice plan.`,
-        monthly: `${perMonth("lifestyle", "inner_session")} sessions of ${minutes("inner_session")} minutes a month, and the plan is revised.`,
+        monthly: `${sessions("lifestyle", "inner_session", "en")} a month, and the plan is revised.`,
         review: "A review against your goals every third month, where the goals can be revised.",
       },
       startOffering: "inner_start_lifestyle",
@@ -896,14 +919,14 @@ const en: InnerContent = {
         "Words for your values and for how you want to live them",
       ],
       howItWorks: [
-        `${perMonth("group", "inner_group")} group sessions of ${minutes("inner_group")} minutes a month`,
+        `${sessions("group", "inner_group", "en")} a month`,
         "Each session has a theme from yoga philosophy, an exercise and a conversation",
         "You book your seat in the calendar, one session at a time",
         "No commitment period",
       ],
       yoga: "Each session starts from a theme in yoga philosophy, for example the yamas and niyamas, yoga's guidelines for how you relate to others and to yourself. You do an exercise together and talk about what the theme means in your leadership and your life.",
       package: {
-        monthly: `${perMonth("group", "inner_group")} group sessions of ${minutes("inner_group")} minutes a month.`,
+        monthly: `${sessions("group", "inner_group", "en")} a month.`,
         review: "You take part for as long as you want and can stop whenever you want.",
       },
       groupOffering: "inner_group",
@@ -982,7 +1005,7 @@ const en: InnerContent = {
     trackName: "Leading from within",
     back: "All paths in Leading from within",
     readMore: "Read more",
-    forWhom: "For you who",
+    forWhom: "This is for you if you",
     outcomes: "What you work towards",
     howItWorks: "How it works",
     yoga: "Yoga in practice",
@@ -1000,8 +1023,8 @@ const en: InnerContent = {
     },
     book: {
       start: "Book a start call",
-      member: "Already a member? Book your next session",
-      memberHint: "For you who are already a member",
+      member: "Are you already a member? Book your next session",
+      memberHint: "If you are already a member",
       group: "Book a seat in the group",
     },
     research: {
