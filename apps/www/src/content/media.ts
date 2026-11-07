@@ -1,8 +1,9 @@
 import type { OfferingKey } from "@repo/api-contract/booking-limits"
 import type { Locale } from "@repo/i18n/locales"
+import type { InnerServiceId } from "@/content/inner-pricing"
 
 /**
- * The photographs and the two clips under `public/media/`, plus every visible string the media
+ * The photographs and the clips under `public/media/`, plus every visible string the media
  * components need (alt texts, the clip toggle's labels, a caption, two column headings), in
  * Swedish and English. `mediaFor(locale)` / `clipsFor(locale)` / `mediaTextFor(locale)` pick one
  * language per request; the views pass what they need down as props, so this module never
@@ -107,6 +108,24 @@ const IMAGES = {
     height: 1280,
     small: { width: 720, height: 1280 },
   },
+  innerConversationPoster: {
+    name: "inner-conversation-poster",
+    width: 1280,
+    height: 720,
+    small: { width: 1280, height: 720 },
+  },
+  innerGroupPoster: {
+    name: "inner-group-poster",
+    width: 1280,
+    height: 720,
+    small: { width: 1280, height: 720 },
+  },
+  keynotePoster: {
+    name: "keynote-poster",
+    width: 1280,
+    height: 672,
+    small: { width: 1280, height: 672 },
+  },
 } as const satisfies Record<string, Omit<MediaImage, "alt">>
 
 export type MediaKey = keyof typeof IMAGES
@@ -135,6 +154,12 @@ const ALT: Record<Locale, Record<MediaKey, string>> = {
       "Yasmina Petersson talar med headset framför en stor publik i en konferenssal.",
     heroPoster: "En ljus lobby i trä och sten där Yasmina Petersson är på väg in.",
     aboutPoster: "Yasmina Petersson ler i en solig park.",
+    innerConversationPoster:
+      "Yasmina Petersson i samtal med en man vid ett bord i ett ljust rum med träpanel, växter och en tänd lampa.",
+    innerGroupPoster:
+      "Yasmina Petersson talar i en mikrofon till en liten grupp som sitter och lyssnar i en ljus lokal.",
+    keynotePoster:
+      "Yasmina Petersson talar i en mikrofon på en scen inför publik i en sal med träpanel.",
   },
   en: {
     portraitOffice:
@@ -159,6 +184,12 @@ const ALT: Record<Locale, Record<MediaKey, string>> = {
       "Yasmina Petersson speaks with a headset in front of a large audience in a conference hall.",
     heroPoster: "A bright lobby in wood and stone, which Yasmina Petersson is walking into.",
     aboutPoster: "Yasmina Petersson smiles in a sunny park.",
+    innerConversationPoster:
+      "Yasmina Petersson in conversation with a man at a table in a bright, wood-panelled room with plants and a lit lamp.",
+    innerGroupPoster:
+      "Yasmina Petersson speaks into a microphone to a small seated group listening in a bright room.",
+    keynotePoster:
+      "Yasmina Petersson speaks into a microphone on a stage before an audience in a wood-panelled hall.",
   },
 }
 
@@ -170,7 +201,7 @@ export function mediaFor(locale: Locale): Record<MediaKey, MediaImage> {
   ) as Record<MediaKey, MediaImage>
 }
 
-/** The two clips, their posters' alt texts in `locale`. */
+/** The clips, their posters' alt texts in `locale`. */
 export function clipsFor(locale: Locale) {
   const media = mediaFor(locale)
   return {
@@ -178,8 +209,41 @@ export function clipsFor(locale: Locale) {
     hero: { src: "/media/hero.mp4", poster: media.heroPoster, width: 1280, height: 720 },
     /** Yasmina smiling in a park: the about section's portrait. */
     about: { src: "/media/about.mp4", poster: media.aboutPoster, width: 608, height: 1080 },
+    /** Yasmina in a one-to-one conversation: the coaching and mentoring pages' hero. */
+    innerConversation: {
+      src: "/media/inner-conversation.mp4",
+      poster: media.innerConversationPoster,
+      width: 1280,
+      height: 720,
+    },
+    /** Yasmina speaking to a small group: the Inifrån group page's hero. */
+    innerGroup: {
+      src: "/media/inner-group.mp4",
+      poster: media.innerGroupPoster,
+      width: 1280,
+      height: 720,
+    },
+    /** Yasmina on stage before an audience: the keynote's booking page. */
+    keynote: {
+      src: "/media/keynote.mp4",
+      poster: media.keynotePoster,
+      width: 1280,
+      height: 672,
+    },
   } satisfies Record<string, MediaClip>
 }
+
+export type ClipKey = keyof ReturnType<typeof clipsFor>
+
+/** A Ledarskap inifrån service page whose hero is a clip rather than its photo. */
+export const INNER_CLIPS: Partial<Record<InnerServiceId, ClipKey>> = {
+  coaching: "innerConversation",
+  mentoring: "innerConversation",
+  group: "innerGroup",
+}
+
+/** A booking page that opens on a clip rather than its photo (`OFFERING_MEDIA`). */
+export const OFFERING_CLIPS: Partial<Record<OfferingKey, ClipKey>> = { keynote: "keynote" }
 
 /** The photo on each offer card of the landing page, in `home.offers.items` order. */
 export const OFFER_MEDIA: readonly MediaKey[] = [
