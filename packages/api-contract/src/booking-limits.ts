@@ -119,7 +119,7 @@ export const OFFERINGS: Record<OfferingKey, Offering> = {
   inner_start_coaching: {
     key: "inner_start_coaching",
     kind: "instant",
-    label: "Inner leadership: start (coaching)",
+    label: "Start call, transformative coaching",
     durationMinutes: 90,
     sessions: 1,
     audiences: ["private", "organisation"],
@@ -128,7 +128,7 @@ export const OFFERINGS: Record<OfferingKey, Offering> = {
   inner_start_mentoring: {
     key: "inner_start_mentoring",
     kind: "instant",
-    label: "Inner leadership: start (mentoring)",
+    label: "Start call, mentoring",
     durationMinutes: 90,
     sessions: 1,
     audiences: ["private", "organisation"],
@@ -137,7 +137,7 @@ export const OFFERINGS: Record<OfferingKey, Offering> = {
   inner_start_lifestyle: {
     key: "inner_start_lifestyle",
     kind: "instant",
-    label: "Inner leadership: start (lifestyle)",
+    label: "Start call, lifestyle change",
     durationMinutes: 90,
     sessions: 1,
     audiences: ["private", "organisation"],
@@ -146,7 +146,7 @@ export const OFFERINGS: Record<OfferingKey, Offering> = {
   inner_session: {
     key: "inner_session",
     kind: "instant",
-    label: "Inner leadership session",
+    label: "Member session",
     durationMinutes: 60,
     sessions: 1,
     audiences: ["private", "organisation"],
@@ -155,7 +155,7 @@ export const OFFERINGS: Record<OfferingKey, Offering> = {
   inner_mentoring_session: {
     key: "inner_mentoring_session",
     kind: "instant",
-    label: "Mentoring session",
+    label: "Member mentoring session",
     durationMinutes: 90,
     sessions: 1,
     audiences: ["private", "organisation"],
@@ -164,7 +164,7 @@ export const OFFERINGS: Record<OfferingKey, Offering> = {
   inner_group: {
     key: "inner_group",
     kind: "group",
-    label: "Inifrån group",
+    label: "The Inifrån group",
     durationMinutes: 120,
     sessions: 1,
     audiences: ["private", "organisation"],
