@@ -1,0 +1,27 @@
+{
+  "name": "@repo/public-api-contract",
+  "version": "1.0.0",
+  "description": "The public /v1 REST contract apps/api serves to API-key holders",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./openapi": "./src/openapi.ts",
+    "./webhook-events": "./src/webhook-events.ts",
+    "./webhooks": "./src/webhooks.ts"
+  },
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@orpc/contract": "catalog:",
+    "@orpc/openapi": "catalog:",
+    "@orpc/zod": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/bun": "catalog:"
+  }
+}

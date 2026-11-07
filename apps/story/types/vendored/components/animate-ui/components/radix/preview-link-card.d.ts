@@ -1,0 +1,10 @@
+import { type PreviewLinkCardContentProps as PreviewLinkCardContentPrimitiveProps, type PreviewLinkCardImageProps as PreviewLinkCardImagePrimitiveProps, type PreviewLinkCardProps as PreviewLinkCardPrimitiveProps, type PreviewLinkCardTriggerProps as PreviewLinkCardTriggerPrimitiveProps } from "@repo/ui/components/animate-ui/primitives/radix/preview-link-card";
+type PreviewLinkCardProps = PreviewLinkCardPrimitiveProps;
+declare function PreviewLinkCard(props: PreviewLinkCardProps): import("react").JSX.Element;
+type PreviewLinkCardTriggerProps = PreviewLinkCardTriggerPrimitiveProps;
+declare function PreviewLinkCardTrigger(props: PreviewLinkCardTriggerProps): import("react").JSX.Element;
+type PreviewLinkCardContentProps = PreviewLinkCardContentPrimitiveProps;
+declare function PreviewLinkCardContent({ className, align, sideOffset, ...props }: PreviewLinkCardContentProps): import("react").JSX.Element;
+type PreviewLinkCardImageProps = PreviewLinkCardImagePrimitiveProps;
+declare function PreviewLinkCardImage(props: PreviewLinkCardImageProps): import("react").JSX.Element;
+export { PreviewLinkCard, PreviewLinkCardContent, type PreviewLinkCardContentProps, PreviewLinkCardImage, type PreviewLinkCardImageProps, type PreviewLinkCardProps, PreviewLinkCardTrigger, type PreviewLinkCardTriggerProps, };

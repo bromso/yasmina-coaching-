@@ -1,0 +1,25 @@
+{
+  "name": "@repo/telemetry",
+  "version": "0.1.0",
+  "description": "Error and web-vitals reporting: browsers to their own app, apps and services to apps/api",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./analytics": "./src/analytics.ts",
+    "./browser": "./src/browser.ts",
+    "./server": "./src/server.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@orpc/client": "catalog:",
+    "@repo/api-contract": "workspace:*",
+    "@repo/log": "workspace:*"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/bun": "catalog:"
+  }
+}

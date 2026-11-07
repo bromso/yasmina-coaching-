@@ -1,0 +1,42 @@
+{
+  "name": "@repo/api-contract",
+  "version": "0.1.0",
+  "description": "Typed oRPC contract shared by apps/api and every app that calls it",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./analytics": "./src/analytics.ts",
+    "./api-keys-limits": "./src/api-keys-limits.ts",
+    "./application-statuses": "./src/application-statuses.ts",
+    "./billing-plans": "./src/billing-plans.ts",
+    "./email-change-limits": "./src/email-change-limits.ts",
+    "./files-limits": "./src/files-limits.ts",
+    "./invite-domains": "./src/invite-domains.ts",
+    "./jobs": "./src/jobs.ts",
+    "./jobs-limits": "./src/jobs-limits.ts",
+    "./notifications": "./src/notifications.ts",
+    "./passkey-limits": "./src/passkey-limits.ts",
+    "./realtime": "./src/realtime.ts",
+    "./roles": "./src/roles.ts",
+    "./route": "./src/route.ts",
+    "./support": "./src/support.ts",
+    "./support-limits": "./src/support-limits.ts",
+    "./telemetry-limits": "./src/telemetry-limits.ts",
+    "./webhooks-limits": "./src/webhooks-limits.ts",
+    "./workspace-activity": "./src/workspace-activity.ts"
+  },
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@orpc/contract": "catalog:",
+    "@repo/i18n": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/bun": "catalog:"
+  }
+}

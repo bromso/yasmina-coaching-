@@ -1,0 +1,185 @@
+/* Import the design system from @repo/ui */
+@import "@repo/ui/globals.css";
+
+/* Import typography plugin for www */
+@plugin "@tailwindcss/typography";
+
+/* www-specific font extensions (uses design system fonts from @repo/ui) */
+:root {
+  /* StyleGlide provides a better abstraction for fonts */
+  --display-family: var(--font-sans);
+  --text-family: var(--font-sans);
+  --display-weight: 600;
+  --text-weight: 400;
+}
+
+/* www-specific theme extensions */
+@theme inline {
+  --radius-xs: calc(var(--radius) - 4px);
+  --radius-2xl: calc(var(--radius) * 2);
+  --radius-3xl: calc(var(--radius) * 3);
+  --radius-4xl: calc(var(--radius) * 4);
+
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1400px;
+
+  --font-display: var(--display-family);
+  --font-text: var(--text-family);
+  --font-weight-display: var(--display-weight);
+  --font-weight-text: var(--text-weight);
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+}
+
+/* www-specific typography utilities */
+@layer utilities {
+  body,
+  .font-text {
+    font-family: var(--font-text);
+    font-weight: var(--text-weight);
+  }
+  h1,
+  h2,
+  .font-display {
+    font-family: var(--font-display);
+    font-weight: var(--display-weight);
+  }
+  .font-mono {
+    font-family: var(--font-mono), monospace;
+  }
+}
+
+/* www-specific component styles */
+@layer components {
+  button {
+    cursor: pointer;
+  }
+  [class*="border"] {
+    @apply border-border;
+  }
+}
+
+/* www-specific base styles */
+html,
+body {
+  scroll-behavior: smooth;
+}
+html {
+  /* Ensure focused elements aren't hidden behind sticky header */
+  scroll-padding-top: 6rem;
+}
+body {
+  position: relative;
+}
+
+/* Windows High Contrast Mode support */
+@media (forced-colors: active) {
+  /* Ensure borders remain visible */
+  .border,
+  [class*="border"] {
+    border-color: CanvasText !important;
+  }
+
+  /* Preserve focus indicators */
+  *:focus-visible {
+    outline: 3px solid Highlight !important;
+    outline-offset: 3px !important;
+  }
+
+  /* Ensure icons remain visible */
+  svg {
+    forced-color-adjust: auto;
+  }
+
+  /* Ensure cards and backgrounds have proper contrast */
+  .bg-card,
+  .bg-background,
+  .bg-muted {
+    background-color: Canvas !important;
+  }
+
+  /* Gradient sections: replace gradients with solid background and visible borders */
+  [class*="bg-linear-"],
+  [class*="from-"],
+  [class*="via-"],
+  [class*="to-"] {
+    background: Canvas !important;
+  }
+
+  /* Add visible borders to rounded gradient sections for structure */
+  [class*="rounded-4xl"],
+  [class*="rounded-t-4xl"],
+  [class*="rounded-b-4xl"],
+  [class*="rounded-t-2xl"],
+  [class*="rounded-b-2xl"] {
+    border: 2px solid CanvasText !important;
+  }
+
+  /* Interactive elements: ensure visibility */
+  a,
+  button,
+  [role="button"] {
+    border: 2px solid LinkText;
+    background: ButtonFace;
+    color: ButtonText;
+  }
+
+  a:hover,
+  button:hover,
+  [role="button"]:hover {
+    border-color: Highlight;
+    background: Highlight;
+    color: HighlightText;
+  }
+
+  /* Links with gradient backgrounds */
+  a[class*="bg-linear-"],
+  a[class*="from-"] {
+    background: ButtonFace !important;
+    border: 2px solid LinkText !important;
+  }
+}
+
+/* High contrast preference support */
+@media (prefers-contrast: high) {
+  /* Increase border visibility */
+  .border,
+  [class*="border"] {
+    border-width: 2px;
+  }
+
+  /* Ensure focus rings are prominent */
+  *:focus-visible {
+    outline-width: 3px;
+  }
+
+  /* Add borders to gradient sections for better structure visibility */
+  [class*="rounded-4xl"],
+  [class*="rounded-t-4xl"],
+  [class*="rounded-b-4xl"],
+  [class*="rounded-t-2xl"],
+  [class*="rounded-b-2xl"] {
+    border: 1px solid currentColor;
+  }
+}

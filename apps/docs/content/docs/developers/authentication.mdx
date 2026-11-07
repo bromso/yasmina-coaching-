@@ -1,0 +1,92 @@
+---
+title: Authentication
+description: Create an API key, send it with every request, and know what to do if one leaks.
+tags: [api, authentication]
+---
+
+A workspace admin or owner creates an API key on the account's **Workspace** page, in the
+**API keys** card, and hands it to an outside tool or script. The key acts as that workspace, with only the scopes it was given — never
+as a person, and never with access to anything outside `/v1`.
+
+API access is a paid feature. On a plan without it, a workspace's existing keys are paused —
+every request with one answers `401` until the workspace is upgraded — but a paused key is never
+deleted, and can still be revoked.
+
+## Creating a key
+
+1. Give the key a name, 1–60 characters, for telling keys apart later. It is not secret: a note the
+   key creates on your behalf shows the key's name as its author, so avoid putting anything
+   sensitive in it.
+2. Choose one or more scopes:
+
+   | Scope | Lets the key |
+   |---|---|
+   | `workspace:read` | Read the workspace's name, slug and plan |
+   | `members:read` | List members by user id, name and role — never an email address |
+   | `notes:read` | List and read notes |
+   | `notes:write` | Create and delete notes |
+
+   Give a key only the scopes the integration actually needs: a read-only dashboard should never
+   hold `notes:write`.
+3. Choose an expiry — 30, 90 or 365 days, or no expiry — then create the key.
+
+A workspace can hold up to **20 active keys**; revoked and expired keys do not count. At 20, creating
+another is refused until you revoke one.
+
+The full key is shown **exactly once**, right after creation. Copy it somewhere safe; once you
+leave that screen there is no way to see it again. Only its prefix, name, scopes, status and
+timestamps are kept after that — never the secret itself. If you lose it, revoke it and create
+another.
+
+<Callout type="note" title="Scopes and expiry are fixed at creation">
+  There is no edit. To change a key's scopes or expiry, revoke it and create a replacement.
+</Callout>
+
+## Sending the key
+
+Every request needs the key in an `Authorization` header, and nothing else:
+
+```
+Authorization: Bearer $API_KEY
+```
+
+A real key looks like `bb_live_EXAMPLE0_docsOnlyFakeKeyNeverIssuedDoNotUse000000000` — that one is a fake, never issued, shown only to illustrate the format. {/* gitleaks:allow */}
+
+<Callout type="warning" title="Keep your API key secret">
+  Send the key only in the `Authorization` header, from your own server. Never put it in a URL or
+  a query string, where logs and browser history keep it, and never in browser or mobile app code,
+  where anyone can read it.
+</Callout>
+
+## 401 and 403
+
+- **`401` `unauthorized`** — the key is missing, malformed, unknown, revoked or expired, or its
+  workspace has lost API access (for example, a downgraded plan). One message covers all of these,
+  by design: a caller is never told *which* is wrong.
+- **`403` `forbidden_scope`** — the key is valid but lacks the scope the route needs. The message
+  names the missing scope. This is checked before your request's own input, so a wrong-scope key
+  never also learns whether its body was valid.
+
+See [the error envelope](/developers#errors) for the full shape every error answers with.
+
+## Revoking a key
+
+Revoke a key in the **API keys** card on the account's **Workspace** page. This takes effect immediately: the very next request
+with that key answers `401`, the same as an unknown key, with no grace period and no undo. Revoke a
+key you no longer trust, or whose scopes you want to narrow — then create a replacement with only
+the scopes it needs.
+
+## If a key leaks
+
+A workspace API key is as sensitive as a password: whoever holds it can act within its scopes
+until it is revoked or expires. If a key was committed to a public repository, pasted into a chat,
+or otherwise exposed:
+
+1. **Revoke it immediately** — this takes effect at once and needs nothing from whatever tool or
+   script was using it.
+2. **Create a replacement** with only the scopes the integration actually needs — an opportunity to
+   narrow them if the original key was broader than necessary — and update the integration.
+3. **Check when the key was last used**, for any sign of use you did not expect.
+
+There is no way to see what a leaked key was used for beyond its scopes and last-used time: `/v1`
+keeps no access log of its own.

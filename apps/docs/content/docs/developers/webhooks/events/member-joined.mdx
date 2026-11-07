@@ -1,0 +1,91 @@
+---
+title: "member.joined"
+description: "Someone joined your workspace."
+---
+
+{/* Generated from @repo/public-api-contract by apps/docs/scripts/generate-api-reference.ts. Do not edit: change the contract, then run bun run --filter @repo/docs generate:api. */}
+
+Someone joined your workspace.
+
+Sent when a person accepts an invitation. `data` is the member as [List members](/developers/reference/list-members) returns them — never an email address.
+
+## Payload
+
+Every delivery's body is one JSON envelope: the event's `type`, the `timestamp` it happened at, and its `data`.
+
+<SchemaTable caption={"Envelope"} schema={{
+  "type": "object",
+  "properties": {
+    "type": {
+      "const": "member.joined",
+      "description": "The event type."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the event happened. The \u0060webhook-timestamp\u0060 header is when this attempt was signed."
+    },
+    "data": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "description": "The member's user id."
+        },
+        "name": {
+          "type": "string",
+          "description": "The member's display name."
+        },
+        "role": {
+          "enum": [
+            "viewer",
+            "member",
+            "admin",
+            "owner"
+          ],
+          "type": "string",
+          "description": "The member's role in the workspace."
+        },
+        "joinedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the member joined the workspace."
+        }
+      },
+      "required": [
+        "userId",
+        "name",
+        "role",
+        "joinedAt"
+      ],
+      "description": "The event's payload."
+    }
+  },
+  "required": [
+    "type",
+    "timestamp",
+    "data"
+  ]
+}} />
+
+## Example
+
+Shown formatted here; a delivery's body arrives as minified JSON.
+
+```json
+{
+  "type": "member.joined",
+  "timestamp": "2026-01-15T09:30:00.000Z",
+  "data": {
+    "userId": 1,
+    "name": "Ada Lovelace",
+    "role": "member",
+    "joinedAt": "2026-01-15T09:30:00.000Z"
+  }
+}
+```
+
+<Callout type="warning" title="Verify the signature first">
+Anyone can send a request to your endpoint. Before you parse or act on a delivery, check its `webhook-signature` header against your endpoint's signing secret, and refuse a `webhook-timestamp` more than 5 minutes from your own clock. See [Verifying signatures](/developers/webhooks/verifying-signatures).
+</Callout>

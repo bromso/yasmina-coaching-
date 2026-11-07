@@ -1,0 +1,44 @@
+{
+  "shadow": {
+    "2xs": {
+      "$value": "0px 4px 8px -1px hsl(0 0% 0% / 0.05)",
+      "$type": "shadow",
+      "$description": "Extra extra small shadow"
+    },
+    "xs": {
+      "$value": "0px 4px 8px -1px hsl(0 0% 0% / 0.05)",
+      "$type": "shadow",
+      "$description": "Extra small shadow"
+    },
+    "sm": {
+      "$value": "0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 1px 2px -2px hsl(0 0% 0% / 0.1)",
+      "$type": "shadow",
+      "$description": "Small shadow"
+    },
+    "default": {
+      "$value": "0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 1px 2px -2px hsl(0 0% 0% / 0.1)",
+      "$type": "shadow",
+      "$description": "Default shadow"
+    },
+    "md": {
+      "$value": "0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 2px 4px -2px hsl(0 0% 0% / 0.1)",
+      "$type": "shadow",
+      "$description": "Medium shadow"
+    },
+    "lg": {
+      "$value": "0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 4px 6px -2px hsl(0 0% 0% / 0.1)",
+      "$type": "shadow",
+      "$description": "Large shadow"
+    },
+    "xl": {
+      "$value": "0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 8px 10px -2px hsl(0 0% 0% / 0.1)",
+      "$type": "shadow",
+      "$description": "Extra large shadow"
+    },
+    "2xl": {
+      "$value": "0px 4px 8px -1px hsl(0 0% 0% / 0.25)",
+      "$type": "shadow",
+      "$description": "Extra extra large shadow"
+    }
+  }
+}

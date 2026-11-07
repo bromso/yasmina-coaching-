@@ -1,0 +1,40 @@
+{
+  "recommendations": [
+    // Essential
+    "biomejs.biome",
+    "bradlc.vscode-tailwindcss",
+    "oven.bun-vscode",
+
+    // Next.js & React
+    "dsznajder.es7-react-js-snippets",
+
+    // TypeScript
+    "yoavbls.pretty-ts-errors",
+
+    // Testing: Playwright e2e (apps/e2e) and Storybook's Vitest tests (apps/story)
+    "ms-playwright.playwright",
+    "vitest.explorer",
+
+    // Git & Docker
+    "ms-azuretools.vscode-docker",
+    "ms-vscode-remote.remote-containers",
+
+    // Productivity
+    "usernamehw.errorlens",
+    "streetsidesoftware.code-spell-checker",
+    "christian-kohler.path-intellisense",
+    "gruntfuggly.todo-tree",
+
+    // Documentation
+    "unifiedjs.vscode-mdx",
+
+    // Config
+    "redhat.vscode-yaml",
+    "mikestead.dotenv",
+    "github.vscode-github-actions"
+  ],
+  "unwantedRecommendations": [
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint"
+  ]
+}

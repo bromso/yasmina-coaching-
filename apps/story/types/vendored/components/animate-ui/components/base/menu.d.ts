@@ -1,0 +1,43 @@
+import { type MenuArrowProps as MenuArrowPrimitiveProps, type MenuCheckboxItemProps as MenuCheckboxItemPrimitiveProps, type MenuGroupLabelProps as MenuGroupLabelPrimitiveProps, type MenuGroupProps as MenuGroupPrimitiveProps, type MenuItemProps as MenuItemPrimitiveProps, type MenuPopupProps as MenuPopupPrimitiveProps, type MenuPortalProps as MenuPortalPrimitiveProps, type MenuPositionerProps as MenuPositionerPrimitiveProps, type MenuProps as MenuPrimitiveProps, type MenuRadioGroupProps as MenuRadioGroupPrimitiveProps, type MenuRadioItemProps as MenuRadioItemPrimitiveProps, type MenuSeparatorProps as MenuSeparatorPrimitiveProps, type MenuShortcutProps as MenuShortcutPrimitiveProps, type MenuSubmenuProps as MenuSubmenuPrimitiveProps, type MenuSubmenuTriggerProps as MenuSubmenuTriggerPrimitiveProps, type MenuTriggerProps as MenuTriggerPrimitiveProps } from "@repo/ui/components/animate-ui/primitives/base/menu";
+import type * as React from "react";
+type MenuProps = MenuPrimitiveProps;
+declare function Menu(props: MenuProps): React.JSX.Element;
+type MenuTriggerProps = MenuTriggerPrimitiveProps;
+declare function MenuTrigger(props: MenuTriggerProps): React.JSX.Element;
+type MenuPortalProps = MenuPortalPrimitiveProps;
+declare function MenuPortal(props: MenuPortalProps): React.JSX.Element;
+type MenuPanelProps = MenuPopupPrimitiveProps & MenuPositionerPrimitiveProps;
+declare function MenuPanel({ className, finalFocus, id, children, sideOffset, transition, ...props }: MenuPanelProps): React.JSX.Element;
+type MenuGroupProps = MenuGroupPrimitiveProps;
+declare function MenuGroup(props: MenuGroupProps): React.JSX.Element;
+type MenuGroupLabelProps = MenuGroupLabelPrimitiveProps & {
+    inset?: boolean;
+};
+declare function MenuGroupLabel({ className, inset, ...props }: MenuGroupLabelProps): React.JSX.Element;
+type MenuItemProps = MenuItemPrimitiveProps & {
+    inset?: boolean;
+    variant?: "default" | "destructive";
+};
+declare function MenuItem({ className, inset, variant, disabled, ...props }: MenuItemProps): React.JSX.Element;
+type MenuCheckboxItemProps = MenuCheckboxItemPrimitiveProps;
+declare function MenuCheckboxItem({ className, children, checked, disabled, ...props }: MenuCheckboxItemProps): React.JSX.Element;
+type MenuRadioGroupProps = MenuRadioGroupPrimitiveProps;
+declare function MenuRadioGroup(props: MenuRadioGroupProps): React.JSX.Element;
+type MenuRadioItemProps = MenuRadioItemPrimitiveProps;
+declare function MenuRadioItem({ className, children, disabled, ...props }: MenuRadioItemProps): React.JSX.Element;
+type MenuSeparatorProps = MenuSeparatorPrimitiveProps;
+declare function MenuSeparator({ className, ...props }: MenuSeparatorProps): React.JSX.Element;
+type MenuShortcutProps = MenuShortcutPrimitiveProps;
+declare function MenuShortcut({ className, ...props }: MenuShortcutProps): React.JSX.Element;
+type MenuArrowProps = MenuArrowPrimitiveProps;
+declare function MenuArrow(props: MenuArrowProps): React.JSX.Element;
+type MenuSubmenuProps = MenuSubmenuPrimitiveProps;
+declare function MenuSubmenu(props: MenuSubmenuProps): React.JSX.Element;
+type MenuSubmenuTriggerProps = MenuSubmenuTriggerPrimitiveProps & {
+    inset?: boolean;
+    children?: React.ReactNode;
+};
+declare function MenuSubmenuTrigger({ disabled, className, inset, children, ...props }: MenuSubmenuTriggerProps): React.JSX.Element;
+type MenuSubmenuPanelProps = MenuPopupPrimitiveProps & MenuPositionerPrimitiveProps;
+declare function MenuSubmenuPanel({ className, finalFocus, id, children, sideOffset, transition, ...props }: MenuSubmenuPanelProps): React.JSX.Element;
+export { Menu, MenuArrow, type MenuArrowProps, MenuCheckboxItem, type MenuCheckboxItemProps, MenuGroup, MenuGroupLabel, type MenuGroupLabelProps, type MenuGroupProps, MenuItem, type MenuItemProps, MenuPanel, type MenuPanelProps, MenuPortal, type MenuPortalProps, type MenuProps, MenuRadioGroup, type MenuRadioGroupProps, MenuRadioItem, type MenuRadioItemProps, MenuSeparator, type MenuSeparatorProps, MenuShortcut, type MenuShortcutProps, MenuSubmenu, MenuSubmenuPanel, type MenuSubmenuPanelProps, type MenuSubmenuProps, MenuSubmenuTrigger, type MenuSubmenuTriggerProps, MenuTrigger, type MenuTriggerProps, };

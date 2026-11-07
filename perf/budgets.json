@@ -1,0 +1,150 @@
+{
+  "bundles": {
+    "account": {
+      "/": 290.8,
+      "/data-privacy": 290.5,
+      "/email/confirm": 298.5,
+      "/notifications": 297.4,
+      "/payments": 300.1,
+      "/personal-info": 303.6,
+      "/security": 293.9,
+      "/workspace": 303.9
+    },
+    "app": {
+      "/": 285.4,
+      "/chat": 337.5,
+      "/invitations/[token]": 283.7,
+      "/notes": 319.9,
+      "/workspaces/new": 285.1
+    },
+    "auth": {
+      "/": 282.8,
+      "/admin": 287,
+      "/admin/analytics": 489.5,
+      "/admin/applications": 295.6,
+      "/admin/audit": 284,
+      "/admin/stop": 283.1,
+      "/admin/support": 285.4,
+      "/admin/users": 284,
+      "/admin/users/[id]": 288.2,
+      "/admin/workspaces": 284,
+      "/admin/workspaces/[id]": 283.7,
+      "/email/cancel": 297.2,
+      "/email/revert": 298.5,
+      "/email/unsubscribe": 293.8,
+      "/forgot-password": 288,
+      "/login": 287.1,
+      "/login/verify": 288.1,
+      "/magic": 286.1,
+      "/reset-password": 286.4,
+      "/signup": 287,
+      "/verify-email": 283.3
+    },
+    "blog": {
+      "/": 270.3,
+      "/[slug]": 273,
+      "/authors/[author]": 270.3,
+      "/page/[n]": 270.3,
+      "/tags/[tag]": 270.3
+    },
+    "docs": {
+      "/[[...slug]]": 321.7,
+      "/all": 318.2
+    },
+    "help": {
+      "/": 321.1,
+      "/[category]": 270.5,
+      "/[category]/[article]": 271.3,
+      "/all": 268.5,
+      "/contact": 281
+    },
+    "jobs": {
+      "/": 270.3,
+      "/[slug]": 270.3,
+      "/[slug]/apply": 281.3
+    },
+    "www": {
+      "/": 259.2,
+      "/privacy": 255.9,
+      "/terms": 255.9
+    }
+  },
+  "lighthouse": {
+    "auth:/login": {
+      "score": 77,
+      "lcpMs": 4250,
+      "tbtMs": 470,
+      "cls": 0.02
+    },
+    "blog:/welcome": {
+      "score": 73,
+      "lcpMs": 4610,
+      "tbtMs": 530,
+      "cls": 0.021
+    },
+    "docs:/getting-started": {
+      "score": 77,
+      "lcpMs": 5280,
+      "tbtMs": 410,
+      "cls": 0.022
+    },
+    "help:/getting-started/create-an-account": {
+      "score": 79,
+      "lcpMs": 4390,
+      "tbtMs": 390,
+      "cls": 0.021
+    },
+    "jobs:/senior-fullstack-engineer": {
+      "score": 83,
+      "lcpMs": 4190,
+      "tbtMs": 350,
+      "cls": 0.021
+    },
+    "www:/": {
+      "score": 75,
+      "lcpMs": 4180,
+      "tbtMs": 550,
+      "cls": 0.021
+    }
+  },
+  "vitals": {
+    "account:/security": {
+      "lcpMs": 510,
+      "cls": 0.02
+    },
+    "app:/notes": {
+      "lcpMs": 440,
+      "cls": 0.026
+    },
+    "auth:/login": {
+      "lcpMs": 440,
+      "cls": 0.02
+    },
+    "blog:/welcome": {
+      "lcpMs": 440,
+      "cls": 0.021
+    },
+    "docs:/getting-started": {
+      "lcpMs": 470,
+      "cls": 0.021
+    },
+    "help:/getting-started/create-an-account": {
+      "lcpMs": 440,
+      "cls": 0.021
+    },
+    "jobs:/senior-fullstack-engineer": {
+      "lcpMs": 400,
+      "cls": 0.021
+    },
+    "www:/": {
+      "lcpMs": 420,
+      "cls": 0.021
+    }
+  },
+  "api": {
+    "auth.me": 170,
+    "notes.create": 170,
+    "notes.list": 170,
+    "workspaces.list": 170
+  }
+}

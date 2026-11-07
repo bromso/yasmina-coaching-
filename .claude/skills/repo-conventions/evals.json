@@ -1,0 +1,48 @@
+[
+  {
+    "query": "where should I put a new shared button component?",
+    "should_trigger": true,
+    "rationale": "monorepo layout question"
+  },
+  {
+    "query": "how do I run just the dashboard app dev server?",
+    "should_trigger": true,
+    "rationale": "Bun workspace command"
+  },
+  {
+    "query": "what's the lint command in this repo?",
+    "should_trigger": true,
+    "rationale": "tooling lookup"
+  },
+  {
+    "query": "should I add a changeset for this refactor?",
+    "should_trigger": true,
+    "rationale": "changeset workflow"
+  },
+  {
+    "query": "where are the GraphQL resolvers?",
+    "should_trigger": true,
+    "rationale": "data layer location"
+  },
+  {
+    "query": "how do I make a conventional commit message?",
+    "should_trigger": true,
+    "rationale": "commit convention"
+  },
+  {
+    "query": "what's a JavaScript closure?",
+    "should_trigger": false,
+    "rationale": "generic JS question, not repo-specific"
+  },
+  {
+    "query": "explain async/await in TypeScript",
+    "should_trigger": false,
+    "rationale": "generic TS question"
+  },
+  { "query": "what does useEffect do?", "should_trigger": false, "rationale": "generic React" },
+  {
+    "query": "review my pull request",
+    "should_trigger": false,
+    "rationale": "should hit pr-review-toolkit, not this"
+  }
+]

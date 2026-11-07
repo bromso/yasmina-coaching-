@@ -1,0 +1,53 @@
+---
+title: Architecture
+description: The apps, the shared packages, and the one-way layers every frontend follows.
+tags: [architecture]
+---
+
+## Apps
+
+Each app deploys to its own subdomain and is independently installable as a PWA.
+
+| App | What it is |
+|---|---|
+| `www` | Marketing site: landing blocks, pricing, a waitlist form |
+| `app` | The signed-in application: notes per workspace, chat |
+| `auth` | Sign-in, sign-up, password reset, social sign-in, magic links, the superadmin pages |
+| `account` | Profile, security, workspace and payment settings |
+| `docs` | These docs |
+| `help`, `jobs` | Static shells |
+| `blog` | MDX posts with RSS, Atom and JSON feeds |
+| `api` | `Bun.serve` + oRPC: typed RPC, REST and OpenAPI, the data layer and the job queue |
+| `ai` | The AI service: streaming chat and structured endpoints |
+
+## Frontend only
+
+The Next apps own no backend and no data layer. Server-side work lives in `apps/api`, which the
+frontends call server to server through the typed contract in `packages/api-contract`. The browser
+never calls `apps/api` directly.
+
+## Layers
+
+Frontend code flows one way:
+
+```
+tokens → components → blocks → views → pages
+```
+
+- **Tokens** (`packages/tokens`) — design tokens.
+- **Components** (`packages/ui/src/components`) — low-level primitives such as Button and Card.
+- **Blocks** (`packages/ui/src/blocks`) — reusable, content-agnostic sections that take props.
+- **Views** (`apps/<app>/src/views`) — page-level compositions specific to one app.
+- **Pages** (`apps/<app>/src/app`) — thin wrappers that render a view.
+
+A block may import components but never a view or a page.
+
+## Shared packages
+
+Every cross-app concern lives in one package, so changing it once changes every app: fonts, theme,
+security headers, status pages, the site header and footer, cookie consent, OG images and the
+service workers come from `packages/ui`; the list of apps and their URLs comes from
+`packages/sites`; errors and web vitals go through `packages/telemetry`.
+
+Shared dependency versions live in the root `catalog`, and every workspace references them with
+`catalog:`, so versions never drift between apps.

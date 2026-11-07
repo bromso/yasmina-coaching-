@@ -1,0 +1,37 @@
+---
+title: Adding an app
+description: Add a new subdomain app that shares the design system, sign-in and telemetry.
+tags: [apps]
+---
+
+New subdomain apps follow one pattern, so each gets the shared fonts, theme, security headers,
+status pages, header, footer and service worker without copying any of them.
+
+## Steps
+
+1. **Register it.** Add the app to `SITES` in `packages/sites` with its label and a unique dev port,
+   and to the nav and footer if it belongs there.
+2. **Scaffold** a Next.js project under `apps/<name>/`, with a dev script on its own port and
+   `<name>.brand.localhost` as the host.
+3. **Use the catalog** for shared dependencies (`next`, `react`, `motion` and friends): `catalog:`
+   in `package.json`, never a literal version.
+4. **PWA.** Wrap the Next config in Serwist, and add a service worker, the offline page, a manifest
+   and its icons, copied from an existing app.
+5. **Single points.** Copy the proxy (security headers), the status pages and the telemetry route
+   from an existing app, unchanged. Copy the OG image too, but set its title. Add
+   `src/lib/routes.ts` with the app's `PUBLIC_ROUTES`, then copy `src/app/sitemap.ts` and
+   `src/app/robots.ts`: two lines each, over `sitemapFor` and `robotsFor` from `@repo/sites`.
+6. **Signed-in pages** add `createAuth`, an instrumentation file that checks the auth environment at
+   boot, and a workspace switcher.
+7. **Layout.** Copy a root layout: the site header and footer from `@repo/sites`, then the cookie
+   consent banner after the footer.
+8. **Docker.** Add the service to `docker-compose.yml`, a matrix row to
+   `.github/workflows/docker-build.yml.disabled`, the dev compose volumes and the devcontainer's
+   forwarded ports. `scripts/docker.test.ts` fails until each is there.
+
+Never load fonts, theme providers or global CSS directly in an app: change the shared package
+instead, and every app follows.
+
+## Next steps
+
+Read the [architecture](/architecture) for the layers a new app's code follows.

@@ -1,0 +1,20 @@
+import { type SheetCloseProps as SheetClosePrimitiveProps, type SheetContentProps as SheetContentPrimitiveProps, type SheetDescriptionProps as SheetDescriptionPrimitiveProps, type SheetFooterProps as SheetFooterPrimitiveProps, type SheetHeaderProps as SheetHeaderPrimitiveProps, type SheetProps as SheetPrimitiveProps, type SheetTitleProps as SheetTitlePrimitiveProps, type SheetTriggerProps as SheetTriggerPrimitiveProps } from "@repo/ui/components/animate-ui/primitives/radix/sheet";
+type SheetProps = SheetPrimitiveProps;
+declare function Sheet(props: SheetProps): import("react").JSX.Element;
+type SheetTriggerProps = SheetTriggerPrimitiveProps;
+declare function SheetTrigger(props: SheetTriggerProps): import("react").JSX.Element;
+type SheetCloseProps = SheetClosePrimitiveProps;
+declare function SheetClose(props: SheetCloseProps): import("react").JSX.Element;
+type SheetContentProps = SheetContentPrimitiveProps & {
+    showCloseButton?: boolean;
+};
+declare function SheetContent({ className, children, side, showCloseButton, ...props }: SheetContentProps): import("react").JSX.Element;
+type SheetHeaderProps = SheetHeaderPrimitiveProps;
+declare function SheetHeader({ className, ...props }: SheetHeaderProps): import("react").JSX.Element;
+type SheetFooterProps = SheetFooterPrimitiveProps;
+declare function SheetFooter({ className, ...props }: SheetFooterProps): import("react").JSX.Element;
+type SheetTitleProps = SheetTitlePrimitiveProps;
+declare function SheetTitle({ className, ...props }: SheetTitleProps): import("react").JSX.Element;
+type SheetDescriptionProps = SheetDescriptionPrimitiveProps;
+declare function SheetDescription({ className, ...props }: SheetDescriptionProps): import("react").JSX.Element;
+export { Sheet, SheetClose, type SheetCloseProps, SheetContent, type SheetContentProps, SheetDescription, type SheetDescriptionProps, SheetFooter, type SheetFooterProps, SheetHeader, type SheetHeaderProps, type SheetProps, SheetTitle, type SheetTitleProps, SheetTrigger, type SheetTriggerProps, };

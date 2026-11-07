@@ -1,0 +1,40 @@
+/**
+ * Custom Storybook styles
+ * These styles extend the Storybook UI to better integrate with the design system.
+ */
+
+/* Apply background color to the entire preview area */
+.sb-show-main,
+.docs-story,
+.sbdocs-preview,
+#storybook-preview-wrapper,
+#storybook-root {
+  background-color: var(--background) !important;
+}
+
+/* Ensure the story canvas fills available space */
+.sb-story {
+  background-color: var(--background);
+}
+
+/* Style the docs page preview blocks */
+.sbdocs .sbdocs-preview {
+  background-color: var(--background);
+  border-color: var(--border);
+}
+
+/* Improve code block styling in docs */
+.sbdocs pre {
+  background-color: var(--muted);
+  border-color: var(--border);
+}
+
+/* Dark mode adjustments for Storybook UI elements that don't pick up the theme */
+.dark .sb-show-main,
+.dark .docs-story,
+.dark .sbdocs-preview,
+.dark #storybook-preview-wrapper,
+.dark #storybook-root,
+.dark .sb-story {
+  background-color: var(--background) !important;
+}

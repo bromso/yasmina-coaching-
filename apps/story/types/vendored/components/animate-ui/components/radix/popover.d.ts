@@ -1,0 +1,10 @@
+import { type PopoverCloseProps as PopoverClosePrimitiveProps, type PopoverContentProps as PopoverContentPrimitiveProps, type PopoverProps as PopoverPrimitiveProps, type PopoverTriggerProps as PopoverTriggerPrimitiveProps } from "@repo/ui/components/animate-ui/primitives/radix/popover";
+type PopoverProps = PopoverPrimitiveProps;
+declare function Popover(props: PopoverProps): import("react").JSX.Element;
+type PopoverTriggerProps = PopoverTriggerPrimitiveProps;
+declare function PopoverTrigger(props: PopoverTriggerProps): import("react").JSX.Element;
+type PopoverContentProps = PopoverContentPrimitiveProps;
+declare function PopoverContent({ className, align, sideOffset, ...props }: PopoverContentProps): import("react").JSX.Element;
+type PopoverCloseProps = PopoverClosePrimitiveProps;
+declare function PopoverClose(props: PopoverCloseProps): import("react").JSX.Element;
+export { Popover, PopoverClose, type PopoverCloseProps, PopoverContent, type PopoverContentProps, type PopoverProps, PopoverTrigger, type PopoverTriggerProps, };

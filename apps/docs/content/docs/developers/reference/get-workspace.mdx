@@ -1,0 +1,88 @@
+---
+title: "Get the workspace"
+description: "Returns the API key's workspace: its id, name, slug and current billing plan."
+---
+
+{/* Generated from @repo/public-api-contract by apps/docs/scripts/generate-api-reference.ts. Do not edit: change the contract, then run bun run --filter @repo/docs generate:api. */}
+
+Returns the API key's workspace: its id, name, slug and current billing plan.
+
+Requires the `workspace:read` scope.
+
+<Endpoint method={"GET"} path={"/v1/workspace"} scope={"workspace:read"} />
+
+## Request
+
+No parameters or body.
+
+## Example request
+
+The example reads your API key from the `API_KEY` environment variable. A key looks like `bb_live_EXAMPLE0_docsOnlyFakeKeyNeverIssuedDoNotUse000000000` — that one is a fake, never issued. {/* gitleaks:allow */}
+
+```bash
+curl -X GET "https://api.your-domain.example/v1/workspace" \
+  -H "Authorization: Bearer $API_KEY"
+```
+
+<Callout type="warning" title="Keep your API key secret">
+Send the key only in the `Authorization` header, from your own server. Never put it in a URL or a query string, where logs and browser history keep it, and never in browser or mobile app code, where anyone can read it. See [Authentication](/developers/authentication) for creating and revoking keys.
+</Callout>
+
+## Response
+
+On success the API answers `200 OK` with a JSON body.
+
+<SchemaTable caption={"Response body"} schema={{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "description": "The workspace's id."
+    },
+    "name": {
+      "type": "string",
+      "description": "The workspace's name."
+    },
+    "slug": {
+      "type": "string",
+      "description": "A URL-friendly name, set when the workspace is created; it never changes."
+    },
+    "plan": {
+      "enum": [
+        "free",
+        "pro",
+        "team"
+      ],
+      "type": "string",
+      "description": "The workspace's current billing plan."
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "slug",
+    "plan"
+  ]
+}} />
+
+Example response:
+
+```json
+{
+  "id": 1,
+  "name": "Acme",
+  "slug": "acme",
+  "plan": "pro"
+}
+```
+
+## Errors
+
+Every error answers with a JSON body `{ "error": { "code": "…", "message": "…" } }`. This route can answer:
+
+- `401` `unauthorized` — the API key is missing, malformed, unknown, revoked or expired, or the key's workspace was deleted or its plan no longer includes API access.
+- `403` `forbidden_scope` — the key does not have the `workspace:read` scope.
+- `429` `rate_limited` — too many requests with this key, or too many refused attempts from your address; wait the number of seconds in the `Retry-After` header, then retry.
+- `500` `internal` — an unexpected error on our side; retry later.
+- `503` `internal` — the request took too long to answer. It may still have taken effect, so check before you retry a change.

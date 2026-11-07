@@ -1,0 +1,60 @@
+version: 2
+updates:
+  # Single root entry. The bun ecosystem reads the one bun.lock at the root and is
+  # workspace-aware, so this covers apps/* and packages/*. ("npm" fails on a repo with
+  # no npm lockfile.)
+  - package-ecosystem: "bun"
+    directory: "/"
+    # Weekly, grouped: one reviewable PR instead of up to ten a day, each running the full CI.
+    schedule:
+      interval: "weekly"
+    # allow/dependency-type and versioning-strategy are left at their defaults: GitHub documents
+    # neither for the bun ecosystem.
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    labels:
+      - "dependencies"
+    # Majors change APIs and get a deliberate upgrade pass; minors and patches arrive here.
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    # A dependency joins the first group it matches.
+    groups:
+      # Storybook's packages must stay on one version: never update one of them alone.
+      storybook:
+        patterns: ["storybook", "@storybook/*"]
+      # Everything else: every minor and patch update of the week in one PR.
+      minor-and-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+
+  # Dev Container features, pinned in .devcontainer/devcontainer-lock.json
+  - package-ecosystem: "devcontainers"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    labels:
+      - "dependencies"
+    groups:
+      devcontainer-features:
+        patterns: ["*"]
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    groups:
+      actions:
+        patterns: ["*"]

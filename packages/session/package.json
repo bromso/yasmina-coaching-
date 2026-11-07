@@ -1,0 +1,41 @@
+{
+  "name": "@repo/session",
+  "version": "0.1.0",
+  "description": "Session cookie, requireUser and the user-scoped api client shared by the Next apps",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./env": "./src/env.ts",
+    "./cookie": "./src/cookie.ts",
+    "./origin": "./src/origin.ts",
+    "./client": "./src/client.ts",
+    "./files": "./src/files.ts",
+    "./events": "./src/events.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@orpc/client": "catalog:",
+    "@repo/api-contract": "workspace:*",
+    "@repo/i18n": "workspace:*",
+    "@repo/log": "workspace:*",
+    "@repo/sites": "workspace:*",
+    "server-only": "^0.0.1"
+  },
+  "peerDependencies": {
+    "next": "catalog:",
+    "react": "catalog:"
+  },
+  "devDependencies": {
+    "@orpc/server": "catalog:",
+    "@repo/ai-contract": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/bun": "catalog:",
+    "@types/react": "catalog:",
+    "next": "catalog:",
+    "react": "catalog:"
+  }
+}

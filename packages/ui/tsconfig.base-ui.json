@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.typecheck.json",
+  "include": [
+    "src/components/animate-ui/primitives/base/**/*.tsx",
+    "src/components/animate-ui/components/base/**/*.tsx",
+    "src/components/animate-ui/components/community/radial-menu.tsx"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

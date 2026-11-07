@@ -1,0 +1,25 @@
+{
+  "name": "@repo/i18n",
+  "version": "0.1.0",
+  "description": "Locales, browser-language negotiation, the locale cookie and the ICU message catalogs",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./locales": "./src/locales.ts",
+    "./cookie": "./src/cookie.ts",
+    "./dates": "./src/dates.ts",
+    "./messages": "./src/messages.ts",
+    "./translate": "./src/translate.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "use-intl": "catalog:"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/bun": "catalog:"
+  }
+}

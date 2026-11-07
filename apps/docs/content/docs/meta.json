@@ -1,0 +1,15 @@
+{
+  "pages": [
+    "index",
+    "---Start here---",
+    "getting-started",
+    "architecture",
+    "---Guides---",
+    "authentication",
+    "deploying",
+    "adding-an-app",
+    "---Developers---",
+    "developers",
+    "..."
+  ]
+}

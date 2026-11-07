@@ -1,0 +1,66 @@
+{
+  "skipLink": "Hoppa till innehållet",
+  "themeToggle": "Växla mellan ljust och mörkt tema",
+  "signIn": "Logga in",
+  "cookieConsent": {
+    "region": "Samtycke till kakor",
+    "text": "Vi använder kakor för inloggning och, om du tillåter det, för att förstå hur webbplatsen används.",
+    "privacy": "Integritet",
+    "acceptAll": "Godkänn alla",
+    "necessaryOnly": "Endast nödvändiga"
+  },
+  "userMenu": {
+    "trigger": "{pending, plural, =0 {Kontomeny för {name}} one {Kontomeny för {name}, # väntande inbjudan} other {Kontomeny för {name}, # väntande inbjudningar}}",
+    "workspace": "Arbetsyta",
+    "noWorkspace": "Ingen arbetsyta än",
+    "createWorkspace": "Skapa en arbetsyta",
+    "manageMembers": "Hantera medlemmar",
+    "invitations": "Inbjudningar",
+    "account": "Konto",
+    "signOut": "Logga ut"
+  },
+  "notificationBell": {
+    "label": "{count, plural, =0 {Inga olästa aviseringar} one {# oläst avisering} other {# olästa aviseringar}}",
+    "many": "Fler än {cap} olästa aviseringar",
+    "unknown": "Aviseringar"
+  },
+  "impersonation": {
+    "viewingAs": "Visar som",
+    "ends": "slutar",
+    "stop": "Sluta agera som användaren",
+    "endsAt": "{time} UTC"
+  },
+  "siteNav": "Webbplats",
+  "footerNav": "Sidfot",
+  "menu": {
+    "open": "Öppna menyn",
+    "title": "Meny",
+    "close": "Stäng"
+  },
+  "sites": {
+    "www": "Hem",
+    "app": "App",
+    "auth": "Logga in",
+    "account": "Konto",
+    "docs": "Dokumentation",
+    "help": "Hjälp",
+    "jobs": "Jobb",
+    "blog": "Blogg"
+  },
+  "footerGroups": {
+    "product": "Produkt",
+    "company": "Företag",
+    "account": "Konto"
+  },
+  "twoFactorRequired": {
+    "title": "Tvåstegsverifiering krävs",
+    "body": "{workspace} kräver tvåstegsverifiering. Slå på den, eller lägg till en passkey, för att fortsätta.",
+    "setup": "Slå på tvåstegsverifiering",
+    "otherWorkspaces": "Eller öppna en annan arbetsyta:",
+    "switchTo": "Byt till {workspace}",
+    "createWorkspace": "Skapa en ny arbetsyta",
+    "leaveHint": "Behöver du inte längre den här arbetsytan?",
+    "leave": "Lämna {workspace}",
+    "leaving": "Lämnar…"
+  }
+}

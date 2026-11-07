@@ -1,0 +1,110 @@
+---
+title: "api_key.created"
+description: "An API key was created for your workspace."
+---
+
+{/* Generated from @repo/public-api-contract by apps/docs/scripts/generate-api-reference.ts. Do not edit: change the contract, then run bun run --filter @repo/docs generate:api. */}
+
+An API key was created for your workspace.
+
+`data` describes the key — its name, the 8 characters of its prefix, its scopes and when it expires — never the key itself.
+
+## Payload
+
+Every delivery's body is one JSON envelope: the event's `type`, the `timestamp` it happened at, and its `data`.
+
+<SchemaTable caption={"Envelope"} schema={{
+  "type": "object",
+  "properties": {
+    "type": {
+      "const": "api_key.created",
+      "description": "The event type."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the event happened. The \u0060webhook-timestamp\u0060 header is when this attempt was signed."
+    },
+    "data": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "description": "The API key's id."
+        },
+        "name": {
+          "type": "string",
+          "description": "The key's name."
+        },
+        "prefix": {
+          "type": "string",
+          "description": "The 8 characters after \u0060bb_live_\u0060 that identify the key."
+        },
+        "scopes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "workspace:read",
+              "members:read",
+              "notes:read",
+              "notes:write"
+            ],
+            "type": "string"
+          },
+          "description": "What the key may do."
+        },
+        "expiresAt": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "When the key stops working; \u0060null\u0060 if it never expires."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "prefix",
+        "scopes",
+        "expiresAt"
+      ],
+      "description": "The event's payload."
+    }
+  },
+  "required": [
+    "type",
+    "timestamp",
+    "data"
+  ]
+}} />
+
+## Example
+
+Shown formatted here; a delivery's body arrives as minified JSON.
+
+```json
+{
+  "type": "api_key.created",
+  "timestamp": "2026-01-15T09:30:00.000Z",
+  "data": {
+    "id": 1,
+    "name": "CRM sync",
+    "prefix": "EXAMPLE0",
+    "scopes": [
+      "notes:read",
+      "notes:write"
+    ],
+    "expiresAt": "2026-04-15T09:30:00.000Z"
+  }
+}
+```
+
+<Callout type="warning" title="Verify the signature first">
+Anyone can send a request to your endpoint. Before you parse or act on a delivery, check its `webhook-signature` header against your endpoint's signing secret, and refuse a `webhook-timestamp` more than 5 minutes from your own clock. See [Verifying signatures](/developers/webhooks/verifying-signatures).
+</Callout>

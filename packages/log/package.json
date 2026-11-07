@@ -1,0 +1,19 @@
+{
+  "name": "@repo/log",
+  "version": "0.1.0",
+  "description": "A dependency-free structured logger with request context",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./context": "./src/context.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/bun": "catalog:"
+  }
+}

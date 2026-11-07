@@ -1,0 +1,10 @@
+import { buttonVariants } from "@repo/ui/components/animate-ui/components/buttons/button";
+import { type FlipButtonBackProps as FlipButtonBackPrimitiveProps, type FlipButtonFrontProps as FlipButtonFrontPrimitiveProps, type FlipButtonProps as FlipButtonPrimitiveProps } from "@repo/ui/components/animate-ui/primitives/buttons/flip";
+import type { VariantProps } from "class-variance-authority";
+type FlipButtonProps = FlipButtonPrimitiveProps & VariantProps<typeof buttonVariants>;
+declare function FlipButton({ variant, size, ...props }: FlipButtonProps): import("react").JSX.Element;
+type FlipButtonFrontProps = FlipButtonFrontPrimitiveProps & VariantProps<typeof buttonVariants>;
+declare function FlipButtonFront({ variant, size, className, ...props }: FlipButtonFrontProps): import("react").JSX.Element;
+type FlipButtonBackProps = FlipButtonBackPrimitiveProps & VariantProps<typeof buttonVariants>;
+declare function FlipButtonBack({ variant, size, className, ...props }: FlipButtonBackProps): import("react").JSX.Element;
+export { FlipButton, FlipButtonBack, type FlipButtonBackProps, FlipButtonFront, type FlipButtonFrontProps, type FlipButtonProps, };

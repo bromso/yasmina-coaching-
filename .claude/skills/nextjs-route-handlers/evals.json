@@ -1,0 +1,48 @@
+[
+  {
+    "query": "add a /api/webhook endpoint for Stripe",
+    "should_trigger": true,
+    "rationale": "webhook route handler"
+  },
+  {
+    "query": "create a server action for the contact form",
+    "should_trigger": true,
+    "rationale": "next-safe-action"
+  },
+  {
+    "query": "add a POST handler at /api/contact",
+    "should_trigger": true,
+    "rationale": "explicit route handler"
+  },
+  {
+    "query": "build a route.ts that returns user data",
+    "should_trigger": true,
+    "rationale": "route handler"
+  },
+  {
+    "query": "create a type-safe form action with next-safe-action",
+    "should_trigger": true,
+    "rationale": "explicit lib mention"
+  },
+  {
+    "query": "add a dashboard page for orders",
+    "should_trigger": false,
+    "rationale": "should hit add-dashboard-route"
+  },
+  {
+    "query": "create a Button component",
+    "should_trigger": false,
+    "rationale": "should hit add-ui-component"
+  },
+  {
+    "query": "make a marketing pricing page",
+    "should_trigger": false,
+    "rationale": "should hit add-mdx-page"
+  },
+  { "query": "what is REST?", "should_trigger": false, "rationale": "generic" },
+  {
+    "query": "add a GraphQL resolver for products",
+    "should_trigger": false,
+    "rationale": "GraphQL resolver, different skill space"
+  }
+]

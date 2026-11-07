@@ -1,0 +1,31 @@
+{
+  "mcpServers": {
+    "chrome-devtools": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@latest"],
+      "env": {}
+    },
+    "deepwiki": {
+      "type": "http",
+      "url": "https://mcp.deepwiki.com/mcp"
+    },
+    "shadcn": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["shadcn@latest", "mcp"],
+      "env": {}
+    },
+    "motion": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "--ignore-scripts",
+        "https://api.motion.dev/registry.tgz?package=motion-studio-mcp&version=6.1.0"
+      ],
+      "env": {
+        "TOKEN": "${MOTION_TOKEN}"
+      }
+    }
+  }
+}

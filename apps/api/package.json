@@ -1,0 +1,60 @@
+{
+  "name": "@repo/api",
+  "version": "0.1.0",
+  "description": "API shell on Bun.serve + oRPC — frontend boilerplate",
+  "keywords": [
+    "boilerplate",
+    "bun",
+    "orpc"
+  ],
+  "author": "Jonas Bröms",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "NODE_ENV=development bun --hot src/index.ts",
+    "dev:worker": "NODE_ENV=development bun --hot src/worker.ts",
+    "build": "bun build ./src/index.ts ./src/worker.ts ./src/backup-cli.ts ./src/restore-cli.ts --target=bun --outdir=dist --minify --sourcemap=linked",
+    "compile": "bun build ./src/index.ts --compile --minify --sourcemap --outfile=dist/api",
+    "start": "NODE_ENV=production bun dist/index.js",
+    "start:worker": "NODE_ENV=production bun dist/worker.js",
+    "db:migrate": "bun src/migrate-cli.ts",
+    "backup": "bun src/backup-cli.ts",
+    "restore": "bun src/restore-cli.ts",
+    "test": "bun test --timeout 30000",
+    "test:postgres": "TEST_DATABASE_URL=postgres://postgres:postgres@127.0.0.1:5432/postgres bun test --timeout 30000",
+    "typecheck": "tsc --noEmit",
+    "check": "biome check .",
+    "check:fix": "biome check --write .",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "format": "biome format .",
+    "format:fix": "biome format --write .",
+    "validate": "bun format && bun lint && bun check && bun run typecheck && bun run test && bun run build"
+  },
+  "dependencies": {
+    "@orpc/openapi": "catalog:",
+    "@orpc/server": "catalog:",
+    "@orpc/zod": "catalog:",
+    "@oslojs/encoding": "catalog:",
+    "@oslojs/otp": "catalog:",
+    "@repo/api-contract": "workspace:*",
+    "@repo/email": "workspace:*",
+    "@repo/i18n": "workspace:*",
+    "@repo/log": "workspace:*",
+    "@repo/public-api-contract": "workspace:*",
+    "@repo/service-kit": "workspace:*",
+    "@repo/sites": "workspace:*",
+    "@simplewebauthn/server": "catalog:",
+    "arctic": "catalog:",
+    "nodemailer": "catalog:",
+    "stripe": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@orpc/client": "catalog:",
+    "@repo/typescript-config": "workspace:*",
+    "@types/bun": "catalog:",
+    "@types/nodemailer": "catalog:",
+    "standardwebhooks": "^1.1.1"
+  }
+}

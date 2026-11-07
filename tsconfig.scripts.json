@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Scripts",
+  "extends": "./packages/typescript-config/bun.json",
+  "compilerOptions": {
+    "types": ["bun"],
+    "noEmit": true
+  },
+  "include": ["scripts/**/*.ts", "perf/**/*.ts"]
+}

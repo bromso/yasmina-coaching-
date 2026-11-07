@@ -1,0 +1,34 @@
+import { type HTMLMotionProps } from "motion/react";
+import { AlertDialog as AlertDialogPrimitive } from "radix-ui";
+import type * as React from "react";
+type AlertDialogContextType = {
+    isOpen: boolean;
+    setIsOpen: AlertDialogProps["onOpenChange"];
+};
+declare const useAlertDialog: () => AlertDialogContextType;
+type AlertDialogProps = React.ComponentProps<typeof AlertDialogPrimitive.Root>;
+declare function AlertDialog(props: AlertDialogProps): React.JSX.Element;
+type AlertDialogTriggerProps = React.ComponentProps<typeof AlertDialogPrimitive.Trigger>;
+declare function AlertDialogTrigger(props: AlertDialogTriggerProps): React.JSX.Element;
+type AlertDialogPortalProps = Omit<React.ComponentProps<typeof AlertDialogPrimitive.Portal>, "forceMount">;
+declare function AlertDialogPortal(props: AlertDialogPortalProps): React.JSX.Element;
+type AlertDialogOverlayProps = Omit<React.ComponentProps<typeof AlertDialogPrimitive.Overlay>, "forceMount" | "asChild"> & HTMLMotionProps<"div">;
+declare function AlertDialogOverlay({ transition, ...props }: AlertDialogOverlayProps): React.JSX.Element;
+type AlertDialogFlipDirection = "top" | "bottom" | "left" | "right";
+type AlertDialogContentProps = Omit<React.ComponentProps<typeof AlertDialogPrimitive.Content>, "forceMount" | "asChild"> & HTMLMotionProps<"div"> & {
+    from?: AlertDialogFlipDirection;
+};
+declare function AlertDialogContent({ from, onOpenAutoFocus, onCloseAutoFocus, onEscapeKeyDown, transition, ...props }: AlertDialogContentProps): React.JSX.Element;
+type AlertDialogCancelProps = React.ComponentProps<typeof AlertDialogPrimitive.Cancel>;
+declare function AlertDialogCancel(props: AlertDialogCancelProps): React.JSX.Element;
+type AlertDialogActionProps = React.ComponentProps<typeof AlertDialogPrimitive.Action>;
+declare function AlertDialogAction(props: AlertDialogActionProps): React.JSX.Element;
+type AlertDialogHeaderProps = React.ComponentProps<"div">;
+declare function AlertDialogHeader(props: AlertDialogHeaderProps): React.JSX.Element;
+type AlertDialogFooterProps = React.ComponentProps<"div">;
+declare function AlertDialogFooter(props: AlertDialogFooterProps): React.JSX.Element;
+type AlertDialogTitleProps = React.ComponentProps<typeof AlertDialogPrimitive.Title>;
+declare function AlertDialogTitle(props: AlertDialogTitleProps): React.JSX.Element;
+type AlertDialogDescriptionProps = React.ComponentProps<typeof AlertDialogPrimitive.Description>;
+declare function AlertDialogDescription(props: AlertDialogDescriptionProps): React.JSX.Element;
+export { AlertDialog, AlertDialogAction, type AlertDialogActionProps, AlertDialogCancel, type AlertDialogCancelProps, AlertDialogContent, type AlertDialogContentProps, type AlertDialogContextType, AlertDialogDescription, type AlertDialogDescriptionProps, type AlertDialogFlipDirection, AlertDialogFooter, type AlertDialogFooterProps, AlertDialogHeader, type AlertDialogHeaderProps, AlertDialogOverlay, type AlertDialogOverlayProps, AlertDialogPortal, type AlertDialogPortalProps, type AlertDialogProps, AlertDialogTitle, type AlertDialogTitleProps, AlertDialogTrigger, type AlertDialogTriggerProps, useAlertDialog, };

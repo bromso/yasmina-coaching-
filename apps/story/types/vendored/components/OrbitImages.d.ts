@@ -1,0 +1,31 @@
+import { type ReactNode } from "react";
+type OrbitShape = "ellipse" | "circle" | "square" | "rectangle" | "triangle" | "star" | "heart" | "infinity" | "wave" | "custom";
+interface OrbitImagesProps {
+    images?: string[];
+    altPrefix?: string;
+    shape?: OrbitShape;
+    customPath?: string;
+    baseWidth?: number;
+    radiusX?: number;
+    radiusY?: number;
+    radius?: number;
+    starPoints?: number;
+    starInnerRatio?: number;
+    rotation?: number;
+    duration?: number;
+    itemSize?: number;
+    direction?: "normal" | "reverse";
+    fill?: boolean;
+    width?: number | "100%";
+    height?: number | "auto";
+    className?: string;
+    showPath?: boolean;
+    pathColor?: string;
+    pathWidth?: number;
+    easing?: "linear" | "easeIn" | "easeOut" | "easeInOut";
+    paused?: boolean;
+    centerContent?: ReactNode;
+    responsive?: boolean;
+}
+export default function OrbitImages({ images, altPrefix, shape, customPath, baseWidth, radiusX, radiusY, radius, starPoints, starInnerRatio, rotation, duration, itemSize, direction, fill, width, height, className, showPath, pathColor, pathWidth, easing, paused, centerContent, responsive, }: OrbitImagesProps): import("react").JSX.Element;
+export {};

@@ -1,0 +1,251 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.6.3/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true,
+    "defaultBranch": "main"
+  },
+  "files": {
+    "ignoreUnknown": true,
+    "includes": [
+      "**",
+      "!**/.git",
+      "!**/.turbo",
+      "!**/.agents/skills",
+      "!**/.next",
+      "!**/.swc",
+      "!**/.sourcemaps",
+      "!**/.source",
+      "!**/.claude/settings.local.json",
+      "!**/.cursor",
+      "!**/.vscode",
+      "!**/workspace.code-workspace",
+      "!**/node_modules",
+      "!**/dist",
+      "!**/build",
+      "!**/coverage",
+      "!**/bun.lockb",
+      "!**/bun.lock",
+      "!**/package-lock.json",
+      "!**/yarn.lock",
+      "!**/public/sw.js",
+      "!**/public/sw.js.map",
+      "!**/public/**/*.svg",
+      "!apps/story/types/vendored"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "formatWithErrors": false,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100,
+    "lineEnding": "lf"
+  },
+  "javascript": {
+    "formatter": {
+      "arrowParentheses": "always",
+      "bracketSpacing": true,
+      "bracketSameLine": false,
+      "quoteStyle": "double",
+      "jsxQuoteStyle": "double",
+      "semicolons": "asNeeded",
+      "trailingCommas": "es5"
+    }
+  },
+  "css": {
+    "parser": {
+      "cssModules": true,
+      "tailwindDirectives": true
+    },
+    "linter": {
+      "enabled": false
+    },
+    "formatter": {
+      "enabled": false
+    }
+  },
+  "markdown": {
+    "formatter": {
+      "enabled": false
+    }
+  },
+  "yaml": {
+    "formatter": {
+      "enabled": false
+    }
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on"
+        }
+      }
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "correctness": {
+        "useExhaustiveDependencies": "warn",
+        "noUnusedVariables": {
+          "level": "warn",
+          "options": { "ignoreRestSiblings": true }
+        }
+      },
+      "style": {
+        "useImportType": "warn",
+        "useNodejsImportProtocol": "error"
+      },
+      "suspicious": {
+        "noDocumentCookie": "off",
+        "noArrayIndexKey": "warn"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": [".vscode/*.json", "tsconfig.json", "tsconfig.*.json", "**/tsconfig.json"],
+      "json": {
+        "parser": {
+          "allowComments": true,
+          "allowTrailingCommas": true
+        }
+      }
+    },
+    {
+      "includes": [
+        "**/packages/ui/src/components/ASCIIText.tsx",
+        "**/packages/ui/src/components/AnimatedContent.tsx",
+        "**/packages/ui/src/components/Antigravity.tsx",
+        "**/packages/ui/src/components/Aurora.tsx",
+        "**/packages/ui/src/components/Balatro.tsx",
+        "**/packages/ui/src/components/Ballpit.tsx",
+        "**/packages/ui/src/components/Beams.tsx",
+        "**/packages/ui/src/components/BlobCursor.tsx",
+        "**/packages/ui/src/components/BlurText.tsx",
+        "**/packages/ui/src/components/BounceCards.tsx",
+        "**/packages/ui/src/components/BubbleMenu.tsx",
+        "**/packages/ui/src/components/CardNav.tsx",
+        "**/packages/ui/src/components/CardSwap.tsx",
+        "**/packages/ui/src/components/ChromaGrid.tsx",
+        "**/packages/ui/src/components/CircularGallery.tsx",
+        "**/packages/ui/src/components/CircularText.tsx",
+        "**/packages/ui/src/components/ClickSpark.tsx",
+        "**/packages/ui/src/components/ColorBends.tsx",
+        "**/packages/ui/src/components/Crosshair.tsx",
+        "**/packages/ui/src/components/Cubes.tsx",
+        "**/packages/ui/src/components/CurvedLoop.tsx",
+        "**/packages/ui/src/components/DarkVeil.tsx",
+        "**/packages/ui/src/components/DecayCard.tsx",
+        "**/packages/ui/src/components/DecryptedText.tsx",
+        "**/packages/ui/src/components/Dither.tsx",
+        "**/packages/ui/src/components/DomeGallery.tsx",
+        "**/packages/ui/src/components/ElasticSlider.tsx",
+        "**/packages/ui/src/components/ElectricBorder.tsx",
+        "**/packages/ui/src/components/FallingText.tsx",
+        "**/packages/ui/src/components/FaultyTerminal.tsx",
+        "**/packages/ui/src/components/FloatingLines.tsx",
+        "**/packages/ui/src/components/FlowingMenu.tsx",
+        "**/packages/ui/src/components/FluidGlass.tsx",
+        "**/packages/ui/src/components/FlyingPosters.tsx",
+        "**/packages/ui/src/components/Folder.tsx",
+        "**/packages/ui/src/components/FuzzyText.tsx",
+        "**/packages/ui/src/components/Galaxy.tsx",
+        "**/packages/ui/src/components/GhostCursor.tsx",
+        "**/packages/ui/src/components/GlareHover.tsx",
+        "**/packages/ui/src/components/GlassIcons.tsx",
+        "**/packages/ui/src/components/GlitchText.tsx",
+        "**/packages/ui/src/components/GooeyNav.tsx",
+        "**/packages/ui/src/components/GradientBlinds.tsx",
+        "**/packages/ui/src/components/GradualBlur.tsx",
+        "**/packages/ui/src/components/Grainient.tsx",
+        "**/packages/ui/src/components/GridDistortion.tsx",
+        "**/packages/ui/src/components/GridMotion.tsx",
+        "**/packages/ui/src/components/HyperSpeedPresets.tsx",
+        "**/packages/ui/src/components/Hyperspeed.tsx",
+        "**/packages/ui/src/components/ImageTrail.tsx",
+        "**/packages/ui/src/components/InfiniteMenu.tsx",
+        "**/packages/ui/src/components/Iridescence.tsx",
+        "**/packages/ui/src/components/LaserFlow.tsx",
+        "**/packages/ui/src/components/LetterGlitch.tsx",
+        "**/packages/ui/src/components/LightPillar.tsx",
+        "**/packages/ui/src/components/LightRays.tsx",
+        "**/packages/ui/src/components/Lightning.tsx",
+        "**/packages/ui/src/components/LiquidChrome.tsx",
+        "**/packages/ui/src/components/LiquidEther.tsx",
+        "**/packages/ui/src/components/LogoLoop.tsx",
+        "**/packages/ui/src/components/MagicBento.tsx",
+        "**/packages/ui/src/components/MagnetLines.tsx",
+        "**/packages/ui/src/components/Masonry.tsx",
+        "**/packages/ui/src/components/MetaBalls.tsx",
+        "**/packages/ui/src/components/MetallicPaint.tsx",
+        "**/packages/ui/src/components/ModelViewer.tsx",
+        "**/packages/ui/src/components/Noise.tsx",
+        "**/packages/ui/src/components/Orb.tsx",
+        "**/packages/ui/src/components/OrbitImages.tsx",
+        "**/packages/ui/src/components/PixelBlast.tsx",
+        "**/packages/ui/src/components/PixelCard.tsx",
+        "**/packages/ui/src/components/PixelSnow.tsx",
+        "**/packages/ui/src/components/PixelTrail.tsx",
+        "**/packages/ui/src/components/PixelTransition.tsx",
+        "**/packages/ui/src/components/Plasma.tsx",
+        "**/packages/ui/src/components/Prism.tsx",
+        "**/packages/ui/src/components/PrismaticBurst.tsx",
+        "**/packages/ui/src/components/ProfileCard.tsx",
+        "**/packages/ui/src/components/ReactBitsCarousel.tsx",
+        "**/packages/ui/src/components/ReactBitsParticles.tsx",
+        "**/packages/ui/src/components/ReflectiveCard.tsx",
+        "**/packages/ui/src/components/Ribbons.tsx",
+        "**/packages/ui/src/components/RippleGrid.tsx",
+        "**/packages/ui/src/components/ScrollFloat.tsx",
+        "**/packages/ui/src/components/ScrollReveal.tsx",
+        "**/packages/ui/src/components/ScrollStack.tsx",
+        "**/packages/ui/src/components/ShapeBlur.tsx",
+        "**/packages/ui/src/components/Shuffle.tsx",
+        "**/packages/ui/src/components/Silk.tsx",
+        "**/packages/ui/src/components/SplashCursor.tsx",
+        "**/packages/ui/src/components/SpotlightCard.tsx",
+        "**/packages/ui/src/components/Squares.tsx",
+        "**/packages/ui/src/components/Stack.tsx",
+        "**/packages/ui/src/components/StaggeredMenu.tsx",
+        "**/packages/ui/src/components/StarBorder.tsx",
+        "**/packages/ui/src/components/StickerPeel.tsx",
+        "**/packages/ui/src/components/TargetCursor.tsx",
+        "**/packages/ui/src/components/TextCursor.tsx",
+        "**/packages/ui/src/components/TextPressure.tsx",
+        "**/packages/ui/src/components/Threads.tsx",
+        "**/packages/ui/src/components/TiltedCard.tsx",
+        "**/packages/ui/src/components/TrueFocus.tsx",
+        "**/packages/ui/src/components/VariableProximity.tsx",
+        "**/packages/ui/src/components/Waves.tsx",
+        "**/packages/ui/src/components/animate-ui/**",
+        "**/packages/ui/src/components/magicui/**",
+        "**/packages/ui/src/components/charts/**"
+      ],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "noSvgWithoutTitle": "off",
+            "noStaticElementInteractions": "off",
+            "useKeyWithClickEvents": "off",
+            "useSemanticElements": "off"
+          },
+          "correctness": {
+            "useExhaustiveDependencies": "off"
+          },
+          "style": {
+            "noNonNullAssertion": "off"
+          },
+          "suspicious": {
+            "noArrayIndexKey": "off",
+            "noExplicitAny": "off"
+          }
+        }
+      }
+    }
+  ]
+}

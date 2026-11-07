@@ -1,0 +1,98 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Graphify output (queried via the graphify skill, never read directly — graph.json is multi-MB)
+graphify-out/
+
+# Build outputs
+.next/
+out/
+dist/
+build/
+.turbo/
+storybook-static/
+
+# Cache
+.cache/
+*.tsbuildinfo
+.eslintcache
+.stylelintcache
+
+# Lock files (large, not useful for understanding code)
+bun.lockb
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE/Editor
+.idea/
+.vscode/
+*.code-workspace
+*.swp
+*.swo
+.DS_Store
+.cursor/
+
+# Infrastructure (not needed for code understanding)
+.devcontainer/
+docker/
+.github/
+.changeset/
+
+# Config files (read via CLAUDE.md)
+turbo.json
+biome.json
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# Generated types (regenerated on build)
+*.d.ts.map
+
+# Public assets (binary files)
+public/fonts/
+public/images/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+*.webp
+*.svg
+*.woff
+*.woff2
+*.ttf
+*.eot
+
+# Storybook
+storybook-static/
+
+# Playwright
+playwright-report/
+test-results/
+
+# Large mock data files (reduces token usage significantly)
+apps/app/src/data/mock/campaigns.ts
+apps/app/src/data/mock/assets.ts
+
+# Misc
+*.tgz
+*.tar.gz
+*.zip

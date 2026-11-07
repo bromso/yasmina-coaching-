@@ -1,0 +1,19 @@
+{
+  "name": "@repo/tokens",
+  "version": "1.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "node sd.config.js",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "style-dictionary": "^5.7.1"
+  },
+  "exports": {
+    "./css": "./dist/css/variables.css",
+    "./js": "./dist/js/tokens.js",
+    "./ts": "./dist/ts/tokens.ts",
+    "./json": "./dist/json/tokens.json"
+  }
+}

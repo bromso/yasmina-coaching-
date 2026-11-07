@@ -1,0 +1,33 @@
+import { type PreviewCardArrowProps as PreviewCardArrowPropsPrimitive, type PreviewCardBackdropProps as PreviewCardBackdropPropsPrimitive, type PreviewCardPopupProps as PreviewCardPopupPropsPrimitive, type PreviewCardPortalProps as PreviewCardPortalPropsPrimitive, type PreviewCardPositionerProps as PreviewCardPositionerPropsPrimitive, type PreviewCardProps as PreviewCardPropsPrimitive, type PreviewCardTriggerProps as PreviewCardTriggerPropsPrimitive } from "@repo/ui/components/animate-ui/primitives/base/preview-card";
+import * as React from "react";
+type PreviewLinkCardContextType = {
+    href: string;
+    src?: string;
+    width?: number;
+    height?: number;
+};
+declare const usePreviewLinkCard: () => PreviewLinkCardContextType;
+type PreviewLinkCardProps = PreviewCardPropsPrimitive & {
+    href: string;
+    src?: string;
+    width?: number;
+    height?: number;
+    deviceScaleFactor?: number;
+    colorScheme?: "light" | "dark";
+};
+declare function PreviewLinkCard({ href, src, width, height, deviceScaleFactor, colorScheme, ...props }: PreviewLinkCardProps): React.JSX.Element;
+type PreviewLinkCardTriggerProps = PreviewCardTriggerPropsPrimitive & React.ComponentProps<"a">;
+declare function PreviewLinkCardTrigger({ children, href: hrefProp, render, ...props }: PreviewLinkCardTriggerProps): React.JSX.Element;
+type PreviewLinkCardPortalProps = PreviewCardPortalPropsPrimitive;
+declare function PreviewLinkCardPortal(props: PreviewLinkCardPortalProps): React.JSX.Element;
+type PreviewLinkCardPositionerProps = PreviewCardPositionerPropsPrimitive;
+declare function PreviewLinkCardPositioner({ side, sideOffset, align, ...props }: PreviewLinkCardPositionerProps): React.JSX.Element;
+type PreviewLinkCardPopupProps = PreviewCardPopupPropsPrimitive & React.ComponentProps<"a">;
+declare function PreviewLinkCardPopup({ transition, href: hrefProp, style, children, ...props }: PreviewLinkCardPopupProps): React.JSX.Element;
+type PreviewLinkCardImageProps = Omit<React.ComponentProps<"img">, "src" | "width" | "height">;
+declare function PreviewLinkCardImage({ alt, ...props }: PreviewLinkCardImageProps): React.JSX.Element;
+type PreviewLinkCardBackdropProps = PreviewCardBackdropPropsPrimitive;
+declare function PreviewLinkCardBackdrop(props: PreviewLinkCardBackdropProps): React.JSX.Element;
+type PreviewLinkCardArrowProps = PreviewCardArrowPropsPrimitive;
+declare function PreviewLinkCardArrow(props: PreviewLinkCardArrowProps): React.JSX.Element;
+export { PreviewLinkCard, PreviewLinkCardArrow, type PreviewLinkCardArrowProps, PreviewLinkCardBackdrop, type PreviewLinkCardBackdropProps, type PreviewLinkCardContextType, PreviewLinkCardImage, type PreviewLinkCardImageProps, PreviewLinkCardPopup, type PreviewLinkCardPopupProps, PreviewLinkCardPortal, type PreviewLinkCardPortalProps, PreviewLinkCardPositioner, type PreviewLinkCardPositionerProps, type PreviewLinkCardProps, PreviewLinkCardTrigger, type PreviewLinkCardTriggerProps, usePreviewLinkCard, };

@@ -1,0 +1,8 @@
+[
+  {
+    "rule": "aria-hidden-focus",
+    "route": "account:/workspace",
+    "state": true,
+    "reason": "Radix modal DropdownMenu sets aria-hidden on content outside the open menu while trapping focus inside it; those elements cannot receive focus while the menu is open (a11y-keyboard.spec checks the trap)"
+  }
+]

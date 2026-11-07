@@ -1,0 +1,46 @@
+{
+  "name": "@repo/ai",
+  "version": "0.1.0",
+  "description": "AI service shell on Bun.serve + AI SDK + oRPC — frontend boilerplate",
+  "keywords": [
+    "boilerplate",
+    "bun",
+    "ai"
+  ],
+  "author": "Jonas Bröms",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "NODE_ENV=development bun --hot src/index.ts",
+    "build": "bun build ./src/index.ts --target=bun --outdir=dist --minify --sourcemap=linked",
+    "compile": "bun build ./src/index.ts --compile --minify --sourcemap --outfile=dist/ai",
+    "start": "NODE_ENV=production bun dist/index.js",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "check": "biome check .",
+    "check:fix": "biome check --write .",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "format": "biome format .",
+    "format:fix": "biome format --write .",
+    "validate": "bun format && bun lint && bun check && bun run typecheck && bun run test && bun run build"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "catalog:",
+    "@orpc/openapi": "catalog:",
+    "@orpc/server": "catalog:",
+    "@orpc/zod": "catalog:",
+    "@repo/ai-contract": "workspace:*",
+    "@repo/api-contract": "workspace:*",
+    "@repo/log": "workspace:*",
+    "@repo/service-kit": "workspace:*",
+    "@repo/telemetry": "workspace:*",
+    "ai": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@orpc/client": "catalog:",
+    "@repo/typescript-config": "workspace:*",
+    "@types/bun": "catalog:"
+  }
+}

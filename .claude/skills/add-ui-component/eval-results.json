@@ -1,0 +1,91 @@
+{
+  "skill_name": "add-ui-component",
+  "description": "MUST USE for ANY request to create, add, or build a shared UI component, primitive, atom, widget, or design-system element in this Bun workspaces monorepo. Always creates two files - the component at packages/ui/src/components/NAME.tsx AND a Storybook story at apps/story/src/stories/NAME.stories.tsx. Use for Badge, Button, Card, Modal, Tooltip, Dialog, Switch, Tabs, Avatar, or any reusable widget. Trigger phrases - \"add a Badge component\", \"create a reusable Modal\", \"build a Tooltip\", \"I need a Card in the design system\", \"add a shadcn Switch component to the UI package\", \"new UI primitive\", \"shared component\", \"reusable widget\", \"add to packages/ui\", \"add a component to the shared UI package\". Skip ONLY for app-specific forms/layouts that import app data (those live in apps/APPNAME/src/components/), marketing pages, or dashboard route pages.",
+  "results": [
+    {
+      "query": "I need a Tooltip in the design system",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "create a reusable Modal component",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "add a Badge component to the shared UI package",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "build a generic Card variant",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "create a new dashboard page for /teams",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "add a shadcn Switch component",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "make a settings form for the user profile",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "what's the Tailwind utility for grid?",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "create a sidebar layout for apps/app",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "add an MDX marketing page",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    }
+  ],
+  "summary": {
+    "total": 10,
+    "passed": 5,
+    "failed": 5
+  }
+}

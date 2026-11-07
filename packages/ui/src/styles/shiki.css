@@ -1,0 +1,15 @@
+/*
+ * Dual-theme Shiki output: fumadocs-mdx compiles code blocks with both a light and a dark theme,
+ * emitting --shiki-light / --shiki-dark (and the matching -bg variables) on every token span
+ * inside pre.shiki. Light is the default; .dark (next-themes' class on <html>) swaps the pair.
+ */
+.shiki,
+.shiki span {
+  color: var(--shiki-light);
+  background-color: var(--shiki-light-bg);
+}
+.dark .shiki,
+.dark .shiki span {
+  color: var(--shiki-dark);
+  background-color: var(--shiki-dark-bg);
+}

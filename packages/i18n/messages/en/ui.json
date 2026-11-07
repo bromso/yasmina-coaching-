@@ -1,0 +1,66 @@
+{
+  "skipLink": "Skip to content",
+  "themeToggle": "Toggle theme",
+  "signIn": "Sign in",
+  "cookieConsent": {
+    "region": "Cookie consent",
+    "text": "We use cookies for sign-in and, if you allow it, to understand how the site is used.",
+    "privacy": "Privacy",
+    "acceptAll": "Accept all",
+    "necessaryOnly": "Necessary only"
+  },
+  "userMenu": {
+    "trigger": "{pending, plural, =0 {Account menu for {name}} one {Account menu for {name}, # pending invitation} other {Account menu for {name}, # pending invitations}}",
+    "workspace": "Workspace",
+    "noWorkspace": "No workspace yet",
+    "createWorkspace": "Create a workspace",
+    "manageMembers": "Manage members",
+    "invitations": "Invitations",
+    "account": "Account",
+    "signOut": "Sign out"
+  },
+  "notificationBell": {
+    "label": "{count, plural, =0 {No unread notifications} one {# unread notification} other {# unread notifications}}",
+    "many": "More than {cap} unread notifications",
+    "unknown": "Notifications"
+  },
+  "impersonation": {
+    "viewingAs": "Viewing as",
+    "ends": "ends",
+    "stop": "Stop impersonating",
+    "endsAt": "{time} UTC"
+  },
+  "siteNav": "Site",
+  "footerNav": "Footer",
+  "menu": {
+    "open": "Open menu",
+    "title": "Menu",
+    "close": "Close"
+  },
+  "sites": {
+    "www": "Home",
+    "app": "App",
+    "auth": "Sign in",
+    "account": "Account",
+    "docs": "Docs",
+    "help": "Help",
+    "jobs": "Jobs",
+    "blog": "Blog"
+  },
+  "footerGroups": {
+    "product": "Product",
+    "company": "Company",
+    "account": "Account"
+  },
+  "twoFactorRequired": {
+    "title": "Two-step verification required",
+    "body": "{workspace} requires two-step verification. Turn it on, or add a passkey, to continue.",
+    "setup": "Set up two-step verification",
+    "otherWorkspaces": "Or open another workspace:",
+    "switchTo": "Switch to {workspace}",
+    "createWorkspace": "Create another workspace",
+    "leaveHint": "No longer need this workspace?",
+    "leave": "Leave {workspace}",
+    "leaving": "Leaving…"
+  }
+}

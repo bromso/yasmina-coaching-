@@ -1,0 +1,14 @@
+{
+  "title": "Events",
+  "pages": [
+    "note-created",
+    "note-deleted",
+    "member-joined",
+    "member-left",
+    "member-role-changed",
+    "workspace-updated",
+    "api-key-created",
+    "api-key-revoked",
+    "ping"
+  ]
+}

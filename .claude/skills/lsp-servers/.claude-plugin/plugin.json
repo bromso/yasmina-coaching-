@@ -1,0 +1,8 @@
+{
+  "name": "lsp-servers",
+  "description": "Language servers for this monorepo — TypeScript, Biome, and Tailwind CSS — giving Claude Code real-time type errors, lint diagnostics, and class validation.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Jonas Broms"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "font": {
+    "family": {
+      "sans": {
+        "$value": "Inter, sans-serif",
+        "$type": "fontFamily",
+        "$description": "Default sans-serif font"
+      },
+      "serif": {
+        "$value": "Merriweather, serif",
+        "$type": "fontFamily",
+        "$description": "Serif font for headings"
+      },
+      "mono": {
+        "$value": "JetBrains Mono, monospace",
+        "$type": "fontFamily",
+        "$description": "Monospace font for code"
+      }
+    }
+  },
+  "tracking": {
+    "normal": {
+      "$value": "0em",
+      "$type": "letterSpacing",
+      "$description": "Normal letter spacing"
+    }
+  }
+}

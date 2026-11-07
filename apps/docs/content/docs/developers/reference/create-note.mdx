@@ -1,0 +1,173 @@
+---
+title: "Create a note"
+description: "Creates a note authored by the API key."
+---
+
+{/* Generated from @repo/public-api-contract by apps/docs/scripts/generate-api-reference.ts. Do not edit: change the contract, then run bun run --filter @repo/docs generate:api. */}
+
+Creates a note authored by the API key.
+
+`title` is required, 1-200 characters once leading and trailing spaces are trimmed (it is stored trimmed); `body` is optional, up to 10,000 characters, and defaults to an empty string. Requires the `notes:write` scope.
+
+<Endpoint method={"POST"} path={"/v1/notes"} scope={"notes:write"} />
+
+## Request
+
+Send the body as JSON.
+
+<SchemaTable caption={"Request body"} schema={{
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "The note's title. Leading and trailing spaces are trimmed first; what is left must be 1-200 characters."
+    },
+    "body": {
+      "type": "string",
+      "maxLength": 10000,
+      "default": "",
+      "description": "The note's text."
+    }
+  },
+  "required": [
+    "title"
+  ]
+}} />
+
+## Example request
+
+The example reads your API key from the `API_KEY` environment variable. A key looks like `bb_live_EXAMPLE0_docsOnlyFakeKeyNeverIssuedDoNotUse000000000` — that one is a fake, never issued. {/* gitleaks:allow */}
+
+```bash
+curl -X POST "https://api.your-domain.example/v1/notes" \
+  -H "Authorization: Bearer $API_KEY" \
+  -H "content-type: application/json" \
+  -d '{"title":"Quarterly planning","body":"Agenda and decisions from the planning meeting."}'
+```
+
+<Callout type="warning" title="Keep your API key secret">
+Send the key only in the `Authorization` header, from your own server. Never put it in a URL or a query string, where logs and browser history keep it, and never in browser or mobile app code, where anyone can read it. See [Authentication](/developers/authentication) for creating and revoking keys.
+</Callout>
+
+## Response
+
+On success the API answers `201 Created` with a JSON body.
+
+<SchemaTable caption={"Response body"} schema={{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "description": "The note's id."
+    },
+    "title": {
+      "type": "string",
+      "description": "The note's title."
+    },
+    "body": {
+      "type": "string",
+      "description": "The note's text; empty when it has none."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the note was created."
+    },
+    "author": {
+      "anyOf": [
+        {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "const": "user",
+                  "description": "Who wrote the note: a person (\u0060user\u0060) or an API key (\u0060api_key\u0060)."
+                },
+                "id": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "description": "The person's user id, or the API key's id."
+                },
+                "name": {
+                  "type": "string",
+                  "description": "The person's display name, or the API key's name."
+                }
+              },
+              "required": [
+                "type",
+                "id",
+                "name"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "const": "api_key",
+                  "description": "Who wrote the note: a person (\u0060user\u0060) or an API key (\u0060api_key\u0060)."
+                },
+                "id": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "description": "The person's user id, or the API key's id."
+                },
+                "name": {
+                  "type": "string",
+                  "description": "The person's display name, or the API key's name."
+                }
+              },
+              "required": [
+                "type",
+                "id",
+                "name"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Who wrote the note; \u0060null\u0060 once the person's account is deleted."
+    }
+  },
+  "required": [
+    "id",
+    "title",
+    "body",
+    "createdAt",
+    "author"
+  ]
+}} />
+
+Example response:
+
+```json
+{
+  "id": 1,
+  "title": "Quarterly planning",
+  "body": "Agenda and decisions from the planning meeting.",
+  "createdAt": "2026-01-15T09:30:00.000Z",
+  "author": {
+    "type": "api_key",
+    "id": 2,
+    "name": "CRM sync"
+  }
+}
+```
+
+## Errors
+
+Every error answers with a JSON body `{ "error": { "code": "…", "message": "…" } }`. This route can answer:
+
+- `400` `validation_failed` — the body is invalid. The `message` is `Input validation failed` and does not name the field; check the request against the rules in the tables above. A body that is not valid JSON gets `Malformed request. Ensure the request body is properly formatted and the 'Content-Type' header is set correctly.` instead.
+- `401` `unauthorized` — the API key is missing, malformed, unknown, revoked or expired, or the key's workspace was deleted or its plan no longer includes API access.
+- `403` `forbidden_scope` — the key does not have the `notes:write` scope.
+- `413` `validation_failed` — the request body is larger than the API accepts. A body over the server's hard limit may be refused with an empty `413`, with no JSON body.
+- `429` `rate_limited` — too many requests with this key, or too many refused attempts from your address; wait the number of seconds in the `Retry-After` header, then retry.
+- `500` `internal` — an unexpected error on our side; retry later.
+- `503` `internal` — the request took too long to answer. It may still have taken effect, so check before you retry a change.

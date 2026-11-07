@@ -1,0 +1,68 @@
+name: Security scans
+
+# A weekly run so a new advisory against an already-merged dependency, or a new base-image CVE,
+# does not wait for the next PR to touch that workspace to be noticed — plus workflow_dispatch for
+# an on-demand run. ci.yml's `security`/`docker` jobs already cover every PR and push to main; this
+# workflow is the standing check in between.
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+# Nothing here writes to the repository.
+permissions:
+  contents: read
+
+# A manual dispatch should never overlap the weekly run (or another dispatch): queue behind it
+# rather than cancel a scan in progress.
+concurrency:
+  group: security-scans
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Dependency audit
+        # bun audit --json reads only bun.lock — no install step needed.
+        run: bun scripts/security/audit.ts
+
+      - name: Upload audit results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: security-audit
+          path: security/.results
+          include-hidden-files: true
+          retention-days: 7
+
+  image:
+    # The build/cache/scan steps are shared with ci.yml's `docker` job through image-scan.yml
+    # (`workflow_call`) — this job supplies only the matrix, the same three rows as ci.yml's
+    # DOCKER_MATRIX (one Next app, app, stands in for all seven — they share next.Dockerfile —
+    # plus the two Bun services).
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dockerfile: next
+            app: app
+            port: 3001
+          - dockerfile: bun-service
+            app: api
+            port: 3007
+          - dockerfile: bun-service
+            app: ai
+            port: 3008
+    uses: ./.github/workflows/image-scan.yml
+    with:
+      dockerfile: ${{ matrix.dockerfile }}
+      app: ${{ matrix.app }}
+      port: ${{ matrix.port }}

@@ -1,0 +1,127 @@
+name: Image scan
+
+# The build -> restore cache -> scan -> own cache -> check freshness -> save cache -> upload
+# steps shared by ci.yml's `docker` job (one PR-affected image at a time) and security.yml's
+# `image` job (all three, weekly). Each caller supplies one matrix row as inputs and keeps its own
+# matrix and `cache-from`/`cache-to` gha scope around the call — only the steps below move here.
+# See docs/guides/security-scanning.md.
+on:
+  workflow_call:
+    inputs:
+      dockerfile:
+        required: true
+        type: string
+      app:
+        required: true
+        type: string
+      port:
+        required: true
+        type: number
+
+jobs:
+  image-scan:
+    # Permissions flow down from the caller and a called workflow can only narrow them, never
+    # widen them — there is no `permissions: inherit` keyword for GITHUB_TOKEN permissions (that
+    # syntax exists only for `secrets: inherit`). This explicit `contents: read` is therefore
+    # redundant with ci.yml's and security.yml's own top-level `permissions:`, which already cap
+    # this job to read-only; it documents and enforces that scope here too, so it stays read-only
+    # even if a caller ever widened its own. Nothing here writes to the repository (the build
+    # never pushes; the artifact upload uses the artifact service's own token).
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: docker/setup-buildx-action@v4
+
+      - name: UTC date
+        # One value for both caches below: APT_REFRESH busts the Dockerfiles' apt-get upgrade layer
+        # (the gha build cache would otherwise reuse it forever), and Trivy's DB cache is keyed by it.
+        id: date
+        run: echo "date=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+
+      - name: Build ${{ inputs.app }} image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/${{ inputs.dockerfile }}.Dockerfile
+          build-args: |
+            APP=${{ inputs.app }}
+            PORT=${{ inputs.port }}
+            APT_REFRESH=${{ steps.date.outputs.date }}
+          tags: boilerplate-bun-scan-${{ inputs.app }}
+          # Loaded into the local Docker daemon (never pushed) so scripts/security/image.ts can
+          # scan the tag it just built.
+          load: true
+          push: false
+          cache-from: type=gha,scope=${{ inputs.app }}
+          cache-to: type=gha,mode=max,scope=${{ inputs.app }}
+
+      - name: Restore Trivy's vulnerability database
+        # Restore and save are split so the save runs even when the scan fails (findings are not a
+        # reason to throw away a freshly downloaded DB).
+        id: trivy-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: security/.cache/trivy
+          key: trivy-db-${{ steps.date.outputs.date }}
+          restore-keys: |
+            trivy-db-
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Scan ${{ inputs.app }} image
+        id: scan
+        run: >-
+          bun scripts/security/image.ts
+          --image boilerplate-bun-scan-${{ inputs.app }}
+          --app ${{ inputs.app }}
+
+      - name: Own Trivy's cache
+        # Trivy runs as root in its container, so the files it writes are root-owned (0700/0600)
+        # and the runner user's cache save could not read them.
+        if: ${{ !cancelled() }}
+        run: if [ -d security/.cache ]; then sudo chown -R "$(id -u):$(id -g)" security/.cache; fi
+
+      - name: Check Trivy's vulnerability database was refreshed
+        # The scan step can be skipped entirely (an earlier failure, e.g. the build) while still
+        # leaving a restored, older DB sitting in security/.cache/trivy — `!cancelled()` on its own
+        # would then save that stale DB under *today's* key, a false exact-hit for the rest of the
+        # day. The scan step's own outcome check below is what rules that out; this step adds that
+        # db/metadata.json's mtime is within the last day. Trivy rewrites that file only when it
+        # downloads a DB, and actions/cache/restore keeps the original mtimes, so this passes for
+        # a DB downloaded within the last 24h by this run or an earlier one — never an older one.
+        id: trivy-fresh
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -f security/.cache/trivy/db/metadata.json ] && \
+             find security/.cache/trivy/db/metadata.json -mmin -1440 | grep -q .; then
+            echo "fresh=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "fresh=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Save Trivy's vulnerability database
+        # Only when the scan step actually ran (outcome success or failure, never skipped) and the
+        # DB directory holds a database downloaded within the last 24h — and only when today's
+        # exact key missed, since cache keys are immutable and an exact hit is already saved.
+        if: >-
+          ${{ !cancelled() && (steps.scan.outcome == 'success' || steps.scan.outcome == 'failure') &&
+          steps.trivy-fresh.outputs.fresh == 'true' && steps.trivy-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v6
+        with:
+          path: security/.cache/trivy
+          key: trivy-db-${{ steps.date.outputs.date }}
+
+      - name: Upload image scan results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: security-image-${{ inputs.app }}
+          path: security/.results
+          include-hidden-files: true
+          retention-days: 7

@@ -1,0 +1,20 @@
+import { type DialogCloseProps as DialogClosePrimitiveProps, type DialogDescriptionProps as DialogDescriptionPrimitiveProps, type DialogFooterProps as DialogFooterPrimitiveProps, type DialogHeaderProps as DialogHeaderPrimitiveProps, type DialogPopupProps as DialogPopupPrimitiveProps, type DialogProps as DialogPrimitiveProps, type DialogTitleProps as DialogTitlePrimitiveProps, type DialogTriggerProps as DialogTriggerPrimitiveProps } from "@repo/ui/components/animate-ui/primitives/base/dialog";
+type DialogProps = DialogPrimitiveProps;
+declare function Dialog(props: DialogProps): import("react").JSX.Element;
+type DialogTriggerProps = DialogTriggerPrimitiveProps;
+declare function DialogTrigger(props: DialogTriggerProps): import("react").JSX.Element;
+type DialogCloseProps = DialogClosePrimitiveProps;
+declare function DialogClose(props: DialogCloseProps): import("react").JSX.Element;
+type DialogPopupProps = DialogPopupPrimitiveProps & {
+    showCloseButton?: boolean;
+};
+declare function DialogPopup({ className, children, showCloseButton, ...props }: DialogPopupProps): import("react").JSX.Element;
+type DialogHeaderProps = DialogHeaderPrimitiveProps;
+declare function DialogHeader({ className, ...props }: DialogHeaderProps): import("react").JSX.Element;
+type DialogFooterProps = DialogFooterPrimitiveProps;
+declare function DialogFooter({ className, ...props }: DialogFooterProps): import("react").JSX.Element;
+type DialogTitleProps = DialogTitlePrimitiveProps;
+declare function DialogTitle({ className, ...props }: DialogTitleProps): import("react").JSX.Element;
+type DialogDescriptionProps = DialogDescriptionPrimitiveProps;
+declare function DialogDescription({ className, ...props }: DialogDescriptionProps): import("react").JSX.Element;
+export { Dialog, DialogClose, type DialogCloseProps, DialogDescription, type DialogDescriptionProps, DialogFooter, type DialogFooterProps, DialogHeader, type DialogHeaderProps, DialogPopup, type DialogPopupProps, type DialogProps, DialogTitle, type DialogTitleProps, DialogTrigger, type DialogTriggerProps, };

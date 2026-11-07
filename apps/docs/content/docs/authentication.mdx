@@ -1,0 +1,52 @@
+---
+title: Authentication
+description: How sign-in, the shared session cookie, workspaces and two-step verification work.
+tags: [auth, security]
+---
+
+## Sessions
+
+`apps/api` owns users and sessions. The Next apps reach them through `@repo/session`: one
+`createAuth` per app, `requireUser()` in pages and actions. The `session` cookie is HttpOnly,
+`SameSite=Lax` and set on the parent domain (`COOKIE_DOMAIN`), so signing in on the auth app signs
+you in on every subdomain.
+
+The browser never calls the API. A Next app forwards the cookie's token server to server, next to
+its own service token, and the service token alone cannot act as a user.
+
+## Ways to sign in
+
+- **Password**, with sign-up, a verify-email link and password reset.
+- **Google, GitHub and Apple**, each offered only when its credentials are set.
+- **Magic link**: a one-time link by email, valid for fifteen minutes and consumed only by a button
+  press, so mail scanners cannot use it up.
+
+Sign-up, magic-link and reset requests are rate limited per address and across the API.
+
+## Workspaces
+
+Every tenant is a workspace with members and one ordered list of roles: viewer, member, admin and
+owner. Every scoped call names its workspace and is checked against the caller's membership, and a
+workspace always keeps an owner. Invitations are single-use, valid for seven days and bound to the
+invited address.
+
+## Two-step verification
+
+Users can turn on an authenticator app with ten single-use recovery codes. Once it is on, every
+sign-in method asks for a code before a session is issued. Turning it on needs a verified email,
+and the secret is stored encrypted under `TWO_FACTOR_ENCRYPTION_KEY`.
+
+Lost the phone? Each recovery code signs in once. With none left, a superadmin can reset two-step
+verification from the admin pages: that turns it off, ends the user's sessions and emails them.
+There is no email bypass, and a password reset leaves two-step verification on.
+
+## Environment
+
+| Variable | Needed by | Purpose |
+|---|---|---|
+| `COOKIE_DOMAIN` | app, auth, account | The parent domain the session cookie is set on |
+| `AUTH_URL` | app, account, api | Where sign-in lives |
+| `APP_URL` | app, auth, account, api | Where signed-in users land; invitation links point here |
+| `API_URL`, `API_SERVICE_TOKEN` | every Next app | How a Next app reaches the API |
+
+Read [deploying](/deploying) for the full list of values a production build needs.

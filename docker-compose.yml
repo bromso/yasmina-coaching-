@@ -1,0 +1,399 @@
+# Production-like stack: every app built from its Dockerfile, on the same ports as `bun dev`.
+#   docker compose up -d --build        # everything
+#   docker compose up -d --build app ai # a subset
+# Values like AI_SERVICE_TOKEN come from a root .env file (see .env.example).
+
+x-next-app: &next-app
+  restart: unless-stopped
+
+# Sign-in state for the Next apps that read the session cookie (@repo/session). This stack runs on
+# plain localhost ports, where a shared cookie is not available, so COOKIE_DOMAIN is left empty:
+# set it and the *_URL vars to your real domains (in the root .env) for a working login. Until then
+# `app`, `auth` and `account` fail closed — there is no host-only mode, an empty value counts as
+# missing. Their containers start, but the boot check (src/instrumentation.ts) leaves Next
+# unprepared: the log says `COOKIE_DOMAIN is not set` and every request, /api/health included,
+# answers 500, so they report unhealthy. apps/api likewise refuses to start without AUTH_URL.
+x-auth-env: &auth-env
+  COOKIE_DOMAIN: ${COOKIE_DOMAIN:-}
+  AUTH_URL: ${AUTH_URL:-http://localhost:3002}
+  APP_URL: ${APP_URL:-http://localhost:3001}
+
+services:
+  www:
+    <<: *next-app
+    build:
+      {
+        context: .,
+        dockerfile: docker/next.Dockerfile,
+        args: {
+          APP: www,
+          PORT: 3000,
+          SITE_DOMAIN: "${SITE_DOMAIN:-brand.localhost}",
+          COOKIE_DOMAIN: "${COOKIE_DOMAIN:-.brand.localhost}",
+        },
+      }
+    ports: ["127.0.0.1:3000:3000"]
+    # The waitlist form's server action calls the api; www refuses to start without both.
+    # The consent banner's domain is baked in at build, via the COOKIE_DOMAIN build arg above;
+    # COOKIE_DOMAIN here (env) reaches only server code.
+    environment:
+      API_URL: http://api:3007
+      API_SERVICE_TOKEN: ${API_SERVICE_TOKEN:-}
+      COOKIE_DOMAIN: ${COOKIE_DOMAIN:-}
+
+  app:
+    <<: *next-app
+    build:
+      {
+        context: .,
+        dockerfile: docker/next.Dockerfile,
+        args: { APP: app, PORT: 3001, SITE_DOMAIN: "${SITE_DOMAIN:-brand.localhost}" },
+      }
+    ports: ["127.0.0.1:3001:3001"]
+    # Service names resolve on Compose's default network. app waits only for api: ai exits at
+    # startup without AI_SERVICE_TOKEN, and that must not keep the notes page down.
+    environment:
+      <<: *auth-env
+      API_URL: http://api:3007
+      API_SERVICE_TOKEN: ${API_SERVICE_TOKEN:-}
+      AI_SERVICE_URL: http://ai:3008
+      AI_SERVICE_TOKEN: ${AI_SERVICE_TOKEN:-}
+    depends_on:
+      api:
+        condition: service_healthy
+
+  auth:
+    <<: *next-app
+    build:
+      {
+        context: .,
+        dockerfile: docker/next.Dockerfile,
+        args: { APP: auth, PORT: 3002, SITE_DOMAIN: "${SITE_DOMAIN:-brand.localhost}" },
+      }
+    ports: ["127.0.0.1:3002:3002"]
+    environment:
+      <<: *auth-env
+      API_URL: http://api:3007
+      API_SERVICE_TOKEN: ${API_SERVICE_TOKEN:-}
+
+  account:
+    <<: *next-app
+    build:
+      {
+        context: .,
+        dockerfile: docker/next.Dockerfile,
+        args: { APP: account, PORT: 3003, SITE_DOMAIN: "${SITE_DOMAIN:-brand.localhost}" },
+      }
+    ports: ["127.0.0.1:3003:3003"]
+    environment:
+      <<: *auth-env
+      API_URL: http://api:3007
+      API_SERVICE_TOKEN: ${API_SERVICE_TOKEN:-}
+
+  docs:
+    <<: *next-app
+    build:
+      {
+        context: .,
+        dockerfile: docker/next.Dockerfile,
+        args: {
+          APP: docs,
+          PORT: 3004,
+          SITE_DOMAIN: "${SITE_DOMAIN:-brand.localhost}",
+          COOKIE_DOMAIN: "${COOKIE_DOMAIN:-.brand.localhost}",
+          CONTENT_REPO_URL: "${CONTENT_REPO_URL:-}",
+        },
+      }
+    ports: ["127.0.0.1:3004:3004"]
+    # Telemetry only: this app's /api/telemetry route forwards errors/vitals to the api when both
+    # are set; it drops them otherwise.
+    environment:
+      API_URL: http://api:3007
+      API_SERVICE_TOKEN: ${API_SERVICE_TOKEN:-}
+
+  help:
+    <<: *next-app
+    build:
+      {
+        context: .,
+        dockerfile: docker/next.Dockerfile,
+        args: {
+          APP: help,
+          PORT: 3005,
+          SITE_DOMAIN: "${SITE_DOMAIN:-brand.localhost}",
+          COOKIE_DOMAIN: "${COOKIE_DOMAIN:-.brand.localhost}",
+        },
+      }
+    ports: ["127.0.0.1:3005:3005"]
+    # The /contact form's server action calls the api's support.create; help refuses to start
+    # without both. (Telemetry reaches the same api when they are set, same as every other app.)
+    environment:
+      API_URL: http://api:3007
+      API_SERVICE_TOKEN: ${API_SERVICE_TOKEN:-}
+
+  jobs:
+    <<: *next-app
+    build:
+      {
+        context: .,
+        dockerfile: docker/next.Dockerfile,
+        args: {
+          APP: jobs,
+          PORT: 3006,
+          SITE_DOMAIN: "${SITE_DOMAIN:-brand.localhost}",
+          COOKIE_DOMAIN: "${COOKIE_DOMAIN:-.brand.localhost}",
+        },
+      }
+    ports: ["127.0.0.1:3006:3006"]
+    # The apply form's server action calls the api's jobs.apply; jobs refuses to start without
+    # both. (Telemetry reaches the same api when they are set, same as every other app.)
+    environment:
+      API_URL: http://api:3007
+      API_SERVICE_TOKEN: ${API_SERVICE_TOKEN:-}
+
+  blog:
+    <<: *next-app
+    build:
+      {
+        context: .,
+        dockerfile: docker/next.Dockerfile,
+        args: {
+          APP: blog,
+          PORT: 3009,
+          SITE_DOMAIN: "${SITE_DOMAIN:-brand.localhost}",
+          COOKIE_DOMAIN: "${COOKIE_DOMAIN:-.brand.localhost}",
+        },
+      }
+    ports: ["127.0.0.1:3009:3009"]
+    # Telemetry only: this app's /api/telemetry route forwards errors/vitals to the api when both
+    # are set; it drops them otherwise.
+    environment:
+      API_URL: http://api:3007
+      API_SERVICE_TOKEN: ${API_SERVICE_TOKEN:-}
+
+  api:
+    # Fails closed: without API_SERVICE_TOKEN the container exits at startup.
+    restart: on-failure:3
+    build: { context: ., dockerfile: docker/bun-service.Dockerfile, args: { APP: api, PORT: 3007 } }
+    # Named so api-worker runs this same image instead of building a second copy.
+    image: boilerplate-bun-api
+    ports: ["127.0.0.1:3007:3007"]
+    environment: &api-env
+      DATABASE_URL: sqlite:///data/api.db
+      API_SERVICE_TOKEN: ${API_SERVICE_TOKEN:-}
+      # Encrypts the stored TOTP secret. Fails closed: without it, or with the public dev key, the
+      # container exits at startup.
+      TWO_FACTOR_ENCRYPTION_KEY: ${TWO_FACTOR_ENCRYPTION_KEY:-}
+      # Where password-reset and verify links point: the auth app as the browser reaches it.
+      AUTH_URL: ${AUTH_URL:-http://localhost:3002}
+      # Where the password-changed notice links: the account app as the browser reaches it.
+      ACCOUNT_URL: ${ACCOUNT_URL:-http://localhost:3003}
+      # Where invitation mail links: the app as the browser reaches it.
+      APP_URL: ${APP_URL:-http://localhost:3001}
+      # Where the waitlist welcome mail links: https://www.<SITE_DOMAIN> (dev form on .localhost).
+      SITE_DOMAIN: ${SITE_DOMAIN:-brand.localhost}
+      # The passkey relying party id: it must equal, or be a parent domain of, both the AUTH_URL and
+      # ACCOUNT_URL hosts, or the api exits at startup naming the three. SITE_DOMAIN from the root
+      # .env when set (your parent domain, next to your real *_URL values), else `localhost`, which
+      # covers the localhost URL defaults above (docs/guides/passkeys.md).
+      PASSKEY_RP_ID: ${PASSKEY_RP_ID:-${SITE_DOMAIN:-localhost}}
+      # Mail goes to Mailpit (http://localhost:8025) unless the root .env picks another provider.
+      MAIL_PROVIDER: ${MAIL_PROVIDER:-smtp}
+      SMTP_URL: ${SMTP_URL:-smtp://mailpit:1025}
+      MAIL_FROM: ${MAIL_FROM:-Boilerplate <no-reply@brand.localhost>}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      # Where help-center support requests are mailed. Empty → MAIL_FROM's address.
+      SUPPORT_EMAIL: ${SUPPORT_EMAIL:-}
+      # Where job applications are mailed. Empty → wherever support requests go.
+      HIRING_EMAIL: ${HIRING_EMAIL:-}
+      # Platform admins: comma-separated emails, verified to count. Empty → nobody can open /admin.
+      SUPERADMIN_EMAILS: ${SUPERADMIN_EMAILS:-}
+      # Billing: the keyless mock unless the root .env picks stripe (then all six Stripe vars).
+      BILLING_PROVIDER: ${BILLING_PROVIDER:-mock}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      STRIPE_PRICE_PRO_MONTH: ${STRIPE_PRICE_PRO_MONTH:-}
+      STRIPE_PRICE_PRO_YEAR: ${STRIPE_PRICE_PRO_YEAR:-}
+      STRIPE_PRICE_TEAM_MONTH: ${STRIPE_PRICE_TEAM_MONTH:-}
+      STRIPE_PRICE_TEAM_YEAR: ${STRIPE_PRICE_TEAM_YEAR:-}
+      # Social sign-in: a provider is offered only when all of its vars are set in the root .env
+      # (docs/guides/oauth-providers.md). Empty values leave it off.
+      OAUTH_GOOGLE_CLIENT_ID: ${OAUTH_GOOGLE_CLIENT_ID:-}
+      OAUTH_GOOGLE_CLIENT_SECRET: ${OAUTH_GOOGLE_CLIENT_SECRET:-}
+      OAUTH_GITHUB_CLIENT_ID: ${OAUTH_GITHUB_CLIENT_ID:-}
+      OAUTH_GITHUB_CLIENT_SECRET: ${OAUTH_GITHUB_CLIENT_SECRET:-}
+      OAUTH_APPLE_CLIENT_ID: ${OAUTH_APPLE_CLIENT_ID:-}
+      OAUTH_APPLE_TEAM_ID: ${OAUTH_APPLE_TEAM_ID:-}
+      OAUTH_APPLE_KEY_ID: ${OAUTH_APPLE_KEY_ID:-}
+      OAUTH_APPLE_PRIVATE_KEY: ${OAUTH_APPLE_PRIVATE_KEY:-}
+      # Telemetry: store (the default; errors/vitals in the api's own tables, shown on /admin) or
+      # sentry, which also forwards each new error to Sentry over plain fetch (docs/guides/sentry.md).
+      TELEMETRY_PROVIDER: ${TELEMETRY_PROVIDER:-store}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-}
+      # Analytics: store (the default; pageviews/events in the api's own tables, shown on
+      # /admin/analytics) or posthog / plausible, which also forward each one over plain fetch (no
+      # ip, user agent or cookie ever leaves). Setup: docs/guides/analytics.md.
+      ANALYTICS_PROVIDER: ${ANALYTICS_PROVIDER:-store}
+      ANALYTICS_RETENTION_DAYS: ${ANALYTICS_RETENTION_DAYS:-90}
+      ANALYTICS_RATE_LIMIT: ${ANALYTICS_RATE_LIMIT:-120}
+      POSTHOG_KEY: ${POSTHOG_KEY:-}
+      POSTHOG_HOST: ${POSTHOG_HOST:-}
+      PLAUSIBLE_DOMAIN: ${PLAUSIBLE_DOMAIN:-}
+      PLAUSIBLE_HOST: ${PLAUSIBLE_HOST:-}
+      # Uploads (avatars, workspace logos) go to the SeaweedFS bucket below over the S3 API, with
+      # the key pair its gateway is configured with. Point these at a real bucket instead
+      # (docs/guides/storage.md).
+      STORAGE_PROVIDER: s3
+      S3_ENDPOINT: http://seaweedfs:8333
+      S3_BUCKET: uploads
+      S3_REGION: us-east-1
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-devstorage}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-devstorage-secret}
+      # Background jobs (docs/guides/background-jobs.md): the api runs the queue's worker and
+      # scheduler in-process. With the `worker` profile below, start the stack with
+      # JOBS_WORKER=false so the api only enqueues and api-worker does the work.
+      JOBS_WORKER: ${JOBS_WORKER:-true}
+      JOBS_CONCURRENCY: ${JOBS_CONCURRENCY:-4}
+      JOBS_POLL_MS: ${JOBS_POLL_MS:-1000}
+      # Nightly backup.run (0 2 * * *, docs/guides/operations.md): off by default. Retention is
+      # how long it keeps its own objects under backups/ before deleting them itself.
+      BACKUP_ENABLED: ${BACKUP_ENABLED:-false}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-14}
+      # storage.sweep (30 3 * * *) on by default; false pauses it — after a restore, until the
+      # bucket and the database agree again (docs/guides/operations.md, the restore drill).
+      STORAGE_SWEEP_ENABLED: ${STORAGE_SWEEP_ENABLED:-true}
+      # Logs (docs/guides/operations.md): empty → info, and JSON (the image runs in production).
+      LOG_LEVEL: ${LOG_LEVEL:-}
+      LOG_FORMAT: ${LOG_FORMAT:-}
+      # GET /metrics on the api and api-worker needs this bearer (24+ characters). Empty → 404.
+      METRICS_TOKEN: ${METRICS_TOKEN:-}
+      # Shown as build_info{commit} on /metrics. Empty → "unknown".
+      GIT_COMMIT: ${GIT_COMMIT:-}
+    depends_on:
+      mailpit:
+        condition: service_started
+      seaweedfs-init:
+        condition: service_completed_successfully
+    volumes:
+      - api-data:/data
+
+  # A dedicated job worker: the api's image running dist/worker.js (src/worker.ts) — the queue's
+  # worker and scheduler, no api. Off by default; opt in with the `worker` profile:
+  #   JOBS_WORKER=false docker compose --profile worker up -d --build
+  # It shares the api's environment and database volume, and serves only /health, on its own
+  # port (not published), which replaces the image's /ready health check.
+  api-worker:
+    profiles: ["worker"]
+    restart: on-failure:3
+    # The api's image (built by the api service above), not a build of its own.
+    image: boilerplate-bun-api
+    pull_policy: never
+    command: ["bun", "dist/worker.js"]
+    environment:
+      <<: *api-env
+      PORT: 3017
+    healthcheck:
+      test:
+        - CMD
+        - bun
+        - -e
+        # $$ escapes Compose's own interpolation: the container's shell-less exec sees one $.
+        - 'fetch(`http://127.0.0.1:$${process.env.PORT}/health`).then(r => process.exit(r.ok ? 0 : 1), () => process.exit(1))'
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+    depends_on:
+      # The api migrates first; the worker's own migrate then finds nothing to do.
+      api:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+      seaweedfs-init:
+        condition: service_completed_successfully
+    volumes:
+      - api-data:/data
+
+  # A local inbox: catches everything apps/api sends over SMTP (:1025, any credentials accepted)
+  # and shows it at http://localhost:8025. Nothing leaves the machine.
+  mailpit:
+    image: axllent/mailpit
+    ports: ["127.0.0.1:8025:8025"]
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+
+  # A local S3-compatible bucket for apps/api's uploads: SeaweedFS (master, volume, filer and its S3
+  # gateway in one process). Only the S3 API is published, on the host's loopback (127.0.0.1:8333,
+  # for S3_TEST_ENDPOINT or a host-run api); the api reaches seaweedfs:8333 over the Compose network.
+  # The filer (:8888) has no auth and can read, write and delete any object, so it is never
+  # published — inspect with `docker compose exec seaweedfs weed shell`. The gateway accepts only
+  # the identity in the `seaweedfs-s3` config below (without one it would accept any request); its
+  # key pair is the api's S3_ACCESS_KEY_ID / S3_SECRET_ACCESS_KEY.
+  seaweedfs:
+    image: chrislusf/seaweedfs:4.48
+    command: >-
+      server -dir=/data -ip=seaweedfs -ip.bind=0.0.0.0
+      -s3 -s3.port=8333 -s3.config=/etc/seaweedfs/s3.json
+    configs:
+      - source: seaweedfs-s3
+        target: /etc/seaweedfs/s3.json
+    ports: ["127.0.0.1:8333:8333"]
+    volumes: ["seaweedfs-data:/data"]
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8333/healthz"]
+      interval: 5s
+      retries: 20
+
+  # One-shot: creates the `uploads` bucket unless it exists, then exits; the api waits for it.
+  seaweedfs-init:
+    image: chrislusf/seaweedfs:4.48
+    depends_on: { seaweedfs: { condition: service_healthy } }
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >-
+        echo s3.bucket.list | weed shell -master=seaweedfs:9333 | grep -qE "^[[:space:]]*uploads[[:space:]]" ||
+        echo "s3.bucket.create -name uploads" | weed shell -master=seaweedfs:9333
+
+  ai:
+    # Fails closed: without AI_SERVICE_TOKEN (and the provider key, unless AI_MODEL=mock:echo) the
+    # container exits at startup with a message saying what is missing.
+    restart: on-failure:3
+    build: { context: ., dockerfile: docker/bun-service.Dockerfile, args: { APP: ai, PORT: 3008 } }
+    ports: ["127.0.0.1:3008:3008"]
+    environment:
+      AI_SERVICE_TOKEN: ${AI_SERVICE_TOKEN:-}
+      AI_MODEL: ${AI_MODEL:-anthropic:claude-opus-5}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      AI_ALLOWED_ORIGINS: ${AI_ALLOWED_ORIGINS:-}
+      # Telemetry only: reports request failures to the api's telemetry.ingest when both are set.
+      API_URL: http://api:3007
+      API_SERVICE_TOKEN: ${API_SERVICE_TOKEN:-}
+      # Logs (docs/guides/operations.md): empty → info, and JSON. The ai service has no /metrics.
+      LOG_LEVEL: ${LOG_LEVEL:-}
+      LOG_FORMAT: ${LOG_FORMAT:-}
+
+volumes:
+  api-data:
+  seaweedfs-data:
+
+configs:
+  # The S3 gateway's one identity (SeaweedFS's -s3.config format): the api's key pair, from the
+  # root .env (devstorage / devstorage-secret by default — change both before exposing the stack).
+  seaweedfs-s3:
+    content: |
+      {
+        "identities": [
+          {
+            "name": "api",
+            "credentials": [
+              {
+                "accessKey": "${S3_ACCESS_KEY_ID:-devstorage}",
+                "secretKey": "${S3_SECRET_ACCESS_KEY:-devstorage-secret}"
+              }
+            ],
+            "actions": ["Admin", "Read", "Write", "List", "Tagging"]
+          }
+        ]
+      }

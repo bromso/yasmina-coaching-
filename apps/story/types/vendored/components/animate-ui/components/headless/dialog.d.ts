@@ -1,0 +1,20 @@
+import { type DialogCloseProps as DialogClosePrimitiveProps, type DialogDescriptionProps as DialogDescriptionPrimitiveProps, type DialogFooterProps as DialogFooterPrimitiveProps, type DialogHeaderProps as DialogHeaderPrimitiveProps, type DialogPanelProps as DialogPanelPrimitiveProps, type DialogProps as DialogPrimitiveProps, type DialogTitleProps as DialogTitlePrimitiveProps } from "@repo/ui/components/animate-ui/primitives/headless/dialog";
+import type { motion } from "motion/react";
+import type * as React from "react";
+type DialogProps<TTag extends React.ElementType = "div"> = DialogPrimitiveProps<TTag>;
+declare function Dialog<TTag extends React.ElementType = "div">(props: DialogProps<TTag>): React.JSX.Element;
+type DialogCloseProps<TTag extends React.ElementType = "button"> = DialogClosePrimitiveProps<TTag>;
+declare function DialogClose<TTag extends React.ElementType = "button">(props: DialogCloseProps<TTag>): React.JSX.Element;
+type DialogPanelProps<TTag extends React.ElementType = typeof motion.div> = DialogPanelPrimitiveProps<TTag> & {
+    showCloseButton?: boolean;
+};
+declare function DialogPanel<TTag extends React.ElementType = typeof motion.div>({ className, children, showCloseButton, ...props }: DialogPanelProps<TTag>): React.JSX.Element;
+type DialogHeaderProps<TTag extends React.ElementType = "div"> = DialogHeaderPrimitiveProps<TTag>;
+declare function DialogHeader<TTag extends React.ElementType = "div">(props: DialogHeaderProps<TTag>): React.JSX.Element;
+type DialogFooterProps<TTag extends React.ElementType = "div"> = DialogFooterPrimitiveProps<TTag>;
+declare function DialogFooter<TTag extends React.ElementType = "div">({ className, ...props }: DialogFooterProps<TTag>): React.JSX.Element;
+type DialogTitleProps<TTag extends React.ElementType = "h2"> = DialogTitlePrimitiveProps<TTag>;
+declare function DialogTitle<TTag extends React.ElementType = "h2">({ className, ...props }: DialogTitleProps<TTag>): React.JSX.Element;
+type DialogDescriptionProps<TTag extends React.ElementType = "div"> = DialogDescriptionPrimitiveProps<TTag>;
+declare function DialogDescription<TTag extends React.ElementType = "div">({ className, ...props }: DialogDescriptionProps<TTag>): React.JSX.Element;
+export { Dialog, DialogClose, type DialogCloseProps, DialogDescription, type DialogDescriptionProps, DialogFooter, type DialogFooterProps, DialogHeader, type DialogHeaderProps, DialogPanel, type DialogPanelProps, type DialogProps, DialogTitle, type DialogTitleProps, };

@@ -1,0 +1,91 @@
+{
+  "skill_name": "monorepo-deps",
+  "description": "MUST USE for ANY request involving npm/bun packages, dependencies, versions, lockfiles, or security audits in this Bun workspaces monorepo. Use when adding, removing, updating, bumping, upgrading, or downgrading any package or library (React, date-fns, lodash, etc.) in any workspace (apps/app, apps/www, packages/ui, etc.), checking what's outdated, running security audits, fixing peer dependency warnings, resolving lockfile (bun.lock) merge conflicts, or deciding whether a dep change needs a changeset. Trigger phrases \u2014 \"update React\", \"bump packages\", \"upgrade to latest\", \"add date-fns\", \"add a dependency to apps/app\", \"what's outdated\", \"outdated packages in the monorepo\", \"lockfile conflict\", \"merge conflict in bun.lock\", \"security audit\", \"bun audit\", \"do I need a changeset for this dep bump\", \"peer dependency warning\", \"bun install\".",
+  "results": [
+    {
+      "query": "add date-fns to apps/app",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "I have a lockfile conflict in bun.lock",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "what's outdated in the monorepo?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "update React to the latest version",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "do I need a changeset for this dep bump?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "run a security audit on dependencies",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "add a Button component",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "create a dashboard page",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "fix a TypeScript error in my code",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "what is package.json",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    }
+  ],
+  "summary": {
+    "total": 10,
+    "passed": 4,
+    "failed": 6
+  }
+}

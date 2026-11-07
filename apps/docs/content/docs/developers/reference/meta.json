@@ -1,0 +1,4 @@
+{
+  "title": "API reference",
+  "pages": ["get-workspace", "list-members", "list-notes", "get-note", "create-note", "delete-note"]
+}

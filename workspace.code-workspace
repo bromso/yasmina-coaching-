@@ -1,0 +1,113 @@
+{
+  "folders": [
+    { "name": "🏠 Root", "path": "./" },
+    { "name": "🐳 Docker", "path": "./docker" },
+    // Apps (every apps/* workspace; scripts/vscode.test.ts checks the list is complete)
+    { "name": "🌐 WWW", "path": "./apps/www" },
+    { "name": "📱 App", "path": "./apps/app" },
+    { "name": "🔐 Auth", "path": "./apps/auth" },
+    { "name": "👤 Account", "path": "./apps/account" },
+    { "name": "📚 Docs", "path": "./apps/docs" },
+    { "name": "🛟 Help", "path": "./apps/help" },
+    { "name": "💼 Jobs", "path": "./apps/jobs" },
+    { "name": "📝 Blog", "path": "./apps/blog" },
+    { "name": "⚙️ API", "path": "./apps/api" },
+    { "name": "✨ AI", "path": "./apps/ai" },
+    { "name": "📕 Storybook", "path": "./apps/story" },
+    { "name": "🎭 E2E", "path": "./apps/e2e" },
+    { "name": "🏋️ Load", "path": "./apps/load" },
+    // Packages
+    { "name": "🎨 UI", "path": "./packages/ui" },
+    { "name": "💄 Tokens", "path": "./packages/tokens" },
+    { "name": "📜 API Contract", "path": "./packages/api-contract" },
+    { "name": "📜 AI Contract", "path": "./packages/ai-contract" },
+    { "name": "📜 Public API Contract", "path": "./packages/public-api-contract" },
+    { "name": "🍪 Session", "path": "./packages/session" },
+    { "name": "🗺️ Sites", "path": "./packages/sites" },
+    { "name": "📰 Content", "path": "./packages/content" },
+    { "name": "✉️ Email", "path": "./packages/email" },
+    { "name": "📡 Telemetry", "path": "./packages/telemetry" },
+    { "name": "🌍 i18n", "path": "./packages/i18n" },
+    { "name": "🛡️ i18n Guard", "path": "./packages/i18n-guard" },
+    { "name": "🧰 Service Kit", "path": "./packages/service-kit" },
+    { "name": "🪵 Log", "path": "./packages/log" },
+    { "name": "🟦 TS Config", "path": "./packages/typescript-config" },
+    { "name": "📟 IDE", "path": "./.vscode" },
+    { "name": "🐙 Github", "path": "./.github" },
+    { "name": "🦋 Version Control", "path": "./.changeset" },
+    { "name": "🤖 Claude", "path": "./.claude" },
+    { "name": "📦 Devcontainer", "path": "./.devcontainer" },
+  ],
+  "settings": {
+    // ===== Multi-root Workspace Specific =====
+    // These settings ONLY make sense in the multi-root context
+
+    // Hide folder icons to show emoji names in sidebar
+    "vsicons.presets.hideFolders": true,
+    "material-icon-theme.folders.theme": "none",
+    "catppuccin-icons.specificFolders": false,
+
+    // Hide redundant folders in explorer (they appear as workspace roots)
+    "files.exclude": {
+      "node_modules": true,
+      ".next": true,
+      ".swc": true,
+      ".turbo": true,
+      ".changeset": true,
+      ".devcontainer": true,
+      ".github": true,
+      ".husky": true,
+      ".claude": true,
+      ".cursor": true,
+      ".bun": true,
+      ".vscode": true,
+      "docker": true,
+      "apps": true,
+      "packages": true,
+      "coverage": true,
+      "storybook-static": true,
+      "dist": true,
+      "build": true,
+      ".source": true
+    },
+
+    // Search excludes across all roots
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/.next": true,
+      "**/.turbo": true,
+      "**/.swc": true,
+      "**/dist": true,
+      "**/build": true,
+      "**/coverage": true,
+      "**/.git": true,
+      "**/bun.lock": true,
+      "**/storybook-static": true,
+      "**/.source": true
+    },
+
+    // Terminal working directory for multi-root
+    "terminal.integrated.cwd": "${workspaceFolder:🏠 Root}",
+
+    // Tailwind config path (workspace-relative)
+    "tailwindCSS.experimental.configFile": "packages/ui/src/styles/globals.css",
+
+    // ===== File Associations =====
+    // Treat all .vscode JSON files as JSONC (allows comments)
+    "files.associations": {
+      "**/.vscode/*.json": "jsonc",
+      "**/keybindings*.json": "jsonc"
+    },
+
+    // ===== CSpell (Code Spell Checker) =====
+    // Add words to cspell.json instead of settings.json
+    "cSpell.customDictionaries": {
+      "project-words": {
+        "name": "project-words",
+        "path": "${workspaceFolder:🏠 Root}/cspell.json",
+        "addWords": true,
+        "scope": "workspace"
+      }
+    }
+  }
+}

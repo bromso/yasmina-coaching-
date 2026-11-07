@@ -1,0 +1,14 @@
+import { type TabGroupProps as TabGroupPrimitiveProps, type TabListProps as TabListPrimitiveProps, type TabPanelProps as TabPanelPrimitiveProps, type TabPanelsProps as TabPanelsPrimitiveProps, type TabProps as TabPrimitiveProps } from "@repo/ui/components/animate-ui/primitives/headless/tabs";
+import type { motion } from "motion/react";
+import type * as React from "react";
+type TabGroupProps<TTag extends React.ElementType = "div"> = TabGroupPrimitiveProps<TTag>;
+declare function TabGroup<TTag extends React.ElementType = "div">({ className, ...props }: TabGroupProps<TTag>): React.JSX.Element;
+type TabListProps<TTag extends React.ElementType = "div"> = TabListPrimitiveProps<TTag>;
+declare function TabList<TTag extends React.ElementType = "div">({ className, ...props }: TabListProps<TTag>): React.JSX.Element;
+type TabProps<TTag extends React.ElementType = "button"> = TabPrimitiveProps<TTag>;
+declare function Tab<TTag extends React.ElementType = "button">({ className, ...props }: TabProps<TTag>): React.JSX.Element;
+type TabPanelsProps<TTag extends React.ElementType = typeof motion.div> = TabPanelsPrimitiveProps<TTag>;
+declare function TabPanels<TTag extends React.ElementType = typeof motion.div>(props: TabPanelsProps<TTag>): React.JSX.Element;
+type TabPanelProps<TTag extends React.ElementType = typeof motion.div> = TabPanelPrimitiveProps<TTag>;
+declare function TabPanel<TTag extends React.ElementType = typeof motion.div>({ className, ...props }: TabPanelProps<TTag>): React.JSX.Element;
+export { Tab, TabGroup, type TabGroupProps, TabList, type TabListProps, TabPanel, type TabPanelProps, TabPanels, type TabPanelsProps, type TabProps, };

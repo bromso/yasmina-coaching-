@@ -1,0 +1,9 @@
+{
+  "extends": "@repo/typescript-config/bun.json",
+  "compilerOptions": {
+    "types": ["bun"],
+    "declaration": false,
+    "declarationMap": false
+  },
+  "include": ["src"]
+}

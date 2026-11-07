@@ -1,0 +1,149 @@
+---
+title: "note.created"
+description: "A note was created in your workspace."
+---
+
+{/* Generated from @repo/public-api-contract by apps/docs/scripts/generate-api-reference.ts. Do not edit: change the contract, then run bun run --filter @repo/docs generate:api. */}
+
+A note was created in your workspace.
+
+Sent for notes created in the app and through the API ([Create a note](/developers/reference/create-note)). `data` is the note as [Get a note](/developers/reference/get-note) returns it.
+
+## Payload
+
+Every delivery's body is one JSON envelope: the event's `type`, the `timestamp` it happened at, and its `data`.
+
+<SchemaTable caption={"Envelope"} schema={{
+  "type": "object",
+  "properties": {
+    "type": {
+      "const": "note.created",
+      "description": "The event type."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the event happened. The \u0060webhook-timestamp\u0060 header is when this attempt was signed."
+    },
+    "data": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "description": "The note's id."
+        },
+        "title": {
+          "type": "string",
+          "description": "The note's title."
+        },
+        "body": {
+          "type": "string",
+          "description": "The note's text; empty when it has none."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the note was created."
+        },
+        "author": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "const": "user",
+                      "description": "Who wrote the note: a person (\u0060user\u0060) or an API key (\u0060api_key\u0060)."
+                    },
+                    "id": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "description": "The person's user id, or the API key's id."
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "The person's display name, or the API key's name."
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "id",
+                    "name"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "const": "api_key",
+                      "description": "Who wrote the note: a person (\u0060user\u0060) or an API key (\u0060api_key\u0060)."
+                    },
+                    "id": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "description": "The person's user id, or the API key's id."
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "The person's display name, or the API key's name."
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "id",
+                    "name"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Who wrote the note; \u0060null\u0060 once the person's account is deleted."
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "body",
+        "createdAt",
+        "author"
+      ],
+      "description": "The event's payload."
+    }
+  },
+  "required": [
+    "type",
+    "timestamp",
+    "data"
+  ]
+}} />
+
+## Example
+
+Shown formatted here; a delivery's body arrives as minified JSON.
+
+```json
+{
+  "type": "note.created",
+  "timestamp": "2026-01-15T09:30:00.000Z",
+  "data": {
+    "id": 1,
+    "title": "Quarterly planning",
+    "body": "Agenda and decisions from the planning meeting.",
+    "createdAt": "2026-01-15T09:30:00.000Z",
+    "author": {
+      "type": "user",
+      "id": 2,
+      "name": "Ada Lovelace"
+    }
+  }
+}
+```
+
+<Callout type="warning" title="Verify the signature first">
+Anyone can send a request to your endpoint. Before you parse or act on a delivery, check its `webhook-signature` header against your endpoint's signing secret, and refuse a `webhook-timestamp` more than 5 minutes from your own clock. See [Verifying signatures](/developers/webhooks/verifying-signatures).
+</Callout>

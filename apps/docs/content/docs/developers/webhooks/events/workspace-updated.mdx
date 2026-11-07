@@ -1,0 +1,89 @@
+---
+title: "workspace.updated"
+description: "Your workspace was changed."
+---
+
+{/* Generated from @repo/public-api-contract by apps/docs/scripts/generate-api-reference.ts. Do not edit: change the contract, then run bun run --filter @repo/docs generate:api. */}
+
+Your workspace was changed.
+
+Sent when the workspace is renamed or its logo is changed or removed. `data` is the workspace as [Get the workspace](/developers/reference/get-workspace) returns it.
+
+## Payload
+
+Every delivery's body is one JSON envelope: the event's `type`, the `timestamp` it happened at, and its `data`.
+
+<SchemaTable caption={"Envelope"} schema={{
+  "type": "object",
+  "properties": {
+    "type": {
+      "const": "workspace.updated",
+      "description": "The event type."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the event happened. The \u0060webhook-timestamp\u0060 header is when this attempt was signed."
+    },
+    "data": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "description": "The workspace's id."
+        },
+        "name": {
+          "type": "string",
+          "description": "The workspace's name."
+        },
+        "slug": {
+          "type": "string",
+          "description": "A URL-friendly name, set when the workspace is created; it never changes."
+        },
+        "plan": {
+          "enum": [
+            "free",
+            "pro",
+            "team"
+          ],
+          "type": "string",
+          "description": "The workspace's current billing plan."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "slug",
+        "plan"
+      ],
+      "description": "The event's payload."
+    }
+  },
+  "required": [
+    "type",
+    "timestamp",
+    "data"
+  ]
+}} />
+
+## Example
+
+Shown formatted here; a delivery's body arrives as minified JSON.
+
+```json
+{
+  "type": "workspace.updated",
+  "timestamp": "2026-01-15T09:30:00.000Z",
+  "data": {
+    "id": 1,
+    "name": "Acme",
+    "slug": "acme",
+    "plan": "pro"
+  }
+}
+```
+
+<Callout type="warning" title="Verify the signature first">
+Anyone can send a request to your endpoint. Before you parse or act on a delivery, check its `webhook-signature` header against your endpoint's signing secret, and refuse a `webhook-timestamp` more than 5 minutes from your own clock. See [Verifying signatures](/developers/webhooks/verifying-signatures).
+</Callout>

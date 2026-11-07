@@ -1,0 +1,9 @@
+{
+  // TypeScript Config package-specific settings (inherits from workspace.code-workspace)
+  "json.schemas": [
+    {
+      "fileMatch": ["base.json", "bun.json", "nextjs.json", "react-library.json"],
+      "url": "https://json.schemastore.org/tsconfig"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "name": "@repo/content",
+  "version": "0.1.0",
+  "description": "Content helpers shared by the blog and docs: posts, feeds, links, SEO",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./schema": "./src/schema.ts",
+    "./posts": "./src/posts.ts",
+    "./feeds": "./src/feeds.ts",
+    "./links": "./src/links.ts",
+    "./seo": "./src/seo.ts",
+    "./checks": "./src/checks.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/bun": "catalog:"
+  }
+}

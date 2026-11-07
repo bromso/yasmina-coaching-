@@ -1,0 +1,21 @@
+{
+  "name": "@repo/i18n-guard",
+  "version": "0.1.0",
+  "description": "The hard-coded-string guard each translated app runs in its own tests",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "typescript": "catalog:"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/bun": "catalog:"
+  }
+}

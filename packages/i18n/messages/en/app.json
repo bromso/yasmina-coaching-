@@ -1,0 +1,147 @@
+{
+  "meta": {
+    "description": "Application shell — frontend boilerplate",
+    "notes": "Notes",
+    "chat": "Chat",
+    "invitation": "Invitation",
+    "workspaceNew": "Create a workspace"
+  },
+  "layout": {
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "impersonating": "(impersonating)",
+    "deletionScheduled": "Your account will be deleted on {date}.",
+    "cancelDeletion": "Cancel deletion"
+  },
+  "locale": {
+    "label": "Language",
+    "submit": "Change",
+    "error": "Your language could not be saved. Try again."
+  },
+  "status": {
+    "notFoundTitle": "Page not found",
+    "notFoundDescription": "The page you're looking for doesn't exist or has moved.",
+    "backHome": "Back to home",
+    "errorTitle": "Something went wrong",
+    "errorDescription": "An unexpected error occurred. Try again, or head back home.",
+    "errorReference": "Reference: {digest}",
+    "tryAgain": "Try again"
+  },
+  "role": "{role, select, viewer {viewer} member {member} admin {admin} owner {owner} other {{role}}}",
+  "someone": "Someone",
+  "confirm": {
+    "cancel": "Cancel",
+    "continue": "Continue"
+  },
+  "home": {
+    "eyebrow": "App shell",
+    "title": "Welcome to the application",
+    "description": "Two example pages call the backend services: notes from apps/api, chat from apps/ai. Replace them as the product takes shape.",
+    "notes": "Notes",
+    "chat": "Chat"
+  },
+  "notes": {
+    "title": "Notes · {workspace}",
+    "role": "Your role here: {role}.",
+    "intro": "Rendered on the server from apps/api over typed RPC; adding a note runs a server action.",
+    "viewerHint": "Viewers can read notes; ask an admin for the member role to add your own.",
+    "unavailable": "Notes are unavailable",
+    "pages": "Notes pages",
+    "newest": "Newest",
+    "older": "Older notes",
+    "empty": "No notes yet.",
+    "emptyOlder": "No older notes.",
+    "reconnecting": "Reconnecting…",
+    "live": {
+      "signedOut": "You've been signed out. Sign in to see live updates.",
+      "gone": "This workspace is no longer available.",
+      "twoFactorRequired": "This workspace requires two-step verification. Turn it on to see live updates."
+    },
+    "hereNow": "{count, plural, one {# person here} other {# people here}}",
+    "switched": "Switch to that workspace first",
+    "form": {
+      "title": "Title",
+      "body": "Body",
+      "submit": "Add note",
+      "saving": "Saving…"
+    },
+    "delete": {
+      "button": "Delete",
+      "deleting": "Deleting…",
+      "confirmTitle": "Delete this note?",
+      "confirmDescription": "It is removed for everyone in this workspace. This cannot be undone.",
+      "confirm": "Delete"
+    },
+    "deletedUser": "Deleted user",
+    "viaApiKey": "via API key {name}"
+  },
+  "validation": {
+    "reload": "Reload the page and try again",
+    "required": "{field, select, title {Title} body {Body} name {Name} other {This field}} is required",
+    "tooLong": "{field, select, title {Title} body {Body} name {Name} other {This field}} must be at most {max} characters",
+    "invalidCharacter": "{field, select, title {Title} body {Body} name {Name} other {This field}} contains an invalid character",
+    "invalid": "{field, select, title {Title} body {Body} name {Name} other {This field}} is invalid"
+  },
+  "errors": {
+    "notesUnavailable": "The notes service is unavailable",
+    "workspaceUnavailable": "The workspace service is unavailable right now. Try again in a moment.",
+    "chatUpgrade": "Upgrade to use chat",
+    "chatUnavailable": "Chat is temporarily unavailable",
+    "chatSignIn": "Sign in required",
+    "chatNotConfigured": "Chat is not configured",
+    "aiUnavailable": "AI service unavailable",
+    "chatTooManyRequests": "Too many messages. Wait a moment and try again.",
+    "chatTwoFactorRequired": "Turn on two-step verification to use chat in this workspace"
+  },
+  "chat": {
+    "title": "Chat",
+    "intro": "Streams from apps/ai through this app's /api/chat route, which holds the service token. Without an ANTHROPIC_API_KEY the dev service echoes you back — ask for the time and it calls its getCurrentTime tool, just as a real model would.",
+    "you": "You: ",
+    "assistant": "Assistant: ",
+    "time": "It's {time} ({zone})",
+    "timeError": "Couldn't get the time",
+    "timeChecking": "Checking the time…",
+    "error": "Something went wrong. Try again.",
+    "retry": "Retry",
+    "message": "Message",
+    "placeholder": "Say something, or ask for the time",
+    "send": "Send"
+  },
+  "upsell": {
+    "title": "Chat is on the Pro plan",
+    "description": "Upgrade this workspace to use it.",
+    "plans": "See plans"
+  },
+  "workspaceNew": {
+    "title": "Create a workspace",
+    "yours": "Your workspaces",
+    "another": "Create another",
+    "name": "Workspace name",
+    "create": "Create",
+    "creating": "Creating…"
+  },
+  "verify": {
+    "text": "<strong>Verify your email.</strong> We sent a link to {email}. Creating a workspace needs a verified address.",
+    "resend": "Resend verification email",
+    "sending": "Sending…",
+    "sent": "Sent — check your inbox.",
+    "alreadyVerified": "Your email is already verified."
+  },
+  "invitations": {
+    "heading": "Invitations",
+    "summary": "{inviter} invited you to {workspace} as a {role}.",
+    "expires": "Expires <time>{date}</time>",
+    "accept": "Accept",
+    "accepting": "Accepting…",
+    "invalid": "This invitation is no longer valid.",
+    "invalidDescription": "Ask for a new invitation link.",
+    "join": "Join {workspace}",
+    "notYou": "Not you?",
+    "signOut": "Sign out",
+    "signIn": "Sign in",
+    "createAccount": "Create account",
+    "useEmail": "Use {email}.",
+    "requiresTwoFactor": "This workspace requires two-step verification.",
+    "domainNotAllowed": "This workspace no longer accepts invitations to this address."
+  }
+}

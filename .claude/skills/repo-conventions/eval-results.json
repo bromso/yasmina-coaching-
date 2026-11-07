@@ -1,0 +1,91 @@
+{
+  "skill_name": "repo-conventions",
+  "description": "MUST USE before answering ANY question about THIS repo (frontend monorepo boilerplate, a Bun workspaces monorepo). Read this FIRST whenever the user mentions \"this repo\", \"this monorepo\", \"this codebase\", \"the dashboard app\", \"the marketing app\", or asks \"where should I put\", \"where is\", \"where are\", \"how do I run\", \"what's the X command\", \"should I add a changeset\", or about file locations, dev servers, lint, build, commits, or package layout. Trigger examples \u2014 \"where should I put a new shared button component\", \"where do blocks go\", \"where do views go\", \"how do I run the marketing site dev server\", \"what's the lint command in this repo\", \"should I add a changeset for this refactor\", \"how do I make a conventional commit\". Read this BEFORE shadcn, biome-linting, or commit skills, because only this skill knows this repo's specific paths and scripts.",
+  "results": [
+    {
+      "query": "where should I put a new shared button component?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "how do I run just the dashboard app dev server?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "what's the lint command in this repo?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "should I add a changeset for this refactor?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "where are the GraphQL resolvers?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "how do I make a conventional commit message?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "what's a JavaScript closure?",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "review my pull request",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "what does useEffect do?",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "explain async/await in TypeScript",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    }
+  ],
+  "summary": {
+    "total": 10,
+    "passed": 4,
+    "failed": 6
+  }
+}

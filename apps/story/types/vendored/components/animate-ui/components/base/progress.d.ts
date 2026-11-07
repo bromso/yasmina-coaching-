@@ -1,0 +1,10 @@
+import { type ProgressLabelProps as ProgressLabelPrimitiveProps, type ProgressProps as ProgressPrimitiveProps, type ProgressTrackProps as ProgressTrackPrimitiveProps, type ProgressValueProps as ProgressValuePrimitiveProps } from "@repo/ui/components/animate-ui/primitives/base/progress";
+type ProgressProps = ProgressPrimitiveProps;
+declare function Progress(props: ProgressProps): import("react").JSX.Element;
+type ProgressTrackProps = ProgressTrackPrimitiveProps;
+declare function ProgressTrack({ className, ...props }: ProgressTrackProps): import("react").JSX.Element;
+type ProgressLabelProps = ProgressLabelPrimitiveProps;
+declare function ProgressLabel(props: ProgressLabelProps): import("react").JSX.Element;
+type ProgressValueProps = ProgressValuePrimitiveProps;
+declare function ProgressValue(props: ProgressValueProps): import("react").JSX.Element;
+export { Progress, ProgressLabel, type ProgressLabelProps, type ProgressProps, ProgressTrack, type ProgressTrackProps, ProgressValue, type ProgressValueProps, };

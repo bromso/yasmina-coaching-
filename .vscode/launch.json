@@ -1,0 +1,259 @@
+{
+  // One place for every debug config: opening the repo folder or workspace.code-workspace (its
+  // 🏠 Root folder) shows the same list. Inside the devcontainer the servers run in the container
+  // and `browserLaunchLocation: "ui"` opens Chrome on your machine against the forwarded ports, so
+  // the *.brand.localhost URLs (and the session cookie) work in both. Next server breakpoints work
+  // there too: the dev image ships Node (js-debug hooks Node processes, not Bun).
+  // Each serverReadyAction pattern names its app's port: VS Code checks every debug terminal's
+  // output against every waiting pattern, so a shared one ("Ready in") opens the wrong browser.
+  // e2e is a task (`e2e: all journeys`) or the Playwright extension, not a debug config.
+  // scripts/vscode.test.ts keeps it in step with the apps, SITES and the dev scripts.
+  "version": "0.2.0",
+  "configurations": [
+    // ===== Next apps: server (auto-attaches to next dev) + Chrome, opened when it is ready =====
+    {
+      "name": "Next: WWW",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "bun run dev",
+      "cwd": "${workspaceFolder}/apps/www",
+      "serverReadyAction": {
+        "pattern": "Local:\\s+https?://\\S+:3000",
+        "action": "startDebugging",
+        "name": "Chrome: WWW",
+        "killOnServerStop": true
+      }
+    },
+    {
+      "name": "Chrome: WWW",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://www.brand.localhost:3000",
+      "webRoot": "${workspaceFolder}/apps/www",
+      "browserLaunchLocation": "ui"
+    },
+    {
+      "name": "Next: App",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "bun run dev",
+      "cwd": "${workspaceFolder}/apps/app",
+      "serverReadyAction": {
+        "pattern": "Local:\\s+https?://\\S+:3001",
+        "action": "startDebugging",
+        "name": "Chrome: App",
+        "killOnServerStop": true
+      }
+    },
+    {
+      "name": "Chrome: App",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://app.brand.localhost:3001",
+      "webRoot": "${workspaceFolder}/apps/app",
+      "browserLaunchLocation": "ui"
+    },
+    {
+      "name": "Next: Auth",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "bun run dev",
+      "cwd": "${workspaceFolder}/apps/auth",
+      "serverReadyAction": {
+        "pattern": "Local:\\s+https?://\\S+:3002",
+        "action": "startDebugging",
+        "name": "Chrome: Auth",
+        "killOnServerStop": true
+      }
+    },
+    {
+      "name": "Chrome: Auth",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://auth.brand.localhost:3002",
+      "webRoot": "${workspaceFolder}/apps/auth",
+      "browserLaunchLocation": "ui"
+    },
+    {
+      "name": "Next: Account",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "bun run dev",
+      "cwd": "${workspaceFolder}/apps/account",
+      "serverReadyAction": {
+        "pattern": "Local:\\s+https?://\\S+:3003",
+        "action": "startDebugging",
+        "name": "Chrome: Account",
+        "killOnServerStop": true
+      }
+    },
+    {
+      "name": "Chrome: Account",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://account.brand.localhost:3003",
+      "webRoot": "${workspaceFolder}/apps/account",
+      "browserLaunchLocation": "ui"
+    },
+    {
+      "name": "Next: Docs",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "bun run dev",
+      "cwd": "${workspaceFolder}/apps/docs",
+      "serverReadyAction": {
+        "pattern": "Local:\\s+https?://\\S+:3004",
+        "action": "startDebugging",
+        "name": "Chrome: Docs",
+        "killOnServerStop": true
+      }
+    },
+    {
+      "name": "Chrome: Docs",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://docs.brand.localhost:3004",
+      "webRoot": "${workspaceFolder}/apps/docs",
+      "browserLaunchLocation": "ui"
+    },
+    {
+      "name": "Next: Help",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "bun run dev",
+      "cwd": "${workspaceFolder}/apps/help",
+      "serverReadyAction": {
+        "pattern": "Local:\\s+https?://\\S+:3005",
+        "action": "startDebugging",
+        "name": "Chrome: Help",
+        "killOnServerStop": true
+      }
+    },
+    {
+      "name": "Chrome: Help",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://help.brand.localhost:3005",
+      "webRoot": "${workspaceFolder}/apps/help",
+      "browserLaunchLocation": "ui"
+    },
+    {
+      "name": "Next: Jobs",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "bun run dev",
+      "cwd": "${workspaceFolder}/apps/jobs",
+      "serverReadyAction": {
+        "pattern": "Local:\\s+https?://\\S+:3006",
+        "action": "startDebugging",
+        "name": "Chrome: Jobs",
+        "killOnServerStop": true
+      }
+    },
+    {
+      "name": "Chrome: Jobs",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://jobs.brand.localhost:3006",
+      "webRoot": "${workspaceFolder}/apps/jobs",
+      "browserLaunchLocation": "ui"
+    },
+    {
+      "name": "Next: Blog",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "bun run dev",
+      "cwd": "${workspaceFolder}/apps/blog",
+      "serverReadyAction": {
+        "pattern": "Local:\\s+https?://\\S+:3009",
+        "action": "startDebugging",
+        "name": "Chrome: Blog",
+        "killOnServerStop": true
+      }
+    },
+    {
+      "name": "Chrome: Blog",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://blog.brand.localhost:3009",
+      "webRoot": "${workspaceFolder}/apps/blog",
+      "browserLaunchLocation": "ui"
+    },
+
+    // ===== Bun services (oven.bun-vscode): breakpoints in src/, hot reload like `bun run dev` =====
+    {
+      "name": "Bun: API",
+      "type": "bun",
+      "request": "launch",
+      "program": "src/index.ts",
+      "cwd": "${workspaceFolder}/apps/api",
+      "env": { "NODE_ENV": "development" },
+      "watchMode": "hot"
+    },
+    {
+      "name": "Bun: AI",
+      "type": "bun",
+      "request": "launch",
+      "program": "src/index.ts",
+      "cwd": "${workspaceFolder}/apps/ai",
+      "env": { "NODE_ENV": "development" },
+      "watchMode": "hot"
+    },
+    {
+      "name": "Bun: test current file",
+      "type": "bun",
+      "request": "launch",
+      // No timeout: a test paused on a breakpoint would otherwise fail after Bun's default 5 s.
+      "runtimeArgs": ["test", "--timeout", "0"],
+      "program": "${file}",
+      "cwd": "${fileWorkspaceFolder}"
+    },
+
+    // ===== Tooling =====
+    {
+      "name": "Storybook",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "bun run dev",
+      "cwd": "${workspaceFolder}/apps/story",
+      "serverReadyAction": {
+        "pattern": "localhost:6006",
+        "action": "startDebugging",
+        "name": "Chrome: Storybook",
+        "killOnServerStop": true
+      }
+    },
+    {
+      "name": "Chrome: Storybook",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:6006",
+      "webRoot": "${workspaceFolder}/apps/story",
+      "browserLaunchLocation": "ui"
+    }
+  ],
+  "compounds": [
+    {
+      // What /notes and /chat need: the api, the AI service, the app and sign-in.
+      "name": "Stack: app",
+      "configurations": ["Bun: API", "Bun: AI", "Next: App", "Next: Auth"],
+      "stopAll": true
+    },
+    {
+      "name": "Stack: everything",
+      "configurations": [
+        "Bun: API",
+        "Bun: AI",
+        "Next: WWW",
+        "Next: App",
+        "Next: Auth",
+        "Next: Account",
+        "Next: Docs",
+        "Next: Help",
+        "Next: Jobs",
+        "Next: Blog"
+      ],
+      "stopAll": true
+    }
+  ]
+}

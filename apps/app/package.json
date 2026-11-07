@@ -1,0 +1,67 @@
+{
+  "name": "@repo/app",
+  "version": "1.1.0",
+  "description": "Application shell — frontend boilerplate",
+  "keywords": [
+    "boilerplate",
+    "next.js"
+  ],
+  "author": "Jonas Bröms",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3001 --hostname ${DEV_HOSTNAME:-app.brand.localhost}",
+    "build": "next build --webpack",
+    "analyze": "ANALYZE=true next build --webpack",
+    "start": "next start --port 3001",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "check": "biome check .",
+    "check:fix": "biome check --write .",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "format": "biome format .",
+    "format:fix": "biome format --write .",
+    "validate": "bun format && bun lint && bun check && bun run build"
+  },
+  "dependencies": {
+    "@ai-sdk/react": "catalog:",
+    "@orpc/client": "catalog:",
+    "@repo/ai-contract": "workspace:*",
+    "@repo/api-contract": "workspace:*",
+    "@repo/i18n": "workspace:*",
+    "@repo/log": "workspace:*",
+    "@repo/session": "workspace:*",
+    "@repo/sites": "workspace:*",
+    "@repo/telemetry": "workspace:*",
+    "@repo/ui": "workspace:*",
+    "@serwist/next": "catalog:",
+    "ai": "catalog:",
+    "motion": "catalog:",
+    "next": "catalog:",
+    "next-intl": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "server-only": "^0.0.1",
+    "web-vitals": "catalog:",
+    "zod": "catalog:"
+  },
+  "browserslist": [
+    "Chrome >= 109",
+    "Firefox >= 115",
+    "Safari >= 16.4",
+    "Edge >= 109",
+    "not dead"
+  ],
+  "devDependencies": {
+    "@next/bundle-analyzer": "catalog:",
+    "@repo/i18n-guard": "workspace:*",
+    "@tailwindcss/postcss": "catalog:",
+    "@types/bun": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "postcss": "catalog:",
+    "serwist": "catalog:",
+    "sharp": "catalog:"
+  }
+}

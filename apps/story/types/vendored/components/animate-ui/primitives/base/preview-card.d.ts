@@ -1,0 +1,30 @@
+import { PreviewCard as PreviewCardPrimitive } from "@base-ui/react/preview-card";
+import { type HTMLMotionProps, type MotionValue, type SpringOptions } from "motion/react";
+import type * as React from "react";
+type PreviewCardContextType = {
+    isOpen: boolean;
+    setIsOpen: PreviewCardProps["onOpenChange"];
+    x: MotionValue<number>;
+    y: MotionValue<number>;
+    followCursor?: boolean | "x" | "y";
+    followCursorSpringOptions?: SpringOptions;
+};
+declare const usePreviewCard: () => PreviewCardContextType;
+type PreviewCardProps = React.ComponentProps<typeof PreviewCardPrimitive.Root> & {
+    followCursor?: boolean | "x" | "y";
+    followCursorSpringOptions?: SpringOptions;
+};
+declare function PreviewCard({ followCursor, followCursorSpringOptions, ...props }: PreviewCardProps): React.JSX.Element;
+type PreviewCardTriggerProps = React.ComponentProps<typeof PreviewCardPrimitive.Trigger>;
+declare function PreviewCardTrigger({ onMouseMove, ...props }: PreviewCardTriggerProps): React.JSX.Element;
+type PreviewCardPortalProps = Omit<React.ComponentProps<typeof PreviewCardPrimitive.Portal>, "keepMounted">;
+declare function PreviewCardPortal(props: PreviewCardPortalProps): React.JSX.Element;
+type PreviewCardPositionerProps = React.ComponentProps<typeof PreviewCardPrimitive.Positioner>;
+declare function PreviewCardPositioner(props: PreviewCardPositionerProps): React.JSX.Element;
+type PreviewCardPopupProps = Omit<React.ComponentProps<typeof PreviewCardPrimitive.Popup>, "render"> & HTMLMotionProps<"div">;
+declare function PreviewCardPopup({ transition, style, ...props }: PreviewCardPopupProps): React.JSX.Element;
+type PreviewCardBackdropProps = React.ComponentProps<typeof PreviewCardPrimitive.Backdrop>;
+declare function PreviewCardBackdrop(props: PreviewCardBackdropProps): React.JSX.Element;
+type PreviewCardArrowProps = React.ComponentProps<typeof PreviewCardPrimitive.Arrow>;
+declare function PreviewCardArrow(props: PreviewCardArrowProps): React.JSX.Element;
+export { PreviewCard, PreviewCardArrow, type PreviewCardArrowProps, PreviewCardBackdrop, type PreviewCardBackdropProps, type PreviewCardContextType, PreviewCardPopup, type PreviewCardPopupProps, PreviewCardPortal, type PreviewCardPortalProps, PreviewCardPositioner, type PreviewCardPositionerProps, type PreviewCardProps, PreviewCardTrigger, type PreviewCardTriggerProps, usePreviewCard, };

@@ -1,0 +1,265 @@
+{
+  "layout": {
+    "greeting": {
+      "default": "Hej,",
+      "withName": "Hej {name},"
+    },
+    "orLink": "Eller öppna länken: ",
+    "footerSuffix": " · Det här mejlet skickades till dig eftersom du har ett konto."
+  },
+  "verifyEmail": {
+    "subject": "Verifiera din e-postadress",
+    "preview": "Verifiera din e-postadress för att slutföra registreringen av ditt konto",
+    "heading": "Välkommen",
+    "headingNameSuffix": ", {name}",
+    "body": "Verifiera att det här är din e-postadress. Länken är giltig i 24 timmar.",
+    "button": "Verifiera e-postadress",
+    "footer": "Om du inte skapade ett konto kan du ignorera det här mejlet."
+  },
+  "resetPassword": {
+    "subject": "Återställ ditt lösenord",
+    "preview": "Välj ett nytt lösenord",
+    "heading": "Återställ ditt lösenord",
+    "body": "Länken är giltig i en timme. Använd den för att välja ett nytt lösenord.",
+    "button": "Välj ett nytt lösenord",
+    "footer": "Om du inte bad om detta kan du ignorera det här mejlet – ditt lösenord förblir oförändrat."
+  },
+  "passwordChanged": {
+    "subject": "Ditt lösenord har ändrats",
+    "preview": "Ditt lösenord har ändrats",
+    "heading": "Ditt lösenord har ändrats",
+    "bodyBefore": "Lösenordet för ditt konto ändrades den ",
+    "okNotice": "Om det var du behöver du inte göra något mer.",
+    "resetNotice": {
+      "before": "Om det inte var du, återställ ditt lösenord nu på ",
+      "between": ", granska sedan dina inloggade enheter på "
+    }
+  },
+  "magicLink": {
+    "subject": "Din inloggningslänk",
+    "preview": "Din engångslänk för att logga in",
+    "heading": "Logga in på {brand}",
+    "body": "Länken är giltig i {minutes} minuter. Den kan bara användas en gång. Använd den för att logga in.",
+    "button": "Logga in",
+    "footer": "Om du inte begärde detta kan du ignorera det här mejlet."
+  },
+  "accountReset": {
+    "subject": "Ditt konto har återställts",
+    "preview": "Ditt konto har återställts",
+    "heading": "Ditt konto har återställts",
+    "body": "Det fanns redan ett overifierat konto för den här adressen. När du loggade in med ett kopplat konto eller en inloggningslänk togs lösenordet bort och alla enheter loggades ut.",
+    "footer": "För att logga in med ett lösenord igen, skapa ett nytt på "
+  },
+  "waitlistWelcome": {
+    "subject": "Du står på listan",
+    "preview": "Du står på väntelistan för {brand}",
+    "heading": "Du står på listan",
+    "body": "Tack för ditt intresse – vi mejlar dig när det finns nyheter.",
+    "meantime": "Under tiden: ",
+    "footer": "Om du inte anmälde dig kan du ignorera det här mejlet."
+  },
+  "invitation": {
+    "subject": "Du är inbjuden till {workspace}",
+    "preview": "{inviter} bjöd in dig till {workspace}",
+    "heading": "Gå med i {workspace} på {brand}",
+    "body": "{inviter} bjöd in dig att gå med i {workspace} som {role, select, viewer {läsare} member {medlem} admin {administratör} owner {ägare} other {{role}}}. Länken är giltig i {days} dagar.",
+    "button": "Acceptera inbjudan",
+    "footer": "Om du inte väntade dig detta kan du ignorera det här mejlet."
+  },
+  "twoFactorEnabled": {
+    "subject": "Tvåstegsverifiering aktiverad",
+    "preview": "Tvåstegsverifiering aktiverad",
+    "heading": "Tvåstegsverifiering aktiverad",
+    "body": "Ditt konto behöver nu en kod från din autentiseringsapp (eller en återställningskod) för att logga in, utöver ditt lösenord.",
+    "footer": "Om det inte var du, granska ditt konto nu på "
+  },
+  "twoFactorDisabled": {
+    "subject": "Tvåstegsverifiering inaktiverad",
+    "preview": "Tvåstegsverifiering inaktiverad",
+    "heading": "Tvåstegsverifiering inaktiverad",
+    "body": "Ditt konto ber inte längre om en kod från din autentiseringsapp för att logga in.",
+    "footer": "Om det var du behöver du inte göra något mer. Om det inte var du, byt lösenord och logga ut dina andra enheter nu på "
+  },
+  "twoFactorReset": {
+    "subject": "Tvåstegsverifiering har återställts",
+    "preview": "Tvåstegsverifiering har återställts",
+    "heading": "Tvåstegsverifiering har återställts",
+    "body": "En administratör inaktiverade tvåstegsverifiering på ditt konto och loggade ut kontot på alla enheter. Ditt lösenord ändrades inte.",
+    "footer": "Du kan aktivera den igen när du vill på"
+  },
+  "passkeyAdded": {
+    "subject": "En ny passkey lades till i ditt konto",
+    "preview": "En ny passkey lades till i ditt konto",
+    "heading": "En ny passkey har lagts till",
+    "body": "”{passkeyName}” kan nu logga in dig utan lösenord eller kod.",
+    "footer": "Om det inte var du, ta bort den nu på "
+  },
+  "passkeyRemoved": {
+    "subject": "En passkey togs bort från ditt konto",
+    "preview": "En passkey togs bort från ditt konto",
+    "heading": "En passkey togs bort",
+    "body": "”{passkeyName}” kan inte längre logga in dig.",
+    "footer": "Om det inte var du, granska ditt konto nu på "
+  },
+  "passkeysRemoved": {
+    "subject": "Dina passkeys togs bort",
+    "preview": "Dina passkeys togs bort",
+    "heading": "Dina passkeys togs bort",
+    "body": "En administratör tog bort alla passkeys från ditt konto och loggade ut kontot på alla enheter.",
+    "passwordUnchanged": "Ditt lösenord ändrades inte.",
+    "footer": "Du kan lägga till en ny passkey när du vill på "
+  },
+  "dataExportReady": {
+    "subject": "Din dataexport är klar",
+    "preview": "Din dataexport är klar att ladda ned",
+    "heading": "Din dataexport är klar",
+    "body": "Din export finns på sidan Data och integritet. Den finns tillgänglig i 7 dagar.",
+    "button": "Ladda ned dina data",
+    "footer": "Om du inte begärde den här exporten kan du ignorera det här mejlet."
+  },
+  "accountDeletionScheduled": {
+    "subject": "Ditt konto kommer att raderas",
+    "preview": "Ditt konto kommer att raderas den {date}",
+    "heading": "Ditt konto kommer att raderas",
+    "body": "Ditt konto och dess data raderas den {date}. Logga in innan dess för att avbryta raderingen.",
+    "button": "Avbryt raderingen"
+  },
+  "accountDeleted": {
+    "subject": "Ditt konto har raderats",
+    "preview": "Ditt konto har raderats",
+    "heading": "Ditt konto har raderats",
+    "body": "Ditt konto och dess data är borttagna. Arbetsytor du delade med andra behåller anteckningarna du skrev, visade som ”Borttagen användare”."
+  },
+  "accountSuspended": {
+    "subject": "Ditt konto har stängts av",
+    "preview": "Ditt konto har stängts av",
+    "heading": "Ditt konto har stängts av",
+    "bodyIndefinite": "Ditt konto har stängts av och du kommer inte att kunna logga in.",
+    "bodyUntil": "Ditt konto har stängts av fram till den {date}, och du kommer inte att kunna logga in förrän dess.",
+    "support": "Om du tror att det här är ett misstag, kontakta supporten."
+  },
+  "accountUnsuspended": {
+    "subject": "Ditt konto är inte längre avstängt",
+    "preview": "Ditt konto är inte längre avstängt",
+    "heading": "Ditt konto är inte längre avstängt",
+    "body": "Ditt konto är inte längre avstängt. Du kan logga in som vanligt."
+  },
+  "supportRequest": {
+    "subject": "Ny supportförfrågan {reference}: {topic}",
+    "preview": "Ny supportförfrågan från {email}",
+    "heading": "Ny supportförfrågan",
+    "reference": "Referens: {reference}",
+    "topic": "Ämne: {topic}",
+    "from": "Från: {from}",
+    "page": "Sida: {page}",
+    "messageLabel": "Meddelande:",
+    "button": "Öppna i adminpanelen",
+    "footer": "Svara på det här mejlet för att nå {email} direkt."
+  },
+  "supportReceived": {
+    "subject": "Vi har tagit emot din förfrågan ({reference})",
+    "preview": "Vi har tagit emot din förfrågan ({reference})",
+    "heading": "Vi har tagit emot din förfrågan",
+    "body": "Tack för att du hör av dig. Vi har tagit emot din förfrågan {reference} och svarar på det här mejlet.",
+    "footer": "Om du vill lägga till något mer kan du svara på det här mejlet."
+  },
+  "jobApplication": {
+    "subject": "Ny ansökan {reference}: {title}",
+    "preview": "Ny ansökan för {title} från {email}",
+    "heading": "Ny jobbansökan",
+    "reference": "Referens: {reference}",
+    "role": "Roll: {title}",
+    "from": "Från: {from}",
+    "link": "Länk: {link}",
+    "noteLabel": "Meddelande:",
+    "button": "Öppna i adminpanelen",
+    "footer": "Svara på det här mejlet för att nå {email} direkt."
+  },
+  "jobApplicationReceived": {
+    "subject": "Vi har tagit emot din ansökan ({reference})",
+    "preview": "Vi har tagit emot din ansökan ({reference})",
+    "heading": "Vi har tagit emot din ansökan",
+    "body": "Tack för att du sökte tjänsten {title}. Vi har tagit emot din ansökan {reference} och vi hör av oss.",
+    "footer": "Vi sparar ansökningar i 6 månader."
+  },
+  "emailChangeConfirm": {
+    "subject": "Bekräfta din nya e-postadress",
+    "preview": "Bekräfta att det här är din nya e-postadress",
+    "heading": "Bekräfta din nya e-postadress",
+    "body": "Bekräfta att det här är din nya e-postadress för ditt konto. Länken fungerar i 24 timmar.",
+    "button": "Bekräfta e-postadress",
+    "footer": "Om du inte har begärt den här ändringen kan du bortse från det här mejlet."
+  },
+  "emailChangeRequested": {
+    "subject": "Din e-postadress håller på att ändras",
+    "preview": "Vi har tagit emot en begäran om att ändra ditt kontos e-postadress till {maskedEmail}",
+    "heading": "Din e-postadress håller på att ändras",
+    "body": "Någon har begärt att ändra ditt kontos e-postadress till {maskedEmail}. Om det var du kan du kontrollera den adressen för en länk för att bekräfta den.",
+    "cancelNotice": "Om det inte var du kan du avbryta ändringen:",
+    "button": "Avbryt ändringen",
+    "footer": "Länken fungerar i 24 timmar."
+  },
+  "emailChanged": {
+    "subject": "Din e-postadress har ändrats",
+    "preview": "Ditt kontos e-postadress har ändrats till {maskedEmail}",
+    "heading": "Din e-postadress har ändrats",
+    "body": "Ditt kontos e-postadress har ändrats till {maskedEmail}.",
+    "undoNotice": "Om det inte var du kan du ångra det. Länken fungerar i 7 dagar.",
+    "button": "Det var inte jag",
+    "footer": "Om det var du som gjorde ändringen behöver du inte göra något."
+  },
+  "emailChangeReverted": {
+    "subject": "Din e-postadressändring har ångrats",
+    "preview": "Din e-postadressändring har ångrats",
+    "heading": "Din e-postadressändring har ångrats",
+    "body": "Ditt kontos e-postadress har återställts till den här adressen, och alla sessioner har avslutats.",
+    "passkeys": "{count, plural, one {# passkey har tagits bort.} other {# passkeys har tagits bort.}}",
+    "identities": "{count, plural, one {# inloggningstjänst som kopplats sedan ändringen har kopplats bort.} other {# inloggningstjänster som kopplats sedan ändringen har kopplats bort.}}",
+    "twoFactor": "Tvåstegsverifiering, som aktiverats sedan ändringen, har stängts av.",
+    "deletion": "Raderingen av kontot som begärdes sedan ändringen har avbrutits.",
+    "passwordNotice": "Ett separat mejl har en länk för att skapa ett nytt lösenord.",
+    "review": "Gå igenom dina kopplade inloggningstjänster och din tvåstegsverifiering under Säkerhet i ditt konto.",
+    "support": "Om du fortfarande inte kommer in, kontakta supporten.",
+    "footer": "Om du inte kände igen den här aktiviteten, granska ditt kontos senaste aktivitet."
+  },
+  "webhookDisabled": {
+    "subject": "En webhook-mottagare har stängts av",
+    "preview": "Vi slutade skicka händelser till {host}",
+    "heading": "En webhook-mottagare har stängts av",
+    "bodyFailures": "Vi stängde av webhook-mottagaren på {host} i {workspace} efter att {count} leveranser i rad misslyckades.",
+    "bodyGone": "Vi stängde av webhook-mottagaren på {host} i {workspace} eftersom den svarade 410 Gone och bad oss sluta skicka.",
+    "action": "Åtgärda mottagaren och slå sedan på den igen i arbetsytans inställningar. Händelser från tiden då den var avstängd skickas inte igen.",
+    "button": "Öppna arbetsytans inställningar"
+  },
+  "workspaceTwoFactorRequired": {
+    "subject": "Tvåstegsverifiering krävs nu",
+    "preview": "{workspace} kräver nu tvåstegsverifiering",
+    "heading": "Tvåstegsverifiering krävs nu",
+    "body": "{workspace} kräver nu att alla medlemmar har tvåstegsverifiering eller en passkey. Tills du slår på tvåstegsverifiering eller lägger till en passkey kan du inte öppna arbetsytan.",
+    "action": "Slå på tvåstegsverifiering eller lägg till en passkey under Säkerhet i ditt konto. Du är fortfarande medlem under tiden.",
+    "button": "Slå på tvåstegsverifiering"
+  },
+  "notificationEmail": {
+    "inbox": "Visa dina aviseringar",
+    "why": "Du får det här mejlet eftersom det är påslaget i dina aviseringsinställningar.",
+    "turnOff": "Stäng av de här mejlen"
+  },
+  "roleChanged": {
+    "subject": "Din roll i {workspace} har ändrats",
+    "preview": "Du är nu {role, select, viewer {läsare} member {medlem} admin {administratör} owner {ägare} other {{role}}} i {workspace}",
+    "heading": "Din roll har ändrats",
+    "body": "Din roll i {workspace} är nu {role, select, viewer {läsare} member {medlem} admin {administratör} owner {ägare} other {{role}}}."
+  },
+  "removedFromWorkspace": {
+    "subject": "Du har tagits bort från {workspace}",
+    "preview": "Du är inte längre medlem i {workspace}",
+    "heading": "Du har tagits bort från en arbetsyta",
+    "body": "Du är inte längre medlem i {workspace} och kan därför inte öppna den längre. Ditt konto är oförändrat."
+  },
+  "planChanged": {
+    "subject": "{workspace} har nu planen {plan, select, free {Free} pro {Pro} team {Team} other {{plan}}}",
+    "preview": "Planen för {workspace} har ändrats",
+    "heading": "Arbetsytans plan har ändrats",
+    "body": "{workspace} har nu planen {plan, select, free {Free} pro {Pro} team {Team} other {{plan}}}."
+  }
+}

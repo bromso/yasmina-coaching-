@@ -1,0 +1,66 @@
+---
+title: "ping"
+description: "A test event."
+---
+
+{/* Generated from @repo/public-api-contract by apps/docs/scripts/generate-api-reference.ts. Do not edit: change the contract, then run bun run --filter @repo/docs generate:api. */}
+
+A test event.
+
+Sent only when you choose **Send test event** on an endpoint, and only to that endpoint, to confirm it is reachable and verifies signatures. You cannot subscribe to it.
+
+## Payload
+
+Every delivery's body is one JSON envelope: the event's `type`, the `timestamp` it happened at, and its `data`.
+
+<SchemaTable caption={"Envelope"} schema={{
+  "type": "object",
+  "properties": {
+    "type": {
+      "const": "ping",
+      "description": "The event type."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the event happened. The \u0060webhook-timestamp\u0060 header is when this attempt was signed."
+    },
+    "data": {
+      "type": "object",
+      "properties": {
+        "endpointId": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "description": "The id of the endpoint the test was sent to."
+        }
+      },
+      "required": [
+        "endpointId"
+      ],
+      "description": "The event's payload."
+    }
+  },
+  "required": [
+    "type",
+    "timestamp",
+    "data"
+  ]
+}} />
+
+## Example
+
+Shown formatted here; a delivery's body arrives as minified JSON.
+
+```json
+{
+  "type": "ping",
+  "timestamp": "2026-01-15T09:30:00.000Z",
+  "data": {
+    "endpointId": 1
+  }
+}
+```
+
+<Callout type="warning" title="Verify the signature first">
+Anyone can send a request to your endpoint. Before you parse or act on a delivery, check its `webhook-signature` header against your endpoint's signing secret, and refuse a `webhook-timestamp` more than 5 minutes from your own clock. See [Verifying signatures](/developers/webhooks/verifying-signatures).
+</Callout>

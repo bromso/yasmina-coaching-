@@ -1,0 +1,30 @@
+import { Tooltip as TooltipPrimitive } from "@base-ui/react/tooltip";
+import { type HTMLMotionProps, type MotionValue, type SpringOptions } from "motion/react";
+import type * as React from "react";
+type TooltipContextType = {
+    isOpen: boolean;
+    setIsOpen: TooltipProps["onOpenChange"];
+    x: MotionValue<number>;
+    y: MotionValue<number>;
+    followCursor?: boolean | "x" | "y";
+    followCursorSpringOptions?: SpringOptions;
+};
+declare const useTooltip: () => TooltipContextType;
+type TooltipProviderProps = React.ComponentProps<typeof TooltipPrimitive.Provider>;
+declare function TooltipProvider(props: TooltipProviderProps): React.JSX.Element;
+type TooltipProps = React.ComponentProps<typeof TooltipPrimitive.Root> & {
+    followCursor?: boolean | "x" | "y";
+    followCursorSpringOptions?: SpringOptions;
+};
+declare function Tooltip({ followCursor, followCursorSpringOptions, ...props }: TooltipProps): React.JSX.Element;
+type TooltipTriggerProps = React.ComponentProps<typeof TooltipPrimitive.Trigger>;
+declare function TooltipTrigger({ onMouseMove, ...props }: TooltipTriggerProps): React.JSX.Element;
+type TooltipPortalProps = Omit<React.ComponentProps<typeof TooltipPrimitive.Portal>, "keepMounted">;
+declare function TooltipPortal(props: TooltipPortalProps): React.JSX.Element;
+type TooltipPositionerProps = React.ComponentProps<typeof TooltipPrimitive.Positioner>;
+declare function TooltipPositioner(props: TooltipPositionerProps): React.JSX.Element;
+type TooltipPopupProps = Omit<React.ComponentProps<typeof TooltipPrimitive.Popup>, "render"> & HTMLMotionProps<"div">;
+declare function TooltipPopup({ transition, style, ...props }: TooltipPopupProps): React.JSX.Element;
+type TooltipArrowProps = React.ComponentProps<typeof TooltipPrimitive.Arrow>;
+declare function TooltipArrow(props: TooltipArrowProps): React.JSX.Element;
+export { Tooltip, TooltipArrow, type TooltipArrowProps, type TooltipContextType, TooltipPopup, type TooltipPopupProps, TooltipPortal, type TooltipPortalProps, TooltipPositioner, type TooltipPositionerProps, type TooltipProps, TooltipProvider, type TooltipProviderProps, TooltipTrigger, type TooltipTriggerProps, useTooltip, };

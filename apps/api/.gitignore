@@ -1,0 +1,19 @@
+# dependencies
+/node_modules
+
+# build output (bun build / bun build --compile)
+/dist
+
+# local SQLite database (see DATABASE_URL in src/env.ts) and local file storage (STORAGE_DIR,
+# STORAGE_PROVIDER=local in src/env.ts)
+/.data
+
+# env files (can opt-in for committing if needed)
+.env*
+!.env.example
+
+# misc
+.DS_Store
+
+# typescript
+*.tsbuildinfo

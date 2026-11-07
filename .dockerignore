@@ -1,0 +1,34 @@
+# dependencies and build output — images install and build their own
+**/node_modules
+**/.bun
+**/.next
+# fumadocs-mdx output: next build regenerates it from the content
+**/.source
+**/.turbo
+**/dist
+**/storybook-static
+**/*.tsbuildinfo
+**/.*.bun-build
+
+# local state and secrets
+**/.data
+**/.env*
+!**/.env.example
+
+# tooling and editor state
+.git
+.changeset
+.claude
+.agents
+.superpowers
+.vscode
+.cursor
+*.code-workspace
+.DS_Store
+coverage
+*.log
+
+# docker's own files
+Dockerfile*
+docker-compose*
+.dockerignore

@@ -1,0 +1,171 @@
+{
+  "color": {
+    "base": {
+      "background": {
+        "$value": "oklch(0.9842 0.0034 247.8575)",
+        "$type": "color",
+        "$description": "Default background color"
+      },
+      "foreground": {
+        "$value": "oklch(0.2795 0.0368 260.031)",
+        "$type": "color",
+        "$description": "Default foreground/text color"
+      }
+    },
+    "primary": {
+      "default": {
+        "$value": "oklch(0.53 0.2041 277.1173)",
+        "$type": "color",
+        "$description": "Primary brand color"
+      },
+      "foreground": {
+        "$value": "oklch(1.0 0 0)",
+        "$type": "color",
+        "$description": "Text on primary background"
+      }
+    },
+    "secondary": {
+      "default": {
+        "$value": "oklch(0.9276 0.0058 264.5313)",
+        "$type": "color",
+        "$description": "Secondary color"
+      },
+      "foreground": {
+        "$value": "oklch(0.3729 0.0306 259.7328)",
+        "$type": "color",
+        "$description": "Text on secondary background"
+      }
+    },
+    "muted": {
+      "default": {
+        "$value": "oklch(0.967 0.0029 264.5419)",
+        "$type": "color",
+        "$description": "Muted background color"
+      },
+      "foreground": {
+        "$value": "oklch(0.551 0.0234 264.3637)",
+        "$type": "color",
+        "$description": "Text on muted background"
+      }
+    },
+    "accent": {
+      "default": {
+        "$value": "oklch(0.9299 0.0334 272.7879)",
+        "$type": "color",
+        "$description": "Accent color"
+      },
+      "foreground": {
+        "$value": "oklch(0.3729 0.0306 259.7328)",
+        "$type": "color",
+        "$description": "Text on accent background"
+      }
+    },
+    "destructive": {
+      "default": {
+        "$value": "oklch(0.55 0.2078 25.3313)",
+        "$type": "color",
+        "$description": "Destructive/error color"
+      },
+      "foreground": {
+        "$value": "oklch(1.0 0 0)",
+        "$type": "color",
+        "$description": "Text on destructive background"
+      }
+    },
+    "card": {
+      "default": {
+        "$value": "oklch(1.0 0 0)",
+        "$type": "color",
+        "$description": "Card background color"
+      },
+      "foreground": {
+        "$value": "oklch(0.2795 0.0368 260.031)",
+        "$type": "color",
+        "$description": "Card text color"
+      }
+    },
+    "popover": {
+      "default": {
+        "$value": "oklch(1.0 0 0)",
+        "$type": "color",
+        "$description": "Popover background color"
+      },
+      "foreground": {
+        "$value": "oklch(0.2795 0.0368 260.031)",
+        "$type": "color",
+        "$description": "Popover text color"
+      }
+    },
+    "border": {
+      "$value": "oklch(0.8717 0.0093 258.3382)",
+      "$type": "color",
+      "$description": "Border color"
+    },
+    "input": {
+      "$value": "oklch(0.8717 0.0093 258.3382)",
+      "$type": "color",
+      "$description": "Input border color"
+    },
+    "ring": {
+      "$value": "oklch(0.53 0.2041 277.1173)",
+      "$type": "color",
+      "$description": "Focus ring color"
+    },
+    "chart": {
+      "1": {
+        "$value": "oklch(0.53 0.2041 277.1173)",
+        "$type": "color"
+      },
+      "2": {
+        "$value": "oklch(0.5106 0.2301 276.9656)",
+        "$type": "color"
+      },
+      "3": {
+        "$value": "oklch(0.4568 0.2146 277.0229)",
+        "$type": "color"
+      },
+      "4": {
+        "$value": "oklch(0.3984 0.1773 277.3662)",
+        "$type": "color"
+      },
+      "5": {
+        "$value": "oklch(0.3588 0.1354 278.6973)",
+        "$type": "color"
+      }
+    },
+    "sidebar": {
+      "default": {
+        "$value": "oklch(0.967 0.0029 264.5419)",
+        "$type": "color"
+      },
+      "foreground": {
+        "$value": "oklch(0.2795 0.0368 260.031)",
+        "$type": "color"
+      },
+      "primary": {
+        "$value": "oklch(0.53 0.2041 277.1173)",
+        "$type": "color"
+      },
+      "primary-foreground": {
+        "$value": "oklch(1.0 0 0)",
+        "$type": "color"
+      },
+      "accent": {
+        "$value": "oklch(0.9299 0.0334 272.7879)",
+        "$type": "color"
+      },
+      "accent-foreground": {
+        "$value": "oklch(0.3729 0.0306 259.7328)",
+        "$type": "color"
+      },
+      "border": {
+        "$value": "oklch(0.8717 0.0093 258.3382)",
+        "$type": "color"
+      },
+      "ring": {
+        "$value": "oklch(0.53 0.2041 277.1173)",
+        "$type": "color"
+      }
+    }
+  }
+}

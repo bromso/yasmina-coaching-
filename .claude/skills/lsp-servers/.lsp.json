@@ -1,0 +1,42 @@
+{
+  "typescript": {
+    "command": "bunx",
+    "args": ["typescript-language-server", "--stdio"],
+    "extensionToLanguage": {
+      ".ts": "typescript",
+      ".tsx": "typescriptreact",
+      ".cts": "typescript",
+      ".mts": "typescript",
+      ".js": "javascript",
+      ".jsx": "javascriptreact",
+      ".cjs": "javascript",
+      ".mjs": "javascript"
+    }
+  },
+  "biome": {
+    "command": "bunx",
+    "args": ["@biomejs/biome", "lsp-proxy"],
+    "extensionToLanguage": {
+      ".ts": "typescript",
+      ".tsx": "typescriptreact",
+      ".cts": "typescript",
+      ".mts": "typescript",
+      ".js": "javascript",
+      ".jsx": "javascriptreact",
+      ".cjs": "javascript",
+      ".mjs": "javascript",
+      ".json": "json",
+      ".jsonc": "jsonc"
+    }
+  },
+  "tailwindcss": {
+    "command": "bunx",
+    "args": ["@tailwindcss/language-server", "--stdio"],
+    "extensionToLanguage": {
+      ".css": "css",
+      ".tsx": "typescriptreact",
+      ".jsx": "javascriptreact",
+      ".html": "html"
+    }
+  }
+}

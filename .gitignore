@@ -1,0 +1,74 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Local env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Testing
+coverage
+
+# Turbo
+.turbo
+
+# Vercel
+.vercel
+
+# Build Outputs
+.next/
+out/
+build
+dist
+*.tsbuildinfo
+# Next rewrites this on every dev/build run; each app regenerates its own
+next-env.d.ts
+# Temp files `bun build` leaves behind when a build is interrupted
+.*.bun-build
+
+
+# Debug
+npm-debug.log*
+
+# Misc
+.DS_Store
+__pycache__/
+*.pem
+
+# Docker
+docker-compose.override.yml
+
+# Serwist generated files
+**/public/sw.js
+**/public/sw.js.map
+**/public/workbox-*.js
+**/public/workbox-*.js.map
+**/public/swe-worker-*.js
+
+# Model Context Protocol
+.model-context/
+.model-context-cache/
+.model-context-lock/
+mcp.json
+# .mcp.json is the shared project MCP config and stays committed: secrets in it are ${VAR}
+# placeholders that read from the environment — never paste a real token into it.
+
+# Graphify output (fetch via scripts/fetch-graph.sh instead of committing)
+graphify-out/
+
+# Playwright end-to-end tests
+apps/e2e/.tmp
+apps/e2e/playwright-report
+apps/e2e/test-results
+
+# Security scan output (uploaded as a CI artifact, never committed)
+security/.results/
+
+# Trivy's vulnerability database cache (image.ts, --build/--image mode)
+security/.cache/

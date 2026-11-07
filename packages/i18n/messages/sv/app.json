@@ -1,0 +1,147 @@
+{
+  "meta": {
+    "description": "Applikationsskal — gränssnitt för startmallen",
+    "notes": "Anteckningar",
+    "chat": "Chatt",
+    "invitation": "Inbjudan",
+    "workspaceNew": "Skapa en arbetsyta"
+  },
+  "layout": {
+    "terms": "Villkor",
+    "privacy": "Integritet",
+    "impersonating": "(agerar som användaren)",
+    "deletionScheduled": "Ditt konto raderas den {date}.",
+    "cancelDeletion": "Avbryt raderingen"
+  },
+  "locale": {
+    "label": "Språk",
+    "submit": "Byt",
+    "error": "Det gick inte att spara språket. Försök igen."
+  },
+  "status": {
+    "notFoundTitle": "Sidan hittades inte",
+    "notFoundDescription": "Sidan du letar efter finns inte eller har flyttats.",
+    "backHome": "Till startsidan",
+    "errorTitle": "Något gick fel",
+    "errorDescription": "Ett oväntat fel inträffade. Försök igen, eller gå tillbaka till startsidan.",
+    "errorReference": "Referens: {digest}",
+    "tryAgain": "Försök igen"
+  },
+  "role": "{role, select, viewer {läsare} member {medlem} admin {administratör} owner {ägare} other {{role}}}",
+  "someone": "Någon",
+  "confirm": {
+    "cancel": "Avbryt",
+    "continue": "Fortsätt"
+  },
+  "home": {
+    "eyebrow": "Appskal",
+    "title": "Välkommen till applikationen",
+    "description": "Två exempelsidor anropar backend-tjänsterna: anteckningar från apps/api och chatt från apps/ai. Byt ut dem i takt med att produkten tar form.",
+    "notes": "Anteckningar",
+    "chat": "Chatt"
+  },
+  "notes": {
+    "title": "Anteckningar · {workspace}",
+    "role": "Din roll här: {role}.",
+    "intro": "Renderas på servern från apps/api via typad RPC; en ny anteckning sparas med en serveråtgärd.",
+    "viewerHint": "Läsare kan läsa anteckningar; be en administratör om medlemsrollen för att lägga till egna.",
+    "unavailable": "Anteckningarna är inte tillgängliga",
+    "pages": "Sidor med anteckningar",
+    "newest": "Nyaste",
+    "older": "Äldre anteckningar",
+    "empty": "Inga anteckningar än.",
+    "emptyOlder": "Inga äldre anteckningar.",
+    "reconnecting": "Återansluter…",
+    "live": {
+      "signedOut": "Du har loggats ut. Logga in för att se uppdateringar i realtid.",
+      "gone": "Den här arbetsytan är inte längre tillgänglig.",
+      "twoFactorRequired": "Den här arbetsytan kräver tvåstegsverifiering. Slå på den för att se uppdateringar i realtid."
+    },
+    "hereNow": "{count, plural, one {# person här} other {# personer här}}",
+    "switched": "Byt till den arbetsytan först",
+    "form": {
+      "title": "Titel",
+      "body": "Text",
+      "submit": "Lägg till anteckning",
+      "saving": "Sparar…"
+    },
+    "delete": {
+      "button": "Ta bort",
+      "deleting": "Tar bort…",
+      "confirmTitle": "Ta bort anteckningen?",
+      "confirmDescription": "Den tas bort för alla i arbetsytan. Det går inte att ångra.",
+      "confirm": "Ta bort"
+    },
+    "deletedUser": "Borttagen användare",
+    "viaApiKey": "via API-nyckeln {name}"
+  },
+  "validation": {
+    "reload": "Ladda om sidan och försök igen",
+    "required": "{field, select, title {Titeln} body {Texten} name {Namnet} other {Fältet}} måste fyllas i",
+    "tooLong": "{field, select, title {Titeln} body {Texten} name {Namnet} other {Fältet}} får innehålla högst {max} tecken",
+    "invalidCharacter": "{field, select, title {Titeln} body {Texten} name {Namnet} other {Fältet}} innehåller ett ogiltigt tecken",
+    "invalid": "{field, select, title {Titeln är ogiltig} body {Texten är ogiltig} name {Namnet är ogiltigt} other {Fältet är ogiltigt}}"
+  },
+  "errors": {
+    "notesUnavailable": "Anteckningstjänsten är inte tillgänglig",
+    "workspaceUnavailable": "Arbetsytetjänsten är inte tillgänglig just nu. Försök igen om en stund.",
+    "chatUpgrade": "Uppgradera för att använda chatten",
+    "chatUnavailable": "Chatten är tillfälligt otillgänglig",
+    "chatSignIn": "Logga in för att chatta",
+    "chatNotConfigured": "Chatten är inte konfigurerad",
+    "aiUnavailable": "AI-tjänsten är inte tillgänglig",
+    "chatTooManyRequests": "För många meddelanden. Vänta en stund och försök igen.",
+    "chatTwoFactorRequired": "Slå på tvåstegsverifiering för att använda chatten i den här arbetsytan"
+  },
+  "chat": {
+    "title": "Chatt",
+    "intro": "Strömmas från apps/ai via appens /api/chat-route, som har tjänstens token. Utan en ANTHROPIC_API_KEY upprepar utvecklingstjänsten det du skriver – fråga vad klockan är så anropar den sitt verktyg getCurrentTime, precis som en riktig modell skulle göra.",
+    "you": "Du: ",
+    "assistant": "Assistenten: ",
+    "time": "Klockan är {time} ({zone})",
+    "timeError": "Kunde inte hämta tiden",
+    "timeChecking": "Kollar vad klockan är…",
+    "error": "Något gick fel. Försök igen.",
+    "retry": "Försök igen",
+    "message": "Meddelande",
+    "placeholder": "Skriv något, eller fråga vad klockan är",
+    "send": "Skicka"
+  },
+  "upsell": {
+    "title": "Chatten ingår i Pro-planen",
+    "description": "Uppgradera arbetsytan för att använda den.",
+    "plans": "Se planer"
+  },
+  "workspaceNew": {
+    "title": "Skapa en arbetsyta",
+    "yours": "Dina arbetsytor",
+    "another": "Skapa en till",
+    "name": "Arbetsytans namn",
+    "create": "Skapa",
+    "creating": "Skapar…"
+  },
+  "verify": {
+    "text": "<strong>Verifiera din e-postadress.</strong> Vi skickade en länk till {email}. För att skapa en arbetsyta behövs en verifierad adress.",
+    "resend": "Skicka verifieringsmejlet igen",
+    "sending": "Skickar…",
+    "sent": "Skickat – kolla din inkorg.",
+    "alreadyVerified": "Din e-postadress är redan verifierad."
+  },
+  "invitations": {
+    "heading": "Inbjudningar",
+    "summary": "{inviter} bjöd in dig till {workspace} som {role}.",
+    "expires": "Gäller till <time>{date}</time>",
+    "accept": "Acceptera",
+    "accepting": "Accepterar…",
+    "invalid": "Inbjudan är inte längre giltig.",
+    "invalidDescription": "Be om en ny inbjudningslänk.",
+    "join": "Gå med i {workspace}",
+    "notYou": "Inte du?",
+    "signOut": "Logga ut",
+    "signIn": "Logga in",
+    "createAccount": "Skapa konto",
+    "useEmail": "Använd {email}.",
+    "requiresTwoFactor": "Den här arbetsytan kräver tvåstegsverifiering.",
+    "domainNotAllowed": "Den här arbetsytan tar inte längre emot inbjudningar till den här adressen."
+  }
+}

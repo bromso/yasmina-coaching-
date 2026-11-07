@@ -1,0 +1,433 @@
+name: CI
+
+# push runs only on main; branch commits are covered by their pull_request
+# runs. This avoids the duplicate push/pull_request twin for the same SHA,
+# which the old concurrency dedupe cancelled — leaving a permanently
+# "cancelled" check on every PR.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# No job writes to the repository (docker builds without pushing; the e2e report uses the artifact
+# service's own token), so the GITHUB_TOKEN is read-only for every job.
+permissions:
+  contents: read
+
+# Every job has a timeout (about 2-3x its usual run): a hung step otherwise runs until GitHub's
+# 6-hour cap and burns the month's minutes.
+concurrency:
+  # Still cancel superseded runs when new commits land on the same branch/PR
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    # Works out what this change can affect (scripts/ci-plan.ts), so the jobs below run only that.
+    # Skipped jobs and steps count as passing. Pushes to main run everything except docs-only
+    # changes, as a safety net for any dependency the workspace graph does not declare.
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      docs_only: ${{ steps.plan.outputs.docs_only }}
+      typecheck: ${{ steps.plan.outputs.typecheck }}
+      ui_typecheck: ${{ steps.plan.outputs.ui_typecheck }}
+      tests: ${{ steps.plan.outputs.tests }}
+      build: ${{ steps.plan.outputs.build }}
+      storybook: ${{ steps.plan.outputs.storybook }}
+      postgres: ${{ steps.plan.outputs.postgres }}
+      docker: ${{ steps.plan.outputs.docker }}
+      e2e: ${{ steps.plan.outputs.e2e }}
+      audit: ${{ steps.plan.outputs.audit }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Full history for the merge-base diff; blob:none skips file contents it does not need.
+          fetch-depth: 0
+          filter: blob:none
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Test the planner
+        run: bun test scripts
+
+      - name: Plan
+        id: plan
+        env:
+          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          FULL: ${{ github.event_name == 'push' }}
+          # Every image the docker job can build; the plan keeps the rows this change affects.
+          # One Next app stands in for all seven: they share next.Dockerfile. It is app because
+          # app's install graph (the service contracts, the AI SDK) is a superset of the others'.
+          DOCKER_MATRIX: >-
+            [{"dockerfile":"next","app":"app","port":3001},
+             {"dockerfile":"bun-service","app":"api","port":3007},
+             {"dockerfile":"bun-service","app":"ai","port":3008}]
+        run: bun scripts/ci-plan-run.ts
+
+  security:
+    # Dependency audit and secrets scanning (scripts/security/). Runs on every PR and every push
+    # to main, docs-only changes included on purpose — a secret can land in a "docs" commit, and
+    # a change to the scanners themselves must still be exercised — so this job carries no `if:`
+    # of its own and is unconditionally required by the final `ci` job (scripts/ci-gate.ts).
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: changes
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Both ends of the secrets range must exist locally, or secrets.ts exits 2 rather than
+          # silently scanning nothing — a shallow checkout would defeat that check.
+          fetch-depth: 0
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Secrets scan
+        # SHAs only, taken from the event payload, never a branch name, and passed through `env:`
+        # rather than interpolated into the script — scripts/security/secrets.ts resolves them
+        # with `git rev-parse`, never a shell, so neither can inject a command. On a pull request
+        # github.sha is the ephemeral merge commit, so the head comes from the PR payload instead;
+        # on a push to main the range is before..sha (before is all zeros on a new branch, which
+        # secrets.ts already reduces to "scan just the head commit").
+        env:
+          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: bun scripts/security/secrets.ts --range "$BASE_SHA..$HEAD_SHA"
+
+      - name: Dependency audit
+        # bun audit --json reads only bun.lock (verified directly: identical output with
+        # node_modules removed), so no install step is needed here.
+        # !cancelled(): a failing secrets scan above must not skip the audit too.
+        if: ${{ !cancelled() && needs.changes.outputs.audit == 'true' }}
+        run: bun scripts/security/audit.ts
+
+      - name: Upload security results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: security-results
+          path: security/.results
+          # security/.results is gitignored, so it's a dot-directory upload-artifact skips by
+          # default.
+          include-hidden-files: true
+          retention-days: 7
+
+  verify:
+    needs: changes
+    if: needs.changes.outputs.docs_only != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v6
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            bun-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # The typecheck and test sets are the root `typecheck` / `test:services` scripts, narrowed
+      # to the affected workspaces. `bun run ci` still runs all of them locally.
+      - name: Typecheck
+        if: needs.changes.outputs.typecheck != ''
+        run: bun run ${{ needs.changes.outputs.typecheck }} typecheck
+
+      - name: Typecheck UI package
+        if: needs.changes.outputs.ui_typecheck == 'true'
+        run: bun run --filter @repo/ui typecheck
+
+      # Nothing else covers root `scripts/` or `perf/`; cheap enough to run unconditionally on
+      # every `verify` run rather than being narrowed by the plan.
+      - name: Typecheck scripts
+        run: bun run typecheck:scripts
+
+      - name: Service tests
+        # bun test for apps/api, apps/ai and apps/app: the services against real Bun.serve instances on ephemeral ports,
+        # in-memory SQLite for the API, AI SDK mock models for the AI service (no keys, no network).
+        if: needs.changes.outputs.tests != ''
+        run: bun run ${{ needs.changes.outputs.tests }} test
+
+      - name: Biome CI
+        # biome ci covers formatting, lint and import organisation in one
+        # non-writing pass and annotates the PR inline. This is a strictly
+        # wider gate than `bun run lint`, which sees only lint rules.
+        run: bunx biome ci . --max-diagnostics=none
+
+      - name: Build
+        # Affected workspaces plus the ones they build on (Storybook needs tokens' dist/); Bun runs
+        # the filtered builds in dependency order, concurrently. Everything but Storybook builds
+        # here on Node's default heap: with nine Next apps building at once, raising every
+        # process's ceiling to 8 GB let them outgrow the runner's 16 GB together, and the runner
+        # was killed mid-build ("received a shutdown signal", exit 143).
+        if: needs.changes.outputs.build != ''
+        env:
+          BUILD: ${{ needs.changes.outputs.build }}
+        run: |
+          rest=$(printf '%s' "$BUILD" | sed "s/--filter '@repo\/story'//")
+          if [ -n "$(printf '%s' "$rest" | tr -d ' ')" ]; then eval "bun run $rest build"; fi
+
+      - name: Bundle budgets
+        # First-load JS per route of every Next app the step above built, against
+        # perf/budgets.json (scripts/bundle-budget.ts). Next apps are the built workspaces with a
+        # next.config; a route over its budget, or with none, fails here.
+        if: needs.changes.outputs.build != ''
+        env:
+          BUILD: ${{ needs.changes.outputs.build }}
+        run: |
+          apps=""
+          for name in $(printf '%s' "$BUILD" | grep -o "@repo/[a-z0-9-]*" | sed 's|@repo/||'); do
+            if ls "apps/$name"/next.config.* >/dev/null 2>&1; then apps="$apps $name"; fi
+          done
+          if [ -n "$apps" ]; then bun scripts/bundle-budget.ts $apps; fi
+
+      - name: Build Storybook
+        # @repo/story bundles 325 stories into a static Storybook site, which exceeds Node's
+        # default ~4GB old-space limit on a runner and dies with exit 134 (observed passing on one
+        # run and OOM-ing on the next). It builds alone, after the step above (it reads tokens'
+        # dist/), so only this one process gets the 8 GB ceiling.
+        if: contains(needs.changes.outputs.build, '@repo/story')
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: bun run --filter @repo/story build
+
+  storybook:
+    # The slowest job: ~15 WebGL stories render in software on GPU-less runners. It needs nothing
+    # from verify, so it starts alongside it, and the files are split across four machines.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: changes
+    if: needs.changes.outputs.storybook == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    name: storybook (${{ matrix.shard }}/4)
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v6
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            bun-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('apps/story/package.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      - name: Install Playwright browsers
+        # Two things matter here:
+        #   1. chromium-headless-shell is a binary separate from chromium, and it
+        #      is the one Vitest's browser-playwright provider actually launches.
+        #   2. This must run from apps/story so it uses that workspace's pinned
+        #      playwright (1.57 -> build 1200). At the repo root, bunx resolves to
+        #      playwright latest, which installs a different build number and then
+        #      fails with "Executable doesn't exist".
+        working-directory: apps/story
+        run: bunx playwright install --with-deps chromium chromium-headless-shell
+
+      # apps/story imports @repo/tokens/json, whose export maps to
+      # packages/tokens/dist/, generated by that package's build. This job runs
+      # on a fresh checkout that only installs, so without this step the import
+      # is unresolvable and Vite thrashes re-optimizing, failing ~27 unrelated
+      # stories. It passes locally only because dist/ persists there.
+      - name: Build design tokens
+        run: bun run --filter @repo/tokens build
+
+      - name: Run Storybook tests
+        run: bun --filter @repo/story test --run --shard=${{ matrix.shard }}/4
+
+  api-postgres:
+    # apps/api's suite again, against a real Postgres: the verify job's run uses in-memory SQLite.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: changes
+    if: needs.changes.outputs.postgres == 'true'
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v6
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            bun-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Test apps/api on Postgres
+        env:
+          TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+        run: bun --filter @repo/api test
+
+  e2e:
+    # The Playwright journeys (apps/e2e) against production builds on *.brand.localhost.
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.e2e == 'true'
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v6
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            bun-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Resolve *.brand.localhost to loopback
+        run: |
+          for h in www app auth account docs help jobs blog api ai; do
+            line="127.0.0.1 $h.brand.localhost"
+            if ! grep -qxF "$line" /etc/hosts; then
+              echo "$line" | sudo tee -a /etc/hosts
+            fi
+          done
+          getent hosts app.brand.localhost
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+
+      - name: Install Chromium
+        working-directory: apps/e2e
+        run: bunx playwright install --with-deps chromium
+
+      - name: Build the apps under test
+        env:
+          COOKIE_DOMAIN: .brand.localhost
+        run: bun run --filter @repo/www --filter @repo/app --filter @repo/auth --filter @repo/account --filter @repo/blog --filter @repo/docs --filter @repo/help --filter @repo/jobs build
+
+      # Every perf measurement this job takes is also written to perf/.results and uploaded, so
+      # budgets can be re-seeded from the runner's own numbers (download, then `bun run perf:update`).
+      # continue-on-error: a bundle breach is already gated in `verify`; failing here too would
+      # lose this job's own e2e signal (the journeys below) over something that job already caught.
+      - name: Bundle budgets
+        continue-on-error: true
+        run: bun scripts/bundle-budget.ts --write-results www app auth account blog docs help jobs
+
+      - name: Run the journeys
+        env:
+          CI: "true"
+          PERF_WRITE_RESULTS: "1"
+        run: bun --filter @repo/e2e test:ci
+
+      - name: Run the load smoke
+        env:
+          PERF_WRITE_RESULTS: "1"
+        run: bun --filter @repo/load smoke
+
+      - name: Upload the report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: |
+            apps/e2e/playwright-report
+            apps/e2e/test-results
+            apps/load/.results
+            apps/load/.tmp/*/stack.log
+            perf/.results
+          # .results/ and .tmp/ are dot-directories, which upload-artifact skips unless told.
+          include-hidden-files: true
+          retention-days: 7
+
+  docker:
+    # Builds (never pushes) one image per Dockerfile, so a change that breaks the images fails the PR
+    # instead of the next deploy, then scans each build with Trivy (security/.results/image-<app>.json).
+    # The rows are DOCKER_MATRIX in the changes job, narrowed to the images this change affects. The
+    # build/cache/scan steps themselves are shared with security.yml's weekly `image` job through
+    # image-scan.yml (`workflow_call`) — this job supplies only the matrix. The job id stays `docker`
+    # (never the reusable workflow's own job name): scripts/ci-gate.ts and branch protection key off
+    # `needs.docker.result`, which GitHub reports for the calling job regardless of what it calls —
+    # only the check run's label changes, to "docker (<dockerfile>, <app>, <port>) / image-scan".
+    needs: changes
+    if: needs.changes.outputs.docker != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.changes.outputs.docker) }}
+    uses: ./.github/workflows/image-scan.yml
+    with:
+      dockerfile: ${{ matrix.dockerfile }}
+      app: ${{ matrix.app }}
+      port: ${{ matrix.port }}
+
+  ci:
+    # One check that sums up the run: require this in branch protection rather than the jobs above,
+    # which may be skipped (a skipped matrix job never reports under its row names).
+    if: always()
+    needs: [changes, verify, storybook, api-postgres, e2e, docker, security]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # The rule lives in scripts/ci-gate.ts (tested by `bun test scripts`): a job the plan required
+      # must have succeeded, so one that never got a runner fails the gate too. An inline step
+      # `if:` here once silently passed: under `if: always()` a step condition without a status
+      # function gets `success()` prepended, which is false once any needed job failed.
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: scripts
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Every job the plan required passed
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: bun scripts/ci-gate.ts

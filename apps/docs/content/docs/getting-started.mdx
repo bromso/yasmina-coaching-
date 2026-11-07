@@ -1,0 +1,49 @@
+---
+title: Getting started
+description: Install the dependencies, run every app, and learn the everyday commands.
+updated: 2026-10-08
+tags: [setup, bun]
+---
+
+## Requirements
+
+You need [Bun](https://bun.sh/) 1.4.2 or later. Docker is optional: it runs a production-like stack
+of every app.
+
+## Install and run
+
+```bash
+bun install
+bun dev            # every app, in parallel
+```
+
+Modern browsers resolve `*.localhost` on their own, so there are no `/etc/hosts` edits. Every app
+sits under `brand.localhost`, so the apps share one sign-in cookie in development just as they do
+under your own domain in production. The AI service runs without an API key in development: it
+answers with a keyless `mock:echo` model.
+
+To run a single app, filter by its package name:
+
+```bash
+bun --filter @repo/app dev     # app.brand.localhost:3001
+bun --filter @repo/docs dev    # docs.brand.localhost:3004
+bun --filter @repo/api dev     # api.brand.localhost:3007
+```
+
+## Everyday commands
+
+```bash
+bun run build          # build everything
+bun run lint           # Biome lint (bun run lint:fix to fix)
+bun run typecheck      # the gated typechecks
+bun run test:services  # bun test across the services and packages
+bun run ci             # the full CI gate locally
+```
+
+Biome handles formatting and linting: double quotes, no semicolons, two-space indentation and
+100-character lines.
+
+## Next steps
+
+Read the [architecture](/architecture) to see how the apps and packages fit together, then
+[authentication](/authentication) for how sign-in works across every subdomain.

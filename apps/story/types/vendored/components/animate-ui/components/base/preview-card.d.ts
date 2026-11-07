@@ -1,0 +1,10 @@
+import { type PreviewCardBackdropProps as PreviewCardBackdropPrimitiveProps, type PreviewCardPopupProps as PreviewCardPopupPrimitiveProps, type PreviewCardPositionerProps as PreviewCardPositionerPrimitiveProps, type PreviewCardProps as PreviewCardPrimitiveProps, type PreviewCardTriggerProps as PreviewCardTriggerPrimitiveProps } from "@repo/ui/components/animate-ui/primitives/base/preview-card";
+type PreviewCardProps = PreviewCardPrimitiveProps;
+declare function PreviewCard(props: PreviewCardProps): import("react").JSX.Element;
+type PreviewCardTriggerProps = PreviewCardTriggerPrimitiveProps;
+declare function PreviewCardTrigger(props: PreviewCardTriggerProps): import("react").JSX.Element;
+type PreviewCardPanelProps = PreviewCardPositionerPrimitiveProps & PreviewCardPopupPrimitiveProps;
+declare function PreviewCardPanel({ className, align, sideOffset, style, children, ...props }: PreviewCardPanelProps): import("react").JSX.Element;
+type PreviewCardBackdropProps = PreviewCardBackdropPrimitiveProps;
+declare function PreviewCardBackdrop(props: PreviewCardBackdropProps): import("react").JSX.Element;
+export { PreviewCard, PreviewCardBackdrop, type PreviewCardBackdropProps, PreviewCardPanel, type PreviewCardPanelProps, type PreviewCardProps, PreviewCardTrigger, type PreviewCardTriggerProps, };

@@ -1,0 +1,21 @@
+{
+  "name": "@repo/e2e",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "e2e": "COOKIE_DOMAIN=.brand.localhost bun run --filter @repo/www --filter @repo/app --filter @repo/auth --filter @repo/account --filter @repo/blog --filter @repo/docs --filter @repo/help --filter @repo/jobs build && playwright test",
+    "test:ci": "playwright test",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@oslojs/encoding": "catalog:",
+    "@oslojs/otp": "catalog:",
+    "@playwright/test": "catalog:",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "catalog:",
+    "lighthouse": "^13.5.0",
+    "web-vitals": "catalog:"
+  }
+}

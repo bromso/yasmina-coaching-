@@ -1,0 +1,33 @@
+<!doctype html>
+<!--
+  The service worker's offline fallback (OFFLINE_URL in @repo/ui/lib/service-worker-rules). A static
+  file, identical in every app, precached by @serwist/next: a Next route would render the signed-in
+  header and store the user's name in Cache Storage.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>You're offline</title>
+    <style>
+      :root { color-scheme: light dark; --bg: #fff; --fg: #0a0a0a; --muted: #6b7280; }
+      @media (prefers-color-scheme: dark) { :root { --bg: #0a0a0a; --fg: #fafafa; --muted: #9ca3af; } }
+      body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: var(--bg);
+        color: var(--fg); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+      main { max-width: 28rem; padding: 2rem; text-align: center; }
+      h1 { margin: 0 0 0.5rem; font-size: 1.5rem; }
+      p { margin: 0 0 1.5rem; color: var(--muted); }
+      button { padding: 0.5rem 1rem; border: 0; border-radius: 0.375rem; background: var(--fg);
+        color: var(--bg); font: inherit; font-weight: 600; cursor: pointer; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>You're offline</h1>
+      <p>This page needs a connection. Check your network, then try again.</p>
+      <!-- The fallback is served at the URL that was asked for, so a reload retries that page. -->
+      <button type="button" onclick="location.reload()">Try again</button>
+    </main>
+  </body>
+</html>

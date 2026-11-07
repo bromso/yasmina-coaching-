@@ -1,0 +1,38 @@
+---
+title: Rate limits
+description: How many requests you can make, what counts against the limit, and what a 429 means.
+tags: [api, rate-limits]
+---
+
+Two separate budgets apply to `/v1`, counted independently.
+
+## Per key
+
+Every API key may make **600 requests a minute**, counted only once a request authenticates
+successfully. A wrong, unknown, revoked or expired key is never counted here, however many times
+it is tried.
+
+## Per address, for failed authentication
+
+Separately, **60 failed requests a minute** are allowed per address: no key, a malformed or
+unknown key, a wrong secret, a revoked or expired key, or a workspace that has lost API access. A
+key that authenticates successfully is never counted against this budget, whatever else happens
+afterwards.
+
+<Callout type="note" title="Shared addresses share this budget">
+  The budget counts the network address your requests arrive from. Forwarded-address headers such
+  as `X-Forwarded-For` are never read, so integrations that share one outbound address — behind a
+  NAT or a corporate proxy — share one budget for failed attempts. It only ever affects failed
+  authentication: if refused requests start seeing `429`, fix the failing key rather than retrying.
+</Callout>
+
+## Past the limit
+
+A request past either budget answers `429` with a `Retry-After` header, in seconds:
+
+```json
+{ "error": { "code": "rate_limited", "message": "Too many requests" } }
+```
+
+Wait the number of seconds `Retry-After` gives before retrying — retrying immediately only spends
+another attempt against the same budget.

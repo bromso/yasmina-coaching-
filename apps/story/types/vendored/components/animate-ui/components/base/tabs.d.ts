@@ -1,0 +1,12 @@
+import { type TabsListProps as TabsListPrimitiveProps, type TabsPanelProps as TabsPanelPrimitiveProps, type TabsPanelsProps as TabsPanelsPrimitiveProps, type TabsProps as TabsPrimitiveProps, type TabsTabProps as TabsTabPrimitiveProps } from "@repo/ui/components/animate-ui/primitives/base/tabs";
+type TabsProps = TabsPrimitiveProps;
+declare function Tabs({ className, ...props }: TabsProps): import("react").JSX.Element;
+type TabsListProps = TabsListPrimitiveProps;
+declare function TabsList({ className, ...props }: TabsListProps): import("react").JSX.Element;
+type TabsTabProps = TabsTabPrimitiveProps;
+declare function TabsTab({ className, ...props }: TabsTabProps): import("react").JSX.Element;
+type TabsPanelsProps = TabsPanelsPrimitiveProps;
+declare function TabsPanels(props: TabsPanelsProps): import("react").JSX.Element;
+type TabsPanelProps = TabsPanelPrimitiveProps;
+declare function TabsPanel({ className, ...props }: TabsPanelProps): import("react").JSX.Element;
+export { Tabs, TabsList, type TabsListProps, TabsPanel, type TabsPanelProps, TabsPanels, type TabsPanelsProps, type TabsProps, TabsTab, type TabsTabProps, };

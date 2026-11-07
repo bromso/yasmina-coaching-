@@ -1,0 +1,11 @@
+# Dependencies
+node_modules
+
+# Storybook
+storybook-static
+
+# Build
+*.log
+
+# Coverage
+coverage

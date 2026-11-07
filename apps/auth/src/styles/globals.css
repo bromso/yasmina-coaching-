@@ -1,0 +1,3 @@
+/* Import the design system from @repo/ui — the single source of truth.
+   Add app-specific theme extensions below this line. */
+@import "@repo/ui/globals.css";

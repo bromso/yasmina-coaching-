@@ -1,0 +1,21 @@
+{
+  "name": "@repo/ai-contract",
+  "version": "0.1.0",
+  "description": "Typed contract and chat message types shared by apps/ai and its clients",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@orpc/contract": "catalog:",
+    "ai": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*"
+  }
+}

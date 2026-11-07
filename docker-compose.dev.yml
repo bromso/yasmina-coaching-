@@ -1,0 +1,92 @@
+# Development stack: the repo bind-mounted into one container running `bun dev` for every app.
+#   docker compose -f docker-compose.dev.yml up
+# Browse from the host exactly as without Docker: http://app.brand.localhost:3001, http://ai.brand.localhost:3008, …
+
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: docker/dev.Dockerfile
+    volumes:
+      - .:/app:cached
+      # One anonymous volume per workspace keeps the container's Linux node_modules from being
+      # shadowed by the host's. Add a line here when you add a workspace under apps/ or packages/
+      # (scripts/docker.test.ts fails until you do).
+      - /app/node_modules
+      - /app/apps/www/node_modules
+      - /app/apps/app/node_modules
+      - /app/apps/auth/node_modules
+      - /app/apps/account/node_modules
+      - /app/apps/docs/node_modules
+      - /app/apps/help/node_modules
+      - /app/apps/jobs/node_modules
+      - /app/apps/blog/node_modules
+      - /app/apps/api/node_modules
+      - /app/apps/ai/node_modules
+      - /app/apps/story/node_modules
+      - /app/apps/e2e/node_modules
+      - /app/apps/load/node_modules
+      - /app/packages/ui/node_modules
+      - /app/packages/tokens/node_modules
+      - /app/packages/typescript-config/node_modules
+      - /app/packages/api-contract/node_modules
+      - /app/packages/ai-contract/node_modules
+      - /app/packages/public-api-contract/node_modules
+      - /app/packages/service-kit/node_modules
+      - /app/packages/session/node_modules
+      - /app/packages/email/node_modules
+      - /app/packages/sites/node_modules
+      - /app/packages/content/node_modules
+      - /app/packages/telemetry/node_modules
+      - /app/packages/i18n/node_modules
+      - /app/packages/i18n-guard/node_modules
+      - /app/packages/log/node_modules
+      # Container-only .next per Next app: the host's .next caches embed host absolute paths.
+      - /app/apps/www/.next
+      - /app/apps/app/.next
+      - /app/apps/auth/.next
+      - /app/apps/account/.next
+      - /app/apps/docs/.next
+      - /app/apps/help/.next
+      - /app/apps/jobs/.next
+      - /app/apps/blog/.next
+    ports:
+      - "3000-3009:3000-3009"
+      - "6006:6006"
+    environment:
+      - NODE_ENV=development
+      # Next.js dev servers and the Bun services bind 0.0.0.0 inside the container.
+      - DEV_HOSTNAME=0.0.0.0
+      - HOST=0.0.0.0
+      - WATCHPACK_POLLING=true
+      # *.localhost does not resolve inside Linux containers; every app shares this one.
+      - API_URL=http://localhost:3007
+      - AI_SERVICE_URL=http://localhost:3008
+    command: bun dev
+
+  # A local inbox at http://localhost:8025. The dev service keeps MAIL_PROVIDER=log (mail in the
+  # api's output) unless you set, on the dev service:
+  #   MAIL_PROVIDER=smtp  SMTP_URL=smtp://mailpit:1025
+  mailpit:
+    image: axllent/mailpit
+    ports: ["8025:8025"]
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+
+  # Opt-in local Postgres for apps/api: start it with --profile postgres, then set on the dev service:
+  #   DATABASE_URL=postgres://postgres:postgres@postgres:5432/app  (Bun.sql picks the adapter)
+  postgres:
+    image: postgres:17-alpine
+    profiles: ["postgres"]
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: app
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

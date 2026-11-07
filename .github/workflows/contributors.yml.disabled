@@ -1,0 +1,21 @@
+# Keeps a contributors list in README.md: on every push to main, a third-party action
+# (akhilmhdh/contributors-readme-action) commits the updated list back to the repo, so it needs
+# contents: write. Disabled by default — rename to contributors.yml to turn it on, and add the
+# action's markers (<!-- readme: contributors -start/-end -->) to README.md first.
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  contrib-readme-job:
+    runs-on: ubuntu-latest
+    name: A job to automate contrib in readme
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Contribute List
+        uses: akhilmhdh/contributors-readme-action@v2.3.10
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,23 @@
+{
+  "name": "@repo/service-kit",
+  "version": "0.1.0",
+  "description": "Guard, rate limit, error shape and lifecycle shared by the Bun services",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@orpc/server": "catalog:",
+    "@repo/log": "workspace:*"
+  },
+  "devDependencies": {
+    "@orpc/client": "catalog:",
+    "@repo/typescript-config": "workspace:*",
+    "@types/bun": "catalog:"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "title": "Account & security",
+  "description": "Turn on two-step verification, change your email, and export or delete your data.",
+  "pages": [
+    "turn-on-two-step-verification",
+    "change-your-email-address",
+    "export-or-delete-your-data"
+  ]
+}

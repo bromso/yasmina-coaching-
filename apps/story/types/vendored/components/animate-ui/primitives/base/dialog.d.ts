@@ -1,0 +1,32 @@
+import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
+import { type HTMLMotionProps } from "motion/react";
+import type * as React from "react";
+type DialogContextType = {
+    isOpen: boolean;
+    setIsOpen: DialogProps["onOpenChange"];
+};
+declare const useDialog: () => DialogContextType;
+type DialogProps = React.ComponentProps<typeof DialogPrimitive.Root>;
+declare function Dialog(props: DialogProps): React.JSX.Element;
+type DialogTriggerProps = React.ComponentProps<typeof DialogPrimitive.Trigger>;
+declare function DialogTrigger(props: DialogTriggerProps): React.JSX.Element;
+type DialogPortalProps = Omit<React.ComponentProps<typeof DialogPrimitive.Portal>, "keepMounted">;
+declare function DialogPortal(props: DialogPortalProps): React.JSX.Element;
+type DialogBackdropProps = Omit<React.ComponentProps<typeof DialogPrimitive.Backdrop>, "render"> & HTMLMotionProps<"div">;
+declare function DialogBackdrop({ transition, ...props }: DialogBackdropProps): React.JSX.Element;
+type DialogFlipDirection = "top" | "bottom" | "left" | "right";
+type DialogPopupProps = Omit<React.ComponentProps<typeof DialogPrimitive.Popup>, "render"> & HTMLMotionProps<"div"> & {
+    from?: DialogFlipDirection;
+};
+declare function DialogPopup({ from, initialFocus, finalFocus, transition, ...props }: DialogPopupProps): React.JSX.Element;
+type DialogCloseProps = React.ComponentProps<typeof DialogPrimitive.Close>;
+declare function DialogClose(props: DialogCloseProps): React.JSX.Element;
+type DialogHeaderProps = React.ComponentProps<"div">;
+declare function DialogHeader(props: DialogHeaderProps): React.JSX.Element;
+type DialogFooterProps = React.ComponentProps<"div">;
+declare function DialogFooter(props: DialogFooterProps): React.JSX.Element;
+type DialogTitleProps = React.ComponentProps<typeof DialogPrimitive.Title>;
+declare function DialogTitle(props: DialogTitleProps): React.JSX.Element;
+type DialogDescriptionProps = React.ComponentProps<typeof DialogPrimitive.Description>;
+declare function DialogDescription(props: DialogDescriptionProps): React.JSX.Element;
+export { Dialog, DialogBackdrop, type DialogBackdropProps, DialogClose, type DialogCloseProps, type DialogContextType, DialogDescription, type DialogDescriptionProps, type DialogFlipDirection, DialogFooter, type DialogFooterProps, DialogHeader, type DialogHeaderProps, DialogPopup, type DialogPopupProps, DialogPortal, type DialogPortalProps, type DialogProps, DialogTitle, type DialogTitleProps, DialogTrigger, type DialogTriggerProps, useDialog, };

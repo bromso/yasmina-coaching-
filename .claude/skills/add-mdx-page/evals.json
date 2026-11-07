@@ -1,0 +1,52 @@
+[
+  {
+    "query": "add a pricing page to the marketing site",
+    "should_trigger": true,
+    "rationale": "marketing MDX page"
+  },
+  {
+    "query": "create an about page in apps/www",
+    "should_trigger": true,
+    "rationale": "explicit www MDX"
+  },
+  {
+    "query": "build a features landing page with content sections",
+    "should_trigger": true,
+    "rationale": "content-driven page"
+  },
+  {
+    "query": "add a /blog/launch-announcement post",
+    "should_trigger": true,
+    "rationale": "MDX blog post"
+  },
+  {
+    "query": "make a marketing page about our team",
+    "should_trigger": true,
+    "rationale": "marketing content"
+  },
+  {
+    "query": "add a dashboard page for invoices",
+    "should_trigger": false,
+    "rationale": "an app page, not marketing content: the /new-page command"
+  },
+  {
+    "query": "create a Button component",
+    "should_trigger": false,
+    "rationale": "should hit add-ui-component"
+  },
+  {
+    "query": "what's MDX?",
+    "should_trigger": false,
+    "rationale": "generic question, not a build request"
+  },
+  {
+    "query": "add an API route for newsletter signup",
+    "should_trigger": false,
+    "rationale": "should hit nextjs-route-handlers"
+  },
+  {
+    "query": "fix Biome errors in www",
+    "should_trigger": false,
+    "rationale": "tooling, not a new page"
+  }
+]

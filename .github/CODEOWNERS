@@ -1,0 +1,50 @@
+# CODEOWNERS - Defines code ownership for pull request reviews
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything in the repo. scripts/github.test.ts fails until every workspace
+# under apps/ and packages/ has a line below.
+* @bromso
+
+# Next apps
+/apps/www/          @bromso
+/apps/app/          @bromso
+/apps/auth/         @bromso
+/apps/account/      @bromso
+/apps/docs/         @bromso
+/apps/help/         @bromso
+/apps/jobs/         @bromso
+/apps/blog/         @bromso
+/apps/story/        @bromso
+/apps/e2e/          @bromso
+/apps/load/         @bromso
+
+# Bun services and their contracts
+/apps/api/          @bromso
+/apps/ai/           @bromso
+/packages/api-contract/ @bromso
+/packages/ai-contract/  @bromso
+/packages/public-api-contract/ @bromso
+
+# Shared packages
+/packages/ui/       @bromso
+/packages/tokens/   @bromso
+/packages/typescript-config/ @bromso
+/packages/session/  @bromso
+/packages/email/    @bromso
+/packages/sites/    @bromso
+/packages/content/  @bromso
+/packages/telemetry/ @bromso
+/packages/i18n/     @bromso
+/packages/i18n-guard/ @bromso
+/packages/service-kit/ @bromso
+/packages/log/      @bromso
+
+# Infrastructure & Configuration
+/.github/           @bromso
+/docker/            @bromso
+/.devcontainer/     @bromso
+
+# Root configuration files
+/*.json             @bromso
+/*.md               @bromso
+/biome.json         @bromso

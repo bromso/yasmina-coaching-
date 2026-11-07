@@ -1,0 +1,48 @@
+[
+  {
+    "query": "add a Badge component to the shared UI package",
+    "should_trigger": true,
+    "rationale": "obvious case"
+  },
+  {
+    "query": "create a reusable Modal component",
+    "should_trigger": true,
+    "rationale": "shared primitive"
+  },
+  {
+    "query": "I need a Tooltip in the design system",
+    "should_trigger": true,
+    "rationale": "design system component"
+  },
+  { "query": "build a generic Card variant", "should_trigger": true, "rationale": "UI primitive" },
+  {
+    "query": "add a shadcn Switch component",
+    "should_trigger": true,
+    "rationale": "shadcn add into packages/ui"
+  },
+  {
+    "query": "create a new dashboard page for /teams",
+    "should_trigger": false,
+    "rationale": "should hit add-dashboard-route"
+  },
+  {
+    "query": "make a settings form for the user profile",
+    "should_trigger": false,
+    "rationale": "app-specific form, not shared component"
+  },
+  {
+    "query": "what's the Tailwind utility for grid?",
+    "should_trigger": false,
+    "rationale": "generic CSS question"
+  },
+  {
+    "query": "add an MDX marketing page",
+    "should_trigger": false,
+    "rationale": "should hit add-mdx-page"
+  },
+  {
+    "query": "create a sidebar layout for apps/app",
+    "should_trigger": false,
+    "rationale": "app-specific layout"
+  }
+]

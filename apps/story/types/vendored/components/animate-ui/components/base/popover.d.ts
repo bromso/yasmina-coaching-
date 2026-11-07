@@ -1,0 +1,16 @@
+import { type PopoverBackdropProps as PopoverBackdropPrimitiveProps, type PopoverCloseProps as PopoverClosePrimitiveProps, type PopoverDescriptionProps as PopoverDescriptionPrimitiveProps, type PopoverPopupProps as PopoverPopupPrimitiveProps, type PopoverPositionerProps as PopoverPositionerPrimitiveProps, type PopoverProps as PopoverPrimitiveProps, type PopoverTitleProps as PopoverTitlePrimitiveProps, type PopoverTriggerProps as PopoverTriggerPrimitiveProps } from "@repo/ui/components/animate-ui/primitives/base/popover";
+type PopoverProps = PopoverPrimitiveProps;
+declare function Popover(props: PopoverProps): import("react").JSX.Element;
+type PopoverTriggerProps = PopoverTriggerPrimitiveProps;
+declare function PopoverTrigger(props: PopoverTriggerProps): import("react").JSX.Element;
+type PopoverPanelProps = PopoverPositionerPrimitiveProps & PopoverPopupPrimitiveProps;
+declare function PopoverPanel({ className, align, sideOffset, initialFocus, finalFocus, style, children, ...props }: PopoverPanelProps): import("react").JSX.Element;
+type PopoverCloseProps = PopoverClosePrimitiveProps;
+declare function PopoverClose(props: PopoverCloseProps): import("react").JSX.Element;
+type PopoverBackdropProps = PopoverBackdropPrimitiveProps;
+declare function PopoverBackdrop(props: PopoverBackdropProps): import("react").JSX.Element;
+type PopoverTitleProps = PopoverTitlePrimitiveProps;
+declare function PopoverTitle(props: PopoverTitleProps): import("react").JSX.Element;
+type PopoverDescriptionProps = PopoverDescriptionPrimitiveProps;
+declare function PopoverDescription(props: PopoverDescriptionProps): import("react").JSX.Element;
+export { Popover, PopoverBackdrop, type PopoverBackdropProps, PopoverClose, type PopoverCloseProps, PopoverDescription, type PopoverDescriptionProps, PopoverPanel, type PopoverPanelProps, type PopoverProps, PopoverTitle, type PopoverTitleProps, PopoverTrigger, type PopoverTriggerProps, };

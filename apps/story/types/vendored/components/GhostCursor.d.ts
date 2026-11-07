@@ -1,0 +1,22 @@
+import type React from "react";
+type GhostCursorProps = {
+    className?: string;
+    style?: React.CSSProperties;
+    trailLength?: number;
+    inertia?: number;
+    grainIntensity?: number;
+    bloomStrength?: number;
+    bloomRadius?: number;
+    bloomThreshold?: number;
+    brightness?: number;
+    color?: string;
+    mixBlendMode?: React.CSSProperties["mixBlendMode"];
+    edgeIntensity?: number;
+    maxDevicePixelRatio?: number;
+    targetPixels?: number;
+    fadeDelayMs?: number;
+    fadeDurationMs?: number;
+    zIndex?: number;
+};
+declare const GhostCursor: React.FC<GhostCursorProps>;
+export default GhostCursor;

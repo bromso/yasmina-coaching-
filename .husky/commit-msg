@@ -1,0 +1,5 @@
+# Skip hooks in CI environments
+[ -n "$CI" ] && exit 0
+
+# Validate commit message with commitlint
+bun commitlint --edit "$1"

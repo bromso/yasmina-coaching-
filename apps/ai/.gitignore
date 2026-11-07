@@ -1,0 +1,15 @@
+# dependencies
+/node_modules
+
+# build output (bun build / bun build --compile)
+/dist
+
+# env files — .env.example is the committed template
+.env*
+!.env.example
+
+# misc
+.DS_Store
+
+# typescript
+*.tsbuildinfo

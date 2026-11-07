@@ -1,0 +1,99 @@
+{
+  // ===== Editor =====
+  "editor.defaultFormatter": "biomejs.biome",
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": false,
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.rulers": [100],
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": true,
+  "editor.stickyScroll.enabled": true,
+  "editor.linkedEditing": true,
+  "editor.inlineSuggest.enabled": true,
+  "editor.quickSuggestions": { "strings": "on" },
+  "editor.codeActionsOnSave": {
+    "quickfix.biome": "explicit",
+    "source.organizeImports.biome": "explicit"
+  },
+
+  // ===== Files =====
+  "files.autoSave": "onFocusChange",
+  "files.associations": {
+    "*.css": "tailwindcss",
+    "*.mdx": "mdx",
+    ".env*": "dotenv",
+    "biome.json": "jsonc",
+    "docker-compose*.yml": "dockercompose",
+    "Dockerfile*": "dockerfile"
+  },
+
+  // ===== TypeScript =====
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "typescript.suggest.autoImports": true,
+  "typescript.updateImportsOnFileMove.enabled": "always",
+
+  // ===== Tailwind CSS =====
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"],
+    ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["clsx\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
+  ],
+  "tailwindCSS.includeLanguages": {
+    "typescript": "javascript",
+    "typescriptreact": "javascript"
+  },
+  "tailwindCSS.emmetCompletions": true,
+  // Tailwind v4: the one stylesheet every app imports (@repo/ui/globals.css).
+  "tailwindCSS.experimental.configFile": "packages/ui/src/styles/globals.css",
+
+  // ===== Emmet =====
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact",
+    "typescript": "typescriptreact",
+    "mdx": "html"
+  },
+  "emmet.triggerExpansionOnTab": true,
+
+  // ===== Git =====
+  "git.autofetch": true,
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+
+  // ===== Package Manager =====
+  "npm.packageManager": "bun",
+
+  // ===== Language-Specific Formatters =====
+  "[json]": { "editor.defaultFormatter": "biomejs.biome" },
+  "[jsonc]": { "editor.defaultFormatter": "biomejs.biome" },
+  "[javascript]": { "editor.defaultFormatter": "biomejs.biome" },
+  "[javascriptreact]": { "editor.defaultFormatter": "biomejs.biome" },
+  "[typescript]": { "editor.defaultFormatter": "biomejs.biome" },
+  "[typescriptreact]": { "editor.defaultFormatter": "biomejs.biome" },
+  "[markdown]": { "editor.wordWrap": "on" },
+  "[yaml]": { "editor.defaultFormatter": "redhat.vscode-yaml" },
+  "[dockercompose]": { "editor.defaultFormatter": "redhat.vscode-yaml" },
+
+  "yaml.schemas": {
+    "https://json.schemastore.org/github-workflow.json": [".github/workflows/*.yml"]
+  },
+  "yaml.customTags": [
+    "!reference sequence"
+  ],
+  "redhat.telemetry.enabled": false,
+
+  // ===== Explorer =====
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.expand": false,
+  "explorer.fileNesting.patterns": {
+    "package.json": "bun.lock, package-lock.json, yarn.lock, .npmrc",
+    "tsconfig.json": "tsconfig.*.json",
+    "next.config.ts": "next-env.d.ts, middleware.ts",
+    ".env": ".env.*, .env.local, .env.development, .env.production",
+    "README.md": "CLAUDE.md, CONTRIBUTING.md, LICENSE",
+    "docker-compose.yml": "docker-compose.*.yml, .dockerignore"
+  }
+}

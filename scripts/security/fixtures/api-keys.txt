@@ -1,0 +1,13 @@
+# Fixture for gitleaks-rules.test.ts. Every key below is fake (made up by hand, never issued), and
+# every key line ends in the Gitleaks allow marker so the repo's own scan stays green.
+# Lines starting "match:" must match the bb-live-api-key rule (the secret is the key itself);
+# lines starting "no-match:" must not.
+match: bb_live_AbCd1234_Q7x-PZ9_mK3vN0aR4tY8wZ1bC6dE3fG5hJ0mL2nS7uV # gitleaks:allow
+match: export API_KEY="bb_live_00000000_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" # gitleaks:allow
+match: Authorization: Bearer bb_live_ZzYyXx99_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_Q # gitleaks:allow
+no-match: bb_live_AbCd123_Q7x-PZ9_mK3vN0aR4tY8wZ1bC6dE3fG5hJ0mL2nS7uV # gitleaks:allow
+no-match: bb_live_AbCd1234_Q7x-PZ9_mK3vN0aR4tY8wZ1bC6dE3fG5hJ0mL2nS7u # gitleaks:allow
+no-match: bb_live_AbCd1234_Q7x-PZ9_mK3vN0aR4tY8wZ1bC6dE3fG5hJ0mL2nS7uVX # gitleaks:allow
+no-match: bb_test_AbCd1234_Q7x-PZ9_mK3vN0aR4tY8wZ1bC6dE3fG5hJ0mL2nS7uV # gitleaks:allow
+no-match: xbb_live_AbCd1234_Q7x-PZ9_mK3vN0aR4tY8wZ1bC6dE3fG5hJ0mL2nS7uV # gitleaks:allow
+no-match: bb_live_AbCd-234_Q7x-PZ9_mK3vN0aR4tY8wZ1bC6dE3fG5hJ0mL2nS7uV # gitleaks:allow

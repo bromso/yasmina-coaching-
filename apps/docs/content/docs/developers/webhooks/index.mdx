@@ -1,0 +1,109 @@
+---
+title: Webhooks
+description: Register an endpoint, understand deliveries and retries, and the URLs we accept.
+tags: [api, webhooks]
+---
+
+Outgoing webhooks push this product's own events to HTTPS endpoints you register, so your
+integration reacts to a note, a member or an API key as it happens instead of polling the API.
+Managing endpoints needs the workspace's admin or owner role, as API keys do. Webhooks are a paid
+feature for creating, editing, re-enabling and testing an endpoint; an existing endpoint stays
+listed, its recent deliveries stay readable, and it stays deletable on every plan.
+
+On a plan without API access, though, an endpoint receives nothing. Events that happen meanwhile
+are dropped — not sent, and not resent after an upgrade — and retries already queued for earlier
+events stop too. Deliveries resume with the first event after the workspace is on a plan with API
+access again.
+
+## Adding an endpoint
+
+On your account's **Workspace** page, in the **Webhooks** card, add an endpoint URL, tick the
+events it should receive, and save.
+The signing secret is shown **exactly once** — store it with whatever will verify deliveries (see
+[Verifying signatures](/developers/webhooks/verifying-signatures)). After that, only the URL,
+description, events, status and delivery history are kept — never the plain secret.
+
+A workspace can hold up to 10 endpoints. **Send test event** queues a single `ping` to one endpoint
+alone, signed and delivered exactly like a real event, so you can confirm it is reachable and
+verifies signatures before subscribing it to anything real — see
+[the `ping` event](/developers/webhooks/events/ping). It works only on an enabled endpoint, and a
+workspace can send up to 20 test events an hour.
+
+Rotating an endpoint's secret replaces it at once, with no overlap window: every attempt from then
+on, including a retry of a delivery queued before the rotation, is signed with the new secret.
+Update your receiver with the new secret right away.
+
+## Allowed URLs
+
+An endpoint's URL must be an `https://` URL of at most 2000 characters, with no username or
+password (`user:pass@`) and no `#fragment`. It must resolve to a **public address** — no loopback,
+private network, link-local or other non-routable address. This is checked both when you add or
+change the URL and again, independently, right before every single delivery attempt. Checking again at delivery time
+— and only ever connecting to the address that check just returned — closes a DNS-rebinding window:
+a hostname that resolves publicly when you register it could later be pointed somewhere private by
+whoever controls its DNS, so delivery only ever reaches an address verified moments before. A
+delivery also never follows a redirect (a `3xx` is recorded and left alone) and never reads the
+response body back.
+
+## Events and payloads
+
+Every delivery's body is one envelope — the event's `type`, the `timestamp` it happened at, and
+its `data` — minified JSON, signed exactly as sent. For notes, members and the workspace, `data`
+is the same shape the [API reference](/developers/reference/get-workspace) returns for that
+resource (`member.role_changed` adds `previousRole`); each event page shows its exact payload.
+`data` never holds an email address, and new events and fields are only ever added, never removed
+or changed.
+
+| Event | About |
+|---|---|
+| [`note.created`](/developers/webhooks/events/note-created) | A note was created |
+| [`note.deleted`](/developers/webhooks/events/note-deleted) | A note was deleted |
+| [`member.joined`](/developers/webhooks/events/member-joined) | Someone joined the workspace |
+| [`member.left`](/developers/webhooks/events/member-left) | Someone left the workspace |
+| [`member.role_changed`](/developers/webhooks/events/member-role-changed) | A member's role changed |
+| [`workspace.updated`](/developers/webhooks/events/workspace-updated) | The workspace was renamed, or its logo changed |
+| [`api_key.created`](/developers/webhooks/events/api-key-created) | An API key was created |
+| [`api_key.revoked`](/developers/webhooks/events/api-key-revoked) | An API key was revoked |
+| [`ping`](/developers/webhooks/events/ping) | A test event, sent only by **Send test event** |
+
+## Responding
+
+Each delivery is a `POST` with `content-type: application/json`. Your endpoint has **10 seconds**
+per attempt to answer with any `2xx` status; the response body is ignored. Answer at once and do
+the work afterwards, asynchronously — a receiver that processes the event before answering (a sync
+to another system, say) risks timing out, and a timeout is a failed attempt: the event is retried,
+and a receiver that keeps timing out is eventually disabled (see [Auto-disable](#auto-disable)).
+
+## Retries
+
+A failed attempt — a connection that fails, no answer within 10 seconds, or anything other than a
+`2xx`/`410` — is retried with backoff: roughly 30 s, 1 min, 2 min, 4 min, 8 min, 16 min, 32 min between attempts, up to 8 attempts
+in total, about an hour end to end. A `3xx` redirect is never followed and counts as a failed
+attempt like any other non-2xx status; a `410 Gone` is the one exception — it is not retried, and
+disables the endpoint immediately.
+
+## Auto-disable
+
+An endpoint turns off automatically in two cases:
+
+- **5 deliveries in a row that each exhausted every attempt and still failed.** A single
+  successful delivery resets this count to zero, so it only fires on a true losing streak, not an
+  occasional blip.
+- **A `410 Gone` answer** — the receiver itself asked to stop.
+
+Either way every workspace owner is emailed, naming the endpoint's host, and events sent while it
+was off are **not** resent once it is back on — nothing is queued and held for it. Re-enable the
+endpoint in the **Webhooks** card on the account's **Workspace** page once whatever made it fail is fixed, since the first
+attempt happens on the very next matching event.
+
+## Deduplication and ordering
+
+Delivery is **at least once**, with **no ordering guarantee** across events — a retry of an older
+event can arrive after a newer one. Deduplicate on the `webhook-id` header: every attempt of one
+delivery carries the same id, so a retry after a timeout is simply the same id again. Order your
+own processing by the envelope's `timestamp` field (when the event happened), not by arrival order.
+
+<Callout type="warning" title="Verify before you trust a delivery">
+  Anyone can send a request to your endpoint. See
+  [Verifying signatures](/developers/webhooks/verifying-signatures) before you parse or act on one.
+</Callout>

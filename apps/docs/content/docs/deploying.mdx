@@ -1,0 +1,49 @@
+---
+title: Deploying
+description: Build the images, decide the shared values, and run the containers in production.
+tags: [deploy, docker]
+---
+
+## Topology
+
+The starter runs in production as one container per app, built from the two Dockerfiles in
+`docker/`: one for the Next apps and one for the Bun services. Every app gets its own subdomain
+behind one TLS-terminating reverse proxy. The browser only ever talks to the Next apps; they call
+`api` and `ai` server to server, so both services stay on the private network.
+
+The API migrates its database on boot, and migrations are forward-only: roll forward rather than
+downgrade an image. SQLite works for a single API container; use Postgres as soon as you run more
+than one.
+
+## Before building
+
+- **Rename the brand first.** The static apps bake the brand name into their images at build time.
+- **DNS.** Point each subdomain at the proxy, or use one wildcard record.
+- **Decide the shared values** below once; several containers read the same one.
+
+| Value | Example | Read by |
+|---|---|---|
+| `SITE_DOMAIN` | `acme.com` | every Next image at build time; app, auth, account and api at runtime |
+| `COOKIE_DOMAIN` | `.acme.com` | app, auth and account; the static apps at build time |
+| `API_SERVICE_TOKEN` | 32+ random characters | api and every Next app |
+| `TWO_FACTOR_ENCRYPTION_KEY` | 32 random bytes, base64 | api |
+
+## Building
+
+```bash
+docker build -f docker/next.Dockerfile \
+  --build-arg APP=docs --build-arg PORT=3004 \
+  --build-arg SITE_DOMAIN=acme.com --build-arg COOKIE_DOMAIN=.acme.com .
+```
+
+A different domain needs a rebuild, not just a new runtime variable: the static apps bake their
+cross-app links in at build time, and the consent banner's cookie domain with them. Leave
+`COOKIE_DOMAIN` out and the consent cookie is host-only, so a visitor's choice is not shared with
+the other subdomains.
+
+## After it is live
+
+Every Next app answers `/api/health`, and the Bun services answer `/health`. Background jobs run
+inside the API by default; run them in a dedicated worker container once you scale out.
+
+See [authentication](/authentication) for the sign-in variables.

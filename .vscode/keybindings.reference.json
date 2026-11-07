@@ -1,0 +1,196 @@
+[
+  // ===== Development =====
+  // Ctrl+Shift+D: Run all apps (bun dev)
+  {
+    "key": "ctrl+shift+d",
+    "command": "workbench.action.tasks.runTask",
+    "args": "mono: dev"
+  },
+  // Ctrl+Shift+B: Build all (bun run build)
+  {
+    "key": "ctrl+shift+b",
+    "command": "workbench.action.tasks.runTask",
+    "args": "mono: build"
+  },
+
+  // ===== Linting & Formatting =====
+  // Ctrl+Shift+L: Lint all
+  {
+    "key": "ctrl+shift+l",
+    "command": "workbench.action.tasks.runTask",
+    "args": "mono: lint"
+  },
+  // Ctrl+Shift+F: Format & fix current file (Biome)
+  {
+    "key": "ctrl+shift+f",
+    "command": "biome.formatDocument",
+    "when": "editorTextFocus"
+  },
+  // Ctrl+Alt+L: Lint & fix all
+  {
+    "key": "ctrl+alt+l",
+    "command": "workbench.action.tasks.runTask",
+    "args": "mono: lint:fix"
+  },
+
+  // ===== TypeScript =====
+  // Ctrl+Shift+T: Typecheck all
+  {
+    "key": "ctrl+shift+t",
+    "command": "workbench.action.tasks.runTask",
+    "args": "mono: typecheck"
+  },
+  // F12: Go to definition (default, but ensuring it's set)
+  {
+    "key": "f12",
+    "command": "editor.action.revealDefinition",
+    "when": "editorTextFocus"
+  },
+  // Ctrl+.: Quick fix (imports, etc.)
+  {
+    "key": "ctrl+.",
+    "command": "editor.action.quickFix",
+    "when": "editorTextFocus"
+  },
+
+  // ===== Utilities =====
+  // Ctrl+Shift+A: Add shadcn component
+  {
+    "key": "ctrl+shift+a",
+    "command": "workbench.action.tasks.runTask",
+    "args": "shadcn: add"
+  },
+  // Ctrl+Shift+C: Clean all (bun run clean)
+  {
+    "key": "ctrl+shift+c",
+    "command": "workbench.action.tasks.runTask",
+    "args": "mono: clean"
+  },
+
+  // ===== Terminal =====
+  // Ctrl+`: Toggle terminal (default)
+  {
+    "key": "ctrl+`",
+    "command": "workbench.action.terminal.toggleTerminal"
+  },
+  // Ctrl+Shift+`: New terminal
+  {
+    "key": "ctrl+shift+`",
+    "command": "workbench.action.terminal.new"
+  },
+
+  // ===== Navigation =====
+  // Ctrl+P: Quick open file (default)
+  {
+    "key": "ctrl+p",
+    "command": "workbench.action.quickOpen"
+  },
+  // Ctrl+Shift+P: Command palette (default)
+  {
+    "key": "ctrl+shift+p",
+    "command": "workbench.action.showCommands"
+  },
+  // Ctrl+Shift+E: Focus explorer
+  {
+    "key": "ctrl+shift+e",
+    "command": "workbench.view.explorer"
+  },
+  // Ctrl+Shift+G: Focus source control
+  {
+    "key": "ctrl+shift+g",
+    "command": "workbench.view.scm"
+  },
+
+  // ===== Editor =====
+  // Ctrl+/: Toggle comment
+  {
+    "key": "ctrl+/",
+    "command": "editor.action.commentLine",
+    "when": "editorTextFocus"
+  },
+  // Ctrl+Shift+/: Toggle block comment
+  {
+    "key": "ctrl+shift+/",
+    "command": "editor.action.blockComment",
+    "when": "editorTextFocus"
+  },
+  // Alt+Up/Down: Move line up/down
+  {
+    "key": "alt+up",
+    "command": "editor.action.moveLinesUpAction",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "alt+down",
+    "command": "editor.action.moveLinesDownAction",
+    "when": "editorTextFocus"
+  },
+  // Ctrl+D: Add selection to next find match
+  {
+    "key": "ctrl+d",
+    "command": "editor.action.addSelectionToNextFindMatch",
+    "when": "editorTextFocus"
+  },
+  // Ctrl+Shift+K: Delete line
+  {
+    "key": "ctrl+shift+k",
+    "command": "editor.action.deleteLines",
+    "when": "editorTextFocus"
+  },
+
+  // ===== Debugging =====
+  // F5: Start debugging
+  {
+    "key": "f5",
+    "command": "workbench.action.debug.start",
+    "when": "!inDebugMode"
+  },
+  // Shift+F5: Stop debugging
+  {
+    "key": "shift+f5",
+    "command": "workbench.action.debug.stop",
+    "when": "inDebugMode"
+  },
+  // F9: Toggle breakpoint
+  {
+    "key": "f9",
+    "command": "editor.debug.action.toggleBreakpoint",
+    "when": "editorTextFocus"
+  },
+  // F10: Step over
+  {
+    "key": "f10",
+    "command": "workbench.action.debug.stepOver",
+    "when": "inDebugMode"
+  },
+  // F11: Step into
+  {
+    "key": "f11",
+    "command": "workbench.action.debug.stepInto",
+    "when": "inDebugMode"
+  },
+
+  // ===== Sidebar & Panels =====
+  // Ctrl+B: Toggle sidebar
+  {
+    "key": "ctrl+b",
+    "command": "workbench.action.toggleSidebarVisibility"
+  },
+  // Ctrl+J: Toggle panel (terminal, problems, etc.)
+  {
+    "key": "ctrl+j",
+    "command": "workbench.action.togglePanel"
+  },
+
+  // ===== Tasks =====
+  // Ctrl+Shift+R: Run task picker
+  {
+    "key": "ctrl+shift+r",
+    "command": "workbench.action.tasks.runTask"
+  },
+  // Ctrl+Shift+X: Terminate task
+  {
+    "key": "ctrl+shift+x",
+    "command": "workbench.action.tasks.terminate"
+  }
+]

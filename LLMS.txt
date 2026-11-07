@@ -1,0 +1,89 @@
+boilerplate-bun - LLM QUICK REFERENCE
+
+STACK: Bun 1.4.2+ workspaces (+ root `catalog` for shared versions) | Next.js 16 | React 19
+       TypeScript 5.9 | Tailwind v4 | shadcn/ui on Radix + Base UI | Biome (lint/format)
+       Bun services: Bun.serve + oRPC + Zod | Bun.sql | Vercel AI SDK (Anthropic)
+
+APPS (dev URL -> prod subdomain):
+  apps/www:3000      - Marketing site          www.brand.localhost     -> www.brand.com
+  apps/app:3001      - Application shell       app.brand.localhost     -> app.brand.com
+  apps/auth:3002     - Auth screens (mockups)  auth.brand.localhost
+  apps/account:3003  - Account settings hub    account.brand.localhost
+  apps/docs:3004     - Docs shell              docs.brand.localhost
+  apps/help:3005     - Help / support shell    help.brand.localhost
+  apps/jobs:3006     - Jobs shell              jobs.brand.localhost
+  apps/api:3007      - Bun API: /rpc, /openapi, Bun.sql (SQLite default)
+  apps/ai:3008       - Bun AI service: POST /chat (useChat stream), /rpc summarize
+  apps/story:6006    - Storybook for packages/ui (dev only)
+
+PACKAGES:
+  @repo/ui                 - Shared components, blocks, charts, fonts, theme, globals.css
+  @repo/tokens             - Design tokens
+  @repo/api-contract       - oRPC contract for apps/api (clients import ApiClient)
+  @repo/ai-contract        - oRPC contract + ChatMessage for apps/ai (clients import AiClient)
+  @repo/typescript-config  - Shared tsconfig presets (base, nextjs, react-library, bun)
+
+COMMANDS:
+  bun dev                                   Start every app
+  bun --filter @repo/X dev                  Start one app
+  bunx shadcn@latest add Y -c packages/ui   Add a shared component
+  bun run lint / bun run format             Biome
+  bun run typecheck                         TypeScript
+  bun run test:services                     bun test for apps/api + apps/ai
+  bun run ci                                Full CI gate locally
+  docker compose up -d --build              All nine apps in containers
+
+CRITICAL RULES:
+  1. UI components -> packages/ui (NEVER add shadcn components to an app)
+  2. Layers flow one way: tokens -> components -> blocks -> views -> pages
+  3. Apps never import other apps; frontends use @repo/api-contract / @repo/ai-contract
+  4. Shared deps -> root `catalog`, referenced as "catalog:"; never a literal range for those
+  5. API change -> contract first (packages/*-contract), then implement in the service, then test
+  6. Style -> Biome only, no semicolons, double quotes, 100-char lines
+
+KEY FILES:
+  apps/<app>/src/views/                  - Page-level compositions (pages render a view)
+  apps/<app>/src/app/                    - Next.js routes (thin page.tsx wrappers)
+  apps/api/src/router.ts                 - API handlers (implements packages/api-contract)
+  apps/ai/src/chat.ts, src/tools/        - AI chat endpoint and model-callable tools
+  apps/ai/src/router.ts                  - Structured AI endpoints (implements packages/ai-contract)
+  packages/ui/src/components/            - Shared UI
+  packages/ui/components.json            - shadcn config and registries
+  package.json (root)                    - catalog, scripts, gates
+
+DECISION TREE - Where does code go?
+
+  Is it a UI component?
+    -> Shared across apps? -> packages/ui/src/components/
+    -> Reusable section (hero, footer)? -> packages/ui/src/blocks/
+    -> App-specific? -> apps/<app>/src/components/
+
+  Is it a page?
+    -> Composition -> apps/<app>/src/views/<route>-view.tsx
+    -> Route -> apps/<app>/src/app/<route>/page.tsx (renders the view)
+
+  Is it data / server logic?
+    -> Typed endpoint -> packages/api-contract + apps/api/src/router.ts
+    -> AI feature -> packages/ai-contract (+ chatTools for tools) + apps/ai/src/
+
+  Is it documentation?
+    -> Contributor docs -> CLAUDE.md / CONTRIBUTING.md
+    -> Component docs -> apps/story/stories/
+
+NAMING CONVENTIONS:
+  Components: PascalCase (UserProfile.tsx) | Blocks & views: kebab-case files, PascalCase exports
+  Utilities: camelCase (formatDate.ts) | Pages: lowercase-hyphen (user-settings/page.tsx)
+
+IMPORTS:
+  import { Button } from "@repo/ui/components/button"
+  import { Hero } from "@repo/ui/blocks/hero"
+  import { cn } from "@repo/ui/lib/utils"
+  import type { ApiClient } from "@repo/api-contract"
+  import type { AiClient, ChatMessage } from "@repo/ai-contract"
+
+READ ORDER FOR FULL CONTEXT:
+  1. LLMS.txt (this file)
+  2. CLAUDE.md (architecture, dependency rules, quality gates)
+     docs/architecture/<topic>.md (full behaviour of each domain it summarises)
+  3. apps/api/README.md, apps/ai/README.md (the services)
+  4. packages/ui/components.json (component registries)

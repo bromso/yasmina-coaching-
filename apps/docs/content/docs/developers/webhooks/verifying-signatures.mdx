@@ -1,0 +1,145 @@
+---
+title: Verifying signatures
+description: Check a delivery really came from us, using the official library or a hand-written verifier.
+tags: [api, webhooks, signatures]
+---
+
+Every delivery carries three headers, per the
+[Standard Webhooks](https://www.standardwebhooks.com) specification:
+
+```
+webhook-id: msg_EXAMPLE_ONLY_not_realA
+webhook-timestamp: 1768469400
+webhook-signature: v1,e7+hmXqwwTOXERrlNMCtVzdQIcHfO+IHAq0HNLpK9CU=
+```
+
+`webhook-id` is `msg_` followed by 22 base64url characters, the same for every attempt of one
+delivery; `webhook-timestamp` is unix seconds, taken when that attempt was signed;
+`webhook-signature` is a space-separated list of `<version>,<signature>` entries — today a single
+`v1,` one.
+
+To check your own verifier, use this example. The secret is never issued and not real:
+
+`whsec_ZXhhbXBsZS1vbmx5LW5vdC1hLXJlYWwtc2VjcmV0ISE=` {/* gitleaks:allow */}
+
+It is base64 for `example-only-not-a-real-secret!!`. The signature above covers exactly this body,
+byte for byte, on one line with no trailing newline — the
+[`ping` event](/developers/webhooks/events/ping)'s example, minified:
+
+```json
+{"type":"ping","timestamp":"2026-01-15T09:30:00.000Z","data":{"endpointId":1}}
+```
+
+With that secret, those three headers and that exact string, a correct verifier accepts the
+delivery; change one byte of the body and it must refuse it. The example timestamp is in the past
+(15 January 2026, 09:30 UTC), so the 5-minute check below refuses it on a real clock — set your
+test's clock to within 5 minutes of `1768469400` to see it pass.
+
+<Callout type="warning" title="Verify the signature first">
+  Anyone can send a request to your endpoint. Before you parse or act on a delivery, check its
+  `webhook-signature` header against your endpoint's own signing secret, and refuse a
+  `webhook-timestamp` more than 5 minutes from your own clock.
+</Callout>
+
+## With the official library
+
+JavaScript and TypeScript: `npm install standardwebhooks`.
+
+```ts
+import { Webhook, WebhookVerificationError } from "standardwebhooks"
+
+const wh = new Webhook(secret) // "whsec_…", as shown once when you created or rotated the endpoint
+
+/**
+ * The parsed envelope, { type, timestamp, data }, or null to refuse the delivery (answer 400):
+ * a missing header, a timestamp more than 5 minutes old or ahead, or no `v1,` entry in
+ * `webhook-signature` that matches. `rawBody` must be the exact request body, as a string or
+ * Buffer, read before any JSON parsing: a re-serialised copy can differ byte for byte and fail on
+ * a genuine delivery.
+ */
+function readDelivery(rawBody: string | Buffer, headers: Record<string, string>) {
+  try {
+    return wh.verify(rawBody, {
+      "webhook-id": headers["webhook-id"],
+      "webhook-timestamp": headers["webhook-timestamp"],
+      "webhook-signature": headers["webhook-signature"],
+    })
+  } catch (error) {
+    if (error instanceof WebhookVerificationError) return null
+    throw error
+  }
+}
+```
+
+Official libraries also exist for Python, Go, Ruby, Rust, PHP, Java and more — see the Standard
+Webhooks site. Use one if your stack has it.
+
+## Verifying by hand
+
+If you cannot add a dependency (Node, `node:crypto` only):
+
+1. Refuse a `webhook-timestamp` more than 5 minutes older or newer than your own clock.
+2. Strip `whsec_` from the secret and base64-decode the rest: that is the HMAC key.
+3. Compute `HMAC-SHA256(key, "<webhook-id>.<webhook-timestamp>.<raw body>")` — the three parts
+   joined by literal dots, the body the exact bytes received — and base64-encode it.
+4. Split `webhook-signature` on spaces; accept the delivery if any `v1,<signature>` entry equals
+   it, compared in constant time. Skip entries with any other version: a future signing scheme
+   would use a different prefix.
+
+```js
+const crypto = require("node:crypto")
+
+const TOLERANCE_SECONDS = 5 * 60
+
+/**
+ * true when the delivery is genuine and recent. `headers` holds the request's headers with
+ * lower-case names (Node's `req.headers`); `rawBody` is the exact body received, as a string or
+ * Buffer, before any JSON parsing.
+ */
+function verifyWebhook(secret, headers, rawBody) {
+  const id = headers["webhook-id"]
+  const timestamp = headers["webhook-timestamp"]
+  const signatures = headers["webhook-signature"]
+  if (typeof id !== "string" || typeof timestamp !== "string" || typeof signatures !== "string") {
+    return false
+  }
+
+  // 1. Recent: within 5 minutes of this machine's clock, in either direction.
+  if (!/^\d+$/.test(timestamp)) return false
+  const now = Math.floor(Date.now() / 1000)
+  if (Math.abs(now - Number(timestamp)) > TOLERANCE_SECONDS) return false
+
+  // 2. The expected signature: HMAC-SHA256 over "id.timestamp.body", keyed with the secret's
+  //    bytes (the base64 after "whsec_"), base64-encoded.
+  const key = Buffer.from(secret.replace(/^whsec_/, ""), "base64")
+  const expected = Buffer.from(
+    crypto.createHmac("sha256", key).update(`${id}.${timestamp}.`).update(rawBody).digest("base64")
+  )
+
+  // 3. Any "v1,<signature>" entry of the space-separated list may match; other versions are
+  //    skipped. timingSafeEqual throws on unequal lengths, so compare only equal-length buffers.
+  for (const entry of signatures.split(" ")) {
+    const comma = entry.indexOf(",")
+    if (comma === -1 || entry.slice(0, comma) !== "v1") continue
+    const given = Buffer.from(entry.slice(comma + 1))
+    if (given.length === expected.length && crypto.timingSafeEqual(given, expected)) return true
+  }
+  return false
+}
+```
+
+A malformed or truncated header makes it return `false`, never throw.
+
+## The 5-minute tolerance
+
+Reject any delivery whose `webhook-timestamp` is more than 5 minutes from your own clock, in
+either direction. The official libraries do this for you, and so does step 1 of the hand-written
+check above. This bounds how long a captured request stays replayable, and `webhook-id` /
+`webhook-timestamp` are never under the receiving endpoint's control — they come from our signer,
+not from anything your endpoint sent.
+
+## Dedup and ordering
+
+See [Deduplication and ordering](/developers/webhooks#deduplication-and-ordering): deduplicate on
+the `webhook-id` header, and order your own processing by the envelope's `timestamp` field rather
+than arrival order.

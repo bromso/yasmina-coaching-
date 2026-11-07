@@ -1,0 +1,72 @@
+---
+title: Developers
+description: The public API and webhooks for your own tools and integrations — base URL, versioning, errors and a quick start.
+tags: [api, developers]
+---
+
+This section is for developers integrating with this product: connecting your own tools and
+scripts to a workspace, and reacting to events as they happen. It documents a small, versioned
+surface — `/v1` — kept apart from how this product's own apps talk to each other.
+
+## Base URL
+
+Every request in this reference is made against one base URL, shown throughout as:
+
+`https://api.your-domain.example`
+
+`api.your-domain.example` is a placeholder — replace it with wherever your deployment actually
+serves the API. Each page in the [reference](/developers/reference/get-workspace) shows its path in
+full, `/v1` included — for example `/v1/notes`, which makes
+`https://api.your-domain.example/v1/notes`.
+
+## Versioning
+
+`/v1` only ever gains. A new optional input, a new output field, a new route, a new error message
+and a new webhook event are all fine. Nothing already documented here is ever removed, renamed, or
+changed to mean something different, and no required input becomes stricter. A change that could
+break an existing integration ships as a new version served alongside `/v1`, never as a change to
+it.
+
+## Errors
+
+Every error — from authentication and from a request alike — answers with the same one shape:
+
+```json
+{ "error": { "code": "forbidden_scope", "message": "This API key does not have the notes:write scope" } }
+```
+
+| Status | `code` | Meaning |
+|---|---|---|
+| 400 | `validation_failed` | The request's input failed validation: the `message` is `Input validation failed` and does not name the field, so check the request against the rules in the route's tables. A body that is not valid JSON gets `Malformed request. Ensure the request body is properly formatted and the 'Content-Type' header is set correctly.` instead. |
+| 401 | `unauthorized` | The API key is missing, malformed, unknown, revoked or expired, or its workspace has lost API access. |
+| 403 | `forbidden_scope` | The key is valid but lacks the scope the route needs. |
+| 404 | `not_found` | Nothing with that id exists in your workspace, or, with a valid key, the path itself is unknown (without one, any path answers `401` first). |
+| 413 | `validation_failed` | The request body is larger than the API accepts. A body over the server's hard limit may be refused with an empty `413`, with no JSON body. |
+| 429 | `rate_limited` | Too many requests; retry after the number of seconds in the `Retry-After` header. |
+| 500 | `internal` | An unexpected error on our side; retry later. |
+| 503 | `internal` | The request took too long to answer. It may still have taken effect — check before you retry a change. |
+
+## Quick start
+
+1. **Create an API key.** On your account's **Workspace** page, in the **API keys** card, create a
+   key with only the scopes your integration needs — see
+   [Authentication](/developers/authentication).
+2. **Call the API.** Send the key in the `Authorization` header on every request — see
+   [Authentication](/developers/authentication) and [Rate limits](/developers/rate-limits).
+3. **Read the reference.** Every endpoint has a complete example request and response — start at
+   the [API reference](/developers/reference/get-workspace).
+
+<Cards>
+  <Card title="Authentication" href="/developers/authentication">
+    Creating a key, sending it, scopes, and what a 401 or 403 means.
+  </Card>
+  <Card title="Rate limits" href="/developers/rate-limits">
+    How many requests you can make, and what happens past the limit.
+  </Card>
+  <Card title="API reference" href="/developers/reference/get-workspace">
+    Every endpoint: request, response and errors.
+  </Card>
+  <Card title="Webhooks" href="/developers/webhooks">
+    Subscribe your own endpoint to events as they happen.
+  </Card>
+</Cards>

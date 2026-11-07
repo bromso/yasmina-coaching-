@@ -1,0 +1,45 @@
+# Gitleaks config for scripts/security/secrets.ts. Extends (never replaces) the built-in default
+# ruleset, and adds one allowlist of paths: everything this repo's own .gitignore (root and every
+# app's) treats as build output, a cache or a generated artifact. The working-tree scan no longer
+# needs it (secrets.ts stages only `git ls-files --cached --others --exclude-standard` into a temp
+# dir, so an ignored file is never read); `gitleaks git` (--range/--history) still has no notion
+# of .gitignore, so a path here keeps a once-committed build artifact out of those scans. Kept in
+# sync with .gitignore by hand; Gitleaks' TOML format has no way to import another file's
+# patterns.
+[extend]
+useDefault = true
+
+# Workspace API keys (apps/api/src/api-keys.ts): `bb_live_<8 base62>_<43 base64url>`. The
+# distinctive tag is what makes a leaked key findable; scripts/security/gitleaks-rules.test.ts
+# proves this rule matches the format (fixtures/api-keys.txt) and that apps/api's own generator
+# produces keys it matches. RE2-compatible (Gitleaks is Go): no lookarounds.
+[[rules]]
+id = "bb-live-api-key"
+description = "Workspace API key (bb_live_)"
+regex = '''\b(bb_live_[0-9A-Za-z]{8}_[A-Za-z0-9_-]{43})(?:[^A-Za-z0-9_-]|$)'''
+secretGroup = 1
+keywords = ["bb_live_"]
+
+[allowlist]
+paths = [
+  '''(^|/)node_modules/''',
+  '''(^|/)\.next/''',
+  '''(^|/)\.turbo/''',
+  '''(^|/)\.vercel/''',
+  '''(^|/)dist/''',
+  '''(^|/)build/''',
+  '''(^|/)out/''',
+  '''(^|/)coverage/''',
+  '''(^|/)\.source/''',
+  '''(^|/)storybook-static/''',
+  '''^security/\.results/''',
+  '''^security/\.cache/''',
+  '''^perf/\.results/''',
+  '''^apps/e2e/\.tmp/''',
+  '''^apps/e2e/playwright-report/''',
+  '''^apps/e2e/test-results/''',
+  '''^apps/load/\.results/''',
+  '''^apps/load/\.tmp/''',
+  '''^apps/api/\.data/''',
+  '''^graphify-out/''',
+]

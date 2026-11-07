@@ -1,0 +1,61 @@
+---
+title: Welcome to the blog
+description: What this blog is for, and how to write the next post.
+date: 2026-10-07
+author: team
+tags: [announcements, guides]
+---
+
+This is the first post on the blog. Every post is an MDX file in `content/posts/`, checked when the
+site builds: a missing title, an unknown author, a malformed tag or a broken link stops the build
+rather than reaching readers.
+
+## What you will find here
+
+Product news, release notes and the occasional deep dive. Posts about how to get things done are
+tagged [guides](/tags/guides), and everything written by the people behind the product is listed
+under [the team](/authors/team).
+
+<Callout type="tip" title="Looking for reference material?">
+  The blog tells stories; the documentation, linked in the site header, is where every feature is
+  described in full.
+</Callout>
+
+## Writing a post
+
+Add a file to `content/posts/`. Its name becomes the address, so `my-first-post.mdx` is published at
+`/my-first-post`. The frontmatter is validated with the same schema the build uses:
+
+```ts
+const frontmatter = {
+  title: "My first post",
+  description: "One sentence for listings and search results.",
+  date: "2026-10-08",
+  author: "team",
+  tags: ["guides"],
+}
+```
+
+Set `draft: true` to keep a post out of production builds while you work on it.
+
+## Showing alternatives
+
+`<Tabs>` groups a few equivalent snippets under one choice — a reader without JavaScript sees
+every panel stacked instead, so nothing is hidden:
+
+<Tabs items={["bun", "npm"]}>
+<Tab value="bun">
+
+```bash
+bun add left-pad
+```
+
+</Tab>
+<Tab value="npm">
+
+```bash
+npm install left-pad
+```
+
+</Tab>
+</Tabs>

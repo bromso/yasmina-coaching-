@@ -1,0 +1,5 @@
+{
+  // When workspace.code-workspace is open, this folder resolves paths from packages/ui: the
+  // workspace-level "packages/ui/src/styles/globals.css" would point at packages/ui/packages/ui/….
+  "tailwindCSS.experimental.configFile": "./src/styles/globals.css"
+}

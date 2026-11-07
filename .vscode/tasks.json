@@ -1,0 +1,143 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    // ===== Monorepo-wide =====
+    {
+      "label": "mono: dev",
+      "type": "shell",
+      "command": "bun dev",
+      "group": { "kind": "build", "isDefault": true },
+      "icon": { "id": "rocket", "color": "terminal.ansiGreen" },
+      "presentation": { "reveal": "always", "panel": "new" },
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": { "regexp": ".", "file": 1, "line": 2, "column": 3, "message": 4 },
+        "background": { "activeOnStart": true, "beginsPattern": "dev", "endsPattern": "Ready in" }
+      }
+    },
+    {
+      "label": "mono: build",
+      "type": "shell",
+      "command": "bun run build",
+      "group": "build",
+      "icon": { "id": "package", "color": "terminal.ansiBlue" },
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "mono: lint",
+      "type": "shell",
+      "command": "bun run lint",
+      "group": "test",
+      "icon": { "id": "search", "color": "terminal.ansiYellow" },
+      "problemMatcher": []
+    },
+    {
+      "label": "mono: lint:fix",
+      "type": "shell",
+      "command": "bun run lint:fix && bun run format:fix",
+      "group": "test",
+      "icon": { "id": "wrench", "color": "terminal.ansiYellow" },
+      "problemMatcher": []
+    },
+    {
+      "label": "mono: typecheck",
+      "type": "shell",
+      "command": "bun run typecheck",
+      "group": "test",
+      "icon": { "id": "check", "color": "terminal.ansiGreen" },
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "mono: clean",
+      "type": "shell",
+      "command": "bun run clean",
+      "icon": { "id": "trash", "color": "terminal.ansiRed" },
+      "problemMatcher": []
+    },
+    {
+      // The local quality gate: planner tests, Biome, both typechecks, service tests, build.
+      "label": "mono: validate",
+      "type": "shell",
+      "command": "bun run validate",
+      "group": "test",
+      "icon": { "id": "verified", "color": "terminal.ansiGreen" },
+      // `bun --filter` prefixes each line and paths are per package, so $tsc links would be wrong.
+      "problemMatcher": []
+    },
+    {
+      "label": "mono: test services",
+      "type": "shell",
+      "command": "bun run test:services",
+      "group": { "kind": "test", "isDefault": true },
+      "icon": { "id": "beaker", "color": "terminal.ansiGreen" },
+      "problemMatcher": []
+    },
+    {
+      // Devcontainer only, opt-in (~500 MB): Chromium and its system libraries for apps/e2e. The
+      // dev image leaves them out to stay lean; on the host, `bunx playwright install chromium`.
+      "label": "e2e: install Chromium (devcontainer)",
+      "type": "shell",
+      "command": "sudo env \"PATH=$PATH\" bunx playwright install-deps chromium && bunx playwright install chromium",
+      "options": { "cwd": "${workspaceFolder}/apps/e2e" },
+      "icon": { "id": "cloud-download", "color": "terminal.ansiMagenta" },
+      "problemMatcher": []
+    },
+    {
+      // Builds www, app, auth and account, then runs every Playwright journey (apps/e2e).
+      "label": "e2e: all journeys",
+      "type": "shell",
+      "command": "bun --filter @repo/e2e e2e",
+      "group": "test",
+      "icon": { "id": "browser", "color": "terminal.ansiMagenta" },
+      "problemMatcher": []
+    },
+
+    // ===== Docker =====
+    {
+      "label": "docker: dev up",
+      "type": "shell",
+      "command": "docker compose -f docker-compose.dev.yml up --build",
+      "icon": { "id": "vm", "color": "terminal.ansiCyan" },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      // Production-like: all nine images on their dev ports (needs the root .env, see CLAUDE.md).
+      "label": "docker: stack up",
+      "type": "shell",
+      "command": "docker compose up -d --build",
+      "icon": { "id": "server", "color": "terminal.ansiCyan" },
+      "problemMatcher": []
+    },
+    {
+      "label": "docker: stack down",
+      "type": "shell",
+      "command": "docker compose down",
+      "icon": { "id": "server", "color": "terminal.ansiRed" },
+      "problemMatcher": []
+    },
+    {
+      "label": "docker: dev down",
+      "type": "shell",
+      "command": "docker compose -f docker-compose.dev.yml down",
+      "icon": { "id": "vm", "color": "terminal.ansiRed" },
+      "problemMatcher": []
+    },
+
+    // ===== Utilities =====
+    {
+      "label": "shadcn: add",
+      "type": "shell",
+      "command": "bunx shadcn@latest add ${input:component} -c packages/ui",
+      "icon": { "id": "add", "color": "terminal.ansiMagenta" },
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "component",
+      "type": "promptString",
+      "description": "shadcn/ui component name (e.g., button, card, dialog)"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+---
+title: Turn on two-step verification
+description: Add an authenticator app to your sign-in, and keep your recovery codes safe.
+tags: [security, account]
+popular: true
+---
+
+## Turn it on
+
+Open **Account**, go to **Security** and choose **Turn on**. You'll need to confirm it's really
+you first: if your account has a password, enter it; if you signed in without one (through a
+social provider or a magic link), you'll need to have signed in recently instead. You must also
+have a verified email — see [Create an account](/getting-started/create-an-account).
+
+Scan the QR code with an authenticator app, then enter the 6-digit code it shows to confirm setup.
+From then on, signing in asks for a fresh code after your password.
+
+## Save your recovery codes
+
+Once it's on, you get ten recovery codes, shown once. Keep them somewhere safe: each one signs you
+in a single time if you lose access to your authenticator app. You can generate a fresh set, or
+turn two-step verification off again, from the same Security page — both ask for a current code
+first.
+
+If you've lost your device and used up your recovery codes, there's no self-service way back in —
+[contact us](/contact) and a superadmin can reset two-step verification for your account.
+
+## Sign in with a passkey instead
+
+A passkey (your device's fingerprint, face or screen lock) signs you in without a password **and**
+without the code above — it counts as both at once. Add one from the same Security page, under
+**Passkeys**: choose **Add a passkey** and follow your device's own prompt. You can add more than
+one, rename each, and remove one you no longer use.
+
+From then on, `/login` offers **Sign in with a passkey** above the password form. Losing the
+device a passkey lived on doesn't lock you out: your password, a connected sign-in provider, or a
+sign-in link mailed to your verified email all still work, and you can add a fresh passkey from a
+new device once you're back in.

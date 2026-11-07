@@ -1,0 +1,11 @@
+services:
+  dev:
+    command: sleep infinity
+    privileged: true
+    volumes:
+      - docker-certs-ca:/certs/ca
+      - docker-certs-client:/certs/client
+
+volumes:
+  docker-certs-ca:
+  docker-certs-client:

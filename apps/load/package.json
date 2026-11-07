@@ -1,0 +1,26 @@
+{
+  "name": "@repo/load",
+  "version": "0.1.0",
+  "description": "Load scenarios and failure drills for apps/api and apps/ai (local, never shipped)",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "stack": "bun scripts/stack.ts",
+    "api-core": "bun src/scenarios/api-core.ts",
+    "realtime": "bun src/scenarios/realtime.ts",
+    "jobs-burst": "bun src/scenarios/jobs-burst.ts",
+    "drills": "bun src/drills/index.ts",
+    "smoke": "bun src/scenarios/api-core.ts --smoke"
+  },
+  "dependencies": {
+    "@orpc/client": "catalog:",
+    "@repo/ai-contract": "workspace:*",
+    "@repo/api-contract": "workspace:*"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/bun": "catalog:"
+  }
+}

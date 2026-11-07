@@ -1,0 +1,36 @@
+[
+  {
+    "query": "update React to the latest version",
+    "should_trigger": true,
+    "rationale": "dep update"
+  },
+  {
+    "query": "add date-fns to apps/app",
+    "should_trigger": true,
+    "rationale": "add dep to workspace"
+  },
+  {
+    "query": "I have a lockfile conflict in bun.lock",
+    "should_trigger": true,
+    "rationale": "lockfile resolution"
+  },
+  {
+    "query": "what's outdated in the monorepo?",
+    "should_trigger": true,
+    "rationale": "outdated check"
+  },
+  {
+    "query": "do I need a changeset for this dep bump?",
+    "should_trigger": true,
+    "rationale": "changeset workflow"
+  },
+  { "query": "run a security audit on dependencies", "should_trigger": true, "rationale": "audit" },
+  { "query": "add a Button component", "should_trigger": false, "rationale": "component skill" },
+  { "query": "create a dashboard page", "should_trigger": false, "rationale": "route skill" },
+  { "query": "what is package.json", "should_trigger": false, "rationale": "generic" },
+  {
+    "query": "fix a TypeScript error in my code",
+    "should_trigger": false,
+    "rationale": "code, not deps"
+  }
+]
