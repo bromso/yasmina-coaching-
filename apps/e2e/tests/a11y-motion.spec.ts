@@ -3,7 +3,7 @@ import { urlFor } from "../fixtures/a11y-session"
 
 const PAGES = [
   ["www", "/"],
-  ["blog", "/welcome"],
+  ["blog", "/"],
   ["docs", "/getting-started"],
 ] as const
 
