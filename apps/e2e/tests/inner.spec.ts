@@ -37,10 +37,27 @@ test("from the hub to a booked start call", async ({ page }) => {
 
   await page.getByLabel("Namn", { exact: true }).fill("Ada Lovelace")
   await page.getByLabel("E-post", { exact: true }).fill(email)
-  await page.getByRole("button", { name: /bekräfta bokningen/i }).click()
+  await page.getByRole("button", { name: /fortsätt till betalning/i }).click()
 
-  await expect(page).toHaveURL(/\/book\/done\?/)
+  // Payment: the start call has a fixed price, so all four methods are offered. Pay with the
+  // Swish mock: the number is checked in the browser and never posted with the booking.
+  await expect(page.getByRole("heading", { name: "Betalning", level: 2 })).toBeFocused()
+  await expect(page.getByText(/testläge: ingen betalning dras/i)).toBeVisible()
+  for (const method of ["Apple Pay", "Google Pay", "Swish", "Faktura"]) {
+    await expect(page.getByRole("radio", { name: new RegExp(`^${method}`) })).toBeVisible()
+  }
+  await page.getByRole("radio", { name: /^Swish/ }).check()
+  const pay = page.getByRole("button", { name: /betala 2\s250\skr med swish/i })
+  await pay.click()
+  await expect(page.getByText(/fyll i ett svenskt mobilnummer/i)).toBeVisible()
+  await page.getByLabel("Mobilnummer för Swish").fill("070 123 45 67")
+  await pay.click()
+  await expect(page.getByText(/öppna swish-appen/i)).toBeVisible()
+
+  await expect(page).toHaveURL(/\/book\/done\?.*paid=swish/, { timeout: 15_000 })
   await expect(page.getByText(/BK-\d+/)).toBeVisible()
+  await expect(page.getByText("Betalt med Swish (testläge).")).toBeVisible()
+  expect(page.url()).not.toContain("0701234567")
 })
 
 test("Inifrån group lists only its own events", async ({ page }) => {
