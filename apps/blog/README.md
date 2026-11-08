@@ -63,9 +63,8 @@ scratch, and a build fails rather than ships broken content: a frontmatter, auth
 language, translation or nesting problem fails it for any post (drafts included), and a broken
 link or missing image fails it for any post that would actually publish.
 
-The repo ships two draft examples, `exempel.mdx` and its translation `en-example.mdx`, which never
-publish: they keep the post routes, feeds and build checks exercised until the real posts land,
-and should be deleted then.
+The blog ships ten posts by Yasmina in Swedish, each with its English translation (see
+`docs/guides/content.md` for which ones tests reference by name).
 
 ## Where things go
 

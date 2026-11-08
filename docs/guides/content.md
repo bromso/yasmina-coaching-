@@ -304,18 +304,13 @@ fumadocs measures it while compiling every post, before the publish rule is ever
 independently and merges into the one error, a bad tag on one post never hides a broken link on
 another — fix every line the error names, in one pass.
 
-### The example posts
+### The posts the blog ships
 
-The repo ships two drafts, `apps/blog/content/posts/exempel.mdx` and its English translation
-`en-example.mdx`, as working examples of the frontmatter, a cover, a translation, links between
-posts and `www:` links. Being drafts, they never publish: they keep the post routes, feeds and
-build checks exercised under `next dev` and `bun test` until the real posts land. Delete both then;
-`apps/blog/src/lib/feed-render.test.ts` renders `exempel` by name, so point it at a real post in
-the same change.
-
-While no post publishes, a production build has no post, tag or author page, so
-`apps/e2e/a11y/routes.ts` excludes those routes and the e2e post journey skips itself. Once the
-first posts are out, list one real post's pages there (and in `apps/e2e/perf/core.ts`).
+Ten posts by Yasmina in Swedish, each with its English translation, dated a week apart. Two are
+referenced by name: `apps/blog/src/lib/feed-render.test.ts` renders `att-leda-genom-en-kris` and
+its translation, and `apps/e2e` uses that post, `/en/leading-through-a-crisis`, `/tags/kris`,
+`/en/tags/crisis` and the author pages (the a11y manifest, the blog journey, the reduced-motion
+check and the Lighthouse page). Renaming or removing those means updating them in the same change.
 
 ## Writing docs
 
@@ -485,7 +480,7 @@ sync.
 `apps/e2e/tests/docs.spec.ts` references the starter content by name — the "Getting started" and
 "Architecture" pages, the "Workspaces" heading on "Authentication", and the sidebar order from
 `meta.json`. Deleting or renaming the starter pages means updating that spec too, the same
-trade-off as the blog's example posts.
+trade-off as the blog's posts.
 
 ## Writing help content
 
@@ -684,4 +679,4 @@ ready — delete the ones you don't need and add new files; there is no `meta.js
 `apps/e2e/tests/help.spec.ts` references the starter content by name — the "Getting started"
 category, its "Create an account" article, and the "Turn on two-step verification" article found
 by search. Deleting or renaming them means updating that spec too, the same trade-off as the
-blog's example posts and the docs' starter pages.
+blog's posts and the docs' starter pages.

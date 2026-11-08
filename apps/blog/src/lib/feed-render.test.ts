@@ -4,9 +4,9 @@ import { rssFeed } from "@repo/content/feeds"
 import { createMdxPlugin } from "fumadocs-mdx/bun"
 
 /**
- * A smoke test of the real feed path — the compiled example posts (`content/posts/exempel.mdx` and
- * `en-example.mdx`, drafts, which `bun test` sees because only production hides drafts;
- * through fumadocs-mdx's own Bun plugin), `blog.ts`'s loading and validation, `renderPostHtml`'s
+ * A smoke test of the real feed path — real posts (`content/posts/att-leda-genom-en-kris.mdx` and
+ * its translation `en-leading-through-a-crisis.mdx`, compiled through fumadocs-mdx's own Bun
+ * plugin), `blog.ts`'s loading and validation, `renderPostHtml`'s
  * `react-dom/server.edge` stream and `feedResponse` — so a silent change in how that renderer
  * behaves (an empty body, markup gone) fails `bun test`, not just a reader's feed. What it cannot
  * cover is Next's own aliasing of `react-dom/server.edge` inside a route handler (see the comment
@@ -29,11 +29,11 @@ beforeAll(async () => {
 afterAll(() => process.chdir(startDir))
 
 describe("feed rendering, end to end", () => {
-  test("the example post renders to HTML with its paragraphs and a resolved www: link", async () => {
-    const html = await feedRender.renderPostHtml("exempel")
+  test("a post renders to HTML with its paragraphs and a resolved www: link", async () => {
+    const html = await feedRender.renderPostHtml("att-leda-genom-en-kris")
     expect(html).toContain("<p")
-    expect(html).toContain("Det här är ett utkast.")
-    expect(html).toContain('href="http://www.brand.localhost:3000/book"')
+    expect(html).toContain("En kris på jobbet har oftast ett namn.")
+    expect(html).toContain('href="http://www.brand.localhost:3000/#contact"')
     expect(html).not.toContain("www:/")
   })
 
@@ -41,14 +41,14 @@ describe("feed rendering, end to end", () => {
     const sv = await (await feedRender.feedResponse(rssFeed, "application/rss+xml", "sv")).text()
     expect(sv).toContain("<content:encoded><![CDATA[")
     expect(sv).toContain("<language>sv</language>")
-    expect(sv).toContain("Exempel på ett inlägg")
-    expect(sv).not.toContain("An example post")
+    expect(sv).toContain("Att leda genom en kris, på jobbet och hemma")
+    expect(sv).not.toContain("Leading through a crisis, at work and at home")
     const response = await feedRender.feedResponse(rssFeed, "application/rss+xml", "en")
     expect(response.headers.get("content-type")).toBe("application/rss+xml")
     const en = await response.text()
-    expect(en).toContain("An example post")
-    expect(en).toContain("/en/example</link>")
-    expect(en).not.toContain("Exempel på ett inlägg")
+    expect(en).toContain("Leading through a crisis, at work and at home")
+    expect(en).toContain("/en/leading-through-a-crisis</link>")
+    expect(en).not.toContain("Att leda genom en kris, på jobbet och hemma")
   })
 
   test("a slug with no page throws rather than rendering an empty entry", async () => {

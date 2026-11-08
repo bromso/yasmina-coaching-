@@ -156,7 +156,7 @@ they stop at one app's boundary:
   to www, to `/inifran` and `/book` there, and to the English index (`/en`, `<html lang="en">`) and
   back; `/rss.xml` and `/en/rss.xml` each answer in their own `<language>`; an unknown address is a
   Swedish 404 with the blog's chrome; the newest post opens with its title and the call to action
-  linking to www's intro-call form (skipped while the blog ships only its draft examples); with JavaScript disabled, the index
+  linking to www's intro-call form, and its language link opens the English twin; with JavaScript disabled, the index
   still shows its hero and the header's site nav.
 - `docs.spec.ts` — the landing page shows the intro and the sidebar; a sidebar link opens its page
   with breadcrumbs, and a table-of-contents link jumps to its heading (a URL hash); scrolled to a
@@ -216,7 +216,7 @@ they stop at one app's boundary:
   included) at 320 × 640: the document never
   scrolls sideways (WCAG 1.4.10); a table, code block or chart scrolling inside its own container
   is fine.
-- `a11y-motion.spec.ts` — with `reducedMotion: "reduce"`, `www /`, the blog's index and a docs page hold
+- `a11y-motion.spec.ts` — with `reducedMotion: "reduce"`, `www /`, a blog post and a docs page hold
   no running animation after load.
 
   See `docs/guides/accessibility.md` for what each check covers, the manifest and allowlist, and
@@ -227,7 +227,7 @@ they stop at one app's boundary:
   same page get different ids.
 - `perf-lighthouse.spec.ts` — a Lighthouse performance run (mobile emulation, simulated
   throttling, Playwright's own Chromium, no second download) against six public pages (`www /`,
-  `docs /getting-started`, `blog /`, `help /getting-started/create-an-account`,
+  `docs /getting-started`, `blog /att-leda-genom-en-kris`, `help /getting-started/create-an-account`,
   `jobs /senior-fullstack-engineer`, `auth /login`), 3 runs each, the median of score/LCP/TBT/CLS
   judged against `perf/budgets.json`'s `lighthouse` section, the failure listing every run.
 - `perf-vitals.spec.ts` — in-browser Web Vitals (`web-vitals`, injected before any page script):

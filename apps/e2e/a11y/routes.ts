@@ -153,10 +153,15 @@ export const A11Y_PAGES: A11yPage[] = [
   { app: "jobs", path: "/customer-support-specialist", route: "/[slug]", auth: "none" },
   { app: "jobs", path: "/senior-fullstack-engineer/apply", route: "/[slug]/apply", auth: "none" },
   notFound("jobs"),
-  // blog (Swedish at the root, English under /en; the post, tag and author pages wait for the
-  // first published posts — see EXCLUDED)
+  // blog (Swedish at the root, English under /en: one post and its translation, a tag, the author)
   { app: "blog", path: "/", auth: "none" },
   { app: "blog", path: "/en", auth: "none" },
+  { app: "blog", path: "/att-leda-genom-en-kris", route: "/[slug]", auth: "none" },
+  { app: "blog", path: "/en/leading-through-a-crisis", route: "/en/[slug]", auth: "none" },
+  { app: "blog", path: "/tags/kris", route: "/tags/[tag]", auth: "none" },
+  { app: "blog", path: "/en/tags/crisis", route: "/en/tags/[tag]", auth: "none" },
+  { app: "blog", path: "/authors/yasmina", route: "/authors/[author]", auth: "none" },
+  { app: "blog", path: "/en/authors/yasmina", route: "/en/authors/[author]", auth: "none" },
   notFound("blog"),
 ]
 
@@ -192,20 +197,6 @@ export const EXCLUDED: Array<{ app: AppId; route: string; reason: string }> = [
     route: "/en/page/[n]",
     reason: "built only past 12 posts in a language (dynamicParams false)",
   },
-  // The blog's two example posts are drafts, so a production build has no post, tag or author
-  // page yet. List one real post's pages here (and in apps/e2e/perf/core.ts) once they publish.
-  ...[
-    "/[slug]",
-    "/en/[slug]",
-    "/tags/[tag]",
-    "/en/tags/[tag]",
-    "/authors/[author]",
-    "/en/authors/[author]",
-  ].map((route) => ({
-    app: "blog" as const,
-    route,
-    reason: "built only for published posts; the blog ships drafts until its first posts land",
-  })),
 ]
 
 /** The variants a page is checked in: both themes, plus Swedish on translated non-admin pages. */

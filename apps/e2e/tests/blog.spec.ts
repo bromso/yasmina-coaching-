@@ -1,9 +1,7 @@
 import { expect, test } from "@playwright/test"
 import { URLS } from "../e2e.env"
 
-// The blog is Swedish at the root and English under /en, each with its own <html lang>. Its two
-// example posts are drafts, so a production build lists none yet: the post journey below runs
-// once the first posts publish.
+// The blog is Swedish at the root and English under /en, each with its own <html lang>.
 
 test("the Swedish index opens on its hero, in Swedish", async ({ page }) => {
   await page.goto(URLS.blog)
@@ -60,16 +58,21 @@ test("an unknown address is a Swedish 404 with the blog's chrome", async ({ page
 
 test("the newest post opens with its title and links to its translation", async ({ page }) => {
   await page.goto(URLS.blog)
-  const first = page.locator('[data-slot="post-card"] h2 a').first()
-  test.skip((await first.count()) === 0, "no published post yet")
-  const title = (await first.textContent()) ?? ""
-  await first.click()
+  const title = "Att leda genom en kris, på jobbet och hemma"
+  await page.getByRole("link", { name: title }).first().click()
+  await expect(page).toHaveURL(`${URLS.blog}/att-leda-genom-en-kris`)
   await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible()
   await expect(page.locator("html")).toHaveAttribute("lang", "sv")
   await expect(page.getByRole("link", { name: "Boka ett kostnadsfritt samtal" })).toHaveAttribute(
     "href",
     `${URLS.www}/#contact`
   )
+  await page.getByRole("link", { name: "Read in English" }).click()
+  await expect(page).toHaveURL(`${URLS.blog}/en/leading-through-a-crisis`)
+  await expect(page.locator("html")).toHaveAttribute("lang", "en")
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Leading through a crisis, at work and at home" })
+  ).toBeVisible()
 })
 
 test.describe("without JavaScript", () => {
