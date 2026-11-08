@@ -214,3 +214,67 @@ describe("PrevNext", () => {
     expect(html).toContain(">B<")
   })
 })
+
+describe("the blog blocks in another language", () => {
+  test("PostCard takes its words, date locale and classes as props", () => {
+    const html = renderToStaticMarkup(
+      <PostCard
+        href="/hej"
+        title="Hej"
+        description="Ett första inlägg."
+        date={new Date("2026-10-07")}
+        readingMinutes={3}
+        author={author}
+        tags={[]}
+        featured
+        featuredLabel="Utvald"
+        readingTime="3 min läsning"
+        dateLocale="sv-SE"
+        className="rounded-3xl"
+        titleClassName="font-display"
+      />
+    )
+    expect(html).toContain("Utvald")
+    expect(html).not.toContain("Featured")
+    expect(html).toContain("3 min läsning")
+    expect(html).toContain("7 okt. 2026")
+    expect(html).toContain("rounded-3xl")
+    expect(html).toMatch(/<h2[^>]*class="[^"]*font-display/)
+  })
+
+  test("PostHeader takes its words, date locale and classes as props", () => {
+    const html = renderToStaticMarkup(
+      <PostHeader
+        title="Hej"
+        description="Ett första inlägg."
+        date={new Date("2026-10-07")}
+        updated={new Date("2026-10-08")}
+        readingMinutes={5}
+        author={{ ...author, href: "/authors/ada" }}
+        tags={[]}
+        updatedLabel="Uppdaterad"
+        readingTime="5 min läsning"
+        dateLocale="sv-SE"
+        className="gap-8"
+        titleClassName="font-display"
+      />
+    )
+    expect(html).toContain("Uppdaterad")
+    expect(html).not.toContain("Updated")
+    expect(html).toContain("5 min läsning")
+    expect(html).toContain("8 okt. 2026")
+    expect(html).toMatch(/<header[^>]*class="[^"]*gap-8/)
+    expect(html).toMatch(/<h1[^>]*class="[^"]*font-display/)
+  })
+
+  test("Toc's nav label follows navLabel", () => {
+    const html = renderToStaticMarkup(
+      <Toc
+        items={[{ title: "Intro", url: "#intro", depth: 2 }]}
+        label="På sidan"
+        navLabel="På sidan"
+      />
+    )
+    expect(html).toContain('aria-label="På sidan"')
+  })
+})
