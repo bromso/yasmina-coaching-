@@ -48,6 +48,20 @@ describe("postFrontmatterSchema", () => {
     expect(() => postFrontmatterSchema.parse({ ...valid, date: "not-a-date" })).toThrow()
   })
 
+  test("locale defaults to en, takes sv, and refuses anything else", () => {
+    expect(postFrontmatterSchema.parse(valid).locale).toBe("en")
+    expect(postFrontmatterSchema.parse({ ...valid, locale: "sv" }).locale).toBe("sv")
+    expect(() => postFrontmatterSchema.parse({ ...valid, locale: "de" })).toThrow()
+  })
+
+  test("translationOf is optional and must be a slug", () => {
+    expect(postFrontmatterSchema.parse(valid).translationOf).toBeUndefined()
+    expect(postFrontmatterSchema.parse({ ...valid, translationOf: "hej" }).translationOf).toBe(
+      "hej"
+    )
+    expect(() => postFrontmatterSchema.parse({ ...valid, translationOf: "Not A Slug" })).toThrow()
+  })
+
   test("date: null is refused (an empty YAML date:)", () => {
     expect(() => postFrontmatterSchema.parse({ ...valid, date: null })).toThrow()
   })

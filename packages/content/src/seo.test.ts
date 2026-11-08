@@ -15,12 +15,18 @@ function post(overrides: Partial<Post> = {}): Post {
     author: "jane",
     tags: ["bun"],
     type: "Blog Post",
+    locale: "en",
     readingMinutes: 3,
     ...overrides,
   }
 }
 
 describe("blogPostingJsonLd", () => {
+  test("names the post's language", () => {
+    const parsed = JSON.parse(blogPostingJsonLd(post({ locale: "sv" }), author, "https://x.se/hej"))
+    expect(parsed.inLanguage).toBe("sv")
+  })
+
   test("contains the BlogPosting type, dates, and author name", () => {
     const json = blogPostingJsonLd(post(), author, "http://blog.brand.localhost:3009/example")
     expect(json).toContain(`"@type":"BlogPosting"`)

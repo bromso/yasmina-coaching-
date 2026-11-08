@@ -19,6 +19,7 @@ function post(overrides: Partial<Post> = {}): Post {
     author: "jane",
     tags: ["bun"],
     type: "Blog Post",
+    locale: "en",
     readingMinutes: 3,
     ...overrides,
   }
@@ -204,5 +205,41 @@ describe("jsonFeed", () => {
     const parsed = JSON.parse(json)
     expect(parsed.feed_url).toBe("http://blog.brand.localhost:3009/feed.json")
     expect(parsed.items[0].url).toBe("http://blog.brand.localhost:3009/example")
+  })
+})
+
+describe("a feed for one language under a path", () => {
+  const english: FeedSite = { ...site, path: "/en", language: "en" }
+  const entries = [entry({ post: post({ url: "/en/example" }) })]
+
+  test("RSS links home and self under the path and names the language", () => {
+    const xml = rssFeed(english, entries)
+    assertWellFormedXml(xml)
+    expect(xml).toContain("<link>http://blog.brand.localhost:3009/en</link>")
+    expect(xml).toContain('href="http://blog.brand.localhost:3009/en/rss.xml" rel="self"')
+    expect(xml).toContain("<language>en</language>")
+    expect(xml).toContain("<link>http://blog.brand.localhost:3009/en/example</link>")
+  })
+
+  test("Atom carries xml:lang and the path's home and self links", () => {
+    const xml = atomFeed(english, entries)
+    assertWellFormedXml(xml)
+    expect(xml).toContain('<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">')
+    expect(xml).toContain('href="http://blog.brand.localhost:3009/en/atom.xml"')
+    expect(xml).toContain(
+      '<link rel="alternate" type="text/html" href="http://blog.brand.localhost:3009/en"/>'
+    )
+  })
+
+  test("JSON Feed names the language and the path's urls", () => {
+    const feed = JSON.parse(jsonFeed(english, entries))
+    expect(feed.language).toBe("en")
+    expect(feed.home_page_url).toBe("http://blog.brand.localhost:3009/en")
+    expect(feed.feed_url).toBe("http://blog.brand.localhost:3009/en/feed.json")
+  })
+
+  test("without a language, none is written", () => {
+    expect(rssFeed(site, entries)).not.toContain("<language>")
+    expect(JSON.parse(jsonFeed(site, entries)).language).toBeUndefined()
   })
 })

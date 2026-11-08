@@ -5,6 +5,8 @@ import {
   createBlog,
   DEFAULT_PAGE_SIZE,
   isPublished,
+  localePrefix,
+  postPath,
   RESERVED_SLUGS,
   readingMinutes,
 } from "./posts"
@@ -26,6 +28,7 @@ function input(overrides: Partial<PostInput> = {}): PostInput {
       author: "jane",
       tags: ["bun"],
       type: "Blog Post",
+      locale: "en",
     },
     text: "word ".repeat(50).trim(),
     links: [],
@@ -106,6 +109,8 @@ describe("reserved slugs", () => {
       "manifest",
       "api",
       "files",
+      "sv",
+      "en",
     ]
     expect([...RESERVED_SLUGS].sort()).toEqual([...reserved].sort())
     const inputs = reserved.map((slug) => input({ file: `${slug}.mdx`, slug }))
@@ -334,5 +339,126 @@ describe("readingMinutes", () => {
   })
   test("400 words is 2 minutes", () => {
     expect(readingMinutes("word ".repeat(400).trim())).toBe(2)
+  })
+})
+
+describe("languages", () => {
+  const options = {
+    mode: "production" as const,
+    now: new Date("2026-06-01"),
+    rootLocale: "sv" as const,
+  }
+
+  function localized(
+    slug: string,
+    locale: "sv" | "en",
+    extra: Partial<PostFrontmatter> = {}
+  ): PostInput {
+    const base = input({ file: `${slug}.mdx`, slug })
+    return { ...base, frontmatter: { ...base.frontmatter, locale, ...extra } }
+  }
+
+  function problems(inputs: PostInput[], opts: Parameters<typeof createBlog>[2] = options) {
+    try {
+      createBlog(inputs, authors, opts)
+      return []
+    } catch (e) {
+      return (e as ContentError).problems
+    }
+  }
+
+  test("a post's locale defaults to English", () => {
+    const blog = createBlog([input()], authors, { mode: "production", now: new Date("2026-06-01") })
+    expect(blog.posts()[0]?.locale).toBe("en")
+  })
+
+  test("without rootLocale every post is served at /<slug>, whatever its language", () => {
+    const blog = createBlog([localized("en-hello", "en")], authors, {
+      mode: "production",
+      now: new Date("2026-06-01"),
+    })
+    expect(blog.posts()[0]?.url).toBe("/en-hello")
+  })
+
+  test("with rootLocale, a root-language post is /<slug> and another is /<locale>/<rest>", () => {
+    const blog = createBlog([localized("hej", "sv"), localized("en-hello", "en")], authors, options)
+    expect(blog.post("hej")?.url).toBe("/hej")
+    expect(blog.post("en-hello")?.url).toBe("/en/hello")
+    expect(postPath("en-hello", "en", "sv")).toBe("/en/hello")
+    expect(localePrefix("en", "sv")).toBe("/en")
+    expect(localePrefix("sv", "sv")).toBe("")
+  })
+
+  test("an English post must be named en-<slug>, and its rest must not be reserved", () => {
+    expect(problems([localized("hello", "en"), localized("en-tags", "en")])).toEqual([
+      'hello.mdx: a post with locale "en" must be named "en-<slug>.mdx" (it is served at /en/<slug>)',
+      'en-tags.mdx: slug "tags" is reserved',
+    ])
+  })
+
+  test("a Swedish post must not borrow the English prefix", () => {
+    expect(problems([localized("en-hej", "sv")])).toEqual([
+      'en-hej.mdx: "en-" names are for posts with locale "en" — set `locale: en` or rename the file',
+    ])
+  })
+
+  test("translationOf must name another post in another language, once per language", () => {
+    expect(
+      problems([
+        localized("hej", "sv"),
+        localized("ny", "sv", { translationOf: "hej" }),
+        localized("en-hello", "en", { translationOf: "hej" }),
+        localized("en-again", "en", { translationOf: "hej" }),
+        localized("en-lost", "en", { translationOf: "saknas" }),
+      ])
+    ).toEqual([
+      'ny.mdx: translationOf "hej" is a post in the same language ("sv")',
+      'en-again.mdx: "hej" already has a "en" translation (en-hello.mdx)',
+      'en-lost.mdx: translationOf "saknas" names no post',
+    ])
+  })
+
+  test("a draft counts as an existing original", () => {
+    expect(
+      problems([
+        localized("hej", "sv", { draft: true }),
+        localized("en-hello", "en", { translationOf: "hej" }),
+      ])
+    ).toEqual([])
+  })
+
+  test("inLocale narrows every list; translation finds the counterpart both ways", () => {
+    const blog = createBlog(
+      [
+        localized("hej", "sv", { tags: ["ledarskap"] }),
+        localized("tva", "sv", { tags: ["ledarskap"], date: new Date("2026-02-01") }),
+        localized("en-hello", "en", { translationOf: "hej", tags: ["leadership"] }),
+      ],
+      authors,
+      options
+    )
+    const sv = blog.inLocale("sv")
+    expect(sv.posts().map((post) => post.slug)).toEqual(["tva", "hej"])
+    expect(sv.tags()).toEqual([{ tag: "ledarskap", count: 2 }])
+    expect(sv.post("en-hello")).toBeUndefined()
+    expect(sv.neighbours("hej")).toEqual({ newer: sv.post("tva") })
+    expect(
+      blog
+        .inLocale("en")
+        .posts()
+        .map((post) => post.slug)
+    ).toEqual(["en-hello"])
+    expect(sv.translation("hej")?.slug).toBe("en-hello")
+    expect(blog.inLocale("en").translation("en-hello")?.slug).toBe("hej")
+    expect(sv.translation("tva")).toBeUndefined()
+  })
+
+  test("a translation that is not published is not offered", () => {
+    const blog = createBlog(
+      [localized("hej", "sv"), localized("en-hello", "en", { translationOf: "hej", draft: true })],
+      authors,
+      options
+    )
+    expect(blog.translation("hej")).toBeUndefined()
   })
 })
