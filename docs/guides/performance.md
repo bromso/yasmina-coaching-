@@ -176,7 +176,7 @@ other route across every app sits in the 240–335 KB band.
 | | LCP ms | 3159 | 3263 | 4250 |
 | | TBT ms | 23 | 266 | 470 |
 | | CLS | 0 | 0 | 0.02 |
-| `blog:/welcome` | score | 91 | 83 | 73 (floor) |
+| `blog:/`† | score | 91 | 83 | 73 (floor) |
 | | LCP ms | 3521 | 3541 | 4610 |
 | | TBT ms | 26 | 326 | 530 |
 | | CLS | 0.0001 | 0.0009 | 0.021 |
@@ -193,6 +193,10 @@ other route across every app sits in the 240–335 KB band.
 | | TBT ms | 16 | 146 | 350 |
 | | CLS | 0.0001 | 0.0001 | 0.021 |
 
+† Measured as `blog:/welcome`, the starter post the blog shipped before it became Yasmina's
+Swedish and English blog. The page is gone, so the same budgets now apply to the blog's Swedish
+index until `bun run perf:measure` re-measures it.
+
 The CI runner consistently scores several points lower and shows a far higher TBT than the M2
 Max — expected on a shared, throttled runner — which is exactly why the budgets took the worse
 (CI) side on every one of these metrics.
@@ -203,7 +207,7 @@ Max — expected on a shared, throttled runner — which is exactly why the budg
 |---|---|---|---|---|---|---|
 | `www:/` | 79 | 213 | 420 | 0.0001 | 0.0001 | 0.021 |
 | `auth:/login` | 98 | 239 | 440 | 0 | 0 | 0.02 |
-| `blog:/welcome` | 68 | 239 | 440 | 0.0001 | 0.0004 | 0.021 |
+| `blog:/`† | 68 | 239 | 440 | 0.0001 | 0.0004 | 0.021 |
 | `docs:/getting-started` | 70 | 264 | 470 | 0.0001 | 0.0009 | 0.021 |
 | `help:/getting-started/create-an-account` | 65 | 232 | 440 | 0.0001 | 0.0001 | 0.021 |
 | `jobs:/senior-fullstack-engineer` | 83 | 196 | 400 | 0.0001 | 0.0001 | 0.021 |

@@ -16,7 +16,7 @@ of the fixes it already found are in CLAUDE.md's **Accessibility** entry and the
 | States inside journeys | `apps/e2e/tests/{two-factor,admin,...}.spec.ts` | `expectAccessible` called at a dozen states the sweep never visits (see below) |
 | Keyboard-only journeys | `apps/e2e/tests/a11y-keyboard.spec.ts` | Four journeys driven by Tab/Shift+Tab/Enter/Space/Escape/arrows alone |
 | Reflow at 320 px | `apps/e2e/tests/a11y-reflow.spec.ts` | Every manifest entry (light only) at a 320 × 640 viewport |
-| Reduced motion | `apps/e2e/tests/a11y-motion.spec.ts` | `www /`, a blog post, a docs page, with `reducedMotion: "reduce"` |
+| Reduced motion | `apps/e2e/tests/a11y-motion.spec.ts` | `www /`, the blog's index, a docs page, with `reducedMotion: "reduce"` |
 | Route coverage | `scripts/a11y.test.ts` (`bun test scripts`) | Every `page.tsx` in the eight Next apps is in the manifest or `EXCLUDED` with a reason |
 | Pure logic | `scripts/a11y.test.ts` | `applyAllowlist`, `routeMatches`, `formatViolations` — unit-tested without a browser |
 
@@ -122,7 +122,7 @@ the document itself.
 
 ## Reduced motion
 
-`a11y-motion.spec.ts` opens `www /`, a blog post and a docs page with
+`a11y-motion.spec.ts` opens `www /`, the blog's index and a docs page with
 `reducedMotion: "reduce"` and asserts `document.getAnimations()` holds no running animation with a
 duration over 0 ms after load. A `@repo/ui` component that animates must honour
 `prefers-reduced-motion` — `useReducedMotion` from `motion/react`, or the CSS media query — since a

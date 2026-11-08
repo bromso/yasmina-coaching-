@@ -18,8 +18,9 @@ import { extractLinks, extractImages, imageProblems, headingProblems } from "@re
 `postFrontmatterSchema` is a strict Zod object: `title`, `description`, `date` and `updated` (a
 `Date` or a non-empty string that parses to a valid date — never `null`, never `""`, unlike plain
 `z.coerce.date()`), `author`, `tags`, an optional `cover` (`{ src, alt }`, `alt` required with
-it), `draft?` and `type` (defaults to `"Blog Post"`, kept for a later Open Knowledge Format
-export). An unknown key refuses the document — this is the schema `apps/blog`'s `source.config.ts`
+it), `draft?`, `type` (defaults to `"Blog Post"`, kept for a later Open Knowledge Format
+export), `locale` (`POST_LOCALES`: `"sv"` or `"en"`, defaulting to `"en"` so a blog in one
+language never sets it) and `translationOf?` (the slug of the post this one translates). An unknown key refuses the document — this is the schema `apps/blog`'s `source.config.ts`
 hands fumadocs-mdx, so a shape problem (a missing title, a bad date, a `cover` with no `alt`, an
 unknown key) fails at MDX compile time, before any post reaches `createBlog` below.
 
@@ -39,6 +40,13 @@ re-validates every post (bad frontmatter, a non-kebab-case slug or tag, a reserv
 `RESERVED_SLUGS`, the routes a blog serves at its root — an unknown author, a duplicate slug) and
 collects every problem before throwing one `ContentError` — never stops at the first.
 
+`options.rootLocale` (optional) makes the blog multilingual: posts in that language are served at
+`/<slug>`, posts in any other at `/<locale>/<rest>` from a `<locale>-<rest>` file name
+(`postPath(slug, locale, rootLocale)`, `localePrefix(locale, rootLocale)`), and a misnamed file
+fails. Without it every post is `/<slug>`, whatever its `locale`. In either mode a
+`translationOf` must name another post (drafts count) in a different language, at most one
+translation per original and language. `RESERVED_SLUGS` includes the language codes.
+
 `options.mode` decides what counts as published (`isPublished(frontmatter, options)`, exported for
 callers that must apply the same rule without a built `Blog`): `"production"` drops `draft: true` posts and any
 post whose UTC calendar day is after `options.now`'s (a post dated the same day as `now` is
@@ -46,14 +54,18 @@ published); `"development"` keeps everything, so drafts and scheduled posts prev
 
 The returned `Blog` exposes `posts()` (newest first), `post(slug)`, `page(n, size = DEFAULT_PAGE_SIZE)` (12),
 `tags()`, `byTag`, `authors()`, `byAuthor`, `author(key)`, `related(slug, limit = 3)` (most shared
-tags, then newest, never the post itself) and `neighbours(slug)` (the newest post has no `newer`).
+tags, then newest, never the post itself), `neighbours(slug)` (the newest post has no `newer`),
+`inLocale(locale)` (the same `Blog` over one language's posts) and `translation(slug)` (the
+published counterpart in another language, either direction).
 
 `readingMinutes(text)` is `ceil(words / 200)`, minimum 1.
 
 ## `feeds`
 
 `rssFeed` / `atomFeed` / `jsonFeed` each take a `FeedSite` (`title`, `description`, `url` —
-`siteUrl("blog")`) and `FeedEntry[]` (`post`, rendered `html`, `authorName`) and return full-content
+`siteUrl("blog")`, and optionally `path` — `"/en"` puts the home link and the feed's own URL under
+it — and `language`, written as RSS `<language>`, Atom `xml:lang` and JSON Feed `language`) and
+`FeedEntry[]` (`post`, rendered `html`, `authorName`) and return full-content
 feeds: RSS 2.0, Atom, and JSON Feed 1.1. Text is XML-escaped (`&amp; &lt; &gt; &quot; &apos;`); the
 rendered HTML body goes in `<![CDATA[…]]>`, with any `]]>` inside it split across two CDATA
 sections so it cannot close the wrapper early.
@@ -84,8 +96,9 @@ serves), `hosts` (every app's `host[:port]`) and `ownHost` (this site's) — and
 
 ## `seo`
 
-`blogPostingJsonLd(post, author, url)` returns `BlogPosting` JSON-LD as a plain JSON string, for a
-`<script type="application/ld+json">` tag the caller renders.
+`blogPostingJsonLd(post, author, url)` returns `BlogPosting` JSON-LD as a plain JSON string (with
+`inLanguage`, the post's `locale`), for a `<script type="application/ld+json">` tag the caller
+renders.
 
 ## `checks`
 
