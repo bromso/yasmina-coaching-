@@ -62,3 +62,22 @@ export function formatKr(amount: number, _locale: Locale): string {
   const grouped = String(Math.round(amount)).replace(/\B(?=(\d{3})+(?!\d))/g, "\u00a0")
   return `${grouped}\u00a0kr`
 }
+
+/** Swedish VAT on coaching: 25 %. */
+export const VAT_RATE = 0.25
+
+export type VatBreakdown = { net: number; vat: number; total: number }
+
+/**
+ * `amount` as `audience` pays it, split into net, VAT and total, in whole kronor: a private client's
+ * price already includes VAT (so the VAT is a fifth of it), an organisation's excludes it (VAT is
+ * added on top). Derived, never typed, so a price change carries through.
+ */
+export function vatBreakdown(amount: number, audience: "private" | "organisation"): VatBreakdown {
+  if (audience === "private") {
+    const vat = Math.round((amount * VAT_RATE) / (1 + VAT_RATE))
+    return { net: amount - vat, vat, total: amount }
+  }
+  const vat = Math.round(amount * VAT_RATE)
+  return { net: amount, vat, total: amount + vat }
+}

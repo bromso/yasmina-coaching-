@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test"
 import { ORPCError } from "@orpc/client"
 import type { GroupEvent } from "@repo/api-contract"
+import { MEMBER_OFFERING_KEYS } from "@repo/api-contract/booking-limits"
 import {
   bookCore,
   bookingFieldErrors,
@@ -15,6 +16,7 @@ import {
   reserveSeatsCore,
 } from "./booking"
 import { groupBySeries } from "./group-events"
+import { PAYMENT_METHODS } from "./mock-payment"
 
 const form = (fields: Record<string, string | string[]>) => {
   const fd = new FormData()
@@ -178,6 +180,59 @@ describe("bookCore", () => {
   })
 })
 
+describe("bookCore and payment", () => {
+  const api = { book: async () => created }
+  const fields = (offering: string, extra: Record<string, string> = {}) =>
+    form({
+      ...customer,
+      offering,
+      audience: "private",
+      location: "video",
+      slots: ["2026-03-02T09:00:00.000Z"],
+      ...extra,
+    })
+
+  test("a priced start call keeps any of the four methods", async () => {
+    for (const method of PAYMENT_METHODS) {
+      const out = await bookCore({ api }, fields("inner_start_coaching", { paymentMethod: method }))
+      expect(out).toEqual({
+        ok: true,
+        redirectTo: doneUrl("BK-7", created.manageUrl, undefined, method),
+      })
+    }
+  })
+
+  test("an offering priced in writing accepts only an invoice", async () => {
+    const swish = await bookCore({ api }, fields("session", { paymentMethod: "swish" }))
+    expect(swish).toEqual({ ok: true, redirectTo: doneUrl("BK-7", created.manageUrl) })
+    const invoice = await bookCore({ api }, fields("session", { paymentMethod: "invoice" }))
+    expect(invoice).toEqual({
+      ok: true,
+      redirectTo: doneUrl("BK-7", created.manageUrl, undefined, "invoice"),
+    })
+  })
+
+  test("an unknown method is dropped, not shown", async () => {
+    const out = await bookCore(
+      { api },
+      fields("inner_start_coaching", { paymentMethod: "<script>" })
+    )
+    expect(out).toEqual({ ok: true, redirectTo: doneUrl("BK-7", created.manageUrl) })
+  })
+
+  test("members' sessions and extra programme sessions skip payment", async () => {
+    for (const key of MEMBER_OFFERING_KEYS) {
+      const out = await bookCore({ api }, fields(key, { paymentMethod: "swish" }))
+      expect(out).toEqual({ ok: true, redirectTo: doneUrl("BK-7", created.manageUrl, "member") })
+    }
+    const extra = await bookCore(
+      { api },
+      fields("package_6", { packageId: "12", paymentMethod: "invoice" })
+    )
+    expect(extra).toEqual({ ok: true, redirectTo: doneUrl("BK-7", created.manageUrl, "member") })
+  })
+})
+
 describe("reserveSeatsCore", () => {
   const good = form({ ...customer, audience: "private", eventIds: ["3", "4"] })
 
@@ -194,8 +249,43 @@ describe("reserveSeatsCore", () => {
       },
       good
     )
-    expect(out).toEqual({ ok: true, redirectTo: doneUrl("BK-7", created.manageUrl) })
+    expect(out).toEqual({ ok: true, redirectTo: doneUrl("BK-7", created.manageUrl, "group") })
     expect(sent).toMatchObject({ eventIds: [3, 4], audience: "private" })
+  })
+
+  test("the payment method rides along to the done page, never to the api", async () => {
+    let sent: Record<string, unknown> = {}
+    const api = {
+      reserve: async (input: Record<string, unknown>) => {
+        sent = input
+        return created
+      },
+    }
+    const inner = form({
+      ...customer,
+      audience: "private",
+      eventIds: ["3"],
+      offering: "inner_group",
+      paymentMethod: "swish",
+    })
+    expect(await reserveSeatsCore({ api }, inner)).toEqual({
+      ok: true,
+      redirectTo: doneUrl("BK-7", created.manageUrl, "group", "swish"),
+    })
+    expect(sent).not.toHaveProperty("paymentMethod")
+    expect(sent).not.toHaveProperty("offering")
+    // The leadership group is priced in writing: only an invoice counts.
+    const plain = form({
+      ...customer,
+      audience: "private",
+      eventIds: ["3"],
+      offering: "group",
+      paymentMethod: "swish",
+    })
+    expect(await reserveSeatsCore({ api }, plain)).toEqual({
+      ok: true,
+      redirectTo: doneUrl("BK-7", created.manageUrl, "group"),
+    })
   })
 
   test("no event ticked is an eventIds error", async () => {
@@ -521,6 +611,9 @@ describe("doneUrl", () => {
       "/book/done?ref=BK-7&manage=https%3A%2F%2Fwww.example.com%2Fbook%2Fmanage%2Fa+b"
     )
     expect(doneUrl("BK-7", "x", "request")).toBe("/book/done?ref=BK-7&manage=x&kind=request")
+    expect(doneUrl("BK-7", "x", "group", "swish")).toBe(
+      "/book/done?ref=BK-7&manage=x&kind=group&paid=swish"
+    )
   })
 })
 

@@ -7,9 +7,13 @@ import {
   BookingRequestSchema,
   BookingReserveSchema,
 } from "@repo/api-contract"
+import { OFFERING_KEYS, type OfferingKey } from "@repo/api-contract/booking-limits"
 import { createLogger } from "@repo/log"
 import { type FormState, fieldErrors } from "@repo/ui/components/form-feedback"
+import { amountFor } from "@/content/booking"
 import { shiftDay, zonedDay } from "@/lib/booking-dates"
+import { type BookingFlow, flowFor, paysIn } from "@/lib/booking-flow"
+import { type PaymentMethod, paidFor } from "@/lib/mock-payment"
 import { type Locale, SITE_LOCALE } from "@/lib/site-locale"
 
 const logger = createLogger({ service: "www" })
@@ -65,11 +69,36 @@ export function bookingFieldErrors(
   )
 }
 
-/** `/book/done?ref=…&manage=…[&kind=request]`, the page every successful write lands on. */
-export function doneUrl(reference: string, manageUrl: string, kind?: "request"): string {
+/**
+ * `/book/done?ref=…&manage=…[&kind=…][&paid=…]`, the page every successful write lands on: `kind`
+ * is the journey (left out for `instant`), `paid` the payment method's key, never anything the
+ * visitor typed.
+ */
+export function doneUrl(
+  reference: string,
+  manageUrl: string,
+  kind?: Exclude<BookingFlow, "instant">,
+  paid?: PaymentMethod
+): string {
   const params = new URLSearchParams({ ref: reference, manage: manageUrl })
   if (kind) params.set("kind", kind)
+  if (paid) params.set("paid", paid)
   return `/book/done?${params.toString()}`
+}
+
+const offeringKey = (raw: string): OfferingKey | null =>
+  (OFFERING_KEYS as readonly string[]).includes(raw) ? (raw as OfferingKey) : null
+
+/**
+ * The mock payment a booking of `offering` went through, from the form's `paymentMethod`: only for
+ * a journey with a payment step, and only a method the offering allows (invoice alone when it has
+ * no fixed price). The api never sees it; it only picks the line `/book/done` shows.
+ */
+export function paymentOf(fd: FormData, offering: string, packageId?: string) {
+  const key = offeringKey(offering)
+  if (!key) return undefined
+  if (!paysIn(flowFor(key, packageId))) return undefined
+  return paidFor(str(fd, "paymentMethod"), amountFor(key) !== null)
 }
 
 /**
@@ -147,13 +176,21 @@ export async function bookCore(
   }
   try {
     const { reference, manageUrl } = await deps.api.book(parsed.data)
-    return { ok: true, redirectTo: doneUrl(reference, manageUrl) }
+    const flow = flowFor(parsed.data.offering, values.packageId || undefined)
+    const paid = paymentOf(fd, parsed.data.offering, values.packageId || undefined)
+    return {
+      ok: true,
+      redirectTo: doneUrl(reference, manageUrl, flow === "instant" ? undefined : flow, paid),
+    }
   } catch (error) {
     return failure(error, "booking.book", values, deps.locale)
   }
 }
 
-/** Seats at one or several group events (`eventIds`, one checkbox each). */
+/**
+ * Seats at one or several group events (`eventIds`, one checkbox each). `offering` (a hidden
+ * field) is read only to check the payment method; the api decides the offering by the events.
+ */
 export async function reserveSeatsCore(
   deps: { api: ReserveApi; locale?: Locale },
   fd: FormData
@@ -179,7 +216,8 @@ export async function reserveSeatsCore(
   }
   try {
     const { reference, manageUrl } = await deps.api.reserve(parsed.data)
-    return { ok: true, redirectTo: doneUrl(reference, manageUrl) }
+    const paid = paymentOf(fd, str(fd, "offering"))
+    return { ok: true, redirectTo: doneUrl(reference, manageUrl, "group", paid) }
   } catch (error) {
     return failure(error, "booking.reserve", values, deps.locale)
   }
