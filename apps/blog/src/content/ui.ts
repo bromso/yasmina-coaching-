@@ -148,8 +148,8 @@ export const UI: Record<BlogLocale, BlogUi> = {
     },
     cta: {
       title: "Vill du prata om ditt ledarskap?",
-      text: "Ett första samtal på 30 minuter kostar ingenting. Vi pratar om var du står och om coaching kan hjälpa, innan du bestämmer dig.",
-      button: "Boka ett kostnadsfritt samtal",
+      text: "Introsamtalet tar 30 minuter och kostar ingenting. Vi pratar om var du står och om coaching kan hjälpa, innan du bestämmer dig.",
+      button: "Be om ett kostnadsfritt introsamtal",
     },
     legal: { terms: "Villkor", privacy: "Integritet" },
     notFound: {
@@ -196,8 +196,8 @@ export const UI: Record<BlogLocale, BlogUi> = {
     },
     cta: {
       title: "Want to talk about your leadership?",
-      text: "A first 30-minute call is free. We talk about where you are and whether coaching can help, before you decide.",
-      button: "Book a free call",
+      text: "The intro call takes 30 minutes and is free. We talk about where you are and whether coaching can help, before you decide.",
+      button: "Ask for a free intro call",
     },
     legal: { terms: "Terms", privacy: "Privacy" },
     notFound: {

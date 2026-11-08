@@ -80,10 +80,9 @@ test("the newest post opens with its title and links to its translation", async 
   await expect(page).toHaveURL(`${URLS.blog}/att-leda-genom-en-kris`)
   await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible()
   await expect(page.locator("html")).toHaveAttribute("lang", "sv")
-  await expect(page.getByRole("link", { name: "Boka ett kostnadsfritt samtal" })).toHaveAttribute(
-    "href",
-    `${URLS.www}/#contact`
-  )
+  await expect(
+    page.getByRole("link", { name: "Be om ett kostnadsfritt introsamtal" })
+  ).toHaveAttribute("href", `${URLS.www}/#contact`)
   await page.getByRole("link", { name: "Read in English" }).click()
   await expect(page).toHaveURL(`${URLS.blog}/en/leading-through-a-crisis`)
   await expect(page.locator("html")).toHaveAttribute("lang", "en")
