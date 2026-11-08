@@ -14,7 +14,7 @@ import { Icon } from "@repo/ui/components/icon"
 import { Input } from "@repo/ui/components/input"
 import { Label } from "@repo/ui/components/label"
 import { Textarea } from "@repo/ui/components/textarea"
-import { useActionState, useEffect, useRef, useState } from "react"
+import { useActionState, useState } from "react"
 import { requestBooking } from "@/app/actions"
 import { CustomerFields, Fieldset, LocationField, value } from "@/components/booking/details-fields"
 import { useBookingCopy, useLocale } from "@/components/booking/locale-provider"
@@ -22,13 +22,11 @@ import { StepIndicator } from "@/components/booking/step-indicator"
 import {
   checkDetails,
   fieldText,
-  focusFirstError,
   primaryClass,
   StepNav,
   StepPanel,
-  stepWithError,
-  withClientErrors,
 } from "@/components/booking/step-panel"
+import { useBookingSteps } from "@/components/booking/use-booking-steps"
 import type { BookingFormState } from "@/lib/booking"
 import { formatDateKey } from "@/lib/booking-dates"
 
@@ -88,30 +86,15 @@ export function RequestForm({ offering, locations, minDate }: RequestFormProps) 
   const locale = useLocale()
   const text = copy.request
   const [state, action, pending] = useActionState(requestBooking, initialState)
-  const [step, setStep] = useState(1)
-  const [clientErrors, setClientErrors] = useState<Record<string, string>>({})
   const [review, setReview] = useState<Review | null>(null)
-  const formRef = useRef<HTMLFormElement>(null)
   const steps = copy.steps.request
-  const shown = withClientErrors(state, clientErrors)
+  const { step, goTo, formRef, shown, fail, onSubmit, stepClick } = useBookingSteps({
+    state,
+    pending,
+    fields: STEP_FIELDS,
+    directSubmitStep: 3,
+  })
 
-  // A field the server refused reopens the step that holds it.
-  useEffect(() => {
-    setClientErrors({})
-    const errorStep = stepWithError(state, STEP_FIELDS)
-    if (errorStep) setStep(errorStep)
-  }, [state])
-
-  const goTo = (n: number) => {
-    setClientErrors({})
-    setStep(n)
-  }
-  const fail = (errors: Record<string, string>) => {
-    setClientErrors(errors)
-    if (Object.keys(errors).length === 0) return false
-    focusFirstError(formRef.current, Object.keys(errors))
-    return true
-  }
   const toDetails = () => {
     const form = formRef.current
     const errors: Record<string, string> = {}
@@ -160,10 +143,8 @@ export function RequestForm({ offering, locations, minDate }: RequestFormProps) 
       action={action}
       noValidate
       className="grid grid-cols-1 gap-8"
-      onSubmit={(event) => {
-        // Enter in a field of an earlier step never sends the request early.
-        if (step !== 3) event.preventDefault()
-      }}
+      // Enter in a field of an earlier step never sends the request early.
+      onSubmit={onSubmit}
     >
       <noscript>
         <style>{NO_SCRIPT_CSS}</style>
@@ -173,7 +154,7 @@ export function RequestForm({ offering, locations, minDate }: RequestFormProps) 
         current={step}
         stepOf={copy.stepOf}
         doneLabel={copy.stepper.done}
-        onStepClick={goTo}
+        onStepClick={stepClick}
       />
       <FormMessage state={state} />
       <input type="hidden" name="offering" value={offering} />

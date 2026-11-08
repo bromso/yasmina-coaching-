@@ -14,6 +14,10 @@ const { InnerResearchView } = await import("./inner-research-view")
 const { InnerServiceView } = await import("./inner-service-view")
 const { OfferingView } = await import("./offering-view")
 const { DoneView } = await import("./done-view")
+const { LocaleProvider } = await import("@/components/booking/locale-provider")
+const { PaymentError, PaymentStep } = await import("@/components/booking/payment-step")
+const { stepWithError, withClientErrors } = await import("@/components/booking/step-panel")
+type PaymentStepProps = import("@/components/booking/payment-step").PaymentStepProps
 
 const LOCALES = ["sv", "en"] as const
 
@@ -159,31 +163,16 @@ describe("the booking journeys' steps", () => {
   for (const locale of LOCALES) {
     const form = BOOKING[locale].form
 
-    test(`${locale}: a priced start call has four steps and all four payment methods`, () => {
+    test(`${locale}: an instant booking has four steps; the payment step loads later`, () => {
       const html = render(
         <OfferingView offering="inner_start_coaching" locale={locale} {...props} />
       )
       steps(html, form.steps.instant)
       expect(html).toContain(`aria-label="${form.stepOf(1, 4)}"`)
       expect(html).toContain('aria-current="step"')
-      for (const method of ["apple_pay", "google_pay", "swish", "invoice"] as const) {
-        expect(html).toContain(form.payment.methods[method].label)
-      }
-      expect(html).toContain(form.payment.testMode)
-      expect(html).toContain('name="paymentMethod"')
-      // The Swish number and invoice details are never named fields: nothing of them is posted.
-      expect(html).not.toContain('name="swishNumber"')
-      expect(html).not.toContain(form.payment.invoiceOnly)
-    })
-
-    test(`${locale}: an offering priced in writing offers invoice only`, () => {
-      for (const offering of ["session", "group"] as const) {
-        const html = render(<OfferingView offering={offering} locale={locale} {...props} />)
-        expect(html).toContain(form.payment.invoiceOnly)
-        expect(html).toContain(form.payment.methods.invoice.label)
-        expect(html).not.toContain(form.payment.methods.swish.hint)
-        expect(html).not.toContain(form.payment.methods.apple_pay.hint)
-      }
+      // Lazily loaded once the visitor reaches the details step: none of it in the first HTML.
+      expect(html).not.toContain(form.payment.testMode)
+      expect(html).not.toContain('name="paymentMethod"')
     })
 
     test(`${locale}: members' sessions and programme extras have three steps and no payment`, () => {
@@ -193,15 +182,13 @@ describe("the booking journeys' steps", () => {
       ]) {
         const html = render(node)
         expect(html).toContain(`aria-label="${form.stepOf(1, 3)}"`)
-        expect(html).not.toContain(form.payment.testMode)
-        expect(html).not.toContain('name="paymentMethod"')
+        expect(html).not.toContain(form.steps.instant[2] ?? "-")
       }
     })
 
     test(`${locale}: the group picks a session, then details, then pays`, () => {
       const html = render(<OfferingView offering="inner_group" locale={locale} {...props} />)
       steps(html, form.steps.group)
-      expect(html).toContain(form.payment.methods.swish.label)
     })
 
     test(`${locale}: a request reviews before sending, and says nothing is paid now`, () => {
@@ -213,6 +200,140 @@ describe("the booking journeys' steps", () => {
       expect(html).toContain("<noscript><style>")
     })
   }
+})
+
+describe("PaymentStep", () => {
+  const base = {
+    active: true,
+    audience: "private",
+    offering: "Startsamtal",
+    when: ["tisdag 10 november 2026, 09:00–10:30"],
+    email: "ada@example.com",
+    state: { ok: false },
+    pending: false,
+    submit: () => {},
+  } as const
+  const step = (locale: "sv" | "en", props: Partial<PaymentStepProps> = {}) =>
+    render(
+      <LocaleProvider locale={locale}>
+        <PaymentStep {...base} price={{ amount: 2250, per: "session" }} {...props} />
+      </LocaleProvider>
+    )
+
+  for (const locale of LOCALES) {
+    const form = BOOKING[locale].form
+
+    test(`${locale}: a fixed price with the mock on offers all four methods and says test mode`, () => {
+      const html = step(locale)
+      for (const method of ["apple_pay", "google_pay", "swish", "invoice"] as const) {
+        expect(html).toContain(form.payment.methods[method].label)
+      }
+      expect(html).toContain(form.payment.testMode)
+      expect(html).toContain('name="paymentMethod"')
+      expect(html).toContain("2 250 kr")
+      expect(html).toContain(form.payment.summary.vatIncluded)
+    })
+
+    test(`${locale}: the mock off, or no fixed price, leaves invoice only and no test mode`, () => {
+      for (const html of [step(locale, { mock: false }), step(locale, { price: null })]) {
+        expect(html).toContain(form.payment.methods.invoice.label)
+        expect(html).not.toContain(form.payment.methods.swish.hint)
+        expect(html).not.toContain(form.payment.testMode)
+      }
+      // Invoice is the only choice, so it is already chosen and its own line shows once.
+      const quoted = step(locale, { price: null })
+      expect(quoted).toContain(form.payment.invoice.private.unpriced("ada@example.com"))
+      expect(quoted).not.toContain(form.payment.invoice.private.priced("ada@example.com"))
+      expect(quoted).toContain(form.payment.summary.unpriced)
+    })
+
+    test(`${locale}: an organisation's invoice asks for its billing details, posted by name`, () => {
+      const html = step(locale, { audience: "organisation", mock: false })
+      expect(html).toContain(form.payment.invoice.organisation.priced)
+      for (const name of ["invoiceOrgNumber", "invoiceReference", "invoiceAddress"]) {
+        expect(html).toContain(`name="${name}"`)
+      }
+      expect(html).not.toContain('autoComplete="email"')
+      expect(html).not.toContain('autocomplete="email"')
+      // Organisations pay excl. VAT, with the VAT added: 2 250 kr → 563 kr VAT, 2 813 kr in all.
+      expect(html).toContain(form.payment.summary.vatAdded)
+      expect(html).toContain("563 kr")
+      expect(html).toContain("2 813 kr")
+    })
+
+    test(`${locale}: the group's months multiply the monthly price, VAT on the total`, () => {
+      const html = step(locale, { price: { amount: 1980, per: "month" }, quantity: 2 })
+      expect(html).toContain("2 × 1 980 kr")
+      expect(html).toContain("3 960 kr")
+      expect(html).toContain("792 kr")
+    })
+
+    test(`${locale}: the action's error shows beside the pay button`, () => {
+      const html = step(locale, { state: { ok: false, message: "Tiden är tagen." } })
+      expect(html).toContain('role="alert"')
+      expect(html).toContain("Tiden är tagen.")
+      expect(html).not.toContain(form.payment.nothingCharged)
+    })
+
+    test(`${locale}: after an approved mock, the error says nothing was charged`, () => {
+      const html = render(
+        <PaymentError
+          state={{ ok: false, message: "Tiden är tagen." }}
+          afterApproval
+          copy={form.payment}
+        />
+      )
+      expect(html).toContain("Tiden är tagen.")
+      expect(html).toContain(form.payment.nothingCharged)
+      expect(render(<PaymentError state={{ ok: true }} afterApproval copy={form.payment} />)).toBe(
+        ""
+      )
+    })
+  }
+
+  test("the nothing-charged line in both languages", () => {
+    expect(BOOKING.sv.form.payment.nothingCharged).toBe("Ingen betalning har dragits.")
+    expect(BOOKING.en.form.payment.nothingCharged).toBe("Nothing has been charged.")
+  })
+})
+
+describe("step helpers", () => {
+  test("stepWithError: the first step holding a refused field", () => {
+    const fields = [["slots"], ["name", "email"], ["paymentMethod", "invoiceOrgNumber"]]
+    expect(stepWithError({ ok: true }, fields)).toBeNull()
+    expect(stepWithError({ ok: false, message: "x" }, fields)).toBeNull()
+    expect(stepWithError({ ok: false, fieldErrors: { email: "e" } }, fields)).toBe(2)
+    expect(
+      stepWithError({ ok: false, fieldErrors: { invoiceOrgNumber: "o", email: "e" } }, fields)
+    ).toBe(2)
+    expect(stepWithError({ ok: false, fieldErrors: { invoiceOrgNumber: "o" } }, fields)).toBe(3)
+    expect(stepWithError({ ok: false, fieldErrors: { unknown: "u" } }, fields)).toBeNull()
+  })
+
+  test("withClientErrors: the browser's checks over the server's answer", () => {
+    const server = {
+      ok: false as const,
+      message: "Fel",
+      code: "CONFLICT",
+      fieldErrors: { name: "server", email: "server" },
+      values: { name: "Ada" },
+    }
+    expect(withClientErrors(server, {})).toBe(server)
+    expect(withClientErrors(server, { email: "client" })).toEqual({
+      ok: false,
+      message: "Fel",
+      code: "CONFLICT",
+      values: { name: "Ada" },
+      fieldErrors: { name: "server", email: "client" },
+    })
+    expect(withClientErrors({ ok: true }, { name: "client" })).toEqual({
+      ok: false,
+      message: undefined,
+      code: undefined,
+      values: undefined,
+      fieldErrors: { name: "client" },
+    })
+  })
 })
 
 describe("DoneView", () => {
@@ -230,4 +351,17 @@ describe("DoneView", () => {
       for (const line of Object.values(booking.done.paid)) expect(unpaid).not.toContain(line)
     })
   }
+
+  test("invoice lines: one per case, none in test mode, none claiming an address a client never gave", () => {
+    for (const locale of LOCALES) {
+      const paid = BOOKING[locale].done.paid
+      const lines = [paid.invoice, paid.invoice_org, paid.invoice_quote]
+      expect(new Set(lines).size).toBe(3)
+      for (const line of lines) expect(line).not.toMatch(/testläge|test mode/)
+      expect(paid.invoice).not.toMatch(/fakturaadress|invoice address/)
+      for (const key of ["apple_pay", "google_pay", "swish"] as const) {
+        expect(paid[key]).toMatch(/testläge|test mode/)
+      }
+    }
+  })
 })

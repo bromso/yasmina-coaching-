@@ -16,23 +16,23 @@ import {
   NotesField,
   value,
 } from "@/components/booking/details-fields"
+import { LazyPaymentStep } from "@/components/booking/lazy-payment-step"
 import { useBookingCopy, useLocale } from "@/components/booking/locale-provider"
-import { PaymentStep } from "@/components/booking/payment-step"
 import { StepIndicator } from "@/components/booking/step-indicator"
 import {
   checkDetails,
   fieldText,
-  focusFirstError,
+  PAYMENT_FIELDS,
   primaryClass,
   StepNav,
   StepPanel,
-  stepWithError,
-  withClientErrors,
+  useMounted,
 } from "@/components/booking/step-panel"
+import { useBookingSteps } from "@/components/booking/use-booking-steps"
 import type { OfferingAmount } from "@/content/booking"
 import type { BookingFormState } from "@/lib/booking"
 import { formatDay, formatTime } from "@/lib/booking-dates"
-import { groupBySeries } from "@/lib/group-events"
+import { groupBySeries, monthsSpanned } from "@/lib/group-events"
 
 type GroupBookingProps = {
   /** Which group offering's events to list (`group` or `inner_group`). */
@@ -53,7 +53,11 @@ type Events =
 const initialState: BookingFormState = { ok: false }
 
 /** Each step's fields, so a refusal from the server reopens the step that holds the field. */
-const STEP_FIELDS = [["eventIds"], ["audience", "name", "email", "organisation", "phone", "notes"]]
+const STEP_FIELDS = [
+  ["eventIds"],
+  ["audience", "name", "email", "organisation", "phone", "notes"],
+  PAYMENT_FIELDS,
+]
 
 /**
  * Pick one or more dates (step 1), your details (step 2), pay (step 3, the mock in
@@ -77,11 +81,11 @@ export function GroupBooking({
     (value(state, "audience") as BookingAudience) || initialAudience
   )
   const previouslyTicked = new Set(value(state, "eventIds").split(",").filter(Boolean))
-  const [step, setStep] = useState(1)
-  const [clientErrors, setClientErrors] = useState<Record<string, string>>({})
-  const [chosen, setChosen] = useState<{ when: string[]; email: string }>({ when: [], email: "" })
-  const formRef = useRef<HTMLFormElement>(null)
-  const allowSubmit = useRef(false)
+  const [chosen, setChosen] = useState<{ when: string[]; months: number; email: string }>({
+    when: [],
+    months: 1,
+    email: "",
+  })
   const steps = copy.steps.group
 
   // Each load is numbered: only the latest one may set the list, so a retry never races an
@@ -107,50 +111,30 @@ export function GroupBooking({
   useEffect(() => load(), [load])
 
   // A seats-full refusal shows the api's message, the list is fetched again so counts are fresh,
-  // and the dates are picked again; a field the server refused reopens the step that holds it.
-  useEffect(() => {
-    setClientErrors({})
-    if (!state.ok && state.code === "CONFLICT") {
-      load()
-      setStep(1)
-      return
-    }
-    const errorStep = stepWithError(state, STEP_FIELDS)
-    if (errorStep) setStep(errorStep)
-  }, [state, load])
+  // and the dates are picked again.
+  const { step, goTo, formRef, shown, fail, submit, onSubmit, setLocked, stepClick } =
+    useBookingSteps({ state, pending, fields: STEP_FIELDS, onConflict: load })
+  const mountPayment = useMounted(step >= 2)
 
   const series = events.status === "ready" ? groupBySeries(events.events) : []
-  const shown = withClientErrors(state, clientErrors)
-  const goTo = (n: number) => {
-    setClientErrors({})
-    setStep(n)
-  }
   const ticked = () =>
     formRef.current ? new FormData(formRef.current).getAll("eventIds").map((id) => String(id)) : []
   const toDetails = () => {
-    if (ticked().length === 0) {
-      setClientErrors({ eventIds: copy.check.eventIds })
-      formRef.current?.querySelector<HTMLInputElement>('input[name="eventIds"]')?.focus()
-      return
-    }
-    goTo(2)
+    if (!fail(ticked().length === 0 ? { eventIds: copy.check.eventIds } : {})) goTo(2)
   }
   const toPayment = () => {
-    const errors = checkDetails(formRef.current, copy.check)
-    setClientErrors(errors)
-    if (Object.keys(errors).length > 0) {
-      focusFirstError(formRef.current, Object.keys(errors))
-      return
-    }
+    if (fail(checkDetails(formRef.current, copy.check))) return
     const ids = new Set(ticked())
-    const list = events.status === "ready" ? events.events : []
+    const list = (events.status === "ready" ? events.events : []).filter((event) =>
+      ids.has(String(event.id))
+    )
     setChosen({
-      when: list
-        .filter((event) => ids.has(String(event.id)))
-        .map(
-          (event) =>
-            `${formatDay(event.startsAt, locale)}, ${formatTime(event.startsAt, locale)}–${formatTime(event.endsAt, locale)} · ${copy.locationLabels[event.location]}`
-        ),
+      // The Inifrån group is priced per month: dates in two months are two months' fees.
+      months: Math.max(1, monthsSpanned(list.map((event) => event.startsAt))),
+      when: list.map(
+        (event) =>
+          `${formatDay(event.startsAt, locale)}, ${formatTime(event.startsAt, locale)}–${formatTime(event.endsAt, locale)} · ${copy.locationLabels[event.location]}`
+      ),
       email: fieldText(formRef.current, "email"),
     })
     goTo(3)
@@ -162,19 +146,15 @@ export function GroupBooking({
       action={action}
       noValidate
       className="grid grid-cols-1 gap-8"
-      onSubmit={(event) => {
-        // Only the payment step books, once its mock has approved.
-        const ok = allowSubmit.current
-        allowSubmit.current = false
-        if (!ok) event.preventDefault()
-      }}
+      // Only the payment step books, once the payment is authorised.
+      onSubmit={onSubmit}
     >
       <StepIndicator
         steps={steps}
         current={step}
         stepOf={copy.stepOf}
         doneLabel={copy.stepper.done}
-        onStepClick={goTo}
+        onStepClick={stepClick}
       />
       <noscript>
         <p className="rounded-2xl border border-border bg-background/70 px-4 py-3 text-sm">
@@ -184,7 +164,8 @@ export function GroupBooking({
           </a>
         </p>
       </noscript>
-      <FormMessage state={state} />
+      {/* On the payment step the error shows beside the pay button instead. */}
+      {step !== 3 && <FormMessage state={state} />}
       <input type="hidden" name="offering" value={offering} />
 
       <StepPanel n={1} active={step === 1} heading={steps[0] ?? ""}>
@@ -279,21 +260,22 @@ export function GroupBooking({
       </StepPanel>
 
       <StepPanel n={3} active={step === 3} heading={steps[2] ?? ""}>
-        <PaymentStep
-          active={step === 3}
-          price={price}
-          audience={audience}
-          offering={title}
-          when={chosen.when}
-          email={chosen.email}
-          state={state}
-          pending={pending}
-          submit={() => {
-            allowSubmit.current = true
-            formRef.current?.requestSubmit()
-          }}
-        />
-        <StepNav backLabel={copy.stepper.back} onBack={() => goTo(2)}>
+        {mountPayment && (
+          <LazyPaymentStep
+            active={step === 3}
+            price={price}
+            quantity={price?.per === "month" ? chosen.months : 1}
+            audience={audience}
+            offering={title}
+            when={chosen.when}
+            email={chosen.email}
+            state={state}
+            pending={pending}
+            submit={submit}
+            onLockChange={setLocked}
+          />
+        )}
+        <StepNav backLabel={copy.stepper.back} onBack={stepClick && (() => goTo(2))}>
           <span />
         </StepNav>
       </StepPanel>

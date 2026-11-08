@@ -4,7 +4,7 @@ import { StepIndicator } from "@/components/booking/step-indicator"
 import { Eyebrow } from "@/components/eyebrow"
 import { bookingFor } from "@/content/booking"
 import { type BookingFlow, paysIn } from "@/lib/booking-flow"
-import type { PaymentMethod } from "@/lib/mock-payment"
+import type { DonePayment } from "@/lib/mock-payment"
 
 type DoneViewProps = {
   /** The booking reference, shown as text; empty when the page was reached without one. */
@@ -13,8 +13,8 @@ type DoneViewProps = {
   manageUrl?: string
   /** The journey that led here; its stepper shows its last step. */
   kind: BookingFlow
-  /** How the booking was paid (a checked key, see `isPaymentMethod`), for the paying journeys. */
-  paid?: PaymentMethod
+  /** How the booking was paid (a checked key, see `isDonePayment`), for the paying journeys. */
+  paid?: DonePayment
   locale: Locale
 }
 

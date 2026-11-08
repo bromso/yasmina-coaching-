@@ -2,7 +2,7 @@
 
 import { Button } from "@repo/ui/components/button"
 import { Icon } from "@repo/ui/components/icon"
-import { type ReactNode, useEffect, useRef } from "react"
+import { type ReactNode, useEffect, useRef, useState } from "react"
 import type { BookingFormCopy } from "@/content/booking-forms"
 import type { BookingFormState } from "@/lib/booking"
 import { cn } from "@/lib/utils"
@@ -86,6 +86,23 @@ export function StepNav({
       {children}
     </div>
   )
+}
+
+/** The payment step's posted fields, so a refusal of one reopens that step. */
+export const PAYMENT_FIELDS = [
+  "paymentMethod",
+  "invoiceOrgNumber",
+  "invoiceReference",
+  "invoiceAddress",
+] as const
+
+/** `true` from the first render where `when` held, for good: mounts a lazy step once, keeps it. */
+export function useMounted(when: boolean): boolean {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    if (when) setMounted(true)
+  }, [when])
+  return mounted || when
 }
 
 /** The primary button's look in every step. */

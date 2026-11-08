@@ -14,14 +14,17 @@ type OrderSummaryProps = {
   bookedAs: string
   audience: BookingAudience
   price: OfferingAmount | null
+  /** How many of `price`: the group's months among the chosen dates; 1 otherwise. */
+  quantity?: number
   locale: Locale
 }
 
 /**
  * What is being paid for: the offering, the times, the place and the price. A private client's
  * price includes VAT, an organisation's excludes it; the VAT gets its own line either way,
- * derived from the price table (`vatBreakdown`), never typed. An offering priced in writing says
- * so instead.
+ * derived from the price table (`vatBreakdown`) on the whole amount, never typed. A monthly price
+ * over dates in several months reads "2 × 1 980 kr". An offering priced in writing says so
+ * instead.
  */
 export function OrderSummary({
   copy,
@@ -31,10 +34,12 @@ export function OrderSummary({
   bookedAs,
   audience,
   price,
+  quantity = 1,
   locale,
 }: OrderSummaryProps) {
   const kr = (n: number) => formatKr(n, locale)
-  const split = price ? vatBreakdown(price.amount, audience) : null
+  const split = price ? vatBreakdown(price.amount * quantity, audience) : null
+  const each = price ? (quantity > 1 ? `${quantity} × ${kr(price.amount)}` : kr(price.amount)) : ""
   const row = "grid gap-0.5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4"
   return (
     <section
@@ -75,7 +80,7 @@ export function OrderSummary({
           <dt className="text-muted-foreground">{copy.price}</dt>
           <dd>
             {price
-              ? `${kr(price.amount)} ${copy.vat[audience]}${price.per === "month" ? `, ${copy.perMonth}` : ""}`
+              ? `${each} ${copy.vat[audience]}${price.per === "month" ? `, ${copy.perMonth}` : ""}`
               : copy.unpriced}
           </dd>
         </div>

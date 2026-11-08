@@ -125,11 +125,22 @@ is in `src/content/booking.tsx`; the catalog itself (`OFFERINGS`, kinds, limits)
   `src/lib/booking-flow.ts` and `steps` in `src/content/booking-forms.ts`): instant and group pick,
   give details, pay, done; a request describes, gives details, reviews, done; a members' session or
   an extra programme session picks, gives details, done. Steps stay mounted and hidden, and the
-  new step's heading takes focus. Payment is a mock, all of it in `src/lib/mock-payment.ts`:
-  Apple Pay, Google Pay, Swish and invoice for an offering with a fixed price (`amountFor` in
-  `src/content/booking.tsx`), invoice only otherwise. The Swish number and invoice details stay in
-  the browser; only the method's key is posted (`paymentMethod`), checked by `paidFor`, never sent
-  to the api, and shown on `/book/done` from `?paid=`.
+  new step's heading takes focus. The payment step is loaded lazily (`lazy-payment-step.tsx`).
+- Payments sit behind one seam, `src/lib/mock-payment.ts` (a real provider must authorise, book,
+  then capture or void, and feature-detect the wallets — see its header). The build-time flag
+  `NEXT_PUBLIC_BOOKING_PAYMENTS` decides what is offered: `mock` turns on the mock Apple Pay,
+  Google Pay and Swish for an offering with a fixed price (`amountFor` in
+  `src/content/booking.tsx`); unset, they are on outside production and **off in a production
+  build**; any other value turns them off. Off, or for an offering priced in writing, every booking
+  pays by invoice only, with no "test mode" line anywhere — and the server action refuses any
+  other method, whatever the browser sends. Like `COOKIE_DOMAIN`, the value is fixed at
+  `next build`. Posted with the booking: `paymentMethod` and, for an organisation paying by
+  invoice, its organisation number, invoice reference and invoice address, which the action
+  checks and appends to the booking's `notes` as a labelled `[Betalning]` block (the visitor's own
+  note is shortened to fit `BOOKING_NOTES_MAX`, the block never is), so Yasmina's mail carries
+  them. The Swish number is never posted. `/book/done` shows the method from `?paid=`
+  (`DONE_PAYMENTS`), mock lines only while the mock is on. The Inifrån group's monthly price is
+  multiplied by the calendar months (Stockholm) its chosen dates fall in.
 - `/book/manage/[token]` lists the order's bookings and package and, for a confirmed future
   session, a cancel form (action `cancelBooking`) with a required "Yes, cancel" checkbox; the api
   refuses inside the 24-hour cutoff. `robots.ts` disallows `/book/manage/` and `/book/done`.

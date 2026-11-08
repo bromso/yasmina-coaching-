@@ -19,19 +19,19 @@ import {
   NotesField,
   value,
 } from "@/components/booking/details-fields"
+import { LazyPaymentStep } from "@/components/booking/lazy-payment-step"
 import { useBookingCopy, useLocale } from "@/components/booking/locale-provider"
-import { PaymentStep } from "@/components/booking/payment-step"
 import { StepIndicator } from "@/components/booking/step-indicator"
 import {
   checkDetails,
   fieldText,
-  focusFirstError,
+  PAYMENT_FIELDS,
   primaryClass,
   StepNav,
   StepPanel,
-  stepWithError,
-  withClientErrors,
+  useMounted,
 } from "@/components/booking/step-panel"
+import { useBookingSteps } from "@/components/booking/use-booking-steps"
 import type { OfferingAmount } from "@/content/booking"
 import type { BookingFormState } from "@/lib/booking"
 import {
@@ -89,7 +89,8 @@ const gridDate = (day: string) => {
 const STEP_FIELDS = [
   ["slots"],
   ["audience", "name", "email", "organisation", "phone", "location", "notes"],
-] as const
+  PAYMENT_FIELDS,
+]
 
 /**
  * Pick a time (step 1), your details (step 2), then pay (step 3, the mock in
@@ -126,13 +127,23 @@ export function InstantBooking({
   const requested = useRef(new Set<string>())
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
   const [picked, setPicked] = useState<BookingSlot[]>([])
-  const [step, setStep] = useState(1)
-  const [clientErrors, setClientErrors] = useState<Record<string, string>>({})
   const [details, setDetails] = useState({ email: "", location: "" })
-  const formRef = useRef<HTMLFormElement>(null)
-  const allowSubmit = useRef(false)
   const steps = copy.steps[flow]
   const pays = flow === "instant"
+  // After a slot conflict the api's message shows and the times are picked again from fresh data.
+  const { step, goTo, formRef, shown, fail, submit, onSubmit, setLocked, stepClick } =
+    useBookingSteps({
+      state,
+      pending,
+      fields: STEP_FIELDS,
+      directSubmitStep: pays ? undefined : 2,
+      onConflict: () => {
+        requested.current.clear()
+        setMonths({})
+        setPicked([])
+      },
+    })
+  const mountPayment = useMounted(pays && step >= 2)
   const [audience, setAudience] = useState<BookingAudience>(
     (value(state, "audience") as BookingAudience) || initialAudience
   )
@@ -144,21 +155,6 @@ export function InstantBooking({
     setToday(now)
     setMonth(firstOfMonth(now))
   }, [])
-
-  // After a slot conflict the api's message shows and the times are picked again from fresh data;
-  // a field the server refused reopens the step that holds it.
-  useEffect(() => {
-    setClientErrors({})
-    if (!state.ok && state.code === "CONFLICT") {
-      requested.current.clear()
-      setMonths({})
-      setPicked([])
-      setStep(1)
-      return
-    }
-    const errorStep = stepWithError(state, STEP_FIELDS)
-    if (errorStep) setStep(errorStep)
-  }, [state])
 
   const key = monthKey(month)
   const current = months[key]
@@ -219,48 +215,29 @@ export function InstantBooking({
               ? text.noSlotsThisDay
               : ""
 
-  const shown = withClientErrors(state, clientErrors)
-  const goTo = (n: number) => {
-    setClientErrors({})
-    setStep(n)
-  }
   const toPayment = () => {
-    const errors = checkDetails(formRef.current, copy.check)
-    setClientErrors(errors)
-    if (Object.keys(errors).length > 0) {
-      focusFirstError(formRef.current, Object.keys(errors))
-      return
-    }
+    if (fail(checkDetails(formRef.current, copy.check))) return
     setDetails({
       email: fieldText(formRef.current, "email"),
       location: fieldText(formRef.current, "location"),
     })
     goTo(3)
   }
-  const submitBooking = () => {
-    allowSubmit.current = true
-    formRef.current?.requestSubmit()
-  }
-
   return (
     <form
       ref={formRef}
       action={action}
       noValidate
       className="grid grid-cols-1 gap-8"
-      onSubmit={(event) => {
-        // Only the last step books: the payment step after its mock, or a member's details step.
-        const ok = pays ? allowSubmit.current : step === 2
-        allowSubmit.current = false
-        if (!ok) event.preventDefault()
-      }}
+      // Only the last step books: the payment step once authorised, or a member's details step.
+      onSubmit={onSubmit}
     >
       <StepIndicator
         steps={steps}
         current={step}
         stepOf={copy.stepOf}
         doneLabel={copy.stepper.done}
-        onStepClick={goTo}
+        onStepClick={stepClick}
       />
       <noscript>
         <p className="rounded-2xl border border-border bg-background/70 px-4 py-3 text-sm">
@@ -270,7 +247,8 @@ export function InstantBooking({
           </a>
         </p>
       </noscript>
-      <FormMessage state={state} />
+      {/* On the payment step the error shows beside the pay button instead. */}
+      {step !== 3 && <FormMessage state={state} />}
       {packageId && (
         <p className="rounded-2xl border border-border bg-background/70 px-4 py-3 text-sm">
           {text.packageExtraNote}
@@ -469,12 +447,7 @@ export function InstantBooking({
               disabled={pending || picked.length === 0}
               className={primaryClass}
               onClick={(event) => {
-                const errors = checkDetails(formRef.current, copy.check)
-                setClientErrors(errors)
-                if (Object.keys(errors).length > 0) {
-                  event.preventDefault()
-                  focusFirstError(formRef.current, Object.keys(errors))
-                }
+                if (fail(checkDetails(formRef.current, copy.check))) event.preventDefault()
               }}
             >
               {pending ? text.submitting : text.submit}
@@ -485,23 +458,26 @@ export function InstantBooking({
 
       {pays && (
         <StepPanel n={3} active={step === 3} heading={steps[2] ?? ""}>
-          <PaymentStep
-            active={step === 3}
-            price={price}
-            audience={audience}
-            offering={title}
-            when={picked.map((slot) => formatRange(slot.startsAt, slot.endsAt, locale))}
-            location={
-              details.location
-                ? copy.locationLabels[details.location as BookingLocation]
-                : undefined
-            }
-            email={details.email}
-            state={state}
-            pending={pending}
-            submit={submitBooking}
-          />
-          <StepNav backLabel={copy.stepper.back} onBack={() => goTo(2)}>
+          {mountPayment && (
+            <LazyPaymentStep
+              active={step === 3}
+              price={price}
+              audience={audience}
+              offering={title}
+              when={picked.map((slot) => formatRange(slot.startsAt, slot.endsAt, locale))}
+              location={
+                details.location
+                  ? copy.locationLabels[details.location as BookingLocation]
+                  : undefined
+              }
+              email={details.email}
+              state={state}
+              pending={pending}
+              submit={submit}
+              onLockChange={setLocked}
+            />
+          )}
+          <StepNav backLabel={copy.stepper.back} onBack={stepClick && (() => goTo(2))}>
             <span />
           </StepNav>
         </StepPanel>

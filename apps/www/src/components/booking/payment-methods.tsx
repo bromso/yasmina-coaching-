@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils"
  * (`aria-hidden`); the text beside them names each method.
  */
 
+// Placeholders: replace these hand-drawn marks with the official Apple Pay, Google Pay and Swish
+// assets (and follow each brand's button and logo guidelines) before real payments go live.
 const markClass = "h-8 w-12 shrink-0"
 
 function ApplePayMark() {
