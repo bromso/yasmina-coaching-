@@ -31,8 +31,8 @@ export type PostViewProps = {
   ui: BlogUi
   /** `""` for Swedish, `/en` for English. */
   prefix: string
-  /** www's booking page, the closing call to action's target. */
-  bookHref: string
+  /** www's free intro-call form (`/#contact`), the closing call to action's target. */
+  ctaHref: string
 }
 
 /** The MDX components of a post's body: the shared ones, with `www:/…` links resolved. */
@@ -55,7 +55,7 @@ export function PostView({
   authors,
   ui,
   prefix,
-  bookHref,
+  ctaHref,
 }: PostViewProps) {
   const hasToc = toc.length > 0
   const { newer, older } = neighbours
@@ -84,7 +84,7 @@ export function PostView({
               avatar: author.avatar,
               href: `${prefix}/authors/${post.author}`,
             }}
-            tags={post.tags.map((tag) => ({ tag, href: `${prefix}/tags/${tag}` }))}
+            tags={post.tags.map((tag) => ({ tag: ui.tag(tag), href: `${prefix}/tags/${tag}` }))}
             titleClassName="font-display font-normal text-4xl md:text-6xl"
           />
           {/* Layout only: mdxComponents styles each element; this spaces the blocks. */}
@@ -103,7 +103,7 @@ export function PostView({
         )}
       </div>
 
-      <CallToAction ui={ui} href={bookHref} />
+      <CallToAction ui={ui} href={ctaHref} />
 
       <PrevNext
         label={ui.post.prevNext}

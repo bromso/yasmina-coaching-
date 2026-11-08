@@ -25,6 +25,44 @@ export function otherLocale(locale: BlogLocale): BlogLocale {
   return locale === "sv" ? "en" : "sv"
 }
 
+/**
+ * How each language's tags read. A tag is a kebab-case ASCII slug (`aterhamtning`, `from-within`),
+ * which is its address (`/tags/aterhamtning`, `/en/tags/from-within`); this is what the reader
+ * sees on the cards, the post header and the tag page. Swedish posts use the Swedish slugs,
+ * English posts the English ones. A tag missing here shows as its slug.
+ */
+export const TAG_LABELS: Record<BlogLocale, Record<string, string>> = {
+  sv: {
+    aterhamtning: "återhämtning",
+    coachning: "coachning",
+    forskning: "forskning",
+    inifran: "Ledarskap inifrån",
+    kris: "kris",
+    ledarskap: "ledarskap",
+    medarbetare: "medarbetare",
+    mentorskap: "mentorskap",
+    reflektion: "reflektion",
+    samtal: "samtal",
+  },
+  en: {
+    coaching: "coaching",
+    conversations: "conversations",
+    crisis: "crisis",
+    employees: "employees",
+    "from-within": "Leading from within",
+    leadership: "leadership",
+    mentoring: "mentoring",
+    recovery: "recovery",
+    reflection: "reflection",
+    research: "research",
+  },
+}
+
+/** A tag as the reader sees it in `locale`, or the slug itself when it has no label. */
+export function tagLabel(locale: BlogLocale, tag: string): string {
+  return Object.hasOwn(TAG_LABELS[locale], tag) ? (TAG_LABELS[locale][tag] ?? tag) : tag
+}
+
 export type BlogUi = {
   /** The `Intl` locale dates are written in. */
   dateLocale: string
@@ -34,6 +72,8 @@ export type BlogUi = {
   title: string
   /** One sentence for the whole blog: `<meta name="description">` and every feed. */
   description: string
+  /** A tag slug as the reader sees it (`TAG_LABELS`). */
+  tag: (slug: string) => string
   header: {
     /** www's Ledarskap inifrån page. */
     inner: string
@@ -73,6 +113,7 @@ export const UI: Record<BlogLocale, BlogUi> = {
   sv: {
     dateLocale: "sv-SE",
     ogLocale: "sv_SE",
+    tag: (slug) => tagLabel("sv", slug),
     title: "Anteckningar om ledarskap",
     description:
       "Yasmina Peterssons anteckningar om ledarskap, coaching och mentorskap: om att leda människor, och sig själv, också när det blåser.",
@@ -120,6 +161,7 @@ export const UI: Record<BlogLocale, BlogUi> = {
   en: {
     dateLocale: "en-GB",
     ogLocale: "en_GB",
+    tag: (slug) => tagLabel("en", slug),
     title: "Notes on leadership",
     description:
       "Yasmina Petersson's notes on leadership, coaching and mentoring: on leading people, and yourself, when the wind picks up too.",

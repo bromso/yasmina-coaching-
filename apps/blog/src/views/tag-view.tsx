@@ -11,7 +11,7 @@ export type TagViewProps = {
   prefix: string
 }
 
-/** Every post with one tag, on one page. */
+/** Every post with one tag, on one page, headed with the tag as the reader sees it. */
 export function TagView({ tag, posts, authors, ui, prefix }: TagViewProps) {
   return (
     <PostListView
@@ -21,7 +21,7 @@ export function TagView({ tag, posts, authors, ui, prefix }: TagViewProps) {
       authors={authors}
       ui={ui}
       prefix={prefix}
-      heading={{ title: ui.list.tagTitle(tag) }}
+      heading={{ title: ui.list.tagTitle(ui.tag(tag)) }}
     />
   )
 }

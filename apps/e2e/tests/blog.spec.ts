@@ -68,7 +68,7 @@ test("the newest post opens with its title and links to its translation", async 
   await expect(page.locator("html")).toHaveAttribute("lang", "sv")
   await expect(page.getByRole("link", { name: "Boka ett kostnadsfritt samtal" })).toHaveAttribute(
     "href",
-    `${URLS.www}/book`
+    `${URLS.www}/#contact`
   )
 })
 

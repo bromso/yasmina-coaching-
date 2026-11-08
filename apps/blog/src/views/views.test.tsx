@@ -45,7 +45,7 @@ function renderPost(props: Partial<PostViewProps> = {}): string {
       authors={authors}
       ui={UI.en}
       prefix=""
-      bookHref="https://www.example.com/book"
+      ctaHref="https://www.example.com/#contact"
       {...props}
     />
   )
@@ -289,7 +289,7 @@ describe("the coaching look and the two languages", () => {
   test("a post closes with the booking call to action and links its author under its prefix", () => {
     const html = renderPost({ ui: UI.sv, prefix: "" })
     expect(html).toContain("Boka ett kostnadsfritt samtal")
-    expect(html).toContain('href="https://www.example.com/book"')
+    expect(html).toContain('href="https://www.example.com/#contact"')
     const en = renderPost({
       post: post("en-hello", { url: "/en/hello", locale: "en" }),
       prefix: "/en",
@@ -324,5 +324,22 @@ describe("the coaching look and the two languages", () => {
     }
     const html = renderPost({ Body: LinkingBody })
     expect(html).toContain('href="http://www.brand.localhost:3000/book"')
+  })
+})
+
+describe("tag labels", () => {
+  test("cards, the post header and the tag page show a tag's label, linked by its slug", () => {
+    const tagged = post("a", { tags: ["aterhamtning", "okand"] })
+    const list = renderToStaticMarkup(
+      <PostListView posts={[tagged]} page={2} pages={2} authors={authors} ui={UI.sv} prefix="" />
+    )
+    expect(list).toMatch(/href="\/tags\/aterhamtning"[^>]*>återhämtning</)
+    expect(list).toMatch(/href="\/tags\/okand"[^>]*>okand</)
+    const header = renderPost({ post: tagged, ui: UI.sv })
+    expect(header).toMatch(/href="\/tags\/aterhamtning"[^>]*>återhämtning</)
+    const tagPage = renderToStaticMarkup(
+      <TagView tag="from-within" posts={[tagged]} authors={authors} ui={UI.en} prefix="/en" />
+    )
+    expect(tagPage).toMatch(/<h1[^>]*>Posts about Leading from within<\/h1>/)
   })
 })

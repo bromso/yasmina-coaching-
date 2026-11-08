@@ -171,7 +171,7 @@ export function postRoute(locale: BlogLocale) {
             authors={authorsFor(locale)}
             ui={ui}
             prefix={prefix}
-            bookHref={`${siteUrl("www")}/book`}
+            ctaHref={`${siteUrl("www")}/#contact`}
           />
         </>
       )
@@ -199,8 +199,8 @@ export function tagRoute(locale: BlogLocale) {
       const { tag } = await params
       load(tag)
       return {
-        title: ui.list.tagTitle(tag),
-        description: ui.list.tagDescription(tag),
+        title: ui.list.tagTitle(ui.tag(tag)),
+        description: ui.list.tagDescription(ui.tag(tag)),
         alternates: pageAlternates(`${blogUrl()}${prefix}/tags/${tag}`, locale),
       }
     },

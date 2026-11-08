@@ -36,7 +36,7 @@ export function postCardProps(
     author: author?.avatar
       ? { name: author.name, avatar: author.avatar }
       : { name: author?.name ?? post.author },
-    tags: post.tags.map((tag) => ({ tag, href: `${prefix}/tags/${tag}` })),
+    tags: post.tags.map((tag) => ({ tag: ui.tag(tag), href: `${prefix}/tags/${tag}` })),
     featured,
     className: "rounded-3xl",
     titleClassName: "font-display font-normal text-2xl leading-tight",

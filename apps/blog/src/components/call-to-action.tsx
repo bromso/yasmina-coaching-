@@ -1,6 +1,7 @@
 import type { BlogUi } from "@/content/ui"
 
-/** The close of every post: a sun panel inviting the reader to book the free intro call on www. */
+/** The close of every post: a sun panel inviting the reader to ask for the free intro call on
+ * www (its contact form, `/#contact`; `/book` lists the paid sessions). */
 export function CallToAction({ ui, href }: { ui: BlogUi; href: string }) {
   return (
     <section
