@@ -65,7 +65,7 @@ bun --filter @repo/www analyze   # bundle report in .next/analyze/
 | `/` | http://www.brand.localhost:3000 |
 | `/book` | http://www.brand.localhost:3000/book |
 | `/book/[offering]` | http://www.brand.localhost:3000/book/session (one page per `OFFERING_KEYS` entry) |
-| `/book/done` | the confirmation after a booking or request (`?ref=`, `?manage=`, `?kind=`) |
+| `/book/done` | the confirmation after a booking or request (`?ref=`, `?manage=`, `?kind=`, `?paid=`) |
 | `/book/manage/[token]` | the manage page behind the link in the confirmation mail |
 | `/inifran` | the Ledarskap inifrån hub (see **Ledarskap inifrån**) |
 | `/inifran/[service]` | one of `coachning`, `mentorskap`, `livsstil`, `grupp` |
@@ -121,6 +121,15 @@ is in `src/content/booking.tsx`; the catalog itself (`OFFERINGS`, kinds, limits)
 - The cores (`src/lib/booking.ts`, tested) show a declared api error's own message (a taken slot,
   a full event, the rate limit) and a generic failure otherwise; the actions `redirect()` to
   `/book/done`, which links the manage URL only when it is on this site's own origin.
+- Every journey shows one stepper (`components/booking/step-indicator.tsx`; steps per journey in
+  `src/lib/booking-flow.ts` and `steps` in `src/content/booking-forms.ts`): instant and group pick,
+  give details, pay, done; a request describes, gives details, reviews, done; a members' session or
+  an extra programme session picks, gives details, done. Steps stay mounted and hidden, and the
+  new step's heading takes focus. Payment is a mock, all of it in `src/lib/mock-payment.ts`:
+  Apple Pay, Google Pay, Swish and invoice for an offering with a fixed price (`amountFor` in
+  `src/content/booking.tsx`), invoice only otherwise. The Swish number and invoice details stay in
+  the browser; only the method's key is posted (`paymentMethod`), checked by `paidFor`, never sent
+  to the api, and shown on `/book/done` from `?paid=`.
 - `/book/manage/[token]` lists the order's bookings and package and, for a confirmed future
   session, a cancel form (action `cancelBooking`) with a required "Yes, cancel" checkbox; the api
   refuses inside the 24-hour cutoff. `robots.ts` disallows `/book/manage/` and `/book/done`.

@@ -4,6 +4,8 @@ import type {
   BookingLocation,
 } from "@repo/api-contract/booking-limits"
 import type { Locale } from "@repo/i18n/locales"
+import type { BookingFlow } from "@/lib/booking-flow"
+import type { PaymentMethod } from "@/lib/mock-payment"
 
 /**
  * The words the booking forms say (the client components under `src/components/booking/`), in
@@ -19,10 +21,79 @@ export type BookingFormCopy = {
   audienceHints: Record<BookingAudience, string>
   locationLabels: Record<BookingLocation, string>
   dayPartLabels: Record<BookingDayPart, string>
-  /** The three steps of an instant booking; `/book/done` is the third. */
-  steps: readonly [string, string, string]
-  /** The step indicator's accessible name, "Step 1 of 3". */
+  /**
+   * Each journey's steps (`flowFor` in `src/lib/booking-flow.ts`); the last is always `/book/done`.
+   * Each label is also its step's heading in the booking card.
+   */
+  steps: Record<BookingFlow, readonly string[]>
+  /** The step indicator's accessible name, "Step 1 of 4". */
   stepOf: (n: number, total: number) => string
+  stepper: {
+    back: string
+    /** Read after a finished step's name: "Step 1 of 4: Pick a time, done". */
+    done: string
+  }
+  /** The browser-side checks before the next step; the server checks everything again. */
+  check: {
+    name: string
+    email: string
+    organisation: string
+    eventIds: string
+    message: string
+    date: string
+    method: string
+  }
+  payment: {
+    summary: {
+      heading: string
+      offering: string
+      when: string
+      location: string
+      bookedAs: string
+      price: string
+      vatIncluded: string
+      vatAdded: string
+      total: string
+      perMonth: string
+      vat: Record<BookingAudience, string>
+      unpriced: string
+    }
+    methodsLegend: string
+    methods: Record<PaymentMethod, { label: string; hint: string }>
+    invoiceOnly: string
+    testMode: string
+    pay: (amount: string) => string
+    payWith: (amount: string, brand: string) => string
+    /** The mock wallet sheet while it "waits" for the visitor's approval. */
+    approve: Record<"apple_pay" | "google_pay", string>
+    swish: { numberLabel: string; numberHint: string; invalid: string; open: string }
+    approved: string
+    cancel: string
+    cancelled: string
+    invoice: {
+      private: (email: string) => string
+      orgNumber: string
+      orgNumberHint: string
+      orgNumberInvalid: string
+      reference: string
+      referenceMissing: string
+      address: string
+      addressMissing: string
+      confirm: string
+    }
+    submitting: string
+  }
+  review: {
+    request: string
+    dates: string
+    location: string
+    attendees: string
+    venue: string
+    contact: string
+    notGiven: string
+    note: string
+    toReview: string
+  }
   fields: {
     name: string
     email: string
@@ -58,6 +129,7 @@ export type BookingFormCopy = {
     pickedCount: (picked: number, max: number) => string
     removeSlot: string
     continueLabel: string
+    toPayment: string
     changeTimes: string
     submit: string
     submitting: string
@@ -71,12 +143,14 @@ export type BookingFormCopy = {
     seatsLeft: (n: number) => string
     full: string
     seriesHint: string
+    continueLabel: string
     submit: string
     submitting: string
     noScript: string
   }
   request: {
     intro: string
+    continueLabel: string
     datesLegend: string
     datesHint: string
     dateLabel: (n: number) => string
@@ -115,8 +189,87 @@ const sv: BookingFormCopy = {
     afternoon: "Eftermiddag",
     full_day: "Heldag",
   },
-  steps: ["Välj tid", "Dina uppgifter", "Klart"],
+  steps: {
+    instant: ["Välj tid", "Dina uppgifter", "Betalning", "Klart"],
+    group: ["Välj träff", "Dina uppgifter", "Betalning", "Klart"],
+    request: ["Ditt önskemål", "Dina uppgifter", "Granska och skicka", "Klart"],
+    member: ["Välj tid", "Dina uppgifter", "Klart"],
+  },
   stepOf: (n, total) => `Steg ${n} av ${total}`,
+  stepper: { back: "Tillbaka", done: "klart" },
+  check: {
+    name: "Fyll i ditt namn.",
+    email: "Fyll i en giltig e-postadress.",
+    organisation: "Fyll i organisationens namn.",
+    eventIds: "Välj minst ett datum.",
+    message: "Berätta kort vad du vill uppnå.",
+    date: "Välj minst ett datum, från och med i morgon.",
+    method: "Välj hur du vill betala.",
+  },
+  payment: {
+    summary: {
+      heading: "Din bokning",
+      offering: "Tjänst",
+      when: "Tid",
+      location: "Plats",
+      bookedAs: "Bokar som",
+      price: "Pris",
+      vatIncluded: "Varav moms 25 %",
+      vatAdded: "Moms 25 %",
+      total: "Att betala",
+      perMonth: "per person och månad",
+      vat: { private: "inkl. moms", organisation: "exkl. moms" },
+      unpriced: "Bekräftas skriftligt",
+    },
+    methodsLegend: "Välj hur du vill betala",
+    methods: {
+      apple_pay: { label: "Apple Pay", hint: "Med Face ID eller Touch ID på din enhet." },
+      google_pay: { label: "Google Pay", hint: "Med kortet som är sparat i ditt Google-konto." },
+      swish: { label: "Swish", hint: "Godkänn i Swish-appen på din telefon." },
+      invoice: { label: "Faktura", hint: "30 dagars betalningstid." },
+    },
+    invoiceOnly: "Du får fakturan när Yasmina har bekräftat priset.",
+    testMode: "Testläge: ingen betalning dras.",
+    pay: (amount) => `Betala ${amount}`,
+    payWith: (amount, brand) => `Betala ${amount} med ${brand}`,
+    approve: {
+      apple_pay: "Godkänn betalningen i din telefon…",
+      google_pay: "Godkänn betalningen i din webbläsare…",
+    },
+    swish: {
+      numberLabel: "Mobilnummer för Swish",
+      numberHint: "Till exempel 070 123 45 67.",
+      invalid: "Fyll i ett svenskt mobilnummer, till exempel 070 123 45 67.",
+      open: "Öppna Swish-appen och godkänn betalningen…",
+    },
+    approved: "Betalningen är godkänd. Bokningen skickas…",
+    cancel: "Avbryt",
+    cancelled: "Betalningen avbröts. Inget har dragits.",
+    invoice: {
+      private: (email) =>
+        `Fakturan skickas till ${email} när bokningen är klar, med 30 dagars betalningstid. Inget personnummer behövs.`,
+      orgNumber: "Organisationsnummer",
+      orgNumberHint: "Tio siffror, till exempel 212000-1355.",
+      orgNumberInvalid: "Fyll i ett giltigt organisationsnummer.",
+      reference: "Fakturareferens",
+      referenceMissing: "Fyll i er fakturareferens.",
+      address: "E-post eller postadress för fakturan",
+      addressMissing: "Fyll i vart fakturan ska skickas.",
+      confirm: "Boka och betala mot faktura",
+    },
+    submitting: "Bokar…",
+  },
+  review: {
+    request: "Vad du vill uppnå",
+    dates: "Önskade datum",
+    location: "Var",
+    attendees: "Antal deltagare",
+    venue: "Lokal",
+    contact: "Kontakt",
+    notGiven: "Inte angivet",
+    note: "Ingen betalning nu: du får en offert, och betalar mot faktura efter bekräftelse.",
+    toReview: "Granska förfrågan",
+  },
   fields: {
     name: "Namn",
     email: "E-post",
@@ -149,6 +302,7 @@ const sv: BookingFormCopy = {
     pickedCount: (picked, max) => `${picked} av ${max}`,
     removeSlot: "Ta bort",
     continueLabel: "Vidare till dina uppgifter",
+    toPayment: "Fortsätt till betalning",
     changeTimes: "Ändra tider",
     submit: "Bekräfta bokningen",
     submitting: "Bokar…",
@@ -163,6 +317,7 @@ const sv: BookingFormCopy = {
     seatsLeft: (n) => (n === 1 ? "1 plats kvar" : `${n} platser kvar`),
     full: "Fullbokat",
     seriesHint: "Välj ett datum, eller flera i en serie.",
+    continueLabel: "Vidare till dina uppgifter",
     submit: "Boka platser",
     submitting: "Bokar…",
     noScript:
@@ -171,6 +326,7 @@ const sv: BookingFormCopy = {
   request: {
     intro:
       "Berätta för Yasmina vad du har i tankarna och när. Hon svarar inom några dagar med ett förslag på tid och en skriftlig offert.",
+    continueLabel: "Vidare till dina uppgifter",
     datesLegend: "Önskade datum",
     datesHint: "Upp till tre. Välj den del av dagen som passar dig för vart och ett.",
     dateLabel: (n) => `Datum ${n}`,
@@ -210,8 +366,87 @@ const en: BookingFormCopy = {
     afternoon: "Afternoon",
     full_day: "Full day",
   },
-  steps: ["Pick a time", "Your details", "Done"],
+  steps: {
+    instant: ["Pick a time", "Your details", "Payment", "Done"],
+    group: ["Pick a session", "Your details", "Payment", "Done"],
+    request: ["Your request", "Your details", "Review and send", "Done"],
+    member: ["Pick a time", "Your details", "Done"],
+  },
   stepOf: (n, total) => `Step ${n} of ${total}`,
+  stepper: { back: "Back", done: "done" },
+  check: {
+    name: "Enter your name.",
+    email: "Enter a valid email address.",
+    organisation: "Enter the organisation's name.",
+    eventIds: "Pick at least one date.",
+    message: "Tell Yasmina briefly what you want to achieve.",
+    date: "Pick at least one date, from tomorrow onwards.",
+    method: "Choose how you want to pay.",
+  },
+  payment: {
+    summary: {
+      heading: "Your booking",
+      offering: "Service",
+      when: "Time",
+      location: "Where",
+      bookedAs: "Booking as",
+      price: "Price",
+      vatIncluded: "Of which VAT 25%",
+      vatAdded: "VAT 25%",
+      total: "To pay",
+      perMonth: "per person a month",
+      vat: { private: "incl. VAT", organisation: "excl. VAT" },
+      unpriced: "Confirmed in writing",
+    },
+    methodsLegend: "Choose how to pay",
+    methods: {
+      apple_pay: { label: "Apple Pay", hint: "With Face ID or Touch ID on your device." },
+      google_pay: { label: "Google Pay", hint: "With the card saved in your Google account." },
+      swish: { label: "Swish", hint: "Approve in the Swish app on your phone." },
+      invoice: { label: "Invoice", hint: "30 days to pay." },
+    },
+    invoiceOnly: "You get the invoice once Yasmina has confirmed the price.",
+    testMode: "Test mode: no payment is taken.",
+    pay: (amount) => `Pay ${amount}`,
+    payWith: (amount, brand) => `Pay ${amount} with ${brand}`,
+    approve: {
+      apple_pay: "Approve the payment on your phone…",
+      google_pay: "Approve the payment in your browser…",
+    },
+    swish: {
+      numberLabel: "Mobile number for Swish",
+      numberHint: "For example 070 123 45 67.",
+      invalid: "Enter a Swedish mobile number, for example 070 123 45 67.",
+      open: "Open the Swish app and approve the payment…",
+    },
+    approved: "Payment approved. Sending the booking…",
+    cancel: "Cancel",
+    cancelled: "The payment was cancelled. Nothing was charged.",
+    invoice: {
+      private: (email) =>
+        `The invoice is sent to ${email} once the booking is made, with 30 days to pay. No personal identity number is needed.`,
+      orgNumber: "Organisation number",
+      orgNumberHint: "Ten digits, for example 212000-1355.",
+      orgNumberInvalid: "Enter a valid Swedish organisation number.",
+      reference: "Invoice reference",
+      referenceMissing: "Enter your invoice reference.",
+      address: "Email or postal address for the invoice",
+      addressMissing: "Enter where the invoice should go.",
+      confirm: "Book and pay by invoice",
+    },
+    submitting: "Booking…",
+  },
+  review: {
+    request: "What you want to achieve",
+    dates: "Preferred dates",
+    location: "Where",
+    attendees: "Attendees",
+    venue: "Venue",
+    contact: "Contact",
+    notGiven: "Not given",
+    note: "No payment now: you get a quote, and pay by invoice after confirmation.",
+    toReview: "Review request",
+  },
   fields: {
     name: "Name",
     email: "Email",
@@ -249,6 +484,7 @@ const en: BookingFormCopy = {
     pickedCount: (picked, max) => `${picked} of ${max}`,
     removeSlot: "Remove",
     continueLabel: "Continue to your details",
+    toPayment: "Continue to payment",
     changeTimes: "Change times",
     submit: "Confirm booking",
     submitting: "Booking…",
@@ -263,6 +499,7 @@ const en: BookingFormCopy = {
     seatsLeft: (n) => (n === 1 ? "1 seat left" : `${n} seats left`),
     full: "Fully booked",
     seriesHint: "Pick one date, or several in a series.",
+    continueLabel: "Continue to your details",
     submit: "Reserve seats",
     submitting: "Booking…",
     noScript:
@@ -271,6 +508,7 @@ const en: BookingFormCopy = {
   request: {
     intro:
       "Tell Yasmina what you have in mind and when. She replies within a few days with a suggested time and a written quote.",
+    continueLabel: "Continue to your details",
     datesLegend: "Preferred dates",
     datesHint: "Up to three. For each, pick the part of the day that suits you.",
     dateLabel: (n) => `Date ${n}`,

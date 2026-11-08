@@ -13,8 +13,9 @@ import { PauseIcon, PlayIcon } from "@/components/clip-icons"
 import { Eyebrow } from "@/components/eyebrow"
 import { MediaClip } from "@/components/motion/media-clip"
 import { Picture } from "@/components/picture"
-import { bookingFor, priceLineFor } from "@/content/booking"
+import { amountFor, bookingFor, priceLineFor } from "@/content/booking"
 import { clipsFor, mediaFor, mediaTextFor, OFFERING_CLIPS, OFFERING_MEDIA } from "@/content/media"
+import { flowFor } from "@/lib/booking-flow"
 
 type OfferingViewProps = {
   offering: OfferingKey
@@ -28,7 +29,8 @@ type OfferingViewProps = {
 
 /**
  * One offering: its photo (or, for the keynote, its clip over the still) and copy on the left,
- * the journey for its kind in a sun card on the right.
+ * the journey for its kind in a sun card on the right (`flowFor`: its steps, and whether it has a
+ * payment step, priced from `amountFor`).
  */
 export function OfferingView({
   offering,
@@ -43,6 +45,8 @@ export function OfferingView({
   const clipKey = OFFERING_CLIPS[offering]
   const clip = clipKey ? clipsFor(locale)[clipKey] : undefined
   const frame = "aspect-[16/10] w-full object-cover lg:aspect-[4/3]"
+  const flow = flowFor(offering, packageId)
+  const price = amountFor(offering)
   return (
     <main id="main">
       <section aria-labelledby="offering-title" className="container py-16 lg:py-24">
@@ -107,6 +111,9 @@ export function OfferingView({
                   sessions={spec.sessions}
                   initialAudience={audience}
                   packageId={packageId}
+                  title={copy.title}
+                  price={price}
+                  flow={flow === "member" ? "member" : "instant"}
                 />
               )}
               {spec.kind === "group" && (
@@ -114,6 +121,8 @@ export function OfferingView({
                   offering={offering}
                   audiences={spec.audiences}
                   initialAudience={audience}
+                  title={copy.title}
+                  price={price}
                 />
               )}
               {spec.kind === "request" && (

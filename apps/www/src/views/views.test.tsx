@@ -13,6 +13,7 @@ const { InnerHubView } = await import("./inner-hub-view")
 const { InnerResearchView } = await import("./inner-research-view")
 const { InnerServiceView } = await import("./inner-service-view")
 const { OfferingView } = await import("./offering-view")
+const { DoneView } = await import("./done-view")
 
 const LOCALES = ["sv", "en"] as const
 
@@ -147,4 +148,86 @@ describe("OfferingView", () => {
     const html = render(<OfferingView offering="keynote" locale="sv" {...props} />)
     expect(html).toContain("/media/keynote-poster")
   })
+})
+
+describe("the booking journeys' steps", () => {
+  const props = { audience: "private", minDate: "2026-11-08" } as const
+  const steps = (html: string, labels: readonly string[]) => {
+    for (const label of labels) expect(html).toContain(label)
+  }
+
+  for (const locale of LOCALES) {
+    const form = BOOKING[locale].form
+
+    test(`${locale}: a priced start call has four steps and all four payment methods`, () => {
+      const html = render(
+        <OfferingView offering="inner_start_coaching" locale={locale} {...props} />
+      )
+      steps(html, form.steps.instant)
+      expect(html).toContain(`aria-label="${form.stepOf(1, 4)}"`)
+      expect(html).toContain('aria-current="step"')
+      for (const method of ["apple_pay", "google_pay", "swish", "invoice"] as const) {
+        expect(html).toContain(form.payment.methods[method].label)
+      }
+      expect(html).toContain(form.payment.testMode)
+      expect(html).toContain('name="paymentMethod"')
+      // The Swish number and invoice details are never named fields: nothing of them is posted.
+      expect(html).not.toContain('name="swishNumber"')
+      expect(html).not.toContain(form.payment.invoiceOnly)
+    })
+
+    test(`${locale}: an offering priced in writing offers invoice only`, () => {
+      for (const offering of ["session", "group"] as const) {
+        const html = render(<OfferingView offering={offering} locale={locale} {...props} />)
+        expect(html).toContain(form.payment.invoiceOnly)
+        expect(html).toContain(form.payment.methods.invoice.label)
+        expect(html).not.toContain(form.payment.methods.swish.hint)
+        expect(html).not.toContain(form.payment.methods.apple_pay.hint)
+      }
+    })
+
+    test(`${locale}: members' sessions and programme extras have three steps and no payment`, () => {
+      for (const node of [
+        <OfferingView key="m" offering="inner_session" locale={locale} {...props} />,
+        <OfferingView key="p" offering="package_6" packageId="12" locale={locale} {...props} />,
+      ]) {
+        const html = render(node)
+        expect(html).toContain(`aria-label="${form.stepOf(1, 3)}"`)
+        expect(html).not.toContain(form.payment.testMode)
+        expect(html).not.toContain('name="paymentMethod"')
+      }
+    })
+
+    test(`${locale}: the group picks a session, then details, then pays`, () => {
+      const html = render(<OfferingView offering="inner_group" locale={locale} {...props} />)
+      steps(html, form.steps.group)
+      expect(html).toContain(form.payment.methods.swish.label)
+    })
+
+    test(`${locale}: a request reviews before sending, and says nothing is paid now`, () => {
+      const html = render(<OfferingView offering="workshop" locale={locale} {...props} />)
+      steps(html, form.steps.request)
+      expect(html).toContain(form.review.note)
+      expect(html).not.toContain(form.payment.testMode)
+      // Without JavaScript every step shows, as one form.
+      expect(html).toContain("<noscript><style>")
+    })
+  }
+})
+
+describe("DoneView", () => {
+  for (const locale of LOCALES) {
+    const booking = BOOKING[locale]
+    test(`${locale}: the last step of each journey, and how it was paid`, () => {
+      for (const kind of ["instant", "group", "request", "member"] as const) {
+        const total = booking.form.steps[kind].length
+        const html = render(<DoneView reference="BK-1" kind={kind} paid="swish" locale={locale} />)
+        expect(html).toContain(`aria-label="${booking.form.stepOf(total, total)}"`)
+        if (kind === "instant" || kind === "group") expect(html).toContain(booking.done.paid.swish)
+        else expect(html).not.toContain(booking.done.paid.swish)
+      }
+      const unpaid = render(<DoneView reference="BK-1" kind="instant" locale={locale} />)
+      for (const line of Object.values(booking.done.paid)) expect(unpaid).not.toContain(line)
+    })
+  }
 })
