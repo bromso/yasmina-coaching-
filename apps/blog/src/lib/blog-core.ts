@@ -51,8 +51,10 @@ export function knownPaths(
   return paths
 }
 
-/** A link to another app of the site, `<app>:/<path>` (`www:/book`): its app id and path. */
-const SITE_LINK = /^([a-z]+):(.*)$/
+/** A link to another app of the site, `<app>:/<path>` (`www:/book`): its app id and path. The id
+ * matches in any case, so `WWW:/book` is caught (and refused) rather than passing as an unknown
+ * scheme and rendering a dead link. */
+const SITE_LINK = /^([a-z]+):(.*)$/i
 
 /**
  * Problems with a post's links to the site's other apps. A post cannot know the production
@@ -64,9 +66,13 @@ export function siteLinkProblems(file: string, links: string[], ids: readonly st
   const problems: string[] = []
   for (const href of links) {
     const match = href.match(SITE_LINK)
-    if (!match || !ids.includes(match[1] ?? "")) continue
-    const [, id, path = ""] = match
-    if (id === "blog") {
+    const written = match?.[1] ?? ""
+    if (!match || !ids.includes(written.toLowerCase())) continue
+    const [, , path = ""] = match
+    const id = written.toLowerCase()
+    if (written !== id) {
+      problems.push(`${file}: link "${href}" — write the app id in lowercase ("${id}:${path}")`)
+    } else if (id === "blog") {
       problems.push(`${file}: link "${href}" points at the blog itself — write "${path}" instead`)
     } else if (!path.startsWith("/") || path.startsWith("//")) {
       problems.push(`${file}: link "${href}" needs a path starting with "/" (like "${id}:/")`)

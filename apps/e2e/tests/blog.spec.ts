@@ -36,6 +36,23 @@ test("the header links home to www, to Ledarskap inifrån, to booking and to Eng
   await expect(page).toHaveURL(`${URLS.blog}/`)
 })
 
+test("the language link saves the choice for www: English blog, English www", async ({
+  page,
+  context,
+}) => {
+  await page.goto(URLS.blog)
+  await page
+    .getByRole("navigation", { name: "Webbplats" })
+    .getByRole("link", { name: "Read in English" })
+    .click()
+  await expect(page).toHaveURL(`${URLS.blog}/en`)
+  const cookies = await context.cookies(URLS.www)
+  expect(cookies.find((cookie) => cookie.name === "locale")?.value).toBe("en")
+  await page.getByRole("navigation", { name: "Site" }).getByRole("link", { name: "Book" }).click()
+  await expect(page).toHaveURL(`${URLS.www}/book`)
+  await expect(page.locator("html")).toHaveAttribute("lang", "en")
+})
+
 test("each language has its own RSS feed", async ({ request }) => {
   for (const [path, language] of [
     ["/rss.xml", "sv"],

@@ -40,10 +40,13 @@ request, so each language has its own root layout: `src/app/(sv)/layout.tsx` and
 language link is anyway. Two consequences:
 
 - **The header is rendered by each page** (`PageHeader`), not the layout: its language link points
-  at the page's own translation, or the other language's index, which a layout cannot know.
+  at the page's own translation, or the other language's index, which a layout cannot know. That
+  link (`LanguageLink`, a small client component) stays a real link without JavaScript and, on
+  click, writes the shared `locale` cookie (`@repo/i18n/cookie`, `COOKIE_DOMAIN` passed down from
+  the server), so the header's links into www open in the reader's language.
 - **There is no layout above an unmatched URL**, so `next.config.mjs` turns on
   `experimental.globalNotFound` and `src/app/global-not-found.tsx` renders the 404 as a whole
-  document, in Swedish. `src/app/not-found.tsx` stays the file every static app shares.
+  document, in Swedish with an English line linking to `/en`. `src/app/not-found.tsx` stays the file every static app shares.
 
 The pages themselves are a few lines each over the factories in `src/lib/pages.tsx`, once per
 language. Every word the chrome says is in `src/content/ui.ts` (`UI.sv`, `UI.en`); the shared

@@ -1,6 +1,7 @@
 import { translatorFor } from "@repo/i18n/translate"
 import { siteUrl } from "@repo/sites"
 import { type BlogLocale, otherLocale, prefixFor, UI } from "@/content/ui"
+import { cookieDomain } from "@/lib/cookie-domain"
 import { BlogHeader } from "./blog-header"
 
 /**
@@ -22,6 +23,7 @@ export function PageHeader({
       ui={UI[locale]}
       wwwUrl={siteUrl("www")}
       languageHref={languageHref ?? (prefixFor(otherLocale(locale)) || "/")}
+      cookieDomain={cookieDomain}
       labels={{ nav: t("siteNav"), themeToggle: t("themeToggle") }}
     />
   )

@@ -312,6 +312,13 @@ describe("siteLinkProblems", () => {
     ).toEqual([])
   })
 
+  test("an app id written in uppercase is refused, not passed as an unknown scheme", () => {
+    expect(siteLinkProblems("x.mdx", ["WWW:/#contact", "Www:/book"], ids)).toEqual([
+      'x.mdx: link "WWW:/#contact" — write the app id in lowercase ("www:/#contact")',
+      'x.mdx: link "Www:/book" — write the app id in lowercase ("www:/book")',
+    ])
+  })
+
   test("a site link needs a path from / and never points at the blog itself", () => {
     expect(siteLinkProblems("x.mdx", ["www:book", "www://evil", "blog:/hej"], ids)).toEqual([
       'x.mdx: link "www:book" needs a path starting with "/" (like "www:/")',

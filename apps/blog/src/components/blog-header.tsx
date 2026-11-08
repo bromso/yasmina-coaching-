@@ -1,6 +1,7 @@
 import { BRAND_NAME } from "@repo/sites/brand"
 import { ThemeToggle } from "@repo/ui/components/theme-toggle"
 import type { BlogLocale, BlogUi } from "@/content/ui"
+import { LanguageLink } from "./language-link"
 
 export type BlogHeaderProps = {
   locale: BlogLocale
@@ -9,6 +10,8 @@ export type BlogHeaderProps = {
   wwwUrl: string
   /** The same page in the other language, or that language's index. */
   languageHref: string
+  /** The shared cookies' `Domain`, for the language link's `locale` cookie. */
+  cookieDomain?: string
   labels: { nav: string; themeToggle: string }
 }
 
@@ -20,7 +23,14 @@ const focus = "outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
  * toggle and the booking button. Server-rendered and static. On a phone it wraps onto more rows
  * rather than scrolling sideways, and scrolls away with the page instead of covering it.
  */
-export function BlogHeader({ locale, ui, wwwUrl, languageHref, labels }: BlogHeaderProps) {
+export function BlogHeader({
+  locale,
+  ui,
+  wwwUrl,
+  languageHref,
+  cookieDomain,
+  labels,
+}: BlogHeaderProps) {
   const other = locale === "sv" ? "en" : "sv"
   return (
     <header className="relative z-50 flex justify-center px-2.5 pt-2.5 sm:sticky sm:top-[env(safe-area-inset-top,0px)] lg:px-4">
@@ -44,15 +54,15 @@ export function BlogHeader({ locale, ui, wwwUrl, languageHref, labels }: BlogHea
             </a>
           </li>
           <li>
-            <a
+            <LanguageLink
               href={languageHref}
-              hrefLang={other}
-              lang={other}
-              aria-label={ui.header.language.name}
+              locale={other}
+              domain={cookieDomain}
+              name={ui.header.language.name}
               className={`inline-flex h-9 items-center rounded-full px-3 transition-colors hover:bg-muted ${focus}`}
             >
               {ui.header.language.label}
-            </a>
+            </LanguageLink>
           </li>
           <li>
             <ThemeToggle label={labels.themeToggle} className="rounded-full" />

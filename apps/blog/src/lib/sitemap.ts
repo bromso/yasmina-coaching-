@@ -57,6 +57,8 @@ export function blogSitemap(blog: Blog, env?: Env): SitemapEntry[] {
             languages: {
               [post.locale]: `${base}${post.url}`,
               [translation.locale]: `${base}${translation.url}`,
+              // As on the pages: the Swedish one is the default.
+              "x-default": `${base}${(post.locale === "sv" ? post : translation).url}`,
             },
           },
         }),

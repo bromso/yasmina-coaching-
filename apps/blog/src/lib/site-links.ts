@@ -10,8 +10,8 @@ type Env = Record<string, string | undefined>
  * reads `SITE_DOMAIN`.
  */
 export function resolveSiteHref(href: string | undefined, env?: Env): string | undefined {
-  const match = href?.match(/^([a-z]+):(\/.*)$/)
-  const id = match?.[1]
+  const match = href?.match(/^([a-z]+):(\/.*)$/i)
+  const id = match?.[1]?.toLowerCase()
   if (!match || !id || !Object.hasOwn(SITES, id)) return href
   return `${siteUrl(id as SiteId, env)}${match[2] === "/" ? "" : match[2]}`
 }

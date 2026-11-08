@@ -189,7 +189,11 @@ describe("blogSitemap in two languages", () => {
     expect(find("https://blog.example.com/hej")?.alternates?.languages).toEqual({
       sv: "https://blog.example.com/hej",
       en: "https://blog.example.com/en/hello",
+      "x-default": "https://blog.example.com/hej",
     })
+    expect(find("https://blog.example.com/en/hello")?.alternates?.languages?.["x-default"]).toBe(
+      "https://blog.example.com/hej"
+    )
     expect(find("https://blog.example.com/ensam")?.alternates).toBeUndefined()
   })
 })

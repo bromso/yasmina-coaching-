@@ -4,7 +4,7 @@ import { coverOf } from "../../content/media"
 /**
  * A post's cover photo in a rounded frame, cropped to a wide 16:10 so portraits and landscapes sit
  * alike. A `/media/<name>-800.jpg` cover is served as WebP first, from the `.webp` beside it; any
- * other cover is a plain `<img>`. Above the fold, so it loads eagerly.
+ * other cover is a plain `<img>`. Above the fold and the page's LCP, so it loads eagerly and first.
  */
 export function Cover({ src, alt, className }: { src: string; alt: string; className?: string }) {
   const photo = coverOf(src)
@@ -17,7 +17,8 @@ export function Cover({ src, alt, className }: { src: string; alt: string; class
       width={width}
       height={height}
       loading="eager"
-      decoding="async"
+      // The cover is the post page's largest paint.
+      fetchPriority="high"
       className="size-full object-cover object-[center_30%]"
     />
   )

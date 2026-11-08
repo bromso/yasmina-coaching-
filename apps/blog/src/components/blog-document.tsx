@@ -12,6 +12,7 @@ import type { Metadata, Viewport } from "next"
 import type { ReactElement, ReactNode } from "react"
 import { Providers } from "@/app/providers"
 import { type BlogLocale, UI } from "@/content/ui"
+import { cookieDomain } from "@/lib/cookie-domain"
 import { feedTypes } from "@/lib/feed-types"
 import "@/styles/globals.css"
 
@@ -50,12 +51,6 @@ export const documentViewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
 }
-
-// Read at build time (the app is static). Production without COOKIE_DOMAIN writes a host-only
-// consent cookie, so the choice is not shared with the other subdomains — see the README.
-const cookieDomain =
-  process.env.COOKIE_DOMAIN ||
-  (process.env.NODE_ENV === "production" ? undefined : ".brand.localhost")
 
 export function BlogDocument({
   locale,

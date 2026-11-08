@@ -280,7 +280,12 @@ export function indexImage(locale: BlogLocale) {
   }
 }
 
-/** A post's OG/Twitter image: its title over the blog's name. */
+/**
+ * A post's OG/Twitter image: its title over the blog's name. Its alt text is the blog's name, not
+ * the post's title: a per-post alt needs `generateImageMetadata`, which cannot sit beside this
+ * file's own `generateStaticParams` (Next generates one itself: a duplicate export), and with the
+ * params handed down from a `[slug]/layout.tsx` instead, Next 16.4.3 prerendered none of the images.
+ */
 export function postImage(locale: BlogLocale) {
   const ui = UI[locale]
   return {
