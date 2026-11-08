@@ -343,3 +343,51 @@ describe("tag labels", () => {
     expect(tagPage).toMatch(/<h1[^>]*>Posts about Leading from within<\/h1>/)
   })
 })
+
+describe("cards with covers", () => {
+  const covered = (slug: string) =>
+    post(slug, { cover: { src: "/media/session-lounge-800.jpg", alt: `Photo for ${slug}` } })
+
+  test("each card shows its cover lazily, WebP first, with its size and alt", () => {
+    const html = renderToStaticMarkup(
+      <PostListView
+        posts={[covered("a"), covered("b")]}
+        page={1}
+        pages={1}
+        authors={authors}
+        ui={UI.sv}
+        prefix=""
+      />
+    )
+    expect(html.match(/data-slot="post-card-media"/g)).toHaveLength(2)
+    expect(html).toContain('srcSet="/media/session-lounge-800.webp"')
+    expect(html).toMatch(
+      /<img src="\/media\/session-lounge-800.jpg" alt="Photo for b" width="800" height="597" loading="lazy"/
+    )
+  })
+
+  test("the featured card is on sun-soft with a larger image; the others keep the card ground", () => {
+    const html = renderToStaticMarkup(
+      <PostListView
+        posts={[covered("a"), covered("b")]}
+        page={1}
+        pages={1}
+        authors={authors}
+        ui={UI.sv}
+        prefix=""
+      />
+    )
+    const [featured, other] = html.split('data-slot="post-card"').slice(1)
+    expect(featured).toContain("bg-sun-soft")
+    expect(featured).not.toContain("bg-primary/5")
+    expect(featured).toContain("md:aspect-[2/1]")
+    expect(other).not.toContain("bg-sun-soft")
+  })
+
+  test("a post without a cover gets no image frame", () => {
+    const html = renderToStaticMarkup(
+      <PostListView posts={[post("a")]} page={2} pages={2} authors={authors} ui={UI.sv} prefix="" />
+    )
+    expect(html).not.toContain("post-card-media")
+  })
+})

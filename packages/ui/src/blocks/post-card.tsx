@@ -13,6 +13,7 @@ import { useImageFallback } from "@repo/ui/components/image-fallback"
 import { initialsOf } from "@repo/ui/lib/initials"
 import { formatPostDate, toISODate } from "@repo/ui/lib/post-date"
 import { cn } from "@repo/ui/lib/utils"
+import type { ReactNode } from "react"
 
 export type PostCardTag = { tag: string; href: string }
 
@@ -38,6 +39,11 @@ export type PostCardProps = {
   className?: string
   /** Merged onto the title. */
   titleClassName?: string
+  /** An image (or any media) across the top of the card, edge to edge, its top corners following
+   * the card's. Without it the card is text only. */
+  media?: ReactNode
+  /** Merged onto the media's frame (its aspect ratio, say). */
+  mediaClassName?: string
 }
 
 /** A list-page teaser: title (linked), description, tags, author and reading time. */
@@ -56,6 +62,8 @@ export function PostCard({
   dateLocale,
   className,
   titleClassName,
+  media,
+  mediaClassName,
 }: PostCardProps) {
   const avatar = useImageFallback(author.avatar)
   const showAvatar = Boolean(author.avatar) && !avatar.failed
@@ -70,6 +78,14 @@ export function PostCard({
         className
       )}
     >
+      {media && (
+        <div
+          data-slot="post-card-media"
+          className={cn("-mt-6 overflow-hidden rounded-t-[inherit] bg-muted", mediaClassName)}
+        >
+          {media}
+        </div>
+      )}
       <CardHeader>
         {featured && <Badge className="mb-2 w-fit">{featuredLabel}</Badge>}
         <Title

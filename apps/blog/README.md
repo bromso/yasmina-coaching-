@@ -99,8 +99,9 @@ The blog ships ten posts by Yasmina in Swedish, each with its English translatio
   `lastModified` from the posts, tags and authors it actually covers.
 - **Views** — `src/views/<route>-view.tsx`: page-level compositions of `@repo/ui`'s blog blocks
   (`post-card`, `post-header`, `toc` inside `toc-active`, `prev-next`, each given the page's words,
-  date locale and the coaching classes) and MDX components (`@repo/ui/components/mdx`), plus the
-  blog's own `Cover` and `CallToAction`.
+  date locale and the coaching classes; each card shows the post's cover through `PostCard`'s
+  `media` slot, the featured one larger on sun-soft) and MDX components
+  (`@repo/ui/components/mdx`), plus the blog's own `Cover` / `CoverImage` and `CallToAction`.
 - **Styles** — `src/styles/globals.css` imports `@repo/ui/globals.css`, then
   `@repo/ui/themes/coaching.css`, the palette, sun tokens and display serif www uses too; the
   layout adds `fontDisplay`. Fonts, theme, skip link and web vitals come from `@repo/ui`.

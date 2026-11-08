@@ -278,3 +278,29 @@ describe("the blog blocks in another language", () => {
     expect(html).toContain('aria-label="På sidan"')
   })
 })
+
+describe("PostCard media", () => {
+  const props = {
+    href: "/a",
+    title: "A",
+    description: "D",
+    date: new Date("2026-10-07"),
+    readingMinutes: 1,
+    author,
+    tags: [],
+  }
+
+  test("renders the media first, in a frame taking the card's top corners", () => {
+    const html = renderToStaticMarkup(
+      <PostCard {...props} media={<img src="/x.jpg" alt="X" />} mediaClassName="aspect-[3/2]" />
+    )
+    expect(html).toMatch(
+      /data-slot="post-card-media" class="[^"]*rounded-t-\[inherit\][^"]*aspect-\[3\/2\]"><img src="\/x.jpg"/
+    )
+    expect(html.indexOf("post-card-media")).toBeLessThan(html.indexOf('href="/a"'))
+  })
+
+  test("without media there is no frame", () => {
+    expect(renderToStaticMarkup(<PostCard {...props} />)).not.toContain("post-card-media")
+  })
+})

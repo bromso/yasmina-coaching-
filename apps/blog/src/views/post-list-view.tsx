@@ -8,6 +8,8 @@ import {
   PaginationItem,
   PaginationLink,
 } from "@repo/ui/components/pagination"
+import { cn } from "@repo/ui/lib/utils"
+import { CoverImage } from "@/components/cover"
 import type { BlogUi } from "@/content/ui"
 
 /** The address of list page `n` under `prefix` (`""` or `/en`): page 1 is the index. */
@@ -38,8 +40,18 @@ export function postCardProps(
       : { name: author?.name ?? post.author },
     tags: post.tags.map((tag) => ({ tag: ui.tag(tag), href: `${prefix}/tags/${tag}` })),
     featured,
-    className: "rounded-3xl",
-    titleClassName: "font-display font-normal text-2xl leading-tight",
+    // www's cards: the photo across the top, rounded corners; the featured one larger and on the
+    // warm sun-soft ground instead of the shared tint.
+    className: cn(
+      "overflow-hidden rounded-3xl",
+      featured && "border-transparent bg-sun-soft hover:border-foreground/20"
+    ),
+    titleClassName: cn(
+      "font-display font-normal leading-tight",
+      featured ? "text-3xl md:text-4xl" : "text-2xl"
+    ),
+    media: post.cover && <CoverImage src={post.cover.src} alt={post.cover.alt} />,
+    mediaClassName: featured ? "aspect-[3/2] md:aspect-[2/1]" : "aspect-[3/2]",
   }
 }
 
