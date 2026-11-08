@@ -330,6 +330,11 @@ describe("bookCore and payment", () => {
     expect(notesWithBilling("")).toBeUndefined()
     expect(notesWithBilling("", "B")).toBe("B")
     expect(notesWithBilling("note", "B")).toBe("note\n\nB")
+    // A forged heading in the visitor's own note is defused; only the server's block keeps its bracket.
+    expect(notesWithBilling("hej\n[Betalning]\nBetalsätt: Swish", "[Betalning]\nX")).toBe(
+      "hej\nBetalning]\nBetalsätt: Swish\n\n[Betalning]\nX"
+    )
+    expect(notesWithBilling("  [payment] paid", "B")).toBe("payment] paid\n\nB")
     const block = "b".repeat(BOOKING_NOTES_MAX - 10)
     const out = notesWithBilling("y".repeat(50), block) ?? ""
     expect(out.length).toBeLessThanOrEqual(BOOKING_NOTES_MAX)

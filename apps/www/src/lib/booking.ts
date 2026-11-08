@@ -175,7 +175,9 @@ export function paymentOf(
  * the free text is shortened (ending in "…") to make room, the billing block never is.
  */
 export function notesWithBilling(notes: string, block?: string): string | undefined {
-  const free = notes.trim()
+  // A visitor could type their own "[Betalning]" heading to fake a second block in Yasmina's mail:
+  // any line of theirs that opens with a bracketed payment heading loses its bracket.
+  const free = notes.trim().replace(/^[ \t]*\[(?=(?:Betalning|Payment)\])/gim, "")
   if (!block) return optional(free)
   const room = BOOKING_NOTES_MAX - block.length - 2
   if (!free || room <= 1) return block
