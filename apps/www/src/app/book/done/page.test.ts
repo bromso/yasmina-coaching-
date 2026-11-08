@@ -23,6 +23,19 @@ describe("/book/done query", () => {
     expect(junk.paid).toBeUndefined()
   })
 
+  test("the invoice cases pass; a mock line never shows with the mock off", async () => {
+    expect((await propsFor({ ref: "BK-1", paid: "invoice_org" })).paid).toBe("invoice_org")
+    const saved = process.env.NEXT_PUBLIC_BOOKING_PAYMENTS
+    process.env.NEXT_PUBLIC_BOOKING_PAYMENTS = "off"
+    try {
+      expect((await propsFor({ ref: "BK-1", paid: "swish" })).paid).toBeUndefined()
+      expect((await propsFor({ ref: "BK-1", paid: "invoice" })).paid).toBe("invoice")
+    } finally {
+      if (saved === undefined) delete process.env.NEXT_PUBLIC_BOOKING_PAYMENTS
+      else process.env.NEXT_PUBLIC_BOOKING_PAYMENTS = saved
+    }
+  })
+
   test("a manage link off this site is dropped", async () => {
     const props = await propsFor({ ref: "BK-1", manage: "https://evil.example/book/manage/x" })
     expect(props.manageUrl).toBeUndefined()

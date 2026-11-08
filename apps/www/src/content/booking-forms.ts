@@ -60,18 +60,22 @@ export type BookingFormCopy = {
     }
     methodsLegend: string
     methods: Record<PaymentMethod, { label: string; hint: string }>
-    invoiceOnly: string
     testMode: string
     pay: (amount: string) => string
     payWith: (amount: string, brand: string) => string
     /** The mock wallet sheet while it "waits" for the visitor's approval. */
-    approve: Record<"apple_pay" | "google_pay", string>
+    approve: string
     swish: { numberLabel: string; numberHint: string; invalid: string; open: string }
     approved: string
+    /** Under the action's error when the mock had approved: the visitor must know they kept their money. */
+    nothingCharged: string
+    loading: string
     cancel: string
     cancelled: string
     invoice: {
-      private: (email: string) => string
+      /** Where the invoice goes and when: a fixed price is invoiced at once, a quoted one later. */
+      private: { priced: (email: string) => string; unpriced: (email: string) => string }
+      organisation: { priced: string; unpriced: string }
       orgNumber: string
       orgNumberHint: string
       orgNumberInvalid: string
@@ -82,6 +86,19 @@ export type BookingFormCopy = {
       confirm: string
     }
     submitting: string
+  }
+  /**
+   * The labelled block the server action adds to the booking's notes, so Yasmina's mail says how
+   * the visitor chose to pay and, for an organisation's invoice, where to send it.
+   */
+  billing: {
+    heading: string
+    method: string
+    methods: Record<PaymentMethod, string>
+    orgNumber: string
+    reference: string
+    address: string
+    tooLong: string
   }
   review: {
     request: string
@@ -226,16 +243,12 @@ const sv: BookingFormCopy = {
       apple_pay: { label: "Apple Pay", hint: "Med Face ID eller Touch ID på din enhet." },
       google_pay: { label: "Google Pay", hint: "Med kortet som är sparat i ditt Google-konto." },
       swish: { label: "Swish", hint: "Godkänn i Swish-appen på din telefon." },
-      invoice: { label: "Faktura", hint: "30 dagars betalningstid." },
+      invoice: { label: "Faktura", hint: "Betala i efterhand." },
     },
-    invoiceOnly: "Du får fakturan när Yasmina har bekräftat priset.",
     testMode: "Testläge: ingen betalning dras.",
     pay: (amount) => `Betala ${amount}`,
     payWith: (amount, brand) => `Betala ${amount} med ${brand}`,
-    approve: {
-      apple_pay: "Godkänn betalningen i din telefon…",
-      google_pay: "Godkänn betalningen i din webbläsare…",
-    },
+    approve: "Godkänn betalningen på din enhet…",
     swish: {
       numberLabel: "Mobilnummer för Swish",
       numberHint: "Till exempel 070 123 45 67.",
@@ -243,11 +256,23 @@ const sv: BookingFormCopy = {
       open: "Öppna Swish-appen och godkänn betalningen…",
     },
     approved: "Betalningen är godkänd. Bokningen skickas…",
+    nothingCharged: "Ingen betalning har dragits.",
+    loading: "Hämtar betalningen…",
     cancel: "Avbryt",
     cancelled: "Betalningen avbröts. Inget har dragits.",
     invoice: {
-      private: (email) =>
-        `Fakturan skickas till ${email} när bokningen är klar, med 30 dagars betalningstid. Inget personnummer behövs.`,
+      private: {
+        priced: (email) =>
+          `Fakturan skickas till ${email} när bokningen är klar, med 30 dagars betalningstid. Inget personnummer behövs.`,
+        unpriced: (email) =>
+          `Fakturan skickas till ${email} när Yasmina har bekräftat priset, med 30 dagars betalningstid. Inget personnummer behövs.`,
+      },
+      organisation: {
+        priced:
+          "Fakturan skickas dit du anger nedan när bokningen är klar, med 30 dagars betalningstid.",
+        unpriced:
+          "Fakturan skickas dit du anger nedan när Yasmina har bekräftat priset, med 30 dagars betalningstid.",
+      },
       orgNumber: "Organisationsnummer",
       orgNumberHint: "Tio siffror, till exempel 212000-1355.",
       orgNumberInvalid: "Fyll i ett giltigt organisationsnummer.",
@@ -258,6 +283,20 @@ const sv: BookingFormCopy = {
       confirm: "Boka och betala mot faktura",
     },
     submitting: "Bokar…",
+  },
+  billing: {
+    heading: "[Betalning]",
+    method: "Betalsätt",
+    methods: {
+      apple_pay: "Apple Pay (testläge)",
+      google_pay: "Google Pay (testläge)",
+      swish: "Swish (testläge)",
+      invoice: "Faktura",
+    },
+    orgNumber: "Organisationsnummer",
+    reference: "Fakturareferens",
+    address: "Fakturan skickas till",
+    tooLong: "Fakturauppgifterna är för långa. Korta ned dem och försök igen.",
   },
   review: {
     request: "Vad du vill uppnå",
@@ -403,16 +442,12 @@ const en: BookingFormCopy = {
       apple_pay: { label: "Apple Pay", hint: "With Face ID or Touch ID on your device." },
       google_pay: { label: "Google Pay", hint: "With the card saved in your Google account." },
       swish: { label: "Swish", hint: "Approve in the Swish app on your phone." },
-      invoice: { label: "Invoice", hint: "30 days to pay." },
+      invoice: { label: "Invoice", hint: "Pay afterwards." },
     },
-    invoiceOnly: "You get the invoice once Yasmina has confirmed the price.",
     testMode: "Test mode: no payment is taken.",
     pay: (amount) => `Pay ${amount}`,
     payWith: (amount, brand) => `Pay ${amount} with ${brand}`,
-    approve: {
-      apple_pay: "Approve the payment on your phone…",
-      google_pay: "Approve the payment in your browser…",
-    },
+    approve: "Approve the payment on your device…",
     swish: {
       numberLabel: "Mobile number for Swish",
       numberHint: "For example 070 123 45 67.",
@@ -420,11 +455,23 @@ const en: BookingFormCopy = {
       open: "Open the Swish app and approve the payment…",
     },
     approved: "Payment approved. Sending the booking…",
+    nothingCharged: "Nothing has been charged.",
+    loading: "Loading payment…",
     cancel: "Cancel",
     cancelled: "The payment was cancelled. Nothing was charged.",
     invoice: {
-      private: (email) =>
-        `The invoice is sent to ${email} once the booking is made, with 30 days to pay. No personal identity number is needed.`,
+      private: {
+        priced: (email) =>
+          `The invoice is sent to ${email} once the booking is made, with 30 days to pay. No personal identity number is needed.`,
+        unpriced: (email) =>
+          `The invoice is sent to ${email} once Yasmina has confirmed the price, with 30 days to pay. No personal identity number is needed.`,
+      },
+      organisation: {
+        priced:
+          "The invoice goes where you say below once the booking is made, with 30 days to pay.",
+        unpriced:
+          "The invoice goes where you say below once Yasmina has confirmed the price, with 30 days to pay.",
+      },
       orgNumber: "Organisation number",
       orgNumberHint: "Ten digits, for example 212000-1355.",
       orgNumberInvalid: "Enter a valid Swedish organisation number.",
@@ -435,6 +482,20 @@ const en: BookingFormCopy = {
       confirm: "Book and pay by invoice",
     },
     submitting: "Booking…",
+  },
+  billing: {
+    heading: "[Payment]",
+    method: "Payment method",
+    methods: {
+      apple_pay: "Apple Pay (test mode)",
+      google_pay: "Google Pay (test mode)",
+      swish: "Swish (test mode)",
+      invoice: "Invoice",
+    },
+    orgNumber: "Organisation number",
+    reference: "Invoice reference",
+    address: "Send the invoice to",
+    tooLong: "The invoice details are too long. Shorten them and try again.",
   },
   review: {
     request: "What you want to achieve",

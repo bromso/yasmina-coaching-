@@ -7,13 +7,24 @@ import {
   BookingRequestSchema,
   BookingReserveSchema,
 } from "@repo/api-contract"
-import { OFFERING_KEYS, type OfferingKey } from "@repo/api-contract/booking-limits"
+import {
+  BOOKING_NOTES_MAX,
+  OFFERING_KEYS,
+  type OfferingKey,
+} from "@repo/api-contract/booking-limits"
 import { createLogger } from "@repo/log"
 import { type FormState, fieldErrors } from "@repo/ui/components/form-feedback"
 import { amountFor } from "@/content/booking"
+import { BOOKING_FORMS } from "@/content/booking-forms"
 import { shiftDay, zonedDay } from "@/lib/booking-dates"
 import { type BookingFlow, flowFor, paysIn } from "@/lib/booking-flow"
-import { type PaymentMethod, paidFor } from "@/lib/mock-payment"
+import {
+  type DonePayment,
+  donePaymentOf,
+  formatOrgNumber,
+  isOrgNumber,
+  paidFor,
+} from "@/lib/mock-payment"
 import { type Locale, SITE_LOCALE } from "@/lib/site-locale"
 
 const logger = createLogger({ service: "www" })
@@ -78,7 +89,7 @@ export function doneUrl(
   reference: string,
   manageUrl: string,
   kind?: Exclude<BookingFlow, "instant">,
-  paid?: PaymentMethod
+  paid?: DonePayment
 ): string {
   const params = new URLSearchParams({ ref: reference, manage: manageUrl })
   if (kind) params.set("kind", kind)
@@ -89,16 +100,87 @@ export function doneUrl(
 const offeringKey = (raw: string): OfferingKey | null =>
   (OFFERING_KEYS as readonly string[]).includes(raw) ? (raw as OfferingKey) : null
 
+/** The invoice details' own limits; the whole billing block must also fit the api's notes. */
+export const INVOICE_REFERENCE_MAX = 100
+export const INVOICE_ADDRESS_MAX = 300
+
+export type Payment =
+  | { ok: true; paid?: DonePayment; block?: string; values: Record<string, string> }
+  | { ok: false; fieldErrors: Record<string, string>; values: Record<string, string> }
+
 /**
- * The mock payment a booking of `offering` went through, from the form's `paymentMethod`: only for
- * a journey with a payment step, and only a method the offering allows (invoice alone when it has
- * no fixed price). The api never sees it; it only picks the line `/book/done` shows.
+ * The payment a booking of `offering` went through, from the form: nothing for a journey with no
+ * payment step; otherwise `paymentMethod` must be a method the offering allows (`paidFor`: invoice
+ * alone without a fixed price or with the mock off), and an organisation paying by invoice must
+ * give a valid organisation number, an invoice reference and where the invoice goes. Returns the
+ * done page's key and a labelled billing block for the booking's notes, so Yasmina's mail carries
+ * it; the Swish number is never part of the form. The page's own words, in `locale`.
  */
-export function paymentOf(fd: FormData, offering: string, packageId?: string) {
+export function paymentOf(
+  fd: FormData,
+  offering: string,
+  audience: string,
+  locale: Locale = SITE_LOCALE,
+  packageId?: string
+): Payment {
+  const values = {
+    paymentMethod: str(fd, "paymentMethod"),
+    invoiceOrgNumber: str(fd, "invoiceOrgNumber"),
+    invoiceReference: str(fd, "invoiceReference"),
+    invoiceAddress: str(fd, "invoiceAddress"),
+  }
   const key = offeringKey(offering)
-  if (!key) return undefined
-  if (!paysIn(flowFor(key, packageId))) return undefined
-  return paidFor(str(fd, "paymentMethod"), amountFor(key) !== null)
+  if (!key || !paysIn(flowFor(key, packageId))) return { ok: true, values }
+  const copy = BOOKING_FORMS[locale]
+  const priced = amountFor(key) !== null
+  const method = paidFor(values.paymentMethod, priced)
+  if (!method) return { ok: false, fieldErrors: { paymentMethod: copy.check.method }, values }
+  const labels = copy.billing
+  const lines = [labels.heading, `${labels.method}: ${labels.methods[method]}`]
+  const billsOrganisation = method === "invoice" && audience === "organisation"
+  if (billsOrganisation) {
+    const errors: Record<string, string> = {}
+    const reference = values.invoiceReference.trim()
+    const address = values.invoiceAddress.trim()
+    if (!isOrgNumber(values.invoiceOrgNumber)) {
+      errors.invoiceOrgNumber = copy.payment.invoice.orgNumberInvalid
+    }
+    if (!reference || reference.length > INVOICE_REFERENCE_MAX) {
+      errors.invoiceReference = copy.payment.invoice.referenceMissing
+    }
+    if (!address || address.length > INVOICE_ADDRESS_MAX) {
+      errors.invoiceAddress = copy.payment.invoice.addressMissing
+    }
+    if (Object.keys(errors).length > 0) return { ok: false, fieldErrors: errors, values }
+    lines.push(
+      `${labels.orgNumber}: ${formatOrgNumber(values.invoiceOrgNumber)}`,
+      `${labels.reference}: ${reference}`,
+      `${labels.address}: ${address.replace(/\s*\n\s*/g, ", ")}`
+    )
+  }
+  const block = lines.join("\n")
+  if (block.length > BOOKING_NOTES_MAX) {
+    return { ok: false, fieldErrors: { invoiceAddress: labels.tooLong }, values }
+  }
+  return {
+    ok: true,
+    paid: donePaymentOf(method, audience === "organisation" ? "organisation" : "private", priced),
+    block,
+    values,
+  }
+}
+
+/**
+ * The visitor's own notes with the billing block after them, within the api's `BOOKING_NOTES_MAX`:
+ * the free text is shortened (ending in "…") to make room, the billing block never is.
+ */
+export function notesWithBilling(notes: string, block?: string): string | undefined {
+  const free = notes.trim()
+  if (!block) return optional(free)
+  const room = BOOKING_NOTES_MAX - block.length - 2
+  if (!free || room <= 1) return block
+  const kept = free.length > room ? `${free.slice(0, room - 1).trimEnd()}…` : free
+  return `${kept}\n\n${block}`
 }
 
 /**
@@ -163,33 +245,53 @@ export async function bookCore(
     slots: slots.join(","),
     packageId: str(fd, "packageId"),
   }
+  const payment = paymentOf(
+    fd,
+    values.offering,
+    values.audience,
+    deps.locale,
+    values.packageId || undefined
+  )
   const parsed = BookingCreateSchema.safeParse({
     offering: values.offering,
     slots,
     audience: values.audience,
     customer: customerOf(fd),
     location: values.location,
-    notes: optional(values.notes),
+    notes: notesWithBilling(values.notes, payment.ok ? payment.block : undefined),
   })
-  if (!parsed.success) {
-    return { ok: false, fieldErrors: bookingFieldErrors(parsed.error.issues), values }
+  const all = { ...values, ...payment.values }
+  if (!parsed.success || !payment.ok) {
+    const fieldErrors = {
+      ...(payment.ok ? {} : payment.fieldErrors),
+      ...(parsed.success ? {} : bookingFieldErrors(parsed.error.issues)),
+    }
+    return { ok: false, fieldErrors, values: all }
   }
   try {
     const { reference, manageUrl } = await deps.api.book(parsed.data)
     const flow = flowFor(parsed.data.offering, values.packageId || undefined)
-    const paid = paymentOf(fd, parsed.data.offering, values.packageId || undefined)
     return {
       ok: true,
-      redirectTo: doneUrl(reference, manageUrl, flow === "instant" ? undefined : flow, paid),
+      redirectTo: doneUrl(
+        reference,
+        manageUrl,
+        flow === "instant" ? undefined : flow,
+        payment.paid
+      ),
     }
   } catch (error) {
-    return failure(error, "booking.book", values, deps.locale)
+    return failure(error, "booking.book", all, deps.locale)
   }
 }
 
 /**
  * Seats at one or several group events (`eventIds`, one checkbox each). `offering` (a hidden
  * field) is read only to check the payment method; the api decides the offering by the events.
+ * The visitor can change it, but all it can change is their own done page's payment line and
+ * which methods this check accepts — every method is a mock or an invoice, the billing block in
+ * the notes still names the method actually chosen, and nothing is charged — so trusting it is
+ * cosmetic and acceptable. A real provider must price the events server-side instead.
  */
 export async function reserveSeatsCore(
   deps: { api: ReserveApi; locale?: Locale },
@@ -205,21 +307,26 @@ export async function reserveSeatsCore(
     notes: str(fd, "notes"),
     eventIds: eventIds.join(","),
   }
+  const payment = paymentOf(fd, str(fd, "offering"), values.audience, deps.locale)
   const parsed = BookingReserveSchema.safeParse({
     eventIds: eventIds.map((id) => (/^\d+$/.test(id) ? Number(id) : id)),
     audience: values.audience,
     customer: customerOf(fd),
-    notes: optional(values.notes),
+    notes: notesWithBilling(values.notes, payment.ok ? payment.block : undefined),
   })
-  if (!parsed.success) {
-    return { ok: false, fieldErrors: bookingFieldErrors(parsed.error.issues), values }
+  const all = { ...values, ...payment.values }
+  if (!parsed.success || !payment.ok) {
+    const fieldErrors = {
+      ...(payment.ok ? {} : payment.fieldErrors),
+      ...(parsed.success ? {} : bookingFieldErrors(parsed.error.issues)),
+    }
+    return { ok: false, fieldErrors, values: all }
   }
   try {
     const { reference, manageUrl } = await deps.api.reserve(parsed.data)
-    const paid = paymentOf(fd, str(fd, "offering"))
-    return { ok: true, redirectTo: doneUrl(reference, manageUrl, "group", paid) }
+    return { ok: true, redirectTo: doneUrl(reference, manageUrl, "group", payment.paid) }
   } catch (error) {
-    return failure(error, "booking.reserve", values, deps.locale)
+    return failure(error, "booking.reserve", all, deps.locale)
   }
 }
 

@@ -1,23 +1,55 @@
 import { describe, expect, test } from "bun:test"
 import { MEMBER_OFFERING_KEYS, OFFERING_KEYS, OFFERINGS } from "@repo/api-contract/booking-limits"
-import { amountFor, priceFor } from "@/content/booking"
+import { amountFor } from "@/content/booking"
 import { vatBreakdown } from "@/content/inner-pricing"
 import { flowFor, parseFlow, paysIn } from "./booking-flow"
+import { monthsSpanned } from "./group-events"
 import {
+  authoriseMockPayment,
+  donePaymentOf,
+  formatOrgNumber,
+  isDonePayment,
+  isMockOnly,
   isOrgNumber,
   methodsFor,
+  mockPaymentsOn,
   normaliseSwishNumber,
   PAYMENT_METHODS,
   paidFor,
-  runMockPayment,
 } from "./mock-payment"
 
 const instantly = { apple_pay: 0, google_pay: 0, swish: 0, invoice: 0 }
 
 describe("payment methods", () => {
   test("priced offerings take all four, the rest invoice only", () => {
-    expect(methodsFor(true)).toEqual(["apple_pay", "google_pay", "swish", "invoice"])
-    expect(methodsFor(false)).toEqual(["invoice"])
+    expect(methodsFor(true, true)).toEqual(["apple_pay", "google_pay", "swish", "invoice"])
+    expect(methodsFor(false, true)).toEqual(["invoice"])
+    // With the mock off, nothing but an invoice, priced or not.
+    expect(methodsFor(true, false)).toEqual(["invoice"])
+    expect(paidFor("swish", true, false)).toBeUndefined()
+    expect(paidFor("invoice", true, false)).toBe("invoice")
+  })
+
+  test("the build flag: mock on, anything else off; unset follows NODE_ENV", () => {
+    expect(mockPaymentsOn("mock", "production")).toBe(true)
+    expect(mockPaymentsOn("off", "development")).toBe(false)
+    expect(mockPaymentsOn("true", "development")).toBe(false)
+    expect(mockPaymentsOn(undefined, "production")).toBe(false)
+    expect(mockPaymentsOn("", "production")).toBe(false)
+    expect(mockPaymentsOn(undefined, "development")).toBe(true)
+    expect(mockPaymentsOn(undefined, "test")).toBe(true)
+  })
+
+  test("the done page's payment keys", () => {
+    expect(donePaymentOf("swish", "private", true)).toBe("swish")
+    expect(donePaymentOf("invoice", "private", true)).toBe("invoice")
+    expect(donePaymentOf("invoice", "organisation", true)).toBe("invoice_org")
+    expect(donePaymentOf("invoice", "organisation", false)).toBe("invoice_quote")
+    expect(isDonePayment("invoice_quote")).toBe(true)
+    expect(isDonePayment("card")).toBe(false)
+    expect(isMockOnly("swish")).toBe(true)
+    expect(isMockOnly("invoice_org")).toBe(false)
+    expect(formatOrgNumber("2120001355")).toBe("212000-1355")
   })
 
   test("paidFor trusts only a known key the offering allows", () => {
@@ -46,9 +78,9 @@ describe("payment methods", () => {
   })
 
   test("the mock approves after its delay, and a cancel charges nothing", async () => {
-    expect(await runMockPayment("swish", { delays: instantly })).toBe("approved")
+    expect(await authoriseMockPayment("swish", { delays: instantly })).toBe("authorised")
     const controller = new AbortController()
-    const pending = runMockPayment("apple_pay", { signal: controller.signal })
+    const pending = authoriseMockPayment("apple_pay", { signal: controller.signal })
     controller.abort()
     await expect(pending).rejects.toThrow("Payment cancelled")
   })
@@ -88,12 +120,17 @@ describe("prices", () => {
     for (const key of ["session", "package_6", "group", "workshop", ...MEMBER_OFFERING_KEYS]) {
       expect(amountFor(key as (typeof OFFERING_KEYS)[number])).toBeNull()
     }
-    expect(priceFor("inner_group", "organisation")).toEqual({
-      amount: 1980,
-      per: "month",
-      net: 1980,
-      vat: 495,
-      total: 2475,
-    })
+    expect(vatBreakdown(1980, "organisation")).toEqual({ net: 1980, vat: 495, total: 2475 })
+  })
+
+  test("the group is priced per calendar month in Stockholm among the chosen dates", () => {
+    expect(monthsSpanned([])).toBe(0)
+    expect(monthsSpanned(["2026-05-04T16:00:00Z", "2026-05-25T16:00:00Z"])).toBe(1)
+    expect(monthsSpanned(["2026-05-25T16:00:00Z", "2026-06-01T16:00:00Z"])).toBe(2)
+    // 31 May 22:30 UTC is already 1 June in Stockholm.
+    expect(monthsSpanned(["2026-05-31T22:30:00Z", "2026-06-10T16:00:00Z"])).toBe(1)
+    // Two months of the group, VAT on the whole: 2 × 1 980 kr.
+    expect(vatBreakdown(2 * 1980, "private")).toEqual({ net: 3168, vat: 792, total: 3960 })
+    expect(vatBreakdown(2 * 1980, "organisation")).toEqual({ net: 3960, vat: 990, total: 4950 })
   })
 })

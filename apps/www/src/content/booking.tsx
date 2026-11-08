@@ -10,14 +10,8 @@ import {
 import type { Locale } from "@repo/i18n/locales"
 import { BOOKING_FORMS, type BookingFormCopy } from "@/content/booking-forms"
 import { INNER, INNER_SERVICE_IDS } from "@/content/inner"
-import {
-  formatKr,
-  INNER_PRICES,
-  type InnerServiceId,
-  type VatBreakdown,
-  vatBreakdown,
-} from "@/content/inner-pricing"
-import type { PaymentMethod } from "@/lib/mock-payment"
+import { formatKr, INNER_PRICES, type InnerServiceId } from "@/content/inner-pricing"
+import type { DonePayment } from "@/lib/mock-payment"
 
 /**
  * Every word on the booking pages (`/book`, `/book/<offering>`, `/book/done`, `/book/manage/…`),
@@ -96,8 +90,8 @@ export type BookingContent = {
     manageHint: string
     next: string
     nextItems: { instant: string[]; request: string[] }
-    /** How the booking was paid, from `?paid=` (checked against the four methods). */
-    paid: Record<PaymentMethod, string>
+    /** How the booking was paid, from `?paid=` (checked against `DONE_PAYMENTS`). */
+    paid: Record<DonePayment, string>
     home: string
   }
   manage: {
@@ -314,8 +308,9 @@ const sv: BookingContent = {
       apple_pay: "Betalt med Apple Pay (testläge).",
       google_pay: "Betalt med Google Pay (testläge).",
       swish: "Betalt med Swish (testläge).",
-      invoice:
-        "Du betalar mot faktura, som skickas till e-postadressen eller fakturaadressen du angav (testläge).",
+      invoice: "Du betalar mot faktura, som skickas till din e-post med 30 dagars betalningstid.",
+      invoice_org: "Du betalar mot faktura, som skickas dit du angav med 30 dagars betalningstid.",
+      invoice_quote: "Du betalar mot faktura, som skickas när Yasmina har bekräftat priset.",
     },
     home: "Tillbaka till startsidan",
   },
@@ -532,7 +527,9 @@ const en: BookingContent = {
       apple_pay: "Paid with Apple Pay (test mode).",
       google_pay: "Paid with Google Pay (test mode).",
       swish: "Paid with Swish (test mode).",
-      invoice: "You pay by invoice, sent to the email or invoice address you gave (test mode).",
+      invoice: "You pay by invoice, sent to your email with 30 days to pay.",
+      invoice_org: "You pay by invoice, sent where you said with 30 days to pay.",
+      invoice_quote: "You pay by invoice, sent once Yasmina has confirmed the price.",
     },
     home: "Back to the home page",
   },
@@ -587,15 +584,6 @@ export function amountFor(key: OfferingKey): OfferingAmount | null {
   return prices.start === undefined
     ? { amount: prices.monthly, per: "month" }
     : { amount: prices.start, per: "session" }
-}
-
-/** `amountFor(key)` as `audience` pays it, with the VAT on its own (see `vatBreakdown`). */
-export function priceFor(
-  key: OfferingKey,
-  audience: BookingAudience
-): (OfferingAmount & VatBreakdown) | null {
-  const base = amountFor(key)
-  return base ? { ...base, ...vatBreakdown(base.amount, audience) } : null
 }
 
 /**

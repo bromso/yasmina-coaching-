@@ -1,9 +1,21 @@
 /**
- * Every payment on the booking pages, as a mock: no card, wallet, Swish number or invoice detail
- * leaves the browser, and nothing is charged. The payment step (`payment-step.tsx`) runs
- * `runMockPayment` client-side and then submits the booking form with only the chosen method's
- * key (`paymentMethod`); the server action checks that key with `paidFor` and passes it on to
- * `/book/done` as `?paid=`. A real provider later replaces this one file: keep its exports.
+ * Every payment on the booking pages, behind one seam. Today it is a mock: nothing is charged, and
+ * the payment step (`payment-step.tsx`) only calls `authoriseMockPayment` in the browser before it
+ * submits the booking form with the chosen method's key (`paymentMethod`) — plus, for an
+ * organisation paying by invoice, its billing details, which the server action adds to the
+ * booking's notes. The Swish number never leaves the browser.
+ *
+ * A real provider replaces this file and must keep the money and the booking in step:
+ *
+ * 1. **Authorise** the payment (Apple Pay / Google Pay sheet, a Swish request) without capturing.
+ * 2. **Book**: submit the booking form as today; the api may still refuse (a taken slot, a full
+ *    event).
+ * 3. **Capture** only once the booking exists, or **void** the authorisation when it was refused,
+ *    so a refused booking never costs the visitor anything.
+ *
+ * It must also feature-detect the wallets (`ApplePaySession.canMakePayments()`, the Payment
+ * Request API's `canMakePayment()` for Google Pay) and offer only what the browser supports; the
+ * mock offers all of them.
  *
  * Client-safe and pure (no React, no Next), so the server action and `bun test` read it too.
  */
@@ -16,18 +28,72 @@ export const isPaymentMethod = (raw: unknown): raw is PaymentMethod =>
   typeof raw === "string" && (PAYMENT_METHODS as readonly string[]).includes(raw)
 
 /**
- * What a visitor may choose: every method when the offering has a fixed price, invoice only when
- * the price is confirmed in writing first (the leadership sessions, programmes and group).
+ * Whether the mock card, wallet and Swish payments are offered at all: `NEXT_PUBLIC_BOOKING_PAYMENTS`
+ * as it was at `next build` (Next inlines `NEXT_PUBLIC_*` into both bundles). `mock` turns them on;
+ * any other value turns them off; unset, they are on outside production and off in it, so a
+ * production build never takes a pretend payment unless someone asked for it. Off, every booking
+ * pays by invoice only and no "test mode" line is shown anywhere.
  */
-export const methodsFor = (priced: boolean): readonly PaymentMethod[] =>
-  priced ? PAYMENT_METHODS : ["invoice"]
+export function mockPaymentsOn(
+  raw: string | undefined = process.env.NEXT_PUBLIC_BOOKING_PAYMENTS,
+  nodeEnv: string | undefined = process.env.NODE_ENV
+): boolean {
+  if (raw) return raw === "mock"
+  return nodeEnv !== "production"
+}
 
 /**
- * The method a booking was paid with, from an untrusted form value: only one of the four keys,
- * and only one the offering allows (`priced`). Anything else is no payment at all.
+ * What a visitor may choose: every method when the offering has a fixed price and the mock is on
+ * (`mock`, default `mockPaymentsOn()`), invoice only otherwise — the leadership sessions,
+ * programmes and group are priced in writing first.
  */
-export function paidFor(raw: unknown, priced: boolean): PaymentMethod | undefined {
-  return isPaymentMethod(raw) && methodsFor(priced).includes(raw) ? raw : undefined
+export const methodsFor = (priced: boolean, mock = mockPaymentsOn()): readonly PaymentMethod[] =>
+  priced && mock ? PAYMENT_METHODS : ["invoice"]
+
+/**
+ * The method a booking was paid with, from an untrusted form value: only one of the four keys, and
+ * only one the offering allows (see `methodsFor`). Anything else is `undefined`, which the server
+ * action refuses.
+ */
+export function paidFor(
+  raw: unknown,
+  priced: boolean,
+  mock = mockPaymentsOn()
+): PaymentMethod | undefined {
+  return isPaymentMethod(raw) && methodsFor(priced, mock).includes(raw) ? raw : undefined
+}
+
+/**
+ * The payment line `/book/done` shows, by key: a wallet or Swish (always the mock, so it says
+ * "test mode"), or an invoice — to the private client's email, to an organisation's invoice
+ * address, or after Yasmina has confirmed the price (an offering priced in writing).
+ */
+export const DONE_PAYMENTS = [
+  "apple_pay",
+  "google_pay",
+  "swish",
+  "invoice",
+  "invoice_org",
+  "invoice_quote",
+] as const
+export type DonePayment = (typeof DONE_PAYMENTS)[number]
+
+export const isDonePayment = (raw: unknown): raw is DonePayment =>
+  typeof raw === "string" && (DONE_PAYMENTS as readonly string[]).includes(raw)
+
+/** Whether a done-page key is one of the mock's own (shown only while the mock is on). */
+export const isMockOnly = (key: DonePayment): boolean =>
+  key === "apple_pay" || key === "google_pay" || key === "swish"
+
+/** The done-page key for a booking paid with `method` by `audience`, priced or not. */
+export function donePaymentOf(
+  method: PaymentMethod,
+  audience: "private" | "organisation",
+  priced: boolean
+): DonePayment {
+  if (method !== "invoice") return method
+  if (!priced) return "invoice_quote"
+  return audience === "organisation" ? "invoice_org" : "invoice"
 }
 
 /**
@@ -55,7 +121,13 @@ export function isOrgNumber(raw: string): boolean {
   return sum % 10 === 0
 }
 
-/** How long each mock waits, in ms: the wallet sheet, the Swish app, and an invoice (none). */
+/** An organisation number written the usual way, `NNNNNN-NNNN`. */
+export const formatOrgNumber = (raw: string): string => {
+  const digits = raw.replace(/[\s-]/g, "")
+  return `${digits.slice(0, 6)}-${digits.slice(6)}`
+}
+
+/** How long each mock authorisation waits, in ms: the wallet sheet, the Swish app, an invoice. */
 export const MOCK_DELAYS: Record<PaymentMethod, number> = {
   apple_pay: 1200,
   google_pay: 1200,
@@ -64,13 +136,14 @@ export const MOCK_DELAYS: Record<PaymentMethod, number> = {
 }
 
 /**
- * A pretend payment: waits as long as the real one roughly would, then approves. Aborting the
- * signal (the visitor pressed Cancel) rejects with an `AbortError` and charges nothing, as now.
+ * Step 1 of the seam, mocked: "authorises" after roughly as long as the real one would take.
+ * Aborting the signal (the visitor pressed Cancel, or left the step) rejects with an `AbortError`.
+ * There is no capture or void to mock: nothing was ever reserved.
  */
-export function runMockPayment(
+export function authoriseMockPayment(
   method: PaymentMethod,
   { signal, delays = MOCK_DELAYS }: { signal?: AbortSignal; delays?: Record<PaymentMethod, number> }
-): Promise<"approved"> {
+): Promise<"authorised"> {
   return new Promise((resolve, reject) => {
     const abort = () => {
       clearTimeout(timer)
@@ -82,7 +155,7 @@ export function runMockPayment(
     }
     const timer = setTimeout(() => {
       signal?.removeEventListener("abort", abort)
-      resolve("approved")
+      resolve("authorised")
     }, delays[method])
     signal?.addEventListener("abort", abort, { once: true })
   })

@@ -1,4 +1,5 @@
 import type { GroupEvent } from "@repo/api-contract"
+import { zonedDay } from "@/lib/booking-dates"
 
 /*
  * Client-safe (no Zod): the group page's list is a client component, which must not pull the
@@ -21,4 +22,12 @@ export function groupBySeries(events: readonly GroupEvent[]): EventSeries[] {
     else groups.set(key, { key, title: event.title, events: [event] })
   }
   return [...groups.values()]
+}
+
+/**
+ * How many calendar months (in the booking zone, Europe/Stockholm) the chosen events fall in: the
+ * Inifrån group is priced per month, so dates in two months cost two months.
+ */
+export function monthsSpanned(startsAts: readonly string[]): number {
+  return new Set(startsAts.map((at) => zonedDay(new Date(at)).slice(0, 7))).size
 }
