@@ -1,0 +1,167 @@
+import { localePrefix, type PostLocale } from "@repo/content/posts"
+import { ROOT_LOCALE } from "@/lib/blog-core"
+
+export { ROOT_LOCALE }
+
+/**
+ * Every word the blog's own chrome says, in Swedish and English: the header's links, the index
+ * hero, the list and post pages, the closing call to action and the feeds' titles. The shared
+ * pieces (skip link, theme toggle, nav landmarks, cookie banner, footer groups) come from
+ * `@repo/i18n`'s `ui` catalog instead (`translatorFor(locale, "ui")`). Plain data and pure
+ * functions, read at build time by server components only.
+ */
+
+/** The blog's two languages. Swedish is served at the root, English under `/en`. */
+export const BLOG_LOCALES = ["sv", "en"] as const satisfies readonly PostLocale[]
+export type BlogLocale = (typeof BLOG_LOCALES)[number]
+
+/** `""` for Swedish, `"/en"` for English: the start of every list, tag, author and feed path. */
+export function prefixFor(locale: BlogLocale): string {
+  return localePrefix(locale, ROOT_LOCALE)
+}
+
+/** The other language. */
+export function otherLocale(locale: BlogLocale): BlogLocale {
+  return locale === "sv" ? "en" : "sv"
+}
+
+export type BlogUi = {
+  /** The `Intl` locale dates are written in. */
+  dateLocale: string
+  /** Open Graph's `og:locale`. */
+  ogLocale: string
+  /** The blog's name: the `<title>` default, the feeds' title, the OG image. */
+  title: string
+  /** One sentence for the whole blog: `<meta name="description">` and every feed. */
+  description: string
+  header: {
+    /** www's Ledarskap inifrån page. */
+    inner: string
+    /** www's booking page. */
+    book: string
+    /** The language link, written in the *other* language, and its accessible name. */
+    language: { label: string; name: string }
+  }
+  hero: { eyebrow: string; title: string; lead: string }
+  list: {
+    /** The index's accessible heading over the cards past page 1. */
+    page: (n: number) => string
+    empty: string
+    pagination: string
+    newer: string
+    older: string
+    tagTitle: (tag: string) => string
+    tagDescription: (tag: string) => string
+  }
+  post: {
+    featured: string
+    readingTime: (minutes: number) => string
+    updated: string
+    toc: string
+    prevNext: string
+    newer: string
+    older: string
+    related: string
+  }
+  cta: { title: string; text: string; button: string }
+  legal: { terms: string; privacy: string }
+  /** The 404 page (`src/app/global-not-found.tsx`). */
+  notFound: { title: string; description: string; back: string }
+}
+
+export const UI: Record<BlogLocale, BlogUi> = {
+  sv: {
+    dateLocale: "sv-SE",
+    ogLocale: "sv_SE",
+    title: "Anteckningar om ledarskap",
+    description:
+      "Yasmina Peterssons anteckningar om ledarskap, coaching och mentorskap: om att leda människor, och sig själv, också när det blåser.",
+    header: {
+      inner: "Ledarskap inifrån",
+      book: "Boka",
+      language: { label: "In English", name: "Read in English" },
+    },
+    hero: {
+      eyebrow: "Bloggen",
+      title: "Anteckningar om ledarskap",
+      lead: "Om att leda människor, och sig själv. Om coaching, mentorskap och samtalen som gör skillnad, också när det blåser.",
+    },
+    list: {
+      page: (n) => `Inlägg, sida ${n}`,
+      empty: "Inga inlägg än.",
+      pagination: "Sidor",
+      newer: "Nyare inlägg",
+      older: "Äldre inlägg",
+      tagTitle: (tag) => `Inlägg om ${tag}`,
+      tagDescription: (tag) => `Alla inlägg taggade med ”${tag}”.`,
+    },
+    post: {
+      featured: "Senast",
+      readingTime: (minutes) => `${minutes} min läsning`,
+      updated: "Uppdaterad",
+      toc: "På sidan",
+      prevNext: "Fler inlägg",
+      newer: "Nyare",
+      older: "Äldre",
+      related: "Läs vidare",
+    },
+    cta: {
+      title: "Vill du prata om ditt ledarskap?",
+      text: "Ett första samtal på 30 minuter kostar ingenting. Vi pratar om var du står och om coaching kan hjälpa, innan du bestämmer dig.",
+      button: "Boka ett kostnadsfritt samtal",
+    },
+    legal: { terms: "Villkor", privacy: "Integritet" },
+    notFound: {
+      title: "Sidan finns inte",
+      description: "Sidan du letar efter finns inte, eller har flyttat.",
+      back: "Till bloggen",
+    },
+  },
+  en: {
+    dateLocale: "en-GB",
+    ogLocale: "en_GB",
+    title: "Notes on leadership",
+    description:
+      "Yasmina Petersson's notes on leadership, coaching and mentoring: on leading people, and yourself, when the wind picks up too.",
+    header: {
+      inner: "Leading from within",
+      book: "Book",
+      language: { label: "På svenska", name: "Läs på svenska" },
+    },
+    hero: {
+      eyebrow: "The blog",
+      title: "Notes on leadership",
+      lead: "On leading people, and yourself. On coaching, mentoring and the conversations that make a difference, when the wind picks up too.",
+    },
+    list: {
+      page: (n) => `Posts, page ${n}`,
+      empty: "No posts yet.",
+      pagination: "Pages",
+      newer: "Newer posts",
+      older: "Older posts",
+      tagTitle: (tag) => `Posts about ${tag}`,
+      tagDescription: (tag) => `Every post tagged “${tag}”.`,
+    },
+    post: {
+      featured: "Latest",
+      readingTime: (minutes) => `${minutes} min read`,
+      updated: "Updated",
+      toc: "On this page",
+      prevNext: "More posts",
+      newer: "Newer",
+      older: "Older",
+      related: "Read on",
+    },
+    cta: {
+      title: "Want to talk about your leadership?",
+      text: "A first 30-minute call is free. We talk about where you are and whether coaching can help, before you decide.",
+      button: "Book a free call",
+    },
+    legal: { terms: "Terms", privacy: "Privacy" },
+    notFound: {
+      title: "Page not found",
+      description: "The page you're looking for doesn't exist or has moved.",
+      back: "Back to the blog",
+    },
+  },
+}

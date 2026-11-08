@@ -2,7 +2,14 @@ import { describe, expect, test } from "bun:test"
 import type { PostInput } from "@repo/content/posts"
 import { ContentError } from "@repo/content/posts"
 import type { Author } from "@repo/content/schema"
-import { assembleBlog, type BlogInput, knownPaths, nestingProblems } from "./blog-core"
+import {
+  assembleBlog,
+  type BlogInput,
+  coverProblems,
+  knownPaths,
+  nestingProblems,
+  siteLinkProblems,
+} from "./blog-core"
 
 const authors: Record<string, Author> = {
   team: { name: "Team", bio: "Writes things.", avatar: "/authors/team.svg" },
@@ -19,6 +26,7 @@ function input(slug: string, tags: string[] = ["a"]): PostInput {
       author: "team",
       tags,
       type: "Blog Post",
+      locale: "sv",
     },
     text: "word",
     links: [],
@@ -28,10 +36,34 @@ function input(slug: string, tags: string[] = ["a"]): PostInput {
 const options = { mode: "production" as const, now: new Date("2026-10-07") }
 
 describe("knownPaths", () => {
-  test("lists every page, feed, tag and author path for a one-post blog", () => {
+  test("lists every page, feed, tag and author path for a one-post blog, both indexes and feeds", () => {
     expect([...knownPaths([input("hello")])].sort()).toEqual(
-      ["/", "/hello", "/tags/a", "/authors/team", "/rss.xml", "/atom.xml", "/feed.json"].sort()
+      [
+        "/",
+        "/hello",
+        "/tags/a",
+        "/authors/team",
+        "/rss.xml",
+        "/atom.xml",
+        "/feed.json",
+        "/en",
+        "/en/rss.xml",
+        "/en/atom.xml",
+        "/en/feed.json",
+      ].sort()
     )
+  })
+
+  test("an English post's paths sit under /en, its slug's en- dropped", () => {
+    const english = input("en-hello", ["b"])
+    english.frontmatter = { ...english.frontmatter, locale: "en" }
+    const paths = knownPaths([input("hej"), english])
+    expect(paths.has("/en/hello")).toBe(true)
+    expect(paths.has("/en-hello")).toBe(false)
+    expect(paths.has("/en/tags/b")).toBe(true)
+    expect(paths.has("/tags/b")).toBe(false)
+    expect(paths.has("/en/authors/team")).toBe(true)
+    expect(paths.has("/authors/team")).toBe(true)
   })
 
   test("adds /page/<n> only for n >= 2", () => {
@@ -78,6 +110,7 @@ describe("assembleBlog", () => {
         author: "team",
         tags: [],
         type: "Blog Post",
+        locale: "sv",
       },
       text: "word",
       links: [],
@@ -266,6 +299,98 @@ describe("assembleBlog", () => {
     expect(problems.some((p) => p.startsWith("apps/blog/content/posts/bad.mdx: date"))).toBe(true)
     expect(problems).toContain(
       'apps/blog/content/posts/broken-link.mdx: broken link "/missing-page"'
+    )
+  })
+})
+
+describe("siteLinkProblems", () => {
+  const ids = ["www", "blog", "docs"]
+
+  test("a www:/ link with a path is fine; other schemes are not site links", () => {
+    expect(
+      siteLinkProblems("x.mdx", ["www:/book", "www:/", "https://a.se", "mailto:a@b.se"], ids)
+    ).toEqual([])
+  })
+
+  test("a site link needs a path from / and never points at the blog itself", () => {
+    expect(siteLinkProblems("x.mdx", ["www:book", "www://evil", "blog:/hej"], ids)).toEqual([
+      'x.mdx: link "www:book" needs a path starting with "/" (like "www:/")',
+      'x.mdx: link "www://evil" needs a path starting with "/" (like "www:/")',
+      'x.mdx: link "blog:/hej" points at the blog itself — write "/hej" instead',
+    ])
+  })
+})
+
+describe("coverProblems", () => {
+  const files = new Set(["/media/a-800.jpg", "/media/a-800.webp", "/media/b-800.jpg"])
+  const exists = (path: string) => files.has(path)
+
+  test("a media photo needs its WebP sibling", () => {
+    expect(coverProblems("x.mdx", { src: "/media/a-800.jpg" }, exists)).toEqual([])
+    expect(coverProblems("x.mdx", { src: "/media/b-800.jpg" }, exists)).toEqual([
+      'x.mdx: cover "/media/b-800.webp" not found in public/',
+    ])
+  })
+
+  test("a media cover must be the -800.jpg; other covers are left to imageProblems", () => {
+    expect(coverProblems("x.mdx", { src: "/media/a-800.webp" }, exists)).toEqual([
+      'x.mdx: cover "/media/a-800.webp" must be a "/media/<name>-800.jpg" photo',
+    ])
+    expect(coverProblems("x.mdx", { src: "/cover.png" }, exists)).toEqual([])
+    expect(coverProblems("x.mdx", undefined, exists)).toEqual([])
+  })
+})
+
+describe("assembleBlog in two languages", () => {
+  const known = { hosts: new Set<string>(), ownHost: "blog.brand.localhost:3009" }
+  const allExist = () => true
+
+  function post(slug: string, locale: "sv" | "en", extra: Partial<BlogInput> = {}): BlogInput {
+    const base = input(slug)
+    return {
+      ...base,
+      frontmatter: { ...base.frontmatter, locale },
+      images: [],
+      ...extra,
+    }
+  }
+
+  test("Swedish is served at the root and English under /en, linked as translations", () => {
+    const english = post("en-hello", "en")
+    english.frontmatter = { ...english.frontmatter, translationOf: "hej" }
+    const blog = assembleBlog(
+      [post("hej", "sv", { links: ["/en/hello"] }), english],
+      [],
+      authors,
+      options,
+      known,
+      allExist
+    )
+    expect(blog.post("hej")?.url).toBe("/hej")
+    expect(blog.post("en-hello")?.url).toBe("/en/hello")
+    expect(blog.inLocale("sv").translation("hej")?.url).toBe("/en/hello")
+  })
+
+  test("an English post without the en- prefix, or a dangling translationOf, fails the build", () => {
+    const lost = post("en-lost", "en")
+    lost.frontmatter = { ...lost.frontmatter, translationOf: "saknas" }
+    expect(() =>
+      assembleBlog([post("hello", "en"), lost], [], authors, options, known, allExist)
+    ).toThrow(ContentError)
+    try {
+      assembleBlog([post("hello", "en"), lost], [], authors, options, known, allExist)
+    } catch (error) {
+      expect((error as ContentError).problems).toEqual([
+        'apps/blog/content/posts/hello.mdx: a post with locale "en" must be named "en-<slug>.mdx" (it is served at /en/<slug>)',
+        'apps/blog/content/posts/en-lost.mdx: translationOf "saknas" names no post',
+      ])
+    }
+  })
+
+  test("a link to an English post's file name, not its address, is broken", () => {
+    const blogInputs = [post("hej", "sv", { links: ["/en-hello"] }), post("en-hello", "en")]
+    expect(() => assembleBlog(blogInputs, [], authors, options, known, allExist)).toThrow(
+      'broken link "/en-hello"'
     )
   })
 })

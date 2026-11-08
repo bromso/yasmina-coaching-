@@ -6,12 +6,12 @@ import type { PostFrontmatter } from "@repo/content/schema"
 import { postFrontmatterSchema } from "@repo/content/schema"
 import { SITES, type SiteId, siteUrl } from "@repo/sites"
 import { authors } from "../../content/authors"
-import { assembleBlog, type BlogInput, nestingProblems } from "./blog-core"
+import { assembleBlog, type BlogInput, nestingProblems, siteLinkProblems } from "./blog-core"
 import { source } from "./source"
 
-/** Every author, by key: the cards' bylines. */
-export { authors } from "../../content/authors"
-export { BLOG_DESCRIPTION, knownPaths, nestingProblems } from "./blog-core"
+/** Every author, by key, with their bio in one language: the cards' bylines. */
+export { authorsFor } from "../../content/authors"
+export { knownPaths, nestingProblems } from "./blog-core"
 
 /** A post as fumadocs loaded it. */
 export type Page = ReturnType<typeof source.getPages>[number]
@@ -37,21 +37,23 @@ function fileOf(page: Page): string {
   return `apps/blog/content/posts/${page.path}`
 }
 
-function toInput(page: Page): BlogInput & { headings: string[] } {
+function toInput(page: Page): BlogInput & { headings: string[]; siteLinks: string[] } {
   // fumadocs keeps no raw source, so links and images are read from the file itself.
   const raw = readFileSync(join(process.cwd(), POSTS_DIR, page.path), "utf8")
   const frontmatter = frontmatterOf(page)
   const bodyImages = extractImages(raw)
   // cover.src is checked the same way as a body image — root-relative and present under public/.
   const images = frontmatter.cover ? [...bodyImages, frontmatter.cover.src] : bodyImages
+  const links = extractLinks(raw)
   return {
     file: fileOf(page),
     slug: page.slugs[0] ?? "",
     frontmatter,
     text: page.data.structuredData.contents.map((c) => c.content).join(" "),
-    links: extractLinks(raw),
+    links,
     images,
     headings: headingProblems(fileOf(page), raw, "post"),
+    siteLinks: siteLinkProblems(fileOf(page), links, Object.keys(SITES)),
   }
 }
 
@@ -59,8 +61,9 @@ function load(): Blog {
   const pages = source.getPages()
   const nested = nestingProblems(pages.map((page) => ({ file: fileOf(page), slugs: page.slugs })))
   const inputs = pages.map(toInput)
-  // Checked for every post, drafts too, like the frontmatter: an h1 is a mistake in any post.
-  const headings = inputs.flatMap((input) => input.headings)
+  // Checked for every post, drafts too, like the frontmatter: an h1 or a malformed `www:/` link is
+  // a mistake in any post.
+  const headings = inputs.flatMap((input) => [...input.headings, ...input.siteLinks])
   const ids = Object.keys(SITES) as SiteId[]
   const exists = (path: string) => existsSync(join(process.cwd(), PUBLIC_DIR, path))
   return assembleBlog(
@@ -80,13 +83,14 @@ function load(): Blog {
 }
 
 /**
- * Every post, validated once per process when this module loads. Every page imports it, so a
- * bad post — frontmatter, author, tag, slug, nesting, a broken internal link or a missing image —
- * fails `next build`.
+ * Every post, in both languages, validated once per process when this module loads. Every page
+ * imports it, so a bad post — frontmatter, author, tag, slug, language, translation, nesting, a
+ * broken internal link or a missing image — fails `next build`. Pages read one language through
+ * `blog.inLocale(locale)`.
  */
 export const blog: Blog = load()
 
-/** The fumadocs page behind a post (its compiled body component and table of contents). */
+/** The fumadocs page behind a post, by its slug (`en-<rest>` for an English post). */
 export function postPage(slug: string): Page | undefined {
   return source.getPage([slug])
 }

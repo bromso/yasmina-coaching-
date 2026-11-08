@@ -1,8 +1,9 @@
 import type { FeedEntry, FeedSite } from "@repo/content/feeds"
 import type { Blog } from "@repo/content/posts"
 import { siteUrl } from "@repo/sites"
+import { type BlogLocale, prefixFor, UI } from "@/content/ui"
 import { authors } from "../../content/authors"
-import { BLOG_DESCRIPTION } from "./blog-core"
+import { feedTitle } from "./feed-types"
 
 /** A `<code>…</code>` or `<pre>…</pre>` block, start to its own closing tag. A code sample may
  * show example markup — `<a href="/x">` as literal text — whose quotes are not escaped in HTML
@@ -79,19 +80,22 @@ export function feedEntries(blog: Blog, render: (slug: string) => string): FeedE
 }
 
 /**
- * The feed-level site info shared by the three feeds: `updated` is the max of `updated ?? date`
- * across every entry (not just the first — the newest-*dated* post need not be the most recently
- * *updated* one), or the current time with no posts yet.
+ * The feed-level site info shared by one language's three feeds: its title, description, path
+ * (`/en` for English) and language; `updated` is the max of `updated ?? date` across every entry
+ * (not just the first — the newest-*dated* post need not be the most recently *updated* one), or
+ * the current time with no posts yet.
  */
-export function feedSite(title: string, entries: FeedEntry[]): FeedSite {
+export function feedSite(locale: BlogLocale, entries: FeedEntry[]): FeedSite {
   const updated = entries.reduce<Date | undefined>((latest, { post }) => {
     const candidate = post.updated ?? post.date
     return !latest || candidate.getTime() > latest.getTime() ? candidate : latest
   }, undefined)
   return {
-    title,
-    description: BLOG_DESCRIPTION,
+    title: feedTitle(locale),
+    description: UI[locale].description,
     url: siteUrl("blog"),
+    path: prefixFor(locale) || undefined,
+    language: locale,
     updated: updated ?? new Date(),
   }
 }

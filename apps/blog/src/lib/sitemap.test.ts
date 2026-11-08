@@ -8,6 +8,12 @@ const authors: Record<string, Author> = {
   team: { name: "Team", bio: "Writes things.", avatar: "/authors/team.svg" },
 }
 
+const options = {
+  mode: "production" as const,
+  now: new Date("2026-10-07"),
+  rootLocale: "sv" as const,
+}
+
 function input(slug: string, overrides: Partial<PostInput["frontmatter"]> = {}): PostInput {
   return {
     file: `apps/blog/content/posts/${slug}.mdx`,
@@ -20,6 +26,7 @@ function input(slug: string, overrides: Partial<PostInput["frontmatter"]> = {}):
       author: "team",
       tags: ["guides"],
       type: "Blog Post",
+      locale: "sv",
       ...overrides,
     },
     text: "word",
@@ -27,7 +34,6 @@ function input(slug: string, overrides: Partial<PostInput["frontmatter"]> = {}):
   }
 }
 
-const options = { mode: "production" as const, now: new Date("2026-10-07") }
 const env = { SITE_DOMAIN: "example.com" }
 
 describe("blogSitemap", () => {
@@ -36,6 +42,7 @@ describe("blogSitemap", () => {
     const urls = blogSitemap(blog, env).map((entry) => entry.url)
     expect(urls).toEqual([
       "https://blog.example.com/",
+      "https://blog.example.com/en",
       "https://blog.example.com/hello",
       "https://blog.example.com/tags/guides",
       "https://blog.example.com/authors/team",
@@ -69,10 +76,10 @@ describe("blogSitemap", () => {
     expect(urls.some((url) => url.endsWith(".xml") || url.endsWith(".json"))).toBe(false)
   })
 
-  test("with zero published posts, only the home page", () => {
+  test("with zero published posts, only the two indexes", () => {
     const blog = createBlog([], authors, options)
     const urls = blogSitemap(blog, env).map((entry) => entry.url)
-    expect(urls).toEqual(["https://blog.example.com/"])
+    expect(urls).toEqual(["https://blog.example.com/", "https://blog.example.com/en"])
   })
 
   test("the home page's lastModified is the newest overall updated-or-date, not the build time", () => {
@@ -139,5 +146,50 @@ describe("blogSitemap", () => {
     )
     // The newest post is "post-24" (2026-01-25); none of these have an `updated`.
     expect(page2?.lastModified).toEqual(new Date(2026, 0, 25))
+  })
+})
+
+describe("blogSitemap in two languages", () => {
+  const english = (slug: string, overrides: Partial<PostInput["frontmatter"]> = {}) =>
+    input(slug, { locale: "en", tags: ["leadership"], ...overrides })
+
+  test("English posts, tags and authors sit under /en; each index has its own lastModified", () => {
+    const blog = createBlog(
+      [
+        input("hej", { date: new Date("2026-03-01"), updated: undefined }),
+        english("en-hello", { date: new Date("2026-05-01"), updated: undefined }),
+      ],
+      authors,
+      options
+    )
+    const entries = blogSitemap(blog, env)
+    const urls = entries.map((entry) => entry.url)
+    expect(urls).toContain("https://blog.example.com/en/hello")
+    expect(urls).toContain("https://blog.example.com/en/tags/leadership")
+    expect(urls).toContain("https://blog.example.com/en/authors/team")
+    expect(urls).not.toContain("https://blog.example.com/en-hello")
+    const at = (url: string) => entries.find((entry) => entry.url === url)?.lastModified
+    expect(at("https://blog.example.com/")).toEqual(new Date("2026-03-01"))
+    expect(at("https://blog.example.com/en")).toEqual(new Date("2026-05-01"))
+  })
+
+  test("the indexes and a translated post carry hreflang alternates", () => {
+    const blog = createBlog(
+      [input("hej"), english("en-hello", { translationOf: "hej" }), input("ensam")],
+      authors,
+      options
+    )
+    const entries = blogSitemap(blog, env)
+    const find = (url: string) => entries.find((entry) => entry.url === url)
+    expect(find("https://blog.example.com/")?.alternates?.languages).toEqual({
+      sv: "https://blog.example.com/",
+      en: "https://blog.example.com/en",
+      "x-default": "https://blog.example.com/",
+    })
+    expect(find("https://blog.example.com/hej")?.alternates?.languages).toEqual({
+      sv: "https://blog.example.com/hej",
+      en: "https://blog.example.com/en/hello",
+    })
+    expect(find("https://blog.example.com/ensam")?.alternates).toBeUndefined()
   })
 })

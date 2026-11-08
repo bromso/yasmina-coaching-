@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test"
 import type { Post } from "@repo/content/posts"
 import type { Author } from "@repo/content/schema"
 import { renderToStaticMarkup } from "react-dom/server"
+import { UI } from "@/content/ui"
 import { AuthorView } from "./author-view"
 import { PostListView } from "./post-list-view"
 import { PostView, type PostViewProps } from "./post-view"
@@ -21,6 +22,7 @@ function post(slug: string, overrides: Partial<Post> = {}): Post {
     author: "team",
     tags: ["guides"],
     type: "Blog Post",
+    locale: "sv",
     readingMinutes: 2,
     ...overrides,
   }
@@ -41,6 +43,9 @@ function renderPost(props: Partial<PostViewProps> = {}): string {
       neighbours={{}}
       related={[]}
       authors={authors}
+      ui={UI.en}
+      prefix=""
+      bookHref="https://www.example.com/book"
       {...props}
     />
   )
@@ -56,7 +61,7 @@ function jsonLdScripts(html: string): string[] {
 describe("PostListView", () => {
   test("shows an empty state with no posts", () => {
     const html = renderToStaticMarkup(
-      <PostListView posts={[]} page={1} pages={1} authors={authors} />
+      <PostListView posts={[]} page={1} pages={1} authors={authors} ui={UI.en} prefix="" />
     )
     expect(html).toContain("No posts yet.")
     expect(html).not.toContain('data-slot="post-card"')
@@ -64,7 +69,14 @@ describe("PostListView", () => {
 
   test("marks the first card featured on page 1, and only that one", () => {
     const html = renderToStaticMarkup(
-      <PostListView posts={[post("a"), post("b")]} page={1} pages={1} authors={authors} />
+      <PostListView
+        posts={[post("a"), post("b")]}
+        page={1}
+        pages={1}
+        authors={authors}
+        ui={UI.en}
+        prefix=""
+      />
     )
     expect(html.match(/data-featured/g)).toHaveLength(1)
     expect(html.indexOf("data-featured")).toBeLessThan(html.indexOf("Post b"))
@@ -72,14 +84,14 @@ describe("PostListView", () => {
 
   test("features nothing past page 1", () => {
     const html = renderToStaticMarkup(
-      <PostListView posts={[post("a")]} page={2} pages={2} authors={authors} />
+      <PostListView posts={[post("a")]} page={2} pages={2} authors={authors} ui={UI.en} prefix="" />
     )
     expect(html).not.toContain("data-featured")
   })
 
   test("links the cards to their post, tags and author", () => {
     const html = renderToStaticMarkup(
-      <PostListView posts={[post("a")]} page={1} pages={1} authors={authors} />
+      <PostListView posts={[post("a")]} page={1} pages={1} authors={authors} ui={UI.en} prefix="" />
     )
     expect(html).toContain('href="/a"')
     expect(html).toContain('href="/tags/guides"')
@@ -89,7 +101,14 @@ describe("PostListView", () => {
 
   test("card titles are h2s under the page's h1", () => {
     const html = renderToStaticMarkup(
-      <PostListView posts={[post("a"), post("b")]} page={1} pages={1} authors={authors} />
+      <PostListView
+        posts={[post("a"), post("b")]}
+        page={1}
+        pages={1}
+        authors={authors}
+        ui={UI.en}
+        prefix=""
+      />
     )
     expect(html.match(/<h1/g)).toHaveLength(1)
     expect(html.match(/<h2[^>]*><a href="\/(a|b)"/g)).toHaveLength(2)
@@ -98,7 +117,14 @@ describe("PostListView", () => {
   test("an author without an avatar gets initials, not an empty image", () => {
     const noAvatar = { team: { name: "The team", bio: "Bio.", avatar: "" } }
     const html = renderToStaticMarkup(
-      <PostListView posts={[post("a")]} page={1} pages={1} authors={noAvatar} />
+      <PostListView
+        posts={[post("a")]}
+        page={1}
+        pages={1}
+        authors={noAvatar}
+        ui={UI.en}
+        prefix=""
+      />
     )
     expect(html).not.toContain("<img")
     expect(html).toContain("TT")
@@ -106,7 +132,7 @@ describe("PostListView", () => {
 
   test("has no pagination with one page", () => {
     const html = renderToStaticMarkup(
-      <PostListView posts={[post("a")]} page={1} pages={1} authors={authors} />
+      <PostListView posts={[post("a")]} page={1} pages={1} authors={authors} ui={UI.en} prefix="" />
     )
     expect(html).not.toContain("Newer posts")
     expect(html).not.toContain("Older posts")
@@ -114,7 +140,7 @@ describe("PostListView", () => {
 
   test("page 1 of 3 links to older posts only", () => {
     const html = renderToStaticMarkup(
-      <PostListView posts={[post("a")]} page={1} pages={3} authors={authors} />
+      <PostListView posts={[post("a")]} page={1} pages={3} authors={authors} ui={UI.en} prefix="" />
     )
     expect(html).not.toContain("Newer posts")
     expect(html).toMatch(/href="\/page\/2"[^>]*>Older posts/)
@@ -122,7 +148,7 @@ describe("PostListView", () => {
 
   test("page 2 links newer posts to / and older to page 3", () => {
     const html = renderToStaticMarkup(
-      <PostListView posts={[post("a")]} page={2} pages={3} authors={authors} />
+      <PostListView posts={[post("a")]} page={2} pages={3} authors={authors} ui={UI.en} prefix="" />
     )
     expect(html).toMatch(/href="\/"[^>]*>Newer posts/)
     expect(html).toMatch(/href="\/page\/3"[^>]*>Older posts/)
@@ -130,7 +156,7 @@ describe("PostListView", () => {
 
   test("the last page links newer posts to the page before and has no older link", () => {
     const html = renderToStaticMarkup(
-      <PostListView posts={[post("a")]} page={3} pages={3} authors={authors} />
+      <PostListView posts={[post("a")]} page={3} pages={3} authors={authors} ui={UI.en} prefix="" />
     )
     expect(html).toMatch(/href="\/page\/2"[^>]*>Newer posts/)
     expect(html).not.toContain("Older posts")
@@ -140,17 +166,23 @@ describe("PostListView", () => {
 describe("TagView and AuthorView", () => {
   test("a tag page is headed with the tag and features nothing", () => {
     const html = renderToStaticMarkup(
-      <TagView tag="guides" posts={[post("a"), post("b")]} authors={authors} />
+      <TagView tag="guides" posts={[post("a"), post("b")]} authors={authors} ui={UI.en} prefix="" />
     )
     expect(html).toContain("<h1")
-    expect(html).toContain("Posts tagged guides")
+    expect(html).toContain("Posts about guides")
     expect(html).not.toContain("data-featured")
     expect(html).toContain('href="/a"')
   })
 
   test("an author page is headed with the author's name and bio", () => {
     const html = renderToStaticMarkup(
-      <AuthorView author={authors.team as Author} posts={[post("a")]} authors={authors} />
+      <AuthorView
+        author={authors.team as Author}
+        posts={[post("a")]}
+        authors={authors}
+        ui={UI.en}
+        prefix=""
+      />
     )
     expect(html).toMatch(/<h1[^>]*>The team<\/h1>/)
     expect(html).toContain("The people building this.")
@@ -204,16 +236,93 @@ describe("PostView", () => {
 
   test("hides the related row when there are no related posts", () => {
     const html = renderPost({ related: [] })
-    expect(html).not.toContain("Related posts")
+    expect(html).not.toContain("Read on")
   })
 
   test("shows related posts as cards, none featured", () => {
     const html = renderPost({ related: [post("r1"), post("r2")] })
-    expect(html).toContain("Related posts")
+    expect(html).toContain("Read on")
     expect(html.match(/data-slot="post-card"/g)).toHaveLength(2)
     // Under the section's h2, the cards' titles are h3s.
-    expect(html).toMatch(/<h2[^>]*>Related posts<\/h2>/)
+    expect(html).toMatch(/<h2[^>]*>Read on<\/h2>/)
     expect(html.match(/<h3[^>]*><a href="\/r[12]"/g)).toHaveLength(2)
     expect(html).not.toContain("data-featured")
+  })
+})
+
+describe("the coaching look and the two languages", () => {
+  test("the index opens on the sun hero; a further page and a tag page do not", () => {
+    const index = renderToStaticMarkup(
+      <PostListView posts={[post("a")]} page={1} pages={2} authors={authors} ui={UI.sv} prefix="" />
+    )
+    expect(index).toMatch(/<h1[^>]*>Anteckningar om ledarskap<\/h1>/)
+    expect(index).toContain("bg-sun")
+    expect(index).toContain("rounded-4xl")
+    const page2 = renderToStaticMarkup(
+      <PostListView posts={[post("a")]} page={2} pages={2} authors={authors} ui={UI.sv} prefix="" />
+    )
+    expect(page2).not.toContain("bg-sun")
+    expect(page2).toContain("Inlägg, sida 2")
+  })
+
+  test("Swedish cards read Swedish; English cards link tags and pages under /en", () => {
+    const sv = renderToStaticMarkup(
+      <PostListView posts={[post("a")]} page={1} pages={2} authors={authors} ui={UI.sv} prefix="" />
+    )
+    expect(sv).toContain("2 min läsning")
+    expect(sv).toContain("Äldre inlägg")
+    const en = renderToStaticMarkup(
+      <PostListView
+        posts={[post("en-a", { url: "/en/a", locale: "en" })]}
+        page={1}
+        pages={2}
+        authors={authors}
+        ui={UI.en}
+        prefix="/en"
+      />
+    )
+    expect(en).toContain('href="/en/a"')
+    expect(en).toContain('href="/en/tags/guides"')
+    expect(en).toMatch(/href="\/en\/page\/2"[^>]*>Older posts/)
+  })
+
+  test("a post closes with the booking call to action and links its author under its prefix", () => {
+    const html = renderPost({ ui: UI.sv, prefix: "" })
+    expect(html).toContain("Boka ett kostnadsfritt samtal")
+    expect(html).toContain('href="https://www.example.com/book"')
+    const en = renderPost({
+      post: post("en-hello", { url: "/en/hello", locale: "en" }),
+      prefix: "/en",
+    })
+    expect(en).toContain('href="/en/authors/team"')
+  })
+
+  test("a media cover is a WebP-first picture in a rounded frame", () => {
+    const html = renderPost({
+      post: post("hello", { cover: { src: "/media/session-lounge-800.jpg", alt: "Ett samtal" } }),
+    })
+    expect(html).toContain('data-slot="post-cover"')
+    expect(html).toContain('srcSet="/media/session-lounge-800.webp"')
+    expect(html).toContain('src="/media/session-lounge-800.jpg"')
+    expect(html).toContain('width="800" height="597"')
+    expect(html).toContain('alt="Ett samtal"')
+  })
+
+  test("the BlogPosting JSON-LD names the post's language", () => {
+    const data = JSON.parse(jsonLdScripts(renderPost())[0] ?? "{}")
+    expect(data.inLanguage).toBe("sv")
+  })
+
+  test("a www: link in the body resolves to www's address", () => {
+    function LinkingBody({ components }: { components?: Record<string, unknown> }) {
+      const A = (components?.a ?? "a") as "a"
+      return (
+        <p>
+          <A href="www:/book">Boka</A>
+        </p>
+      )
+    }
+    const html = renderPost({ Body: LinkingBody })
+    expect(html).toContain('href="http://www.brand.localhost:3000/book"')
   })
 })
