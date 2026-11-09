@@ -49,6 +49,16 @@ export function siteDomain(env: Env = process.env): string {
 }
 
 /**
+ * SITE_HOST_PREFIX, lowercase letters, digits and hyphens only (anything else is ignored): put in
+ * front of every app id on a real domain, so a staging stack can share a parent domain with
+ * other things (`yas-` → `https://yas-www.example.com`). Never applied to `.localhost`.
+ */
+function hostPrefix(env: Env): string {
+  const prefix = env.SITE_HOST_PREFIX?.trim().toLowerCase() ?? ""
+  return /^[a-z0-9-]*$/.test(prefix) ? prefix : ""
+}
+
+/**
  * `http://<id>.brand.localhost:<port>` until SITE_DOMAIN is set; a `.localhost` domain keeps the
  * dev form, anything else is `https://<id>.<domain>`. A leading scheme or dot and trailing slashes
  * are dropped, so `https://brand.com/` and `.brand.com` both mean `brand.com`. Never throws: `next build` always runs in
@@ -63,7 +73,7 @@ export function siteUrl(id: SiteId, env: Env = process.env): string {
   const host = domain ?? DEV_DOMAIN
   return host.endsWith(".localhost") || host === "localhost"
     ? `http://${id}.${host}:${SITES[id].port}`
-    : `https://${id}.${host}`
+    : `https://${hostPrefix(env)}${id}.${host}`
 }
 
 const NAV: readonly SiteId[] = ["app", "docs", "blog", "help", "jobs"]

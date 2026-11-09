@@ -1,0 +1,51 @@
+[variables]
+# Change these before importing. Staging: every app at https://<prefix><app>.<domain>.
+site_domain = "undefined.guru"
+host_prefix = "yas-"
+admin_email = "yasmina@yasminapetersson.se"
+git_ref = "feature/blog"
+
+[config]
+env = [
+  "GIT_REF=${git_ref}",
+  "SITE_DOMAIN=${site_domain}",
+  "SITE_HOST_PREFIX=${host_prefix}",
+  "COOKIE_DOMAIN=.${site_domain}",
+  "AUTH_URL=https://${host_prefix}auth.${site_domain}",
+  "APP_URL=https://${host_prefix}app.${site_domain}",
+  "ACCOUNT_URL=https://${host_prefix}account.${site_domain}",
+  "API_SERVICE_TOKEN=${hash:32}",
+  "TWO_FACTOR_ENCRYPTION_KEY=${base64:32}",
+  "MAIL_PROVIDER=log",
+  "MAIL_FROM=Yasmina Petersson <no-reply@${site_domain}>",
+  "RESEND_API_KEY=",
+  "BOOKING_EMAIL=${admin_email}",
+  "SUPPORT_EMAIL=${admin_email}",
+  "SUPERADMIN_EMAILS=${admin_email}",
+]
+
+
+[[config.domains]]
+serviceName = "www"
+port = 3000
+host = "${host_prefix}www.${site_domain}"
+
+[[config.domains]]
+serviceName = "blog"
+port = 3009
+host = "${host_prefix}blog.${site_domain}"
+
+[[config.domains]]
+serviceName = "auth"
+port = 3002
+host = "${host_prefix}auth.${site_domain}"
+
+[[config.domains]]
+serviceName = "app"
+port = 3001
+host = "${host_prefix}app.${site_domain}"
+
+[[config.domains]]
+serviceName = "account"
+port = 3003
+host = "${host_prefix}account.${site_domain}"

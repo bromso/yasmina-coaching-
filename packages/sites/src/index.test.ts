@@ -34,6 +34,17 @@ describe("siteUrl", () => {
     expect(siteUrl("auth", { SITE_DOMAIN: "acme.com" })).toBe("https://auth.acme.com")
     expect(siteUrl("auth", { SITE_DOMAIN: " acme.com/ " })).toBe("https://auth.acme.com")
   })
+  test("SITE_HOST_PREFIX goes in front of the app id on a real domain only", () => {
+    const env = { SITE_DOMAIN: "undefined.guru", SITE_HOST_PREFIX: "yas-" }
+    expect(siteUrl("www", env)).toBe("https://yas-www.undefined.guru")
+    expect(siteUrl("auth", env)).toBe("https://yas-auth.undefined.guru")
+    expect(siteUrl("www", { SITE_DOMAIN: "acme.localhost", SITE_HOST_PREFIX: "yas-" })).toBe(
+      "http://www.acme.localhost:3000"
+    )
+    expect(siteUrl("www", { SITE_DOMAIN: "acme.com", SITE_HOST_PREFIX: "a.b/" })).toBe(
+      "https://www.acme.com"
+    )
+  })
   test("blog: dev host with its port, and https in production", () => {
     expect(siteUrl("blog", {})).toBe("http://blog.brand.localhost:3009")
     expect(siteUrl("blog", { SITE_DOMAIN: "example.com" })).toBe("https://blog.example.com")
