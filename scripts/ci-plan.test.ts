@@ -378,13 +378,13 @@ test("the shared per-app files are byte-identical across the Next apps", async (
       apps.filter((a) => a !== "account")
     )
   ).toBe(1)
-  // auth, app and account read their status pages in the request's language (i18n G1, G2); the
-  // static apps keep theirs in English.
+  // auth, app and account read their status pages in the request's language (i18n G1, G2); www is
+  // Swedish-only with its own Swedish copy; the other static apps keep theirs in English.
   const translated = ["auth", "app", "account"]
   expect(
     await same(
       "src/app/error.tsx",
-      apps.filter((a) => !translated.includes(a))
+      apps.filter((a) => !translated.includes(a) && a !== "www")
     )
   ).toBe(1)
   // The translated copies differ only in their namespace (`auth.status`, `app.status`,
@@ -403,7 +403,11 @@ test("the shared per-app files are byte-identical across the Next apps", async (
       'reportError(error, { kind: "boundary"'
     )
   }
-  expect(await same("src/app/global-error.tsx")).toBe(1)
+  // www's differs only in `lang="sv"` (it is the Swedish-only app); normalize that before comparing.
+  const globalErrors = await Promise.all(
+    apps.map((a) => Bun.file(`${ROOT}/apps/${a}/src/app/global-error.tsx`).text())
+  )
+  expect(new Set(globalErrors.map((text) => text.replace('lang="sv"', 'lang="en"'))).size).toBe(1)
   // Each app's telemetry route differs only in its `app:` literal; normalize that before comparing.
   const telemetryRoutes = await Promise.all(
     apps.map((a) => Bun.file(`${ROOT}/apps/${a}/src/app/api/telemetry/route.ts`).text())

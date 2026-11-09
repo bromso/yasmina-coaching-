@@ -27,9 +27,9 @@ type BrandProps = {
 /** The site's brand link: mark + name. A plain anchor, so it works across subdomain apps. */
 export function Brand({ name = BRAND_NAME, href, className }: BrandProps) {
   return (
-    <a href={href} className={cn("flex items-center gap-2 font-semibold", className)}>
+    <a href={href} className={cn("flex min-w-0 items-center gap-2 font-semibold", className)}>
       <BrandMark />
-      {name}
+      <span className="truncate">{name}</span>
     </a>
   )
 }

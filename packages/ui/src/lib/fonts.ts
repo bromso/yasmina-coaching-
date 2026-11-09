@@ -1,4 +1,4 @@
-import { Inter, JetBrains_Mono } from "next/font/google"
+import { Fraunces, Inter, JetBrains_Mono } from "next/font/google"
 
 /**
  * Canonical fonts for every app in the monorepo — the single point of truth.
@@ -27,4 +27,18 @@ export const fontMono = JetBrains_Mono({
   variable: "--font-mono",
   display: "swap",
   preload: false,
+})
+
+/**
+ * The editorial display serif, for the apps whose headlines want one (`apps/www`). Opt-in: an
+ * app adds `fontDisplay.variable` to its `<body>` and points its own `--display-family` at
+ * `--font-display`; the apps that never import it ship no extra font. Fraunces is a variable
+ * font: `opsz` tunes the contrast to the rendered size, `SOFT` rounds the terminals a little.
+ */
+export const fontDisplay = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+  preload: true,
+  axes: ["opsz", "SOFT"],
 })

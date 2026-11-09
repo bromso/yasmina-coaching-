@@ -10,6 +10,14 @@ import {
 import { AccountReset, type AccountResetProps } from "./templates/account-reset"
 import { AccountSuspended, type AccountSuspendedProps } from "./templates/account-suspended"
 import { AccountUnsuspended, type AccountUnsuspendedProps } from "./templates/account-unsuspended"
+import { BookingCancelled, type BookingCancelledProps } from "./templates/booking-cancelled"
+import { BookingConfirmed, type BookingConfirmedProps } from "./templates/booking-confirmed"
+import { BookingDeclined, type BookingDeclinedProps } from "./templates/booking-declined"
+import { BookingNew, type BookingNewProps } from "./templates/booking-new"
+import {
+  BookingRequestReceived,
+  type BookingRequestReceivedProps,
+} from "./templates/booking-request-received"
 import { DataExportReady, type DataExportReadyProps } from "./templates/data-export-ready"
 import { EmailChangeConfirm, type EmailChangeConfirmProps } from "./templates/email-change-confirm"
 import {
@@ -187,6 +195,38 @@ export const emails = {
       translatorFor(locale, "email")("supportReceived.subject", { reference: props.reference }),
       <SupportReceived {...props} locale={locale} />
     ),
+  // The booking mails: apps/api passes every date pre-formatted, the templates never format one.
+  bookingConfirmed: (props: BookingConfirmedProps, locale: Locale = DEFAULT_LOCALE) =>
+    rendered(
+      translatorFor(locale, "email")("bookingConfirmed.subject", { reference: props.reference }),
+      <BookingConfirmed {...props} locale={locale} />
+    ),
+  bookingRequestReceived: (props: BookingRequestReceivedProps, locale: Locale = DEFAULT_LOCALE) =>
+    rendered(
+      translatorFor(locale, "email")("bookingRequestReceived.subject", {
+        reference: props.reference,
+      }),
+      <BookingRequestReceived {...props} locale={locale} />
+    ),
+  bookingDeclined: (props: BookingDeclinedProps, locale: Locale = DEFAULT_LOCALE) =>
+    rendered(
+      translatorFor(locale, "email")("bookingDeclined.subject", { reference: props.reference }),
+      <BookingDeclined {...props} locale={locale} />
+    ),
+  bookingCancelled: (props: BookingCancelledProps, locale: Locale = DEFAULT_LOCALE) =>
+    rendered(
+      translatorFor(locale, "email")("bookingCancelled.subject", { reference: props.reference }),
+      <BookingCancelled {...props} locale={locale} />
+    ),
+  bookingNew: (props: BookingNewProps, locale: Locale = DEFAULT_LOCALE) =>
+    rendered(
+      translatorFor(locale, "email")("bookingNew.subject", {
+        reference: props.reference,
+        offeringLabel: props.offeringLabel,
+        kind: props.kind,
+      }),
+      <BookingNew {...props} locale={locale} />
+    ),
   emailChangeConfirm: (props: EmailChangeConfirmProps, locale: Locale = DEFAULT_LOCALE) =>
     rendered(
       translatorFor(locale, "email")("emailChangeConfirm.subject"),
@@ -269,6 +309,32 @@ export {
   type AccountUnsuspendedProps,
   accountUnsuspendedSubject,
 } from "./templates/account-unsuspended"
+export {
+  BookingCancelled,
+  type BookingCancelledProps,
+  bookingCancelledSubject,
+} from "./templates/booking-cancelled"
+export {
+  BookingConfirmed,
+  type BookingConfirmedProps,
+  bookingConfirmedSubject,
+} from "./templates/booking-confirmed"
+export {
+  BookingDeclined,
+  type BookingDeclinedProps,
+  bookingDeclinedSubject,
+} from "./templates/booking-declined"
+export {
+  type BookingKind,
+  BookingNew,
+  type BookingNewProps,
+  bookingNewSubject,
+} from "./templates/booking-new"
+export {
+  BookingRequestReceived,
+  type BookingRequestReceivedProps,
+  bookingRequestReceivedSubject,
+} from "./templates/booking-request-received"
 export {
   DataExportReady,
   type DataExportReadyProps,

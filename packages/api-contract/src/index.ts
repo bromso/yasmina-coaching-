@@ -98,6 +98,37 @@ import {
   MockChangeSchema,
 } from "./billing"
 import {
+  ADMIN_BOOKING_CONFIRM_ERRORS,
+  AdminAvailabilityBlockSchema,
+  AdminAvailabilityResultSchema,
+  AdminAvailabilitySetSchema,
+  AdminBookingCalendarResultSchema,
+  AdminBookingCalendarSchema,
+  AdminBookingConfirmSchema,
+  AdminBookingDecideSchema,
+  AdminBookingPendingResultSchema,
+  AdminBookingSchema,
+  AdminGroupEventCreateResultSchema,
+  AdminGroupEventCreateSchema,
+  BOOKING_CANCEL_ERRORS,
+  BOOKING_CREATE_ERRORS,
+  BOOKING_ERRORS,
+  BOOKING_MANAGE_ERRORS,
+  BOOKING_RESERVE_ERRORS,
+  BookingAvailabilityResultSchema,
+  BookingAvailabilitySchema,
+  BookingCancelSchema,
+  BookingCreateResultSchema,
+  BookingCreateSchema,
+  BookingGroupEventsSchema,
+  BookingManageResultSchema,
+  BookingManageSchema,
+  BookingRequestResultSchema,
+  BookingRequestSchema,
+  BookingReserveSchema,
+  GroupEventsResultSchema,
+} from "./booking"
+import {
   EMAIL_CHANGE_CODE_REASON,
   EMAIL_CHANGE_LINK_INVALID_MESSAGE,
   EMAIL_CHANGE_RATE_MESSAGE,
@@ -225,6 +256,7 @@ export * from "./analytics"
 export * from "./api-keys"
 export * from "./auth"
 export * from "./billing"
+export * from "./booking"
 export * from "./dev"
 export * from "./email-change"
 export * from "./files"
@@ -1410,6 +1442,66 @@ export const contract = {
       .input(SupportCreateSchema)
       .output(SupportCreateResultSchema),
   },
+  // The coaching site's booking calendar (see docs/architecture/booking.md). Service token only,
+  // no session: a visitor books with their email; a token link in the confirmation mail manages
+  // the booking afterwards. Every write runs the per-client, per-address and api-wide limiters.
+  booking: {
+    availability: oc
+      .route({
+        method: "GET",
+        path: "/booking/availability",
+        summary: "Free slots for an instant offering, per day",
+      })
+      .input(BookingAvailabilitySchema)
+      .output(BookingAvailabilityResultSchema),
+    groupEvents: oc
+      .route({
+        method: "GET",
+        path: "/booking/group-events",
+        summary: "Upcoming group coaching events with seats left",
+      })
+      .input(BookingGroupEventsSchema)
+      .output(GroupEventsResultSchema),
+    book: oc
+      .route({ method: "POST", path: "/booking", summary: "Book a session or a programme" })
+      .errors(BOOKING_CREATE_ERRORS)
+      .input(BookingCreateSchema)
+      .output(BookingCreateResultSchema),
+    reserve: oc
+      .route({ method: "POST", path: "/booking/group", summary: "Reserve seats at group events" })
+      .errors(BOOKING_RESERVE_ERRORS)
+      .input(BookingReserveSchema)
+      .output(BookingCreateResultSchema),
+    request: oc
+      .route({
+        method: "POST",
+        path: "/booking/request",
+        summary: "Request a workshop, programme or keynote",
+      })
+      .errors(BOOKING_ERRORS)
+      .input(BookingRequestSchema)
+      .output(BookingRequestResultSchema),
+    manage: {
+      get: oc
+        .route({
+          method: "GET",
+          path: "/booking/manage/{token}",
+          summary: "The bookings behind a manage link",
+        })
+        .errors(BOOKING_MANAGE_ERRORS)
+        .input(BookingManageSchema)
+        .output(BookingManageResultSchema),
+      cancel: oc
+        .route({
+          method: "POST",
+          path: "/booking/manage/{token}/cancel",
+          summary: "Cancel one booking from its manage link",
+        })
+        .errors(BOOKING_CANCEL_ERRORS)
+        .input(BookingCancelSchema)
+        .output(OkSchema),
+    },
+  },
   // The jobs site's apply form. Service token only, no session; the CV is multipart and private
   // (never served by `files.get`).
   jobs: {
@@ -1667,6 +1759,116 @@ export const contract = {
         .errors(ADMIN_ERRORS)
         .input(AdminIdSchema)
         .output(z.file()),
+    },
+    bookings: {
+      calendar: oc
+        .route({
+          method: "GET",
+          path: "/admin/bookings/calendar",
+          summary: "Bookings, group events and blocked days in a date range",
+        })
+        .errors(ADMIN_ERRORS)
+        .input(AdminBookingCalendarSchema)
+        .output(AdminBookingCalendarResultSchema),
+      pending: oc
+        .route({
+          method: "GET",
+          path: "/admin/bookings/pending",
+          summary: "Requests waiting for a decision, oldest first",
+        })
+        .errors(ADMIN_ERRORS)
+        .input(empty)
+        .output(AdminBookingPendingResultSchema),
+      get: oc
+        .route({ method: "GET", path: "/admin/bookings/{id}", summary: "One booking" })
+        .errors(ADMIN_ERRORS)
+        .input(AdminIdSchema)
+        .output(AdminBookingSchema),
+      confirm: oc
+        .route({
+          method: "POST",
+          path: "/admin/bookings/{id}/confirm",
+          summary: "Confirm a request at a chosen time",
+        })
+        .errors({ ...ADMIN_ERRORS, ...ADMIN_BOOKING_CONFIRM_ERRORS })
+        .input(AdminBookingConfirmSchema)
+        .output(OkSchema),
+      decline: oc
+        .route({
+          method: "POST",
+          path: "/admin/bookings/{id}/decline",
+          summary: "Decline a request",
+        })
+        .errors(ADMIN_ERRORS)
+        .input(AdminBookingDecideSchema)
+        .output(OkSchema),
+      cancel: oc
+        .route({
+          method: "POST",
+          path: "/admin/bookings/{id}/cancel",
+          summary: "Cancel a confirmed booking",
+        })
+        .errors(ADMIN_ERRORS)
+        .input(AdminBookingDecideSchema)
+        .output(OkSchema),
+      availability: {
+        get: oc
+          .route({
+            method: "GET",
+            path: "/admin/bookings/availability",
+            summary: "Weekly availability rules and blocked days",
+          })
+          .errors(ADMIN_ERRORS)
+          .input(empty)
+          .output(AdminAvailabilityResultSchema),
+        set: oc
+          .route({
+            method: "PUT",
+            path: "/admin/bookings/availability",
+            summary: "Replace the weekly availability rules",
+          })
+          .errors(ADMIN_ERRORS)
+          .input(AdminAvailabilitySetSchema)
+          .output(OkSchema),
+        block: oc
+          .route({
+            method: "POST",
+            path: "/admin/bookings/availability/blocks",
+            summary: "Block a range of days",
+          })
+          .errors(ADMIN_ERRORS)
+          .input(AdminAvailabilityBlockSchema)
+          .output(OkSchema),
+        unblock: oc
+          .route({
+            method: "DELETE",
+            path: "/admin/bookings/availability/blocks/{id}",
+            summary: "Remove a blocked range",
+          })
+          .errors(ADMIN_ERRORS)
+          .input(AdminIdSchema)
+          .output(OkSchema),
+      },
+      groupEvents: {
+        create: oc
+          .route({
+            method: "POST",
+            path: "/admin/bookings/group-events",
+            summary: "Schedule a group event, optionally as a weekly series",
+          })
+          .errors({ ...ADMIN_ERRORS, ...ADMIN_BOOKING_CONFIRM_ERRORS })
+          .input(AdminGroupEventCreateSchema)
+          .output(AdminGroupEventCreateResultSchema),
+        cancel: oc
+          .route({
+            method: "POST",
+            path: "/admin/bookings/group-events/{id}/cancel",
+            summary: "Cancel a group event and tell its seat holders",
+          })
+          .errors(ADMIN_ERRORS)
+          .input(AdminBookingDecideSchema)
+          .output(OkSchema),
+      },
     },
     telemetry: {
       errors: oc

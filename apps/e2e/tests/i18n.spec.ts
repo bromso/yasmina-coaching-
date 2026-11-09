@@ -22,16 +22,6 @@ async function switchToSwedish(page: Page) {
 }
 
 /**
- * Picks Svenska in a static app's header switcher. Unlike `switchToSwedish`, the page itself
- * never changes language (the static apps stay static, `○`) — only the saved cookie and the
- * confirmation note do.
- */
-async function pickSwedishStatic(page: Page) {
-  await localeSelect(page).selectOption("sv")
-  await localeSubmit(page).click()
-}
-
-/**
  * Personal info's Language card: a second control sharing the header switcher's "Language" /
  * "Språk" accessible name, told apart by its own submit label — "Save language" / "Spara språk"
  * (`account.language.submit`), never "Change" / "Byt" (the header's `account.locale.submit`).
@@ -148,23 +138,37 @@ test("picking Svenska switches the page, carries to sign-up mail, and the saved 
   await expect(page.getByRole("heading", { name: "Personuppgifter", exact: true })).toBeVisible()
   await expect(page.getByRole("link", { name: "Personuppgifter", exact: true })).toBeVisible()
 
-  // www: an anonymous visitor's static switcher never changes the page itself (the static apps
-  // stay static), but the choice is saved on the shared cookie domain, so a fresh visit of the
-  // sign-in link already arrives Swedish.
+  // www: Swedish by default; the switcher (in the navigation's panel, behind "Utforska") writes
+  // the shared cookie and reloads, and the page comes back in English — then back in Swedish.
+  // The choice sits on the shared cookie domain, so a fresh visit of the sign-in link already
+  // arrives Swedish.
   const visitor = await browser.newContext()
   try {
     const tab = await visitor.newPage()
     await tab.goto(URLS.www)
-    await expect(tab.locator("html")).toHaveAttribute("lang", "en")
-
-    await pickSwedishStatic(tab)
-    await expect(tab.locator("html")).toHaveAttribute("lang", "en")
+    await expect(tab.locator("html")).toHaveAttribute("lang", "sv")
     await expect(
-      tab.getByRole("status").filter({ hasText: "Saved — signed-in pages will use it." })
+      tab.getByRole("heading", { level: 1, name: "Led så som du själv skulle vilja bli ledd" })
     ).toBeVisible()
 
-    // The footer has its own "Sign in" link too — the header's is the one next to the switcher.
-    await tab.getByRole("banner").getByRole("link", { name: "Sign in", exact: true }).click()
+    await tab.getByRole("button", { name: "Utforska" }).click()
+    await localeSelect(tab).selectOption("en")
+    await localeSubmit(tab).click()
+    await expect(tab.locator("html")).toHaveAttribute("lang", "en")
+    await expect(
+      tab.getByRole("heading", { level: 1, name: "Lead the way you would want to be led" })
+    ).toBeVisible()
+    await expect(tab.getByRole("button", { name: "Explore", exact: true })).toBeVisible()
+
+    await tab.getByRole("button", { name: "Explore", exact: true }).click()
+    await localeSelect(tab).selectOption("sv")
+    await localeSubmit(tab).click()
+    await expect(tab.locator("html")).toHaveAttribute("lang", "sv")
+    await expect(tab.getByRole("button", { name: "Utforska", exact: true })).toBeVisible()
+
+    // The footer has its own "Logga in" link too — the header's is the one next to the switcher.
+    await tab.getByRole("button", { name: "Utforska" }).click()
+    await tab.getByRole("banner").getByRole("link", { name: "Logga in", exact: true }).click()
     await expect(tab).toHaveURL(`${URLS.auth}/login`)
     await expect(tab.locator("html")).toHaveAttribute("lang", "sv")
     await expect(tab.getByText("Välkommen tillbaka", { exact: true })).toBeVisible()

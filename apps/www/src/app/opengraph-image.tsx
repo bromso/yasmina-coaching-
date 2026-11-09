@@ -7,5 +7,8 @@ export const contentType = "image/png"
 export const alt = BRAND_NAME
 
 export default function Image() {
-  return ogImage({ title: BRAND_NAME, subtitle: "Build faster with this monorepo template" })
+  return ogImage({
+    title: BRAND_NAME,
+    subtitle: "Ledarskapscoaching för människor som leder människor",
+  })
 }

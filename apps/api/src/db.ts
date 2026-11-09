@@ -12,6 +12,7 @@ import { apiKeysQueries } from "./queries/api-keys"
 import { applicationsQueries } from "./queries/applications"
 import { auditQueries } from "./queries/audit"
 import { billingQueries } from "./queries/billing"
+import { bookingQueries } from "./queries/booking"
 import { exportsQueries } from "./queries/exports"
 import { identitiesQueries } from "./queries/identities"
 import { invitationsQueries } from "./queries/invitations"
@@ -72,6 +73,7 @@ function queries(sql: SQL, afterCommit: AfterCommit = runNow) {
     webhooks: webhooksQueries(sql),
     notifications: notificationsQueries(sql),
     notificationPreferences: notificationPreferencesQueries(sql),
+    booking: bookingQueries(sql),
   }
 }
 

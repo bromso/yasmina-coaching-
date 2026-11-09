@@ -18,6 +18,11 @@ const nextConfig: NextConfig = {
     "@repo/telemetry",
   ],
   output: "standalone",
+  // The consent banner's and the language switcher's cookie domain, fixed at `next build` as it
+  // was while www was static: the layout now renders per request, and a plain
+  // `process.env.COOKIE_DOMAIN` there would read the runtime env instead (empty in the Compose
+  // runner), silently turning the shared cookie host-only. See the README's Cookie consent.
+  env: { BUILD_COOKIE_DOMAIN: process.env.COOKIE_DOMAIN ?? "" },
   // Empty turbopack config to allow Serwist webpack config alongside Turbopack
   turbopack: {},
   // Enable source maps for bundle analysis
@@ -75,6 +80,10 @@ const withSerwist = withSerwistInit({
   // Serwist would reload the page on every "online" event: a blip in the connection would throw away
   // whatever is typed into an open form. Next refetches on the next navigation anyway.
   reloadOnOnline: false,
+  // @serwist/next precaches every file under public/ by default. The offline page, the icons and
+  // the logo belong there; the photos and clips under public/media (megabytes) do not — they are
+  // fetched on demand and cached by the runtime image rule like any other image.
+  globPublicPatterns: ["offline.html", "icons/**", "logo.svg"],
 })
 
 export default withBundleAnalyzer(withSerwist(nextConfig))

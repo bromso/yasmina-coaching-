@@ -5,10 +5,14 @@ import {
   auditExportDefaultRange,
   canUseAdmin,
   formatDateTime,
+  formatDay,
+  formatStockholm,
+  formatStockholmTime,
   parseCursor,
   parseDays,
   parseJob,
   parseSuspended,
+  stockholmDay,
   suspendUntilBounds,
 } from "./admin"
 
@@ -64,6 +68,24 @@ test("parseCursor accepts positive integers only", () => {
 test("formatDateTime is fixed to en/UTC", () => {
   expect(formatDateTime("2026-06-01T13:05:00.000Z")).toBe("Jun 1, 2026, 13:05 UTC")
   expect(formatDateTime("2026-12-31T00:05:00.000Z")).toBe("Dec 31, 2026, 00:05 UTC")
+})
+
+test("formatStockholm shows Europe/Stockholm wall-clock time, en-GB order", () => {
+  // CEST (UTC+2) in June, CET (UTC+1) in December.
+  expect(formatStockholm("2026-06-01T13:05:00.000Z")).toBe("Mon 1 Jun 2026, 15:05")
+  expect(formatStockholm("2026-12-31T00:05:00.000Z")).toBe("Thu 31 Dec 2026, 01:05")
+  expect(formatStockholmTime("2026-06-01T13:05:00.000Z")).toBe("15:05")
+})
+
+test("stockholmDay is the Stockholm calendar date, which can differ from the UTC one", () => {
+  expect(stockholmDay("2026-06-01T22:30:00.000Z")).toBe("2026-06-02")
+  expect(stockholmDay("2026-12-31T23:30:00.000Z")).toBe("2027-01-01")
+  expect(stockholmDay(new Date("2026-06-01T10:00:00.000Z"))).toBe("2026-06-01")
+})
+
+test("formatDay prints a YYYY-MM-DD date without a zone shift", () => {
+  expect(formatDay("2026-06-01")).toBe("Mon 1 Jun 2026")
+  expect(formatDay("2026-12-31")).toBe("Thu 31 Dec 2026")
 })
 
 test("parseJob trims and clamps to the contract's 100-character max", () => {

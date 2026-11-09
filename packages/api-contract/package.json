@@ -10,6 +10,8 @@
     "./api-keys-limits": "./src/api-keys-limits.ts",
     "./application-statuses": "./src/application-statuses.ts",
     "./billing-plans": "./src/billing-plans.ts",
+    "./booking": "./src/booking.ts",
+    "./booking-limits": "./src/booking-limits.ts",
     "./email-change-limits": "./src/email-change-limits.ts",
     "./files-limits": "./src/files-limits.ts",
     "./invite-domains": "./src/invite-domains.ts",

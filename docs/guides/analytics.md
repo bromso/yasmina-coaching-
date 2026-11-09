@@ -52,9 +52,9 @@ track("pricing_viewed")
 
 `track` (and `sendPageview`, which `<Analytics />` already calls for you) beacons to the app's own
 `POST /api/analytics`, which refuses to forward anything that isn't a known `client: true` name with
-allowlisted props. See `apps/www/src/components/pricing-view-tracker.tsx` for a complete example: an
-`IntersectionObserver` that fires `track("pricing_viewed")` at most once per page load, when the
-pricing section scrolls into view.
+allowlisted props. A typical caller is an `IntersectionObserver` that fires `track("pricing_viewed")`
+at most once per page load, when a pricing section scrolls into view (keep the "sent" flag at module
+level: a component remounts on a client-side navigation away and back, a module does not).
 
 Adding a client event is the same first step as a product event (name, `client: true`, prop
 allowlist) — there is no second contract to update; the browser's `track()` call and the route's own

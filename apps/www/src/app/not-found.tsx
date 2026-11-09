@@ -3,17 +3,16 @@ import { Button } from "@repo/ui/components/button"
 import Link from "next/link"
 
 import { Background } from "@/components/background"
+import { STATUS } from "@/content/status"
+import { getLocale } from "@/lib/locale"
 
-export default function NotFound() {
+export default async function NotFound() {
+  const copy = STATUS[await getLocale()]
   return (
     <Background>
-      <StatusPage
-        code="404"
-        title="Page not found"
-        description="The page you're looking for doesn't exist or has moved."
-      >
+      <StatusPage code="404" title={copy.notFound.title} description={copy.notFound.description}>
         <Button asChild size="lg">
-          <Link href="/">Back to home</Link>
+          <Link href="/">{copy.home}</Link>
         </Button>
       </StatusPage>
     </Background>

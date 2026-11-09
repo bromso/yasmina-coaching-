@@ -182,6 +182,59 @@
     "body": "Thanks for applying for {title}. We've received your application {reference}, and we'll be in touch.",
     "footer": "We keep applications on file for 6 months."
   },
+  "bookingConfirmed": {
+    "subject": "Your booking is confirmed ({reference})",
+    "preview": "Your {offeringLabel} is booked for {when} ({reference})",
+    "heading": "Your booking is confirmed",
+    "body": "Your {offeringLabel} is booked for {when}, {where}.",
+    "extraSessionsHeading": "Further sessions",
+    "button": "Manage your booking",
+    "memberBooking": "Once you have started, book your sessions here: ",
+    "footer": "You can cancel online until {hours} hours before a session from that link. Reply to this email to reschedule."
+  },
+  "bookingRequestReceived": {
+    "subject": "We've received your request ({reference})",
+    "preview": "We've received your request ({reference})",
+    "heading": "We've received your request",
+    "body": "Thanks for your request. Yasmina will reply to this address within a few days with a proposed time for your {offeringLabel}.",
+    "button": "View your request"
+  },
+  "bookingDeclined": {
+    "subject": "About your request ({reference})",
+    "preview": "About your request ({reference})",
+    "heading": "About your request",
+    "body": "Unfortunately Yasmina cannot take on your {offeringLabel} at the dates you proposed.",
+    "footer": "Reply to this email if you would like to look at other dates."
+  },
+  "bookingCancelled": {
+    "subject": "Your booking is cancelled ({reference})",
+    "preview": "Your {offeringLabel} on {when} is cancelled ({reference})",
+    "heading": "Your booking is cancelled",
+    "bodyByCustomer": "As requested, your {offeringLabel} on {when} is cancelled.",
+    "bodyByYasmina": "Yasmina has had to cancel your {offeringLabel} on {when}. She is sorry for the trouble.",
+    "footer": "Reply to this email to find a new time."
+  },
+  "bookingNew": {
+    "subject": "{kind, select, request {New request} other {New booking}}: {offeringLabel} ({reference})",
+    "preview": "{kind, select, request {New request} other {New booking}} from {name}",
+    "heading": "{kind, select, request {New request} other {New booking}}",
+    "reference": "Reference: {reference}",
+    "offering": "Offering: {offeringLabel}",
+    "name": "Name: {name}",
+    "email": "Email: {email}",
+    "organisation": "Organisation: {organisation}",
+    "phone": "Phone: {phone}",
+    "audience": "Audience: {audience, select, private {Private individual} organisation {Organisation} other {{audience}}}",
+    "location": "Location: {location}",
+    "when": "When: {when}",
+    "extraSessionsLabel": "Further sessions:",
+    "preferredDatesLabel": "Proposed dates:",
+    "attendees": "Attendees: {attendees}",
+    "venue": "Venue: {venue}",
+    "messageLabel": "Message:",
+    "button": "Open in admin",
+    "footer": "Reply to this email to answer {email} directly."
+  },
   "emailChangeConfirm": {
     "subject": "Confirm your new email address",
     "preview": "Confirm this is your new email address",

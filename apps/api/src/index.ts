@@ -2,7 +2,7 @@ import { DEV_API_TOKEN } from "@repo/api-contract"
 import { createLogger } from "@repo/log"
 import { siteUrl } from "@repo/sites"
 import { createAnalyticsProvider } from "./analytics/providers/create-provider"
-import { hiringEmailOf, loadEnv, supportEmailOf } from "./env"
+import { bookingEmailOf, hiringEmailOf, loadEnv, supportEmailOf } from "./env"
 import { createMailer } from "./mail/create-mailer"
 import { legacyLog } from "./request-context"
 import { createServer } from "./server"
@@ -113,6 +113,10 @@ if (!env.SUPPORT_EMAIL && env.NODE_ENV === "production") {
 
 if (!env.HIRING_EMAIL && env.NODE_ENV === "production") {
   logger.warn(`⚠ HIRING_EMAIL is not set: job applications go to ${hiringEmailOf(env)}.`)
+}
+
+if (!env.BOOKING_EMAIL && env.NODE_ENV === "production") {
+  logger.warn(`⚠ BOOKING_EMAIL is not set: new bookings go to ${bookingEmailOf(env)}.`)
 }
 
 for (const message of webhookStartupWarnings(env, Bun.env)) logger.warn(message)

@@ -1,15 +1,15 @@
 import { anonymousClientId, createApiClient, loadEnv } from "@repo/session"
 
-let env: ReturnType<typeof loadEnv<"API_URL" | "API_SERVICE_TOKEN">> | undefined
-
 /**
  * The api with the service token only, keyed per browser ip for the rate limiter. Call it from a
- * server action, never at a page's module scope: env is read on first use, not at `next build`.
- * `locale` is sent as `x-locale`; omit it for the English default (no real choice to report).
+ * server action or route handler, never at a page's module scope: env is read per call, not at
+ * `next build` (and never cached, so a test file's stub api is the one its own calls reach).
+ * `locale` is sent as `x-locale` (the site's own `sv` unless the visitor chose otherwise);
+ * omitted, the api answers in English.
  * `requestId` (the request's `x-request-id`, set by the shared proxy) is sent on when well-formed.
  */
 export async function anonymousApi(ip?: string, locale?: string, requestId?: string | null) {
-  env ??= loadEnv(["API_URL", "API_SERVICE_TOKEN"])
+  const env = loadEnv(["API_URL", "API_SERVICE_TOKEN"])
   return createApiClient({
     apiUrl: env.API_URL,
     serviceToken: env.API_SERVICE_TOKEN,

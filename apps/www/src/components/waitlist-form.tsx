@@ -4,8 +4,24 @@ import { Newsletter } from "@repo/ui/blocks/newsletter"
 import { useActionState } from "react"
 import { joinWaitlist } from "@/app/actions"
 
-/** Copy comes in as props so the content module (icons, logos) stays out of the client bundle. */
-export function WaitlistForm({ title, description }: { title: string; description?: string }) {
+type WaitlistFormProps = {
+  title: string
+  description?: string
+  buttonLabel: string
+  legal: string
+  emailLabel: string
+  placeholder: string
+}
+
+/** Copy comes in as props so the content module stays out of the client bundle. */
+export function WaitlistForm({
+  title,
+  description,
+  buttonLabel,
+  legal,
+  emailLabel,
+  placeholder,
+}: WaitlistFormProps) {
   const [state, action] = useActionState(joinWaitlist, { ok: false })
   return (
     <Newsletter
@@ -14,7 +30,11 @@ export function WaitlistForm({ title, description }: { title: string; descriptio
       description={description}
       action={action}
       state={state}
-      legal="No marketing without a separate opt-in. Unsubscribe any time."
+      buttonLabel={buttonLabel}
+      emailLabel={emailLabel}
+      placeholder={placeholder}
+      legal={legal}
+      className="py-0"
     />
   )
 }

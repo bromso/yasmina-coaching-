@@ -5,6 +5,11 @@ import {
   API_KEY_LIMIT_MESSAGE,
   API_KEY_NOT_FOUND_MESSAGE,
   AUTH_ERRORS,
+  BOOKING_CANCEL_CUTOFF_HOURS,
+  BOOKING_CANCEL_LATE_MESSAGE,
+  BOOKING_RATE_MESSAGE,
+  BOOKING_SEATS_FULL_MESSAGE,
+  BOOKING_SLOT_TAKEN_MESSAGE,
   CONNECT_REAUTH_MESSAGE,
   CV_UPLOAD_MESSAGE,
   contract,
@@ -115,6 +120,9 @@ describe("the api catalog's English equals today's strings", () => {
     ["cvUpload", CV_UPLOAD_MESSAGE],
     ["storageUnavailable", STORAGE_UNAVAILABLE_MESSAGE],
     ["jobsRate", JOBS_RATE_MESSAGE],
+    ["bookingRate", BOOKING_RATE_MESSAGE],
+    ["bookingSlotTaken", BOOKING_SLOT_TAKEN_MESSAGE],
+    ["bookingSeatsFull", BOOKING_SEATS_FULL_MESSAGE],
     ["exportNotFound", EXPORT_NOT_FOUND_MESSAGE],
     ["deleteEmailMismatch", DELETE_EMAIL_MISMATCH_MESSAGE],
     ["deleteReauth", DELETE_REAUTH_MESSAGE],
@@ -210,6 +218,9 @@ describe("the api catalog's English equals today's strings", () => {
     ["supportRate", "support.create", "TOO_MANY_REQUESTS"],
     ["cvUpload", "jobs.apply", "BAD_REQUEST"],
     ["jobsRate", "jobs.apply", "TOO_MANY_REQUESTS"],
+    ["bookingRate", "booking.book", "TOO_MANY_REQUESTS"],
+    ["bookingSlotTaken", "booking.book", "CONFLICT"],
+    ["bookingSeatsFull", "booking.reserve", "CONFLICT"],
     ["passkeyFailed", "auth.passkey.verify", "UNAUTHORIZED"],
     ["passkeyRate", "auth.passkey.verify", "TOO_MANY_REQUESTS"],
     ["passkeyReauth", "account.passkeys.registerOptions", "FORBIDDEN"],
@@ -265,6 +276,8 @@ describe("the api catalog's English equals today's strings", () => {
     "workspaceTwoFactorRequired",
     "ownerTwoFactorRequired",
     "inviteDomainRestricted",
+    "bookingCancelLate",
+    "bookingNotFound",
     "roles",
   ]
   test("every key in messages/en/api.json is checked above", () => {
@@ -286,6 +299,10 @@ describe("the api catalog's English equals today's strings", () => {
       "This invitation was sent to a***@example.com. Sign in with that address to accept it."
     )
     expect(en("mockBillingDisabled")).toBe("Mock billing is not enabled")
+    expect(en("bookingCancelLate", { hours: BOOKING_CANCEL_CUTOFF_HOURS })).toBe(
+      BOOKING_CANCEL_LATE_MESSAGE
+    )
+    expect(en("bookingNotFound")).toBe("We could not find that booking link.")
     expect(en("exportTooSoon", { time: "Oct 11, 2026, 2:05 PM UTC" })).toBe(
       "You can request a new export after Oct 11, 2026, 2:05 PM UTC."
     )

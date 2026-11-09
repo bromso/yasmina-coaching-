@@ -17,6 +17,9 @@ export type NewsletterProps = {
   action: (formData: FormData) => void | Promise<void>
   state: FormState
   buttonLabel?: string
+  /** The email field's (visually hidden) label and placeholder; English by default. */
+  emailLabel?: string
+  placeholder?: string
   legal?: ReactNode
   idPrefix?: string
   id?: string
@@ -33,6 +36,8 @@ export function Newsletter({
   action,
   state,
   buttonLabel = "Join the waitlist",
+  emailLabel = "Email",
+  placeholder = "you@example.com",
   legal,
   idPrefix = "newsletter-",
   id,
@@ -53,14 +58,14 @@ export function Newsletter({
         <div className="flex flex-col gap-2 sm:flex-row">
           <div className="flex-1 text-left">
             <Label htmlFor={inputId} className="sr-only">
-              Email
+              {emailLabel}
             </Label>
             <Input
               id={inputId}
               name="email"
               type="email"
               autoComplete="email"
-              placeholder="you@example.com"
+              placeholder={placeholder}
               required
               defaultValue={state.ok ? "" : state.values?.email}
               {...fieldAria("email", state, undefined, { idPrefix })}

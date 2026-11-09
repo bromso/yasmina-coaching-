@@ -1,4 +1,4 @@
-import { type Me, SUSPEND_UNTIL_MAX_DAYS } from "@repo/api-contract"
+import { BOOKING_TIMEZONE, type Me, SUSPEND_UNTIL_MAX_DAYS } from "@repo/api-contract"
 
 /** The admin pages and the Admin link exist only for a superadmin who is not impersonating. */
 export const canUseAdmin = (me: Me | null): boolean =>
@@ -98,4 +98,57 @@ export function formatDateTime(iso: string): string {
   const parts: Partial<Record<Intl.DateTimeFormatPartTypes, string>> = {}
   for (const part of dateTime.formatToParts(new Date(iso))) parts[part.type] = part.value
   return `${parts.month} ${parts.day}, ${parts.year}, ${parts.hour}:${parts.minute} UTC`
+}
+
+// The booking pages show every time in Europe/Stockholm (`BOOKING_TIMEZONE`): the api stores UTC,
+// Yasmina reads her calendar in Sweden. en-GB, assembled from parts for the same reason as
+// `formatDateTime` above (Bun and Node join the parts differently; the parts agree).
+const stockholm = (options: Intl.DateTimeFormatOptions) =>
+  new Intl.DateTimeFormat("en-GB", { timeZone: BOOKING_TIMEZONE, hourCycle: "h23", ...options })
+const stockholmDateTime = stockholm({
+  weekday: "short",
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+})
+const stockholmDayKey = stockholm({ year: "numeric", month: "2-digit", day: "2-digit" })
+
+function parts(formatter: Intl.DateTimeFormat, date: Date) {
+  const out: Partial<Record<Intl.DateTimeFormatPartTypes, string>> = {}
+  for (const part of formatter.formatToParts(date)) out[part.type] = part.value
+  return out
+}
+
+/** An ISO instant as `Mon 1 Jun 2026, 15:05`, Stockholm wall-clock time. */
+export function formatStockholm(iso: string): string {
+  const p = parts(stockholmDateTime, new Date(iso))
+  return `${p.weekday} ${p.day} ${p.month} ${p.year}, ${p.hour}:${p.minute}`
+}
+
+/** An ISO instant as `15:05` in Stockholm, for the calendar cells. */
+export function formatStockholmTime(iso: string): string {
+  const p = parts(stockholmDateTime, new Date(iso))
+  return `${p.hour}:${p.minute}`
+}
+
+/** The Stockholm calendar day an ISO instant falls on, as `YYYY-MM-DD` (a booking's grid cell). */
+export function stockholmDay(iso: string | Date): string {
+  const p = parts(stockholmDayKey, typeof iso === "string" ? new Date(iso) : iso)
+  return `${p.year}-${p.month}-${p.day}`
+}
+
+const utcDay = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "UTC",
+  weekday: "short",
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+})
+
+/** A `YYYY-MM-DD` calendar date (a blocked day, a proposed date) as `Mon 1 Jun 2026`. */
+export function formatDay(date: string): string {
+  const p = parts(utcDay, new Date(`${date}T00:00:00.000Z`))
+  return `${p.weekday} ${p.day} ${p.month} ${p.year}`
 }

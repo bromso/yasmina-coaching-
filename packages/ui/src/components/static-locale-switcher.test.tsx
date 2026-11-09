@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test"
 import { localeCookie } from "@repo/i18n/cookie"
 import { renderToStaticMarkup } from "react-dom/server"
-import { StaticLocaleSwitcher, writeLocaleCookie } from "./static-locale-switcher"
+import { chooseLocale, StaticLocaleSwitcher, writeLocaleCookie } from "./static-locale-switcher"
 
 const options = [
   { value: "en", label: "English" },
@@ -36,5 +36,39 @@ describe("writeLocaleCookie", () => {
     writeLocaleCookie("en", { secure: false }, (s) => calls.push(s))
     expect(calls).toEqual([localeCookie("en", { secure: false })])
     expect(calls[0]).toBe("locale=en; Path=/; Max-Age=31536000; SameSite=Lax")
+  })
+})
+
+describe("chooseLocale", () => {
+  test("by default: writes the cookie, never reloads, and the saved note is due", () => {
+    const written: string[] = []
+    let reloads = 0
+    const note = chooseLocale(
+      "sv",
+      { secure: false },
+      { write: (s) => written.push(s), reload: () => reloads++ }
+    )
+    expect(written).toEqual([localeCookie("sv", { secure: false })])
+    expect(reloads).toBe(0)
+    expect(note).toBe(true)
+  })
+
+  test("reloadOnChange: writes the cookie first, then reloads once, and shows no note", () => {
+    const calls: string[] = []
+    const note = chooseLocale(
+      "en",
+      { domain: ".brand.localhost", secure: true, reloadOnChange: true },
+      { write: (s) => calls.push(`write ${s}`), reload: () => calls.push("reload") }
+    )
+    expect(calls).toEqual([
+      `write ${localeCookie("en", { domain: ".brand.localhost", secure: true })}`,
+      "reload",
+    ])
+    expect(note).toBe(false)
+  })
+
+  test("reloadOnChange renders the same placeholder on the server", () => {
+    const html = renderToStaticMarkup(<StaticLocaleSwitcher options={options} reloadOnChange />)
+    expect(html).toMatch(/^<div aria-hidden="true" inert="" class="invisible /)
   })
 })

@@ -182,6 +182,59 @@
     "body": "Tack för att du sökte tjänsten {title}. Vi har tagit emot din ansökan {reference} och vi hör av oss.",
     "footer": "Vi sparar ansökningar i 6 månader."
   },
+  "bookingConfirmed": {
+    "subject": "Din bokning är bekräftad ({reference})",
+    "preview": "Vi har bokat din {offeringLabel} {when} ({reference})",
+    "heading": "Din bokning är bekräftad",
+    "body": "Vi har bokat din {offeringLabel} {when}, {where}.",
+    "extraSessionsHeading": "Ytterligare tillfällen",
+    "button": "Hantera din bokning",
+    "memberBooking": "När du är igång bokar du dina samtal här: ",
+    "footer": "Du kan avboka online via den länken fram till {hours} timmar före ett tillfälle. Svara på det här mejlet om du vill boka om."
+  },
+  "bookingRequestReceived": {
+    "subject": "Vi har tagit emot din förfrågan ({reference})",
+    "preview": "Vi har tagit emot din förfrågan ({reference})",
+    "heading": "Vi har tagit emot din förfrågan",
+    "body": "Tack för din förfrågan. Yasmina återkommer till den här adressen inom några dagar med ett förslag på tid för din {offeringLabel}.",
+    "button": "Visa din förfrågan"
+  },
+  "bookingDeclined": {
+    "subject": "Angående din förfrågan ({reference})",
+    "preview": "Angående din förfrågan ({reference})",
+    "heading": "Angående din förfrågan",
+    "body": "Tyvärr kan Yasmina inte ta sig an din {offeringLabel} på de datum du föreslog.",
+    "footer": "Svara på det här mejlet om du vill titta på andra datum."
+  },
+  "bookingCancelled": {
+    "subject": "Din bokning är avbokad ({reference})",
+    "preview": "Din {offeringLabel} {when} är avbokad ({reference})",
+    "heading": "Din bokning är avbokad",
+    "bodyByCustomer": "Som du önskade är din {offeringLabel} {when} nu avbokad.",
+    "bodyByYasmina": "Yasmina har tyvärr behövt avboka din {offeringLabel} {when}. Hon ber om ursäkt för besväret.",
+    "footer": "Svara på det här mejlet så hittar vi en ny tid."
+  },
+  "bookingNew": {
+    "subject": "{kind, select, request {Ny förfrågan} other {Ny bokning}}: {offeringLabel} ({reference})",
+    "preview": "{kind, select, request {Ny förfrågan} other {Ny bokning}} från {name}",
+    "heading": "{kind, select, request {Ny förfrågan} other {Ny bokning}}",
+    "reference": "Referens: {reference}",
+    "offering": "Tjänst: {offeringLabel}",
+    "name": "Namn: {name}",
+    "email": "E-post: {email}",
+    "organisation": "Organisation: {organisation}",
+    "phone": "Telefon: {phone}",
+    "audience": "Målgrupp: {audience, select, private {Privatperson} organisation {Organisation} other {{audience}}}",
+    "location": "Plats: {location}",
+    "when": "När: {when}",
+    "extraSessionsLabel": "Ytterligare tillfällen:",
+    "preferredDatesLabel": "Föreslagna datum:",
+    "attendees": "Antal deltagare: {attendees}",
+    "venue": "Lokal: {venue}",
+    "messageLabel": "Meddelande:",
+    "button": "Öppna i adminpanelen",
+    "footer": "Svara på det här mejlet för att nå {email} direkt."
+  },
   "emailChangeConfirm": {
     "subject": "Bekräfta din nya e-postadress",
     "preview": "Bekräfta att det här är din nya e-postadress",

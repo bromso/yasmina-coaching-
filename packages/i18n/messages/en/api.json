@@ -98,5 +98,10 @@
   "webhookUrlBlocked": "That URL points to a private or reserved address. Use a public endpoint.",
   "webhookUrlUnresolved": "We couldn't find that URL's host. Check the address and try again.",
   "webhookTestDisabled": "Turn this endpoint on before sending a test event.",
-  "webhookTestRate": "Too many test events, try again later."
+  "webhookTestRate": "Too many test events, try again later.",
+  "bookingRate": "Too many booking attempts, try again later.",
+  "bookingSlotTaken": "That time is no longer available. Pick another slot.",
+  "bookingSeatsFull": "That session is fully booked.",
+  "bookingCancelLate": "Sessions can be cancelled online until {hours} hours before they start. Reply to your confirmation email instead.",
+  "bookingNotFound": "We could not find that booking link."
 }

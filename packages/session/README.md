@@ -221,9 +221,9 @@ rule over the request's own headers — rather than spend a second `auth.me` per
 `localeFromRequest(req)` is exported for any other route handler holding a `Request`.
 `createFileRoute`, `createEventsRoute` and `@repo/telemetry`'s route build their own clients and
 send no `x-locale`: each answers with a bodyless status or a `204`, so nothing they return is shown
-to anyone. `apps/www`'s waitlist client resolves and sends it the same way `anonymousApi()` does —
-from a real signal only (`resolveWaitlistLocale` over the cookie and `Accept-Language`, in
-`apps/www/src/lib/actions.ts`) — since it is not built from a `createAuth` instance.
+to anyone. `apps/www`'s actions build their own client too and send the page's own locale
+(`getLocale()` in `apps/www/src/lib/locale.ts`: the `locale` cookie, else Swedish), since they are
+not built from a `createAuth` instance.
 
 `setLocale(locale)` throws on an unsupported value before doing anything. With a session it first
 saves the preference (`account.setLocale`, sent with the new locale as `x-locale`); an expired

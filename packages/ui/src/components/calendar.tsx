@@ -6,6 +6,24 @@ import * as React from "react"
 import { type DayButton, DayPicker, getDefaultClassNames } from "react-day-picker"
 import { Icon } from "./icon"
 
+/**
+ * A day button's accessible name, starting with the number the button shows ("9, Monday, November
+ * 2026"; "Today, 7, …" / "Selected, …" when so). react-day-picker's default ("Monday, November
+ * 9th, 2026") fails WCAG 2.5.3 (axe `label-content-name-mismatch`): the visible "9" is not a word
+ * of it. A caller's `labels.labelDayButton` still overrides this.
+ */
+function labelDayButton(
+  date: Date,
+  modifiers: { today?: boolean; selected?: boolean },
+  options?: { locale?: { code?: string } }
+): string {
+  const locale = options?.locale?.code ?? "default"
+  const weekday = date.toLocaleString(locale, { weekday: "long" })
+  const month = date.toLocaleString(locale, { month: "long" })
+  const prefix = `${modifiers.today ? "Today, " : ""}${modifiers.selected ? "Selected, " : ""}`
+  return `${prefix}${date.getDate()}, ${weekday}, ${month} ${date.getFullYear()}`
+}
+
 function Calendar({
   className,
   classNames,
@@ -14,6 +32,7 @@ function Calendar({
   buttonVariant = "ghost",
   formatters,
   components,
+  labels,
   ...props
 }: React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>["variant"]
@@ -23,6 +42,7 @@ function Calendar({
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
+      labels={{ labelDayButton, ...labels }}
       className={cn(
         "bg-background group/calendar p-3 [--cell-size:--spacing(8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent",
         String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
