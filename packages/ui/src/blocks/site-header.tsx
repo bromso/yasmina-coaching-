@@ -48,7 +48,9 @@ export function SiteHeader({
     >
       <div className="container flex min-h-14 flex-wrap items-center gap-x-4 gap-y-2 py-2.5 sm:h-14 sm:flex-nowrap sm:py-0">
         {start}
-        {brand}
+        {/* Below sm the brand shrinks (its name truncates) so it shares row one with `end`; a long
+            name such as "Yasmina Petersson" would otherwise push the menu onto a row of its own. */}
+        <div className="flex min-w-0 max-sm:flex-1 max-sm:basis-0">{brand}</div>
         {links.length > 0 && (
           <nav aria-label={navLabel} className="hidden md:flex md:items-center md:gap-1">
             {links.map((link) =>

@@ -7,13 +7,13 @@ describe("Brand", () => {
   test("links to href with the default name and a hidden mark", () => {
     const html = renderToStaticMarkup(<Brand href="https://www.example.com" />)
     expect(html).toMatch(/^<a [^>]*href="https:\/\/www\.example\.com"/)
-    expect(html).toContain(`>${BRAND_NAME}</a>`)
+    expect(html).toContain(`<span class="truncate">${BRAND_NAME}</span></a>`)
     expect(html).toContain('aria-hidden="true"')
   })
 
   test("renders a custom name and merges className", () => {
     const html = renderToStaticMarkup(<Brand href="/" name="Acme" className="extra" />)
-    expect(html).toContain(">Acme</a>")
+    expect(html).toContain(`<span class="truncate">Acme</span></a>`)
     expect(html).not.toContain(BRAND_NAME)
     expect(html).toMatch(/<a [^>]*class="[^"]*extra[^"]*"/)
   })
