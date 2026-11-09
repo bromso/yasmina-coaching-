@@ -1,13 +1,13 @@
 import { BRAND_NAME } from "@repo/sites"
 import type { MetadataRoute } from "next"
-import { ROOT_LOCALE, UI } from "@/content/ui"
+import { BLOG_META } from "@/content/blog-meta"
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
     // One manifest for both languages: the blog's own Swedish.
-    name: `${BRAND_NAME} · ${UI[ROOT_LOCALE].title}`,
-    short_name: "Blogg",
-    description: UI[ROOT_LOCALE].description,
+    name: `${BRAND_NAME} · ${BLOG_META.sv.title}`,
+    short_name: BLOG_META.sv.shortName,
+    description: BLOG_META.sv.description,
     start_url: "/",
     scope: "/",
     display: "standalone",

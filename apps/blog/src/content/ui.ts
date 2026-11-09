@@ -1,4 +1,5 @@
 import { localePrefix, type PostLocale } from "@repo/content/posts"
+import { BLOG_META } from "@/content/blog-meta"
 import { ROOT_LOCALE } from "@/lib/blog-core"
 
 export { ROOT_LOCALE }
@@ -114,9 +115,8 @@ export const UI: Record<BlogLocale, BlogUi> = {
     dateLocale: "sv-SE",
     ogLocale: "sv_SE",
     tag: (slug) => tagLabel("sv", slug),
-    title: "Anteckningar om ledarskap",
-    description:
-      "Yasmina Peterssons anteckningar om ledarskap, coaching och mentorskap: om att leda människor, och sig själv, också när det blåser.",
+    title: BLOG_META.sv.title,
+    description: BLOG_META.sv.description,
     header: {
       inner: "Ledarskap inifrån",
       book: "Boka",
@@ -162,9 +162,8 @@ export const UI: Record<BlogLocale, BlogUi> = {
     dateLocale: "en-GB",
     ogLocale: "en_GB",
     tag: (slug) => tagLabel("en", slug),
-    title: "Notes on leadership",
-    description:
-      "Yasmina Petersson's notes on leadership, coaching and mentoring: on leading people, and yourself, when the wind picks up too.",
+    title: BLOG_META.en.title,
+    description: BLOG_META.en.description,
     header: {
       inner: "Leading from within",
       book: "Book",
