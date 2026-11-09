@@ -42,4 +42,9 @@ paths = [
   '''^apps/load/\.tmp/''',
   '''^apps/api/\.data/''',
   '''^graphify-out/''',
+  # Vendored agent skills' eval fixtures: example prompts installed from upstream and pinned by
+  # hash in skills-lock.json, so an inline `gitleaks:allow` would be overwritten on the next
+  # install. They hold made-up keys such as `sk_live_123abc` (video/evals/evals.json). Only the
+  # evals/ folders are skipped; a real key anywhere else in a skill is still found.
+  '''^\.agents/skills/[^/]+/evals/''',
 ]
