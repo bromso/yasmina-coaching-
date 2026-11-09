@@ -1,14 +1,13 @@
 import { BRAND_NAME } from "@repo/sites"
 import type { MetadataRoute } from "next"
-import { homeFor } from "@/content/home"
-import { SITE_LOCALE } from "@/lib/site-locale"
+import { SITE_META } from "@/content/site-meta"
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: BRAND_NAME,
     short_name: BRAND_NAME,
     // One manifest for both languages: the site's own Swedish.
-    description: homeFor(SITE_LOCALE).meta.description,
+    description: SITE_META.sv.description,
     start_url: "/",
     scope: "/",
     display: "standalone",
