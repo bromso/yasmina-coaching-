@@ -1,6 +1,7 @@
 import type { Locale } from "@repo/i18n/locales"
 import type { FaqItem } from "@repo/ui/blocks/faq"
 import { INNER_HREF } from "@/content/inner"
+import { SITE_META } from "@/content/site-meta"
 
 /**
  * Every word on the landing page, in Swedish and English. Rewrite the pitch, reorder the offers
@@ -69,11 +70,7 @@ export type HomeContent = {
 }
 
 const sv: HomeContent = {
-  meta: {
-    title: "Ledarskapscoaching",
-    description:
-      "Ledarskapscoaching, teamutveckling och handledning för chefer inom socialtjänst, vård och skola, med Yasmina Petersson. Varberg och online.",
-  },
+  meta: SITE_META.sv,
 
   nav: [
     { label: "Coaching", href: "/#coaching" },
@@ -296,11 +293,7 @@ const sv: HomeContent = {
 }
 
 const en: HomeContent = {
-  meta: {
-    title: "Leadership coaching",
-    description:
-      "Leadership coaching, team development and supervision for managers in social services, healthcare and schools, with Yasmina Petersson. Varberg and online.",
-  },
+  meta: SITE_META.en,
 
   nav: [
     { label: "Coaching", href: "/#coaching" },
