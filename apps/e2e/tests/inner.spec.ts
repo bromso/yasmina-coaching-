@@ -72,13 +72,17 @@ test("Inifrån group lists only its own events", async ({ page }) => {
   }
   const stamp = Date.now().toString(36)
   const titles = { group: `Plain group ${stamp}`, inner_group: `Inifrån grupp ${stamp}` }
+  // One calendar: two events may not overlap, and a retry or rerun must not hit this run's own
+  // events. So a day in 2099 that differs per run, and two hours apart on it.
+  const day = new Date(Date.UTC(2099, 0, 1) + (Date.now() % 360) * 86_400_000)
+  const startsAt = { group: 9, inner_group: 13 } as const
   for (const offering of ["group", "inner_group"] as const) {
     const response = await page.request.post(`${URLS.api}/openapi/admin/bookings/group-events`, {
       headers,
       data: {
         title: titles[offering],
         offering,
-        startsAt: "2099-05-04T16:00:00.000Z",
+        startsAt: new Date(day.getTime() + startsAt[offering] * 3_600_000).toISOString(),
         durationMinutes: 60,
         capacity: 8,
         location: "video",
