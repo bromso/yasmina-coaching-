@@ -350,6 +350,9 @@ jobs:
       - name: Build the apps under test
         env:
           COOKIE_DOMAIN: .brand.localhost
+          # The journeys pay with the mock wallets and Swish (apps/www/src/lib/mock-payment.ts),
+          # which a production build leaves off unless asked.
+          NEXT_PUBLIC_BOOKING_PAYMENTS: mock
         run: bun run --filter @repo/www --filter @repo/app --filter @repo/auth --filter @repo/account --filter @repo/blog --filter @repo/docs --filter @repo/help --filter @repo/jobs build
 
       # Every perf measurement this job takes is also written to perf/.results and uploaded, so

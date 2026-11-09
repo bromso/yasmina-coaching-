@@ -252,6 +252,8 @@ cd apps/e2e && bunx playwright test tests/a11y-pages.spec.ts -g "axe: help "   #
   `www` is readable on every other `*.brand.localhost` subdomain (`i18n.spec.ts`'s last step
   depends on this). Building one of them another way without that env var writes a host-only
   cookie instead.
+- It also builds with `NEXT_PUBLIC_BOOKING_PAYMENTS=mock`: `inner.spec.ts` pays a start call with
+  www's Swish mock, which a production build leaves off unless the flag says `mock` (invoice only).
 - First time on a machine: `bunx playwright install chromium`.
 - Ports 3000–3009 must be free, or (outside CI) a server already listening there —
   including a `bun dev` server — is reused as is. Set `CI=1` to always start fresh servers.

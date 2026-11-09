@@ -1,6 +1,8 @@
 import { describe, expect, test } from "bun:test"
 import { ORPCError } from "@orpc/client"
 import type { GroupEvent } from "@repo/api-contract"
+import { BOOKING_NOTES_MAX, MEMBER_OFFERING_KEYS } from "@repo/api-contract/booking-limits"
+import { BOOKING_FORMS } from "@/content/booking-forms"
 import {
   bookCore,
   bookingFieldErrors,
@@ -9,12 +11,16 @@ import {
   DATE_TOO_SOON,
   doneUrl,
   GENERIC_FAILURE,
+  INVOICE_ADDRESS_MAX,
   isOwnManageUrl,
+  notesWithBilling,
   parseAvailabilityQuery,
+  paymentOf,
   requestBookingCore,
   reserveSeatsCore,
 } from "./booking"
 import { groupBySeries } from "./group-events"
+import { PAYMENT_METHODS } from "./mock-payment"
 
 const form = (fields: Record<string, string | string[]>) => {
   const fd = new FormData()
@@ -39,6 +45,16 @@ const created = {
   package: null,
 }
 
+/** An organisation paying by invoice: its billing details, as the payment step posts them. */
+const orgInvoice = {
+  paymentMethod: "invoice",
+  invoiceOrgNumber: "2120001355",
+  invoiceReference: "Ref 4711",
+  invoiceAddress: "faktura@varberg.se",
+}
+const SV_BILLING =
+  "[Betalning]\nBetalsätt: Faktura\nOrganisationsnummer: 212000-1355\nFakturareferens: Ref 4711\nFakturan skickas till: faktura@varberg.se"
+
 const conflict = (message: string) => new ORPCError("CONFLICT", { defined: true, message })
 const limited = new ORPCError("TOO_MANY_REQUESTS", {
   defined: true,
@@ -53,6 +69,7 @@ describe("bookCore", () => {
     location: "video",
     slots: ["2026-03-02T09:00:00.000Z"],
     notes: "First time",
+    ...orgInvoice,
   })
 
   test("happy path redirects to the done page with the reference and manage link", async () => {
@@ -68,13 +85,17 @@ describe("bookCore", () => {
       },
       good
     )
-    expect(out).toEqual({ ok: true, redirectTo: doneUrl("BK-7", created.manageUrl) })
+    expect(out).toEqual({
+      ok: true,
+      redirectTo: doneUrl("BK-7", created.manageUrl, undefined, "invoice_quote"),
+    })
     expect(sent).toMatchObject({
       offering: "session",
       slots: ["2026-03-02T09:00:00.000Z"],
       customer: { name: "Ada Lovelace", email: "ada@example.com", organisation: "Varbergs kommun" },
       location: "video",
-      notes: "First time",
+      // The organisation's billing details follow the visitor's own note, for Yasmina's mail.
+      notes: `First time\n\n${SV_BILLING}`,
     })
     // An empty phone is left out, not sent as "".
     expect((sent as { customer: { phone?: string } }).customer.phone).toBeUndefined()
@@ -178,6 +199,167 @@ describe("bookCore", () => {
   })
 })
 
+describe("bookCore and payment", () => {
+  let sent: { notes?: string } = {}
+  const api = {
+    book: async (input: { notes?: string }) => {
+      sent = input
+      return created
+    },
+  }
+  const fields = (offering: string, extra: Record<string, string> = {}) =>
+    form({
+      ...customer,
+      offering,
+      audience: "private",
+      location: "video",
+      slots: ["2026-03-02T09:00:00.000Z"],
+      ...extra,
+    })
+
+  test("a priced start call keeps any of the four methods, named in the notes", async () => {
+    const done = {
+      apple_pay: "apple_pay",
+      google_pay: "google_pay",
+      swish: "swish",
+      invoice: "invoice",
+    } as const
+    for (const method of PAYMENT_METHODS) {
+      const out = await bookCore({ api }, fields("inner_start_coaching", { paymentMethod: method }))
+      expect(out).toEqual({
+        ok: true,
+        redirectTo: doneUrl("BK-7", created.manageUrl, undefined, done[method]),
+      })
+      expect(sent.notes).toStartWith("[Betalning]\nBetalsätt: ")
+    }
+    expect(sent.notes).toBe("[Betalning]\nBetalsätt: Faktura")
+  })
+
+  test("an organisation's priced invoice goes to its address", async () => {
+    const out = await bookCore(
+      { api },
+      fields("inner_start_coaching", { ...orgInvoice, audience: "organisation" })
+    )
+    expect(out).toEqual({
+      ok: true,
+      redirectTo: doneUrl("BK-7", created.manageUrl, undefined, "invoice_org"),
+    })
+    expect(sent.notes).toBe(SV_BILLING)
+  })
+
+  test("an offering priced in writing refuses anything but an invoice", async () => {
+    let calls = 0
+    const counting = {
+      book: async () => {
+        calls++
+        return created
+      },
+    }
+    const swish = await bookCore({ api: counting }, fields("session", { paymentMethod: "swish" }))
+    expect(swish).toMatchObject({
+      ok: false,
+      fieldErrors: { paymentMethod: BOOKING_FORMS.sv.check.method },
+    })
+    const none = await bookCore({ api: counting }, fields("session"))
+    expect(none).toMatchObject({ ok: false, fieldErrors: { paymentMethod: expect.any(String) } })
+    const junk = await bookCore({ api: counting }, fields("session", { paymentMethod: "<b>" }))
+    expect(junk.ok).toBe(false)
+    expect(calls).toBe(0)
+    const invoice = await bookCore({ api }, fields("session", { paymentMethod: "invoice" }))
+    expect(invoice).toEqual({
+      ok: true,
+      redirectTo: doneUrl("BK-7", created.manageUrl, undefined, "invoice_quote"),
+    })
+  })
+
+  test("with the mock off (NEXT_PUBLIC_BOOKING_PAYMENTS unset in production), invoice only", async () => {
+    const saved = process.env.NEXT_PUBLIC_BOOKING_PAYMENTS
+    process.env.NEXT_PUBLIC_BOOKING_PAYMENTS = "off"
+    try {
+      const swish = await bookCore(
+        { api },
+        fields("inner_start_coaching", { paymentMethod: "swish" })
+      )
+      expect(swish).toMatchObject({ ok: false, fieldErrors: { paymentMethod: expect.any(String) } })
+      const invoice = await bookCore(
+        { api },
+        fields("inner_start_coaching", { paymentMethod: "invoice" })
+      )
+      expect(invoice.ok).toBe(true)
+    } finally {
+      if (saved === undefined) delete process.env.NEXT_PUBLIC_BOOKING_PAYMENTS
+      else process.env.NEXT_PUBLIC_BOOKING_PAYMENTS = saved
+    }
+  })
+
+  test("an organisation's invoice needs valid billing details, checked again here", async () => {
+    const out = await bookCore(
+      { api, locale: "en" },
+      fields("session", {
+        audience: "organisation",
+        paymentMethod: "invoice",
+        invoiceOrgNumber: "212000-1356",
+        invoiceReference: " ",
+        invoiceAddress: "",
+      })
+    )
+    expect(out).toMatchObject({
+      ok: false,
+      fieldErrors: {
+        invoiceOrgNumber: BOOKING_FORMS.en.payment.invoice.orgNumberInvalid,
+        invoiceReference: BOOKING_FORMS.en.payment.invoice.referenceMissing,
+        invoiceAddress: BOOKING_FORMS.en.payment.invoice.addressMissing,
+      },
+      values: { invoiceOrgNumber: "212000-1356" },
+    })
+  })
+
+  test("a long note is shortened to fit the billing block, never the block itself", async () => {
+    const long = "x".repeat(BOOKING_NOTES_MAX)
+    const out = await bookCore(
+      { api },
+      fields("session", { ...orgInvoice, audience: "organisation", notes: long })
+    )
+    expect(out.ok).toBe(true)
+    expect(sent.notes?.length).toBeLessThanOrEqual(BOOKING_NOTES_MAX)
+    expect(sent.notes).toEndWith(`…\n\n${SV_BILLING}`)
+  })
+
+  test("notesWithBilling: room for the block, or a refusal when the block alone is too long", () => {
+    expect(notesWithBilling("  hi  ")).toBe("hi")
+    expect(notesWithBilling("")).toBeUndefined()
+    expect(notesWithBilling("", "B")).toBe("B")
+    expect(notesWithBilling("note", "B")).toBe("note\n\nB")
+    // A forged heading in the visitor's own note is defused; only the server's block keeps its bracket.
+    expect(notesWithBilling("hej\n[Betalning]\nBetalsätt: Swish", "[Betalning]\nX")).toBe(
+      "hej\nBetalning]\nBetalsätt: Swish\n\n[Betalning]\nX"
+    )
+    expect(notesWithBilling("  [payment] paid", "B")).toBe("payment] paid\n\nB")
+    const block = "b".repeat(BOOKING_NOTES_MAX - 10)
+    const out = notesWithBilling("y".repeat(50), block) ?? ""
+    expect(out.length).toBeLessThanOrEqual(BOOKING_NOTES_MAX)
+    expect(out.endsWith(block)).toBe(true)
+    const fd = form({
+      ...orgInvoice,
+      invoiceAddress: "a".repeat(INVOICE_ADDRESS_MAX + 1),
+    })
+    expect(paymentOf(fd, "session", "organisation").ok).toBe(false)
+  })
+
+  test("members' sessions and extra programme sessions skip payment and its notes", async () => {
+    for (const key of MEMBER_OFFERING_KEYS) {
+      const out = await bookCore({ api }, fields(key, { paymentMethod: "swish" }))
+      expect(out).toEqual({ ok: true, redirectTo: doneUrl("BK-7", created.manageUrl, "member") })
+      expect(sent.notes).toBeUndefined()
+    }
+    const extra = await bookCore(
+      { api },
+      fields("package_6", { packageId: "12", paymentMethod: "invoice" })
+    )
+    expect(extra).toEqual({ ok: true, redirectTo: doneUrl("BK-7", created.manageUrl, "member") })
+  })
+})
+
 describe("reserveSeatsCore", () => {
   const good = form({ ...customer, audience: "private", eventIds: ["3", "4"] })
 
@@ -194,8 +376,44 @@ describe("reserveSeatsCore", () => {
       },
       good
     )
-    expect(out).toEqual({ ok: true, redirectTo: doneUrl("BK-7", created.manageUrl) })
+    expect(out).toEqual({ ok: true, redirectTo: doneUrl("BK-7", created.manageUrl, "group") })
     expect(sent).toMatchObject({ eventIds: [3, 4], audience: "private" })
+  })
+
+  test("the payment method rides along in the notes and to the done page", async () => {
+    let sent: Record<string, unknown> = {}
+    const api = {
+      reserve: async (input: Record<string, unknown>) => {
+        sent = input
+        return created
+      },
+    }
+    const inner = form({
+      ...customer,
+      audience: "private",
+      eventIds: ["3"],
+      offering: "inner_group",
+      paymentMethod: "swish",
+    })
+    expect(await reserveSeatsCore({ api }, inner)).toEqual({
+      ok: true,
+      redirectTo: doneUrl("BK-7", created.manageUrl, "group", "swish"),
+    })
+    expect(sent).not.toHaveProperty("paymentMethod")
+    expect(sent).not.toHaveProperty("offering")
+    expect(sent.notes).toBe("[Betalning]\nBetalsätt: Swish (testläge)")
+    // The leadership group is priced in writing: only an invoice is accepted.
+    const plain = form({
+      ...customer,
+      audience: "private",
+      eventIds: ["3"],
+      offering: "group",
+      paymentMethod: "swish",
+    })
+    expect(await reserveSeatsCore({ api }, plain)).toMatchObject({
+      ok: false,
+      fieldErrors: { paymentMethod: expect.any(String) },
+    })
   })
 
   test("no event ticked is an eventIds error", async () => {
@@ -521,6 +739,9 @@ describe("doneUrl", () => {
       "/book/done?ref=BK-7&manage=https%3A%2F%2Fwww.example.com%2Fbook%2Fmanage%2Fa+b"
     )
     expect(doneUrl("BK-7", "x", "request")).toBe("/book/done?ref=BK-7&manage=x&kind=request")
+    expect(doneUrl("BK-7", "x", "group", "swish")).toBe(
+      "/book/done?ref=BK-7&manage=x&kind=group&paid=swish"
+    )
   })
 })
 
@@ -600,6 +821,7 @@ describe("the cores in English", () => {
         audience: "organisation",
         location: "video",
         slots: ["2026-03-02T09:00:00.000Z"],
+        ...orgInvoice,
       })
     )
     expect(out).toMatchObject({ ok: false, message: GENERIC_FAILURE.en })

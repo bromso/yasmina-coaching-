@@ -137,11 +137,24 @@ test("a visitor books a coaching session from the calendar and gets the confirma
     label: "www /book/session details",
     route: "www:/book/[offering]",
   })
-  await page.getByRole("button", { name: /bekräfta bokningen/i }).click()
+  await page.getByRole("button", { name: /fortsätt till betalning/i }).click()
 
-  // Step 3: the confirmation page, the mail with the Stockholm time and the manage link.
-  await expect(page).toHaveURL(/\/book\/done\?/)
+  // Step 3: payment. A single session is priced in writing, so invoice is the only method and is
+  // already chosen; the mock books straight away (`apps/www/src/lib/mock-payment.ts`).
+  await expect(page.getByRole("heading", { name: "Betalning", level: 2 })).toBeFocused()
+  await expect(page.getByText(/när yasmina har bekräftat priset/i)).toBeVisible()
+  await expect(page.getByRole("radio", { name: /^Faktura/ })).toBeChecked()
+  await expect(page.getByRole("radio", { name: /^Swish/ })).toHaveCount(0)
+  await expectAccessible(page, {
+    label: "www /book/session payment",
+    route: "www:/book/[offering]",
+  })
+  await page.getByRole("button", { name: /boka och betala mot faktura/i }).click()
+
+  // Step 4: the confirmation page, the mail with the Stockholm time and the manage link.
+  await expect(page).toHaveURL(/\/book\/done\?.*paid=invoice_quote/)
   await expect(page.getByText(/BK-\d+/)).toBeVisible()
+  await expect(page.getByText(/du betalar mot faktura/i)).toBeVisible()
   await expectAccessible(page, { label: "www /book/done", route: "www:/book/done" })
   // The www action sends `x-locale: sv`, stored on the order: the confirmation mail is Swedish.
   const confirmed = await latestMail(email, /bokning är bekräftad/i, { after: started })

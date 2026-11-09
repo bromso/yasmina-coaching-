@@ -151,7 +151,13 @@ describe("Yasmina's voice", () => {
     ])
     expect(HOME.sv.hero.primary.label).toBe("Boka ett samtal")
     expect(bookingFor("sv").kindLines.instant).toBe("Välj en tid")
-    expect(bookingFor("sv").form.steps).toEqual(["Välj tid", "Dina uppgifter", "Klart"])
+    expect(bookingFor("sv").form.steps.instant).toEqual([
+      "Välj tid",
+      "Dina uppgifter",
+      "Betalning",
+      "Klart",
+    ])
+    expect(bookingFor("sv").form.steps.member).toEqual(["Välj tid", "Dina uppgifter", "Klart"])
   })
 
   test("English: spot checks on the same places", () => {
@@ -175,7 +181,12 @@ describe("Yasmina's voice", () => {
       group: "Reserve a seat",
       request: "Request dates",
     })
-    expect(bookingFor("en").form.steps).toEqual(["Pick a time", "Your details", "Done"])
+    expect(bookingFor("en").form.steps).toEqual({
+      instant: ["Pick a time", "Your details", "Payment", "Done"],
+      group: ["Pick a session", "Your details", "Payment", "Done"],
+      request: ["Your request", "Your details", "Review and send", "Done"],
+      member: ["Pick a time", "Your details", "Done"],
+    })
     expect(bookingFor("en").form.instant.submit).toBe("Confirm booking")
     expect(bookingFor("en").form.group.submit).toBe("Reserve seats")
     expect(bookingFor("en").form.request.submit).toBe("Send request")
