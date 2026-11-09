@@ -31,6 +31,11 @@ const nextConfig = {
     "@repo/sites",
     "@repo/telemetry",
   ],
+  experimental: {
+    // The blog has one root layout per language (src/app/(sv), src/app/(en)), so no layout sits
+    // above an unmatched URL: src/app/global-not-found.tsx renders the 404 as a whole document.
+    globalNotFound: true,
+  },
   // Empty turbopack config to allow Serwist webpack config alongside Turbopack
   turbopack: {},
   // Enable source maps for production analysis

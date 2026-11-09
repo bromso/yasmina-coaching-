@@ -17,6 +17,7 @@ export function blogPostingJsonLd(post: Post, author: Author, url: string): stri
     datePublished: post.date.toISOString(),
     dateModified: (post.updated ?? post.date).toISOString(),
     author: { "@type": "Person", name: author.name },
+    inLanguage: post.locale,
   }
   if (post.cover) {
     data.image = new URL(post.cover.src, url).href

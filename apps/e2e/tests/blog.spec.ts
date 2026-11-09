@@ -1,56 +1,108 @@
 import { expect, test } from "@playwright/test"
 import { URLS } from "../e2e.env"
 
-test("home lists the starter post", async ({ page }) => {
+// The blog is Swedish at the root and English under /en, each with its own <html lang>.
+
+test("the Swedish index opens on its hero, in Swedish", async ({ page }) => {
   await page.goto(URLS.blog)
-  await expect(page.getByRole("link", { name: "Welcome to the blog" })).toBeVisible()
+  await expect(page.locator("html")).toHaveAttribute("lang", "sv")
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Anteckningar om ledarskap" })
+  ).toBeVisible()
 })
 
-test("a post shows its heading, a code block and the table of contents", async ({ page }) => {
+test("the header links home to www, to Ledarskap inifrån, to booking and to English", async ({
+  page,
+}) => {
   await page.goto(URLS.blog)
-  await page.getByRole("link", { name: "Welcome to the blog" }).click()
-  await expect(page).toHaveURL(`${URLS.blog}/welcome`)
-  await expect(page.getByRole("heading", { level: 1, name: "Welcome to the blog" })).toBeVisible()
-  await expect(page.locator("pre")).not.toHaveCount(0)
-  await expect(page.getByRole("navigation", { name: "On this page" })).toBeVisible()
+  const nav = page.getByRole("navigation", { name: "Webbplats" })
+  await expect(nav.getByRole("link", { name: "Yasmina Petersson" })).toHaveAttribute(
+    "href",
+    URLS.www
+  )
+  await expect(nav.getByRole("link", { name: "Ledarskap inifrån" })).toHaveAttribute(
+    "href",
+    `${URLS.www}/inifran`
+  )
+  await expect(nav.getByRole("link", { name: "Boka" })).toHaveAttribute("href", `${URLS.www}/book`)
+  await nav.getByRole("link", { name: "Read in English" }).click()
+  await expect(page).toHaveURL(`${URLS.blog}/en`)
+  await expect(page.locator("html")).toHaveAttribute("lang", "en")
+  await expect(page.getByRole("heading", { level: 1, name: "Notes on leadership" })).toBeVisible()
+  await page
+    .getByRole("navigation", { name: "Site" })
+    .getByRole("link", { name: "Läs på svenska" })
+    .click()
+  await expect(page).toHaveURL(`${URLS.blog}/`)
 })
 
-test("switching tabs after hydration shows the second panel", async ({ page }) => {
-  await page.goto(`${URLS.blog}/welcome`)
-  await page.getByRole("tab", { name: "npm" }).click()
-  await expect(page.getByRole("tabpanel")).toContainText("npm install left-pad")
+test("the language link saves the choice for www: English blog, English www", async ({
+  page,
+  context,
+}) => {
+  await page.goto(URLS.blog)
+  await page
+    .getByRole("navigation", { name: "Webbplats" })
+    .getByRole("link", { name: "Read in English" })
+    .click()
+  await expect(page).toHaveURL(`${URLS.blog}/en`)
+  const cookies = await context.cookies(URLS.www)
+  expect(cookies.find((cookie) => cookie.name === "locale")?.value).toBe("en")
+  await page.getByRole("navigation", { name: "Site" }).getByRole("link", { name: "Book" }).click()
+  await expect(page).toHaveURL(`${URLS.www}/book`)
+  await expect(page.locator("html")).toHaveAttribute("lang", "en")
 })
 
-test("a tag link opens its tag page listing the post", async ({ page }) => {
-  await page.goto(`${URLS.blog}/welcome`)
-  // The post header's tag badge, not the inline "tagged [guides](/tags/guides)" link in the body.
-  await page.locator('[data-slot="post-header"]').getByRole("link", { name: "guides" }).click()
-  await expect(page).toHaveURL(`${URLS.blog}/tags/guides`)
-  await expect(page.getByRole("link", { name: "Welcome to the blog" })).toBeVisible()
+test("each language has its own RSS feed", async ({ request }) => {
+  for (const [path, language] of [
+    ["/rss.xml", "sv"],
+    ["/en/rss.xml", "en"],
+  ] as const) {
+    const res = await request.get(`${URLS.blog}${path}`)
+    expect(res.ok()).toBe(true)
+    expect(res.headers()["content-type"]).toContain("application/rss+xml")
+    expect(await res.text()).toContain(`<language>${language}</language>`)
+  }
 })
 
-test("an author page lists their post", async ({ page }) => {
-  await page.goto(`${URLS.blog}/authors/team`)
-  await expect(page.getByRole("link", { name: "Welcome to the blog" })).toBeVisible()
+test("an unknown address is a Swedish 404 with the blog's chrome", async ({ page }) => {
+  const res = await page.goto(`${URLS.blog}/finns-inte`)
+  expect(res?.status()).toBe(404)
+  await expect(page.locator("html")).toHaveAttribute("lang", "sv")
+  await expect(page.getByRole("heading", { level: 1, name: "Sidan finns inte" })).toBeVisible()
+  await expect(page.getByRole("navigation", { name: "Webbplats" })).toBeVisible()
 })
 
-test("the RSS feed answers with the post title", async ({ request }) => {
-  const res = await request.get(`${URLS.blog}/rss.xml`)
-  expect(res.ok()).toBe(true)
-  expect(res.headers()["content-type"]).toContain("application/rss+xml")
-  const body = await res.text()
-  expect(body).toContain("Welcome to the blog")
+test("the newest post opens with its title and links to its translation", async ({ page }) => {
+  await page.goto(URLS.blog)
+  const title = "Att leda genom en kris, på jobbet och hemma"
+  await page.getByRole("link", { name: title }).first().click()
+  await expect(page).toHaveURL(`${URLS.blog}/att-leda-genom-en-kris`)
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible()
+  await expect(page.locator("html")).toHaveAttribute("lang", "sv")
+  // The post's own closing line and the call to action below it may both offer the intro call;
+  // every such link must open www's intro-call form.
+  const introCall = page.getByRole("link", { name: "Be om ett kostnadsfritt introsamtal" })
+  await expect(introCall.first()).toBeVisible()
+  for (const link of await introCall.all()) {
+    await expect(link).toHaveAttribute("href", `${URLS.www}/#contact`)
+  }
+  await page.getByRole("link", { name: "Read in English" }).click()
+  await expect(page).toHaveURL(`${URLS.blog}/en/leading-through-a-crisis`)
+  await expect(page.locator("html")).toHaveAttribute("lang", "en")
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Leading through a crisis, at work and at home" })
+  ).toBeVisible()
 })
 
 test.describe("without JavaScript", () => {
   test.use({ javaScriptEnabled: false })
 
-  test("a post renders its heading, body and header nav without scripts", async ({ page }) => {
-    await page.goto(`${URLS.blog}/welcome`)
-    await expect(page.getByRole("heading", { level: 1, name: "Welcome to the blog" })).toBeVisible()
+  test("the index renders its hero and header nav without scripts", async ({ page }) => {
+    await page.goto(URLS.blog)
     await expect(
-      page.getByText("This is the first post on the blog.", { exact: false })
+      page.getByRole("heading", { level: 1, name: "Anteckningar om ledarskap" })
     ).toBeVisible()
-    await expect(page.getByRole("navigation", { name: "Site" })).toBeVisible()
+    await expect(page.getByRole("navigation", { name: "Webbplats" })).toBeVisible()
   })
 })

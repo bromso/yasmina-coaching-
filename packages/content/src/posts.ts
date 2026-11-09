@@ -1,5 +1,7 @@
-import type { Author, PostFrontmatter } from "./schema"
-import { postFrontmatterSchema, SLUG_PATTERN, TAG_PATTERN } from "./schema"
+import type { Author, PostFrontmatter, PostLocale } from "./schema"
+import { POST_LOCALES, postFrontmatterSchema, SLUG_PATTERN, TAG_PATTERN } from "./schema"
+
+export type { PostLocale } from "./schema"
 
 export interface PostInput {
   /** Repo-relative path, for error messages. */
@@ -21,6 +23,13 @@ export interface Post extends PostFrontmatter {
 export interface BlogOptions {
   mode: "production" | "development"
   now: Date
+  /**
+   * The language served at the site's root, for a blog in more than one. When set, a post in any
+   * other language must be named `<locale>-<rest>` and is served at `/<locale>/<rest>`, and a post
+   * in this one must not start with another language's prefix. Unset (the default), every post is
+   * served at `/<slug>` whatever its `locale`.
+   */
+  rootLocale?: PostLocale
 }
 
 export class ContentError extends Error {
@@ -49,6 +58,28 @@ export interface Blog {
   /** `limit` defaults to 3. */
   related(slug: string, limit?: number): Post[]
   neighbours(slug: string): { newer?: Post; older?: Post }
+  /** The same blog over only `locale`'s posts: its own pages, tags, authors and neighbours. */
+  inLocale(locale: PostLocale): Blog
+  /**
+   * The published post in another language that translates this one, or that this one
+   * translates (`translationOf`), whatever locale this `Blog` is narrowed to.
+   */
+  translation(slug: string): Post | undefined
+}
+
+/**
+ * Where a post is served: `/<slug>` in the root language (or with no `rootLocale` at all), and
+ * `/<locale>/<rest>` for a post in another language, whose slug is `<locale>-<rest>`.
+ */
+export function postPath(slug: string, locale: PostLocale, rootLocale?: PostLocale): string {
+  if (!rootLocale || locale === rootLocale) return `/${slug}`
+  const prefix = `${locale}-`
+  return `/${locale}/${slug.startsWith(prefix) ? slug.slice(prefix.length) : slug}`
+}
+
+/** The path every list, tag, author and feed route of `locale` starts with: `""` at the root. */
+export function localePrefix(locale: PostLocale, rootLocale?: PostLocale): string {
+  return !rootLocale || locale === rootLocale ? "" : `/${locale}`
 }
 
 /** `ceil(words / 200)`, minimum 1. */
@@ -78,7 +109,70 @@ export const RESERVED_SLUGS: ReadonlySet<string> = new Set([
   "manifest",
   "api",
   "files",
+  // The language prefixes: `/en` is the English index.
+  ...POST_LOCALES,
 ])
+
+/**
+ * File-name problems for a post's language when the blog has a `rootLocale`: a post in another
+ * language is `<locale>-<rest>` (and `<rest>` is a slug in its own right, never a reserved one),
+ * and a root-language post must not borrow another language's prefix.
+ */
+function localeProblems(
+  file: string,
+  slug: string,
+  locale: PostLocale,
+  root: PostLocale
+): string[] {
+  if (locale !== root) {
+    const prefix = `${locale}-`
+    const rest = slug.startsWith(prefix) ? slug.slice(prefix.length) : ""
+    if (!rest) {
+      return [
+        `${file}: a post with locale "${locale}" must be named "${prefix}<slug>.mdx" (it is served at /${locale}/<slug>)`,
+      ]
+    }
+    return RESERVED_SLUGS.has(rest) ? [`${file}: slug "${rest}" is reserved`] : []
+  }
+  return POST_LOCALES.filter((other) => other !== root && slug.startsWith(`${other}-`)).map(
+    (other) =>
+      `${file}: "${other}-" names are for posts with locale "${other}" — set \`locale: ${other}\` or rename the file`
+  )
+}
+
+/**
+ * `translationOf` problems: it must name another post (drafts and scheduled posts count), in a
+ * different language, and no two posts in one language may translate the same original.
+ */
+function translationProblems(
+  posts: { file: string; slug: string; locale: PostLocale; translationOf?: string }[]
+): string[] {
+  const problems: string[] = []
+  const bySlug = new Map(posts.map((post) => [post.slug, post]))
+  const claimed = new Map<string, string>()
+  for (const { file, locale, translationOf } of posts) {
+    if (!translationOf) continue
+    const original = bySlug.get(translationOf)
+    if (!original) {
+      problems.push(`${file}: translationOf "${translationOf}" names no post`)
+      continue
+    }
+    if (original.locale === locale) {
+      problems.push(
+        `${file}: translationOf "${translationOf}" is a post in the same language ("${locale}")`
+      )
+      continue
+    }
+    const key = `${locale}:${translationOf}`
+    const other = claimed.get(key)
+    if (other) {
+      problems.push(`${file}: "${translationOf}" already has a "${locale}" translation (${other})`)
+    } else {
+      claimed.set(key, file)
+    }
+  }
+  return problems
+}
 
 /** UTC calendar day, for comparing dates regardless of time of day or caller time zone. */
 function utcDay(date: Date): string {
@@ -124,6 +218,8 @@ export function createBlog(
       problems.push(`${file}: slug "${slug}" must be lowercase kebab-case`)
     } else if (RESERVED_SLUGS.has(slug)) {
       problems.push(`${file}: slug "${slug}" is reserved`)
+    } else if (options.rootLocale && POST_LOCALES.includes(fm.locale)) {
+      problems.push(...localeProblems(file, slug, fm.locale, options.rootLocale))
     }
 
     const tags = Array.isArray(fm.tags) ? fm.tags : []
@@ -145,6 +241,15 @@ export function createBlog(
     }
   }
 
+  problems.push(
+    ...translationProblems(
+      inputs.map(({ file, slug }, index) => {
+        const fm = parsed[index] as PostFrontmatter
+        return { file, slug, locale: fm.locale, translationOf: fm.translationOf }
+      })
+    )
+  )
+
   if (problems.length > 0) {
     throw new ContentError(problems)
   }
@@ -155,7 +260,7 @@ export function createBlog(
     .map(({ input, frontmatter }) => ({
       ...frontmatter,
       slug: input.slug,
-      url: `/${input.slug}`,
+      url: postPath(input.slug, frontmatter.locale, options.rootLocale),
       readingMinutes: readingMinutes(input.text),
     }))
     .sort((a, b) => {
@@ -163,53 +268,70 @@ export function createBlog(
       return byDate !== 0 ? byDate : a.slug.localeCompare(b.slug)
     })
 
-  const bySlug = new Map(posts.map((post) => [post.slug, post]))
+  const all = new Map(posts.map((post) => [post.slug, post]))
 
-  return {
-    posts: () => posts,
-    post: (slug) => bySlug.get(slug),
-    page: (n, size = DEFAULT_PAGE_SIZE) => {
-      const pages = Math.max(1, Math.ceil(posts.length / size))
-      const start = (n - 1) * size
-      return { posts: posts.slice(start, start + size), page: n, pages }
-    },
-    tags: () => {
-      const counts = new Map<string, number>()
-      for (const post of posts) {
-        for (const tag of post.tags) counts.set(tag, (counts.get(tag) ?? 0) + 1)
-      }
-      return [...counts.entries()]
-        .map(([tag, count]) => ({ tag, count }))
-        .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag))
-    },
-    byTag: (tag) => posts.filter((post) => post.tags.includes(tag)),
-    authors: () => [...new Set(posts.map((post) => post.author))].sort(),
-    byAuthor: (key) => posts.filter((post) => post.author === key),
-    author: (key) => authors[key],
-    related: (slug, limit = 3) => {
-      const post = bySlug.get(slug)
-      if (!post) return []
-      const postTags = new Set(post.tags)
-      return posts
-        .filter((candidate) => candidate.slug !== slug)
-        .map((candidate) => ({
-          candidate,
-          shared: candidate.tags.filter((tag) => postTags.has(tag)).length,
-        }))
-        .filter(({ shared }) => shared > 0)
-        .sort(
-          (a, b) => b.shared - a.shared || b.candidate.date.getTime() - a.candidate.date.getTime()
-        )
-        .slice(0, limit)
-        .map(({ candidate }) => candidate)
-    },
-    neighbours: (slug) => {
-      const index = posts.findIndex((post) => post.slug === slug)
-      if (index === -1) return {}
-      return {
-        newer: index > 0 ? posts[index - 1] : undefined,
-        older: index < posts.length - 1 ? posts[index + 1] : undefined,
-      }
-    },
+  const translation = (slug: string): Post | undefined => {
+    const post = all.get(slug)
+    if (!post) return undefined
+    if (post.translationOf) {
+      const original = all.get(post.translationOf)
+      if (original && original.locale !== post.locale) return original
+    }
+    return posts.find((other) => other.translationOf === slug && other.locale !== post.locale)
   }
+
+  const view = (list: Post[]): Blog => {
+    const bySlug = new Map(list.map((post) => [post.slug, post]))
+    return {
+      posts: () => list,
+      post: (slug) => bySlug.get(slug),
+      page: (n, size = DEFAULT_PAGE_SIZE) => {
+        const pages = Math.max(1, Math.ceil(list.length / size))
+        const start = (n - 1) * size
+        return { posts: list.slice(start, start + size), page: n, pages }
+      },
+      tags: () => {
+        const counts = new Map<string, number>()
+        for (const post of list) {
+          for (const tag of post.tags) counts.set(tag, (counts.get(tag) ?? 0) + 1)
+        }
+        return [...counts.entries()]
+          .map(([tag, count]) => ({ tag, count }))
+          .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag))
+      },
+      byTag: (tag) => list.filter((post) => post.tags.includes(tag)),
+      authors: () => [...new Set(list.map((post) => post.author))].sort(),
+      byAuthor: (key) => list.filter((post) => post.author === key),
+      author: (key) => authors[key],
+      related: (slug, limit = 3) => {
+        const post = bySlug.get(slug)
+        if (!post) return []
+        const postTags = new Set(post.tags)
+        return list
+          .filter((candidate) => candidate.slug !== slug)
+          .map((candidate) => ({
+            candidate,
+            shared: candidate.tags.filter((tag) => postTags.has(tag)).length,
+          }))
+          .filter(({ shared }) => shared > 0)
+          .sort(
+            (a, b) => b.shared - a.shared || b.candidate.date.getTime() - a.candidate.date.getTime()
+          )
+          .slice(0, limit)
+          .map(({ candidate }) => candidate)
+      },
+      neighbours: (slug) => {
+        const index = list.findIndex((post) => post.slug === slug)
+        if (index === -1) return {}
+        return {
+          newer: index > 0 ? list[index - 1] : undefined,
+          older: index < list.length - 1 ? list[index + 1] : undefined,
+        }
+      },
+      inLocale: (locale) => view(posts.filter((post) => post.locale === locale)),
+      translation,
+    }
+  }
+
+  return view(posts)
 }

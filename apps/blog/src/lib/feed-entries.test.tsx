@@ -1,6 +1,5 @@
 import { describe, expect, test } from "bun:test"
 import type { Blog, Post } from "@repo/content/posts"
-import { BRAND_NAME } from "@repo/sites/brand"
 import { mdxStaticComponents } from "@repo/ui/components/mdx/static"
 import { createElement } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
@@ -17,6 +16,7 @@ function post(slug: string, overrides: Partial<Post> = {}): Post {
     author: "team",
     tags: ["guides"],
     type: "Blog Post",
+    locale: "sv",
     readingMinutes: 2,
     ...overrides,
   }
@@ -34,6 +34,8 @@ function blogOf(posts: Post[]): Blog {
     author: () => undefined,
     related: () => [],
     neighbours: () => ({}),
+    inLocale: () => blogOf(posts),
+    translation: () => undefined,
   }
 }
 
@@ -45,8 +47,8 @@ describe("feedEntries", () => {
   })
 
   test("uses the author's display name from content/authors.ts", () => {
-    const entries = feedEntries(blogOf([post("hello", { author: "team" })]), () => "<p>x</p>")
-    expect(entries[0]?.authorName).toBe(`${BRAND_NAME} team`)
+    const entries = feedEntries(blogOf([post("hello", { author: "yasmina" })]), () => "<p>x</p>")
+    expect(entries[0]?.authorName).toBe("Yasmina Petersson")
   })
 
   test("falls back to the author key when it is unknown", () => {
@@ -155,7 +157,7 @@ describe("feedSite", () => {
       blogOf([post("newest", { updated: new Date("2026-10-05") }), post("oldest")]),
       () => "<p>x</p>"
     )
-    const site = feedSite("Blog", entries)
+    const site = feedSite("sv", entries)
     expect(site.updated).toEqual(new Date("2026-10-05"))
   })
 
@@ -169,13 +171,26 @@ describe("feedSite", () => {
       ]),
       () => "<p>x</p>"
     )
-    const site = feedSite("Blog", entries)
+    const site = feedSite("sv", entries)
     expect(site.updated).toEqual(new Date("2026-10-07"))
   })
 
   test("updated is the build time with no posts", () => {
     const before = new Date()
-    const site = feedSite("Blog", [])
+    const site = feedSite("sv", [])
     expect((site.updated as Date).getTime()).toBeGreaterThanOrEqual(before.getTime())
+  })
+})
+
+describe("feedSite per language", () => {
+  test("Swedish sits at the root, English under /en, each in its own words and language", () => {
+    const sv = feedSite("sv", [])
+    expect(sv.path).toBeUndefined()
+    expect(sv.language).toBe("sv")
+    expect(sv.title).toContain("Anteckningar om ledarskap")
+    const en = feedSite("en", [])
+    expect(en.path).toBe("/en")
+    expect(en.language).toBe("en")
+    expect(en.title).toContain("Notes on leadership")
   })
 })

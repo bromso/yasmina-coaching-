@@ -152,11 +152,12 @@ they stop at one app's boundary:
   `.tmp/storage`, so uploads are reset with everything else.
 - `www.spec.ts` — the home page shows the header, footer and pricing tiers; the waitlist form accepts
   an email, also with JavaScript disabled; `/terms` and `/privacy` render.
-- `blog.spec.ts` — the index lists the starter post; opening it shows the heading, a code block and
-  the table of contents; clicking the second tab after hydration shows its panel (tab switching on a
-  real React Server Components page); the post header's tag badge opens `/tags/guides` listing the
-  post; `/authors/team` lists it too; `/rss.xml` answers with the post title; with JavaScript
-  disabled, the post still shows its heading, body text and the header's site nav.
+- `blog.spec.ts` — the Swedish index (`<html lang="sv">`) opens on its hero; the header links home
+  to www, to `/inifran` and `/book` there, and to the English index (`/en`, `<html lang="en">`) and
+  back; `/rss.xml` and `/en/rss.xml` each answer in their own `<language>`; an unknown address is a
+  Swedish 404 with the blog's chrome; the newest post opens with its title and the call to action
+  linking to www's intro-call form, and its language link opens the English twin; with JavaScript disabled, the index
+  still shows its hero and the header's site nav.
 - `docs.spec.ts` — the landing page shows the intro and the sidebar; a sidebar link opens its page
   with breadcrumbs, and a table-of-contents link jumps to its heading (a URL hash); scrolled to a
   heading, the table of contents marks that section's link `aria-current="location"`, and the mark
@@ -226,7 +227,7 @@ they stop at one app's boundary:
   same page get different ids.
 - `perf-lighthouse.spec.ts` — a Lighthouse performance run (mobile emulation, simulated
   throttling, Playwright's own Chromium, no second download) against six public pages (`www /`,
-  `docs /getting-started`, `blog /welcome`, `help /getting-started/create-an-account`,
+  `docs /getting-started`, `blog /att-leda-genom-en-kris`, `help /getting-started/create-an-account`,
   `jobs /senior-fullstack-engineer`, `auth /login`), 3 runs each, the median of score/LCP/TBT/CLS
   judged against `perf/budgets.json`'s `lighthouse` section, the failure listing every run.
 - `perf-vitals.spec.ts` — in-browser Web Vitals (`web-vitals`, injected before any page script):

@@ -1,0 +1,103 @@
+# Dokploy: Yasmina Petersson's site, built straight from GitHub (no registry needed).
+# Every value comes from Dokploy's Environment tab (template.toml fills it on import).
+# Turn on Advanced → Isolated Deployments: Dokploy then puts every service on the stack's own
+# network and connects Traefik to it, so the services reach each other by name (http://api:3007).
+# Builds run on the server: give it at least 8 GB RAM, or deploy a few services at a time.
+
+x-repo: &repo "https://github.com/bromso/yasmina-coaching-.git#${GIT_REF:-main}"
+
+x-next: &next
+  restart: unless-stopped
+
+x-auth-env: &auth-env
+  API_URL: http://api:3007
+  API_SERVICE_TOKEN: ${API_SERVICE_TOKEN}
+  COOKIE_DOMAIN: ${COOKIE_DOMAIN}
+  AUTH_URL: ${AUTH_URL}
+  APP_URL: ${APP_URL}
+
+services:
+  www:
+    <<: *next
+    build:
+      context: *repo
+      dockerfile: docker/next.Dockerfile
+      args: { APP: www, PORT: 3000, SITE_DOMAIN: "${SITE_DOMAIN}", SITE_HOST_PREFIX: "${SITE_HOST_PREFIX:-}", COOKIE_DOMAIN: "${COOKIE_DOMAIN}" }
+    expose: ["3000"]
+    environment:
+      API_URL: http://api:3007
+      API_SERVICE_TOKEN: ${API_SERVICE_TOKEN}
+      COOKIE_DOMAIN: ${COOKIE_DOMAIN}
+    depends_on: { api: { condition: service_healthy } }
+
+  blog:
+    <<: *next
+    build:
+      context: *repo
+      dockerfile: docker/next.Dockerfile
+      args: { APP: blog, PORT: 3009, SITE_DOMAIN: "${SITE_DOMAIN}", SITE_HOST_PREFIX: "${SITE_HOST_PREFIX:-}", COOKIE_DOMAIN: "${COOKIE_DOMAIN}" }
+    expose: ["3009"]
+    environment:
+      API_URL: http://api:3007
+      API_SERVICE_TOKEN: ${API_SERVICE_TOKEN}
+
+  auth:
+    <<: *next
+    build:
+      context: *repo
+      dockerfile: docker/next.Dockerfile
+      args: { APP: auth, PORT: 3002, SITE_DOMAIN: "${SITE_DOMAIN}", SITE_HOST_PREFIX: "${SITE_HOST_PREFIX:-}" }
+    expose: ["3002"]
+    environment: *auth-env
+    depends_on: { api: { condition: service_healthy } }
+
+  app:
+    <<: *next
+    build:
+      context: *repo
+      dockerfile: docker/next.Dockerfile
+      args: { APP: app, PORT: 3001, SITE_DOMAIN: "${SITE_DOMAIN}", SITE_HOST_PREFIX: "${SITE_HOST_PREFIX:-}" }
+    expose: ["3001"]
+    environment: *auth-env
+    depends_on: { api: { condition: service_healthy } }
+
+  account:
+    <<: *next
+    build:
+      context: *repo
+      dockerfile: docker/next.Dockerfile
+      args: { APP: account, PORT: 3003, SITE_DOMAIN: "${SITE_DOMAIN}", SITE_HOST_PREFIX: "${SITE_HOST_PREFIX:-}" }
+    expose: ["3003"]
+    environment: *auth-env
+    depends_on: { api: { condition: service_healthy } }
+
+  api:
+    restart: unless-stopped
+    build:
+      context: *repo
+      dockerfile: docker/bun-service.Dockerfile
+      args: { APP: api, PORT: 3007 }
+    expose: ["3007"]
+    environment:
+      DATABASE_URL: sqlite:///data/api.db
+      STORAGE_PROVIDER: local
+      API_SERVICE_TOKEN: ${API_SERVICE_TOKEN}
+      TWO_FACTOR_ENCRYPTION_KEY: ${TWO_FACTOR_ENCRYPTION_KEY}
+      SITE_DOMAIN: ${SITE_DOMAIN}
+      SITE_HOST_PREFIX: ${SITE_HOST_PREFIX:-}
+      AUTH_URL: ${AUTH_URL}
+      APP_URL: ${APP_URL}
+      ACCOUNT_URL: ${ACCOUNT_URL}
+      MAIL_PROVIDER: ${MAIL_PROVIDER:-log}
+      MAIL_FROM: ${MAIL_FROM}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      SMTP_URL: ${SMTP_URL:-}
+      BOOKING_EMAIL: ${BOOKING_EMAIL:-}
+      SUPPORT_EMAIL: ${SUPPORT_EMAIL:-}
+      SUPERADMIN_EMAILS: ${SUPERADMIN_EMAILS:-}
+      BILLING_PROVIDER: mock
+    volumes:
+      - api-data:/data
+
+volumes:
+  api-data:

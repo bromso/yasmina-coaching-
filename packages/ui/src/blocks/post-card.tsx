@@ -13,6 +13,7 @@ import { useImageFallback } from "@repo/ui/components/image-fallback"
 import { initialsOf } from "@repo/ui/lib/initials"
 import { formatPostDate, toISODate } from "@repo/ui/lib/post-date"
 import { cn } from "@repo/ui/lib/utils"
+import type { ReactNode } from "react"
 
 export type PostCardTag = { tag: string; href: string }
 
@@ -28,6 +29,21 @@ export type PostCardProps = {
   featured?: boolean
   /** The title's heading level: `h2` in a list (the default), `h3` under a section's own `h2`. */
   headingAs?: "h2" | "h3"
+  /** The featured badge's text. Defaults to "Featured". */
+  featuredLabel?: string
+  /** The reading-time text, already worded. Defaults to "<n> min read". */
+  readingTime?: string
+  /** The date's `Intl` locale. Defaults to en-US. */
+  dateLocale?: string
+  /** Merged onto the card. */
+  className?: string
+  /** Merged onto the title. */
+  titleClassName?: string
+  /** An image (or any media) across the top of the card, edge to edge, its top corners following
+   * the card's. Without it the card is text only. */
+  media?: ReactNode
+  /** Merged onto the media's frame (its aspect ratio, say). */
+  mediaClassName?: string
 }
 
 /** A list-page teaser: title (linked), description, tags, author and reading time. */
@@ -41,6 +57,13 @@ export function PostCard({
   tags,
   featured,
   headingAs: Title = "h2",
+  featuredLabel = "Featured",
+  readingTime,
+  dateLocale,
+  className,
+  titleClassName,
+  media,
+  mediaClassName,
 }: PostCardProps) {
   const avatar = useImageFallback(author.avatar)
   const showAvatar = Boolean(author.avatar) && !avatar.failed
@@ -51,12 +74,24 @@ export function PostCard({
       data-featured={featured ? "" : undefined}
       className={cn(
         "relative transition-colors hover:border-foreground/20",
-        featured && "border-primary/40 bg-primary/5"
+        featured && "border-primary/40 bg-primary/5",
+        className
       )}
     >
+      {media && (
+        <div
+          data-slot="post-card-media"
+          className={cn("-mt-6 overflow-hidden rounded-t-[inherit] bg-muted", mediaClassName)}
+        >
+          {media}
+        </div>
+      )}
       <CardHeader>
-        {featured && <Badge className="mb-2 w-fit">Featured</Badge>}
-        <Title data-slot="card-title" className="font-semibold text-xl leading-none">
+        {featured && <Badge className="mb-2 w-fit">{featuredLabel}</Badge>}
+        <Title
+          data-slot="card-title"
+          className={cn("font-semibold text-xl leading-none", titleClassName)}
+        >
           {/* The stretched link: `after:inset-0` positions relative to the `relative` Card
               above (the anchor itself stays static), so the whole card is clickable while
               staying valid HTML — no nested <a>. Tags below carry their own links and escape
@@ -96,9 +131,9 @@ export function PostCard({
         </Avatar>
         <span>{author.name}</span>
         <span aria-hidden="true">·</span>
-        <time dateTime={toISODate(date)}>{formatPostDate(date)}</time>
+        <time dateTime={toISODate(date)}>{formatPostDate(date, dateLocale)}</time>
         <span aria-hidden="true">·</span>
-        <span>{readingMinutes} min read</span>
+        <span>{readingTime ?? `${readingMinutes} min read`}</span>
       </CardFooter>
     </Card>
   )

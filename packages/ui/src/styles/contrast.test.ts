@@ -5,17 +5,23 @@ import { readFileSync } from "node:fs"
  * Pins the WCAG contrast of the design tokens every app shares, in both themes, so a future token
  * tweak cannot quietly fall under 1.4.3 (text, 4.5:1) or 1.4.11 (the solid focus-ring colour,
  * 3:1). The colours are read from globals.css itself and converted OKLCH → sRGB (gamut-clipped, as
- * browsers render them) → relative luminance.
+ * browsers render them) → relative luminance. The coaching theme (`themes/coaching.css`, www and
+ * the blog) is checked the same way, its overrides layered over globals.css's tokens as the
+ * cascade does, plus the pairs only it has (the sun panels, the blue call to action).
  */
 
 type Rgb = [number, number, number]
 
-const css = readFileSync(new URL("./globals.css", import.meta.url), "utf8")
+const read = (path: string) => readFileSync(new URL(path, import.meta.url), "utf8")
+const base = read("./globals.css")
+const coaching = read("./themes/coaching.css")
 
 type Token = (name: string) => Rgb
 
-function block(selector: string): Token {
+/** Every `--name: oklch(…)` token of one `selector { … }` block of `css`. */
+function tokensOf(css: string, selector: string): Record<string, Rgb> {
   const start = css.indexOf(`${selector} {`)
+  if (start === -1) throw new Error(`no "${selector}" block`)
   const body = css.slice(start, css.indexOf("\n}", start))
   const tokens: Record<string, Rgb> = {}
   for (const [, name, l, c, h] of body.matchAll(
@@ -25,6 +31,15 @@ function block(selector: string): Token {
     const lightness = l.endsWith("%") ? Number.parseFloat(l) / 100 : Number(l)
     tokens[name] = oklchToRgb(lightness, Number(c), Number(h))
   }
+  return tokens
+}
+
+/** `selector`'s tokens from each sheet, a later sheet's winning as the cascade's would. */
+function block(selector: string, sheets: string[]): Token {
+  const tokens = Object.assign({}, ...sheets.map((css) => tokensOf(css, selector))) as Record<
+    string,
+    Rgb
+  >
   return (name) => {
     const rgb = tokens[name]
     if (!rgb) throw new Error(`${selector} has no --${name} oklch() token`)
@@ -179,18 +194,46 @@ function pairs(t: Token, dark: boolean): Pair[] {
   return list
 }
 
-for (const [theme, selector] of [
-  ["light", ":root"],
-  ["dark", ".dark"],
+/** The pairs only the coaching theme has: text on the sun panels, the blue call to action. */
+function coachingPairs(t: Token): Pair[] {
+  const text = 4.5
+  return [
+    { name: "foreground on sun", fg: t("foreground"), bg: t("sun"), min: text },
+    { name: "foreground on sun-soft", fg: t("foreground"), bg: t("sun-soft"), min: text },
+    {
+      name: "muted-foreground on sun-soft",
+      fg: t("muted-foreground"),
+      bg: t("sun-soft"),
+      min: text,
+    },
+    {
+      name: "brand-blue-foreground on brand-blue",
+      fg: t("brand-blue-foreground"),
+      bg: t("brand-blue"),
+      min: text,
+    },
+  ]
+}
+
+for (const [sheet, sheets] of [
+  ["shared", [base]],
+  ["coaching", [base, coaching]],
 ] as const) {
-  describe(`${theme} theme token contrast`, () => {
-    const tokens = block(selector)
-    for (const pair of pairs(tokens, theme === "dark")) {
-      test(`${pair.name} ≥ ${pair.min}:1`, () => {
-        expect(contrast(pair.fg, pair.bg)).toBeGreaterThanOrEqual(pair.min)
-      })
-    }
-  })
+  for (const [theme, selector] of [
+    ["light", ":root"],
+    ["dark", ".dark"],
+  ] as const) {
+    describe(`${sheet} ${theme} theme token contrast`, () => {
+      const tokens = block(selector, [...sheets])
+      const list = pairs(tokens, theme === "dark")
+      if (sheet === "coaching") list.push(...coachingPairs(tokens))
+      for (const pair of list) {
+        test(`${pair.name} ≥ ${pair.min}:1`, () => {
+          expect(contrast(pair.fg, pair.bg)).toBeGreaterThanOrEqual(pair.min)
+        })
+      }
+    })
+  }
 }
 
 describe("contrast()", () => {

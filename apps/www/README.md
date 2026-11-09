@@ -170,14 +170,16 @@ the copy. Pages are dynamic per locale like the rest of www.
 
 ## Look
 
-`src/styles/globals.css` imports the shared design system and then overrides the colour tokens for
-this app only: a warm cream background, charcoal text and buttons, one blue (`--brand-blue`) and a
-yellow "sun" (`--sun`, `--sun-soft`) for the editorial sections, each with a dark-theme value.
-Every text pair clears WCAG 4.5:1 in both themes; keep it that way when retuning. Headlines are set
-in `fontDisplay` (Fraunces, from `@repo/ui/lib/fonts`): the layout adds its CSS variable to
-`<body>`, the stylesheet points `--display-family` at it, and an unlayered `h1, h2` rule applies
-it at weight 400 even where a shared block says `font-semibold`. The other apps keep the shared
-palette and Inter.
+`src/styles/globals.css` imports the shared design system and then the coaching theme,
+`@repo/ui/themes/coaching.css`, which overrides the colour tokens for www and the blog alike: a
+warm cream background, charcoal text and buttons, one blue (`--brand-blue`) and a yellow "sun"
+(`--sun`, `--sun-soft`) for the editorial sections, each with a dark-theme value. Every text pair
+clears WCAG 4.5:1 in both themes, pinned by `packages/ui`'s contrast test; keep it that way when
+retuning, and remember the blog changes with it. Headlines are set in `fontDisplay` (Fraunces, from
+`@repo/ui/lib/fonts`): the layout adds its CSS variable to `<body>`, the theme points
+`--display-family` at it, and an unlayered `h1, h2` rule applies it at weight 400 even where a
+shared block says `font-semibold`. www's own motion, breakpoints and high-contrast rules stay in
+its stylesheet. The other apps keep the shared palette and Inter.
 
 ## Contact form (the api's waitlist)
 
@@ -245,7 +247,8 @@ against the new waitlist row or booking order and sends its mails in that langua
 - **Content** — `src/content/`: the copy each view or page renders.
 - **App-only components** — `src/components/`. Anything shared by two apps belongs in
   `packages/ui` instead.
-- **Styles** — `src/styles/globals.css` starts with `@import "@repo/ui/globals.css";`; fonts, theme,
+- **Styles** — `src/styles/globals.css` starts with `@import "@repo/ui/globals.css";` and
+  `@import "@repo/ui/themes/coaching.css";`; fonts, theme,
   skip link and web vitals come from `@repo/ui` too.
 
 See the root [README](../../README.md) and [CLAUDE.md](../../CLAUDE.md) for the conventions shared by
