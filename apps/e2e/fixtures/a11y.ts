@@ -18,6 +18,22 @@ export async function axeViolations(page: Page): Promise<Violation[]> {
   await page
     .waitForFunction(() => document.title !== "", undefined, { timeout: 5000 })
     .catch(() => {})
+  // Let finite CSS animations finish first: a step that fades in (opacity 0 → 1) would otherwise be
+  // measured half-transparent, and axe reports colour contrast for a frame no reader sees for
+  // long. Endless ones (spinners, pulses) are left running; a stuck one gives up after 3 s.
+  await page
+    .evaluate(() =>
+      Promise.race([
+        Promise.all(
+          document
+            .getAnimations()
+            .filter((a) => a.effect?.getComputedTiming().endTime !== Number.POSITIVE_INFINITY)
+            .map((a) => a.finished.catch(() => undefined))
+        ),
+        new Promise((resolve) => setTimeout(resolve, 3000)),
+      ])
+    )
+    .catch(() => {})
   const results = await new AxeBuilder({ page }).withTags([...WCAG_TAGS]).analyze()
   return results.violations as Violation[]
 }
