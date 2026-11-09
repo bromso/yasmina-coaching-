@@ -20,6 +20,12 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+      # The AI SDK moves by hand: @ai-sdk/react pins one exact `ai`, so `ai`, @ai-sdk/react and
+      # @ai-sdk/anthropic must be bumped together to that version (CLAUDE.md, Dependency
+      # Versioning). Dependabot bumps each to its own latest, which leaves nested copies in
+      # bun.lock and fails scripts/ai-sdk-lockstep.test.ts (PRs #2 and #6).
+      - dependency-name: "ai"
+      - dependency-name: "@ai-sdk/*"
     # A dependency joins the first group it matches.
     groups:
       # Storybook's packages must stay on one version: never update one of them alone.
