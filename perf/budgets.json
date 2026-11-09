@@ -112,10 +112,10 @@
       "cls": 0.021
     },
     "www:/": {
-      "score": 75,
-      "lcpMs": 5790,
-      "tbtMs": 550,
-      "cls": 0.021
+      "score": 64,
+      "lcpMs": 5780,
+      "tbtMs": 620,
+      "cls": 0.02
     }
   },
   "vitals": {
