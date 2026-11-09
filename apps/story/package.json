@@ -32,12 +32,12 @@
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
-    "@storybook/addon-a11y": "^10.6.5",
-    "@storybook/addon-docs": "^10.6.5",
-    "@storybook/addon-links": "^10.6.5",
-    "@storybook/addon-themes": "^10.6.5",
-    "@storybook/addon-vitest": "^10.6.5",
-    "@storybook/react-vite": "^10.6.5",
+    "@storybook/addon-a11y": "^10.6.6",
+    "@storybook/addon-docs": "^10.6.6",
+    "@storybook/addon-links": "^10.6.6",
+    "@storybook/addon-themes": "^10.6.6",
+    "@storybook/addon-vitest": "^10.6.6",
+    "@storybook/react-vite": "^10.6.6",
     "@tailwindcss/vite": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
@@ -47,7 +47,7 @@
     "@vitest/coverage-istanbul": "^4.1.12",
     "@vitest/coverage-v8": "^4.1.12",
     "playwright": "catalog:",
-    "storybook": "^10.6.5",
+    "storybook": "^10.6.6",
     "vite": "^6.4.5",
     "vitest": "^4.1.12"
   }
