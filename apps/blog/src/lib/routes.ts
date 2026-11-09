@@ -1,1 +1,2 @@
-export const PUBLIC_ROUTES = ["/"] as const
+/** The blog's static routes: the Swedish index and the English one. */
+export const PUBLIC_ROUTES = ["/", "/en"] as const

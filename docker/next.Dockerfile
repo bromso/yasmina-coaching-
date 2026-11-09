@@ -22,6 +22,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Where cross-app links point. The default is right for the local Compose stack; a deploy passes its domain.
 ARG SITE_DOMAIN=brand.localhost
 ENV SITE_DOMAIN=${SITE_DOMAIN}
+# Optional host prefix (`yas-` → yas-www.<domain>), see packages/sites/README.md. Empty: none.
+ARG SITE_HOST_PREFIX=
+ENV SITE_HOST_PREFIX=${SITE_HOST_PREFIX}
 # The static apps bake the consent cookie's domain in at build time (see the consent banner in each
 # root layout); empty behaves exactly as today — a host-only cookie.
 ARG COOKIE_DOMAIN=
@@ -39,6 +42,7 @@ ARG APP
 ARG PORT=3000
 # Same domain as the build: app, auth and account resolve their links per request from this ENV.
 ARG SITE_DOMAIN=brand.localhost
+ARG SITE_HOST_PREFIX=
 # Debian security patches for the base image's OS packages (gzip, libpcre2, libsqlite3, libssl,
 # perl-base, …) — the base image is pinned by BUN_VERSION and only gets these otherwise when that
 # tag is bumped. Runs as root, before USER switches away from it below; one layer so the apt lists
@@ -52,7 +56,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
   && rm -rf /var/lib/apt/lists/*
 RUN groupadd --system --gid 1001 nodejs && useradd --uid 1001 --gid nodejs --no-create-home nextjs
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 HOSTNAME=0.0.0.0 PORT=${PORT} APP=${APP} \
-    SITE_DOMAIN=${SITE_DOMAIN}
+    SITE_DOMAIN=${SITE_DOMAIN} SITE_HOST_PREFIX=${SITE_HOST_PREFIX}
 COPY --from=builder --chown=nextjs:nodejs /app/apps/${APP}/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/${APP}/.next/static ./apps/${APP}/.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/apps/${APP}/public ./apps/${APP}/public

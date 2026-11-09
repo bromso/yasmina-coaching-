@@ -18,6 +18,10 @@ Every URL is derived from a single variable, `SITE_DOMAIN`:
 - A `.localhost` domain (e.g. `acme.localhost`) keeps the same `http://<id>.<domain>:<port>` form —
   useful for a renamed local stack.
 - Anything else is a real domain: `https://<id>.<domain>`, no port.
+- `SITE_HOST_PREFIX` (optional, letters, digits and hyphens) goes in front of the app id on a real
+  domain: `SITE_HOST_PREFIX=yas-` with `SITE_DOMAIN=undefined.guru` gives
+  `https://yas-www.undefined.guru`. For a staging stack that shares a parent domain; ignored on
+  `.localhost`. Like `SITE_DOMAIN` it is baked into the static apps at build.
 - A leading `https://` / `http://` or dot and trailing slashes are dropped, so `https://brand.com`
   and `.brand.com` both mean `brand.com`.
 - In production, an unset `SITE_DOMAIN` falls back to the dev form and logs the warning

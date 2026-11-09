@@ -11,6 +11,7 @@ import type { Locale } from "@repo/i18n/locales"
 import { BOOKING_FORMS, type BookingFormCopy } from "@/content/booking-forms"
 import { INNER, INNER_SERVICE_IDS } from "@/content/inner"
 import { formatKr, INNER_PRICES, type InnerServiceId } from "@/content/inner-pricing"
+import type { DonePayment } from "@/lib/mock-payment"
 
 /**
  * Every word on the booking pages (`/book`, `/book/<offering>`, `/book/done`, `/book/manage/…`),
@@ -89,6 +90,8 @@ export type BookingContent = {
     manageHint: string
     next: string
     nextItems: { instant: string[]; request: string[] }
+    /** How the booking was paid, from `?paid=` (checked against `DONE_PAYMENTS`). */
+    paid: Record<DonePayment, string>
     home: string
   }
   manage: {
@@ -301,6 +304,14 @@ const sv: BookingContent = {
         "När du säger ja bekräftas bokningen via e-post.",
       ],
     },
+    paid: {
+      apple_pay: "Betalt med Apple Pay (testläge).",
+      google_pay: "Betalt med Google Pay (testläge).",
+      swish: "Betalt med Swish (testläge).",
+      invoice: "Du betalar mot faktura, som skickas till din e-post med 30 dagars betalningstid.",
+      invoice_org: "Du betalar mot faktura, som skickas dit du angav med 30 dagars betalningstid.",
+      invoice_quote: "Du betalar mot faktura, som skickas när Yasmina har bekräftat priset.",
+    },
     home: "Tillbaka till startsidan",
   },
   manage: {
@@ -512,6 +523,14 @@ const en: BookingContent = {
         "When you say yes, the booking is confirmed by email.",
       ],
     },
+    paid: {
+      apple_pay: "Paid with Apple Pay (test mode).",
+      google_pay: "Paid with Google Pay (test mode).",
+      swish: "Paid with Swish (test mode).",
+      invoice: "You pay by invoice, sent to your email with 30 days to pay.",
+      invoice_org: "You pay by invoice, sent where you said with 30 days to pay.",
+      invoice_quote: "You pay by invoice, sent once Yasmina has confirmed the price.",
+    },
     home: "Back to the home page",
   },
   manage: {
@@ -548,6 +567,25 @@ const INNER_SERVICE_OF = new Map<OfferingKey, InnerServiceId>(
   })
 )
 
+/** A fixed price: the amount as the price table has it, and what one payment covers. */
+export type OfferingAmount = { amount: number; per: "session" | "month" }
+
+/**
+ * The fixed price of `key` from `INNER_PRICES`: a Ledarskap inifrån start call (per session) or
+ * the group (per person and month). `null` for every offering priced in writing and for the
+ * members' sessions, which the membership covers. Adding a price to the table makes the payment
+ * step offer every method for that offering (`methodsFor` in `src/lib/mock-payment.ts`).
+ */
+export function amountFor(key: OfferingKey): OfferingAmount | null {
+  if (memberKeys.includes(key)) return null
+  const id = INNER_SERVICE_OF.get(key)
+  if (!id) return null
+  const prices = INNER_PRICES[id]
+  return prices.start === undefined
+    ? { amount: prices.monthly, per: "month" }
+    : { amount: prices.start, per: "session" }
+}
+
 /**
  * The price line under an offering on `/book` and `/book/<key>`: the fixed price for a
  * Ledarskap inifrån start call or group (with VAT as `audience` pays it), the membership note for
@@ -556,11 +594,10 @@ const INNER_SERVICE_OF = new Map<OfferingKey, InnerServiceId>(
 export function priceLineFor(key: OfferingKey, audience: BookingAudience, locale: Locale): string {
   const booking = BOOKING[locale]
   if (memberKeys.includes(key)) return booking.innerPrice.member
-  const id = INNER_SERVICE_OF.get(key)
-  if (!id) return booking.priceNote
-  const prices = INNER_PRICES[id]
+  const price = amountFor(key)
+  if (!price) return booking.priceNote
   const vat = booking.innerPrice.vat[audience]
-  return prices.start === undefined
-    ? booking.innerPrice.groupMonthly(formatKr(prices.monthly, locale), vat)
-    : booking.innerPrice.start(formatKr(prices.start, locale), vat)
+  return price.per === "month"
+    ? booking.innerPrice.groupMonthly(formatKr(price.amount, locale), vat)
+    : booking.innerPrice.start(formatKr(price.amount, locale), vat)
 }

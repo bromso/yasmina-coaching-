@@ -25,7 +25,7 @@ export const RUNS = 3
 export const LIGHTHOUSE_PAGES: PerfPage[] = [
   { app: "www", path: "/", auth: "none" },
   { app: "docs", path: "/getting-started", auth: "none" },
-  { app: "blog", path: "/welcome", auth: "none" },
+  { app: "blog", path: "/att-leda-genom-en-kris", auth: "none" },
   { app: "help", path: "/getting-started/create-an-account", auth: "none" },
   { app: "jobs", path: "/senior-fullstack-engineer", auth: "none" },
   { app: "auth", path: "/login", auth: "none" },

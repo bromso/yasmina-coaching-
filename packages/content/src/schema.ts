@@ -4,6 +4,10 @@ import { z } from "zod"
 export const TAG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 export const SLUG_PATTERN = TAG_PATTERN
 
+/** The languages a post can be written in. */
+export const POST_LOCALES = ["sv", "en"] as const
+export type PostLocale = (typeof POST_LOCALES)[number]
+
 export interface Author {
   name: string
   bio: string
@@ -36,6 +40,10 @@ const postFrontmatterShape = {
   cover: coverSchema.optional(),
   draft: z.boolean().optional(),
   type: z.string().min(1).default("Blog Post"),
+  /** The post's language. Optional, defaulting to English, so a blog in one language never sets it. */
+  locale: z.enum(POST_LOCALES).default("en"),
+  /** The slug of the post this one translates (the original, in another language). */
+  translationOf: z.string().regex(SLUG_PATTERN, "must be a post's slug").optional(),
 }
 
 /** Strict: an unknown key refuses the document. Used to validate a post before it is trusted. */

@@ -19,8 +19,20 @@ import {
   NotesField,
   value,
 } from "@/components/booking/details-fields"
+import { LazyPaymentStep } from "@/components/booking/lazy-payment-step"
 import { useBookingCopy, useLocale } from "@/components/booking/locale-provider"
 import { StepIndicator } from "@/components/booking/step-indicator"
+import {
+  checkDetails,
+  fieldText,
+  PAYMENT_FIELDS,
+  primaryClass,
+  StepNav,
+  StepPanel,
+  useMounted,
+} from "@/components/booking/step-panel"
+import { useBookingSteps } from "@/components/booking/use-booking-steps"
+import type { OfferingAmount } from "@/content/booking"
 import type { BookingFormState } from "@/lib/booking"
 import {
   bookableRange,
@@ -44,6 +56,12 @@ type InstantBookingProps = {
   initialAudience: BookingAudience
   /** `?package=<id>` from a manage page: one extra session on an existing programme. */
   packageId?: string
+  /** The offering's name, for the payment step's summary. */
+  title: string
+  /** Its fixed price, or `null` when it is priced in writing (invoice only). */
+  price: OfferingAmount | null
+  /** `member` (a members' session or an extra programme session) has no payment step. */
+  flow: "instant" | "member"
 }
 
 /** One free slot as `/api/booking/availability` hands it back: ISO UTC instants. */
@@ -67,8 +85,18 @@ const gridDate = (day: string) => {
   return new Date(y ?? 1970, (m ?? 1) - 1, d ?? 1)
 }
 
+/** Each step's fields, so a refusal from the server reopens the step that holds the field. */
+const STEP_FIELDS = [
+  ["slots"],
+  ["audience", "name", "email", "organisation", "phone", "location", "notes"],
+  PAYMENT_FIELDS,
+]
+
 /**
- * Pick a time (step 1), then your details (step 2); `/book/done` is step 3. Free slots come from
+ * Pick a time (step 1), your details (step 2), then pay (step 3, the mock in
+ * `src/lib/mock-payment.ts`); `/book/done` is the last. A members' session or an extra session on a
+ * programme skips payment: step 2 books it. Every step stays mounted, so going back keeps what
+ * was typed. Free slots come from
  * this origin's `/api/booking/availability`, one month at a time, and show in Swedish time (named
  * in the page's language). The
  * calendar needs JavaScript, so the server-rendered HTML is the loading note plus a `<noscript>`
@@ -81,6 +109,9 @@ export function InstantBooking({
   sessions,
   initialAudience,
   packageId,
+  title,
+  price,
+  flow,
 }: InstantBookingProps) {
   const copy = useBookingCopy()
   const locale = useLocale()
@@ -96,7 +127,23 @@ export function InstantBooking({
   const requested = useRef(new Set<string>())
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
   const [picked, setPicked] = useState<BookingSlot[]>([])
-  const [step, setStep] = useState<1 | 2>(1)
+  const [details, setDetails] = useState({ email: "", location: "" })
+  const steps = copy.steps[flow]
+  const pays = flow === "instant"
+  // After a slot conflict the api's message shows and the times are picked again from fresh data.
+  const { step, goTo, formRef, shown, fail, submit, onSubmit, setLocked, stepClick } =
+    useBookingSteps({
+      state,
+      pending,
+      fields: STEP_FIELDS,
+      directSubmitStep: pays ? undefined : 2,
+      onConflict: () => {
+        requested.current.clear()
+        setMonths({})
+        setPicked([])
+      },
+    })
+  const mountPayment = useMounted(pays && step >= 2)
   const [audience, setAudience] = useState<BookingAudience>(
     (value(state, "audience") as BookingAudience) || initialAudience
   )
@@ -108,16 +155,6 @@ export function InstantBooking({
     setToday(now)
     setMonth(firstOfMonth(now))
   }, [])
-
-  // After a slot conflict the api's message shows and the times are picked again from fresh data.
-  useEffect(() => {
-    if (!state.ok && state.code === "CONFLICT") {
-      requested.current.clear()
-      setMonths({})
-      setPicked([])
-      setStep(1)
-    }
-  }, [state])
 
   const key = monthKey(month)
   const current = months[key]
@@ -178,9 +215,30 @@ export function InstantBooking({
               ? text.noSlotsThisDay
               : ""
 
+  const toPayment = () => {
+    if (fail(checkDetails(formRef.current, copy.check))) return
+    setDetails({
+      email: fieldText(formRef.current, "email"),
+      location: fieldText(formRef.current, "location"),
+    })
+    goTo(3)
+  }
   return (
-    <form action={action} noValidate className="grid grid-cols-1 gap-8">
-      <StepIndicator steps={copy.steps} current={step} stepOf={copy.stepOf} />
+    <form
+      ref={formRef}
+      action={action}
+      noValidate
+      className="grid grid-cols-1 gap-8"
+      // Only the last step books: the payment step once authorised, or a member's details step.
+      onSubmit={onSubmit}
+    >
+      <StepIndicator
+        steps={steps}
+        current={step}
+        stepOf={copy.stepOf}
+        doneLabel={copy.stepper.done}
+        onStepClick={stepClick}
+      />
       <noscript>
         <p className="rounded-2xl border border-border bg-background/70 px-4 py-3 text-sm">
           {text.noScript}{" "}
@@ -189,14 +247,12 @@ export function InstantBooking({
           </a>
         </p>
       </noscript>
-      <FormMessage state={state} />
+      {/* On the payment step the error shows beside the pay button instead. */}
+      {step !== 3 && <FormMessage state={state} />}
       {packageId && (
         <p className="rounded-2xl border border-border bg-background/70 px-4 py-3 text-sm">
           {text.packageExtraNote}
         </p>
-      )}
-      {!packageId && sessions > 1 && (
-        <p className="text-muted-foreground text-sm">{text.packageHint(sessions)}</p>
       )}
 
       <input type="hidden" name="offering" value={offering} />
@@ -205,9 +261,12 @@ export function InstantBooking({
         <input key={slot.startsAt} type="hidden" name="slots" value={slot.startsAt} />
       ))}
 
-      <div className="grid grid-cols-1 gap-8" hidden={step === 2}>
+      <StepPanel n={1} active={step === 1} heading={steps[0] ?? ""}>
+        {!packageId && sessions > 1 && (
+          <p className="text-muted-foreground text-sm">{text.packageHint(sessions)}</p>
+        )}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[auto_1fr]">
-          <div className="rounded-3xl bg-background w-fit p-1 sm:p-2 shadow-xs">
+          <div className="w-fit max-w-full rounded-3xl bg-background p-1 shadow-xs sm:p-2">
             {today ? (
               <Calendar
                 mode="single"
@@ -244,7 +303,7 @@ export function InstantBooking({
                 className="[--cell-size:--spacing(8)] max-sm:p-1 sm:[--cell-size:--spacing(10)]"
               />
             ) : (
-              <div className="h-80 w-72" aria-hidden="true" />
+              <div className="h-80 w-72 max-w-full" aria-hidden="true" />
             )}
           </div>
           <div className="grid content-start gap-4">
@@ -255,7 +314,7 @@ export function InstantBooking({
               <Button
                 type="button"
                 variant="outline"
-                className="w-fit rounded-full"
+                className="min-h-11 w-fit rounded-full"
                 onClick={() => {
                   requested.current.delete(key)
                   setMonths((m) => Object.fromEntries(Object.entries(m).filter(([k]) => k !== key)))
@@ -332,56 +391,96 @@ export function InstantBooking({
                 </li>
               ))}
             </ul>
-            <FieldError name="slots" state={state} />
-            <Button
-              type="button"
-              size="lg"
-              className="w-fit rounded-full px-6"
-              onClick={() => setStep(2)}
-            >
+          </div>
+        )}
+        <FieldError name="slots" state={shown} />
+        {picked.length > 0 && (
+          <StepNav backLabel={copy.stepper.back}>
+            <Button type="button" size="lg" className={primaryClass} onClick={() => goTo(2)}>
               {text.continueLabel}
               <Icon icon="lucide:arrow-right" aria-hidden="true" />
             </Button>
-          </div>
+          </StepNav>
         )}
-        {picked.length === 0 && <FieldError name="slots" state={state} />}
-      </div>
+      </StepPanel>
 
-      {step === 2 && (
-        <div className="grid gap-6">
-          <div className="grid gap-2 rounded-3xl bg-background p-5 shadow-xs">
-            <h3 className="font-display text-xl">{text.selectedHeading}</h3>
-            <ul className="grid gap-1 text-sm">
-              {picked.map((slot) => (
-                <li key={slot.startsAt}>{formatRange(slot.startsAt, slot.endsAt, locale)}</li>
-              ))}
-            </ul>
-            <Button type="button" variant="link" className="w-fit px-0" onClick={() => setStep(1)}>
-              {text.changeTimes}
-            </Button>
-          </div>
-          <AudienceField
-            audiences={audiences}
-            audience={audience}
-            onChange={setAudience}
-            state={state}
-          />
-          <CustomerFields
-            state={state}
-            organisation={audience === "organisation" ? "optional" : "hidden"}
-          />
-          <LocationField locations={locations} state={state} />
-          <NotesField state={state} />
-          <p className="text-muted-foreground text-xs">{text.legal}</p>
+      <StepPanel n={2} active={step === 2} heading={steps[1] ?? ""}>
+        <div className="grid gap-2 rounded-3xl bg-background p-5 shadow-xs">
+          <h3 className="font-display text-xl">{text.selectedHeading}</h3>
+          <ul className="grid gap-1 text-sm">
+            {picked.map((slot) => (
+              <li key={slot.startsAt}>{formatRange(slot.startsAt, slot.endsAt, locale)}</li>
+            ))}
+          </ul>
           <Button
-            type="submit"
-            size="lg"
-            disabled={pending || picked.length === 0}
-            className="w-fit rounded-full px-6"
+            type="button"
+            variant="link"
+            className="min-h-11 w-fit px-0"
+            onClick={() => goTo(1)}
           >
-            {pending ? text.submitting : text.submit}
+            {text.changeTimes}
           </Button>
         </div>
+        <AudienceField
+          audiences={audiences}
+          audience={audience}
+          onChange={setAudience}
+          state={shown}
+        />
+        <CustomerFields
+          state={shown}
+          organisation={audience === "organisation" ? "optional" : "hidden"}
+        />
+        <LocationField locations={locations} state={shown} />
+        <NotesField state={shown} />
+        <p className="text-muted-foreground text-xs">{text.legal}</p>
+        <StepNav backLabel={copy.stepper.back} onBack={() => goTo(1)}>
+          {pays ? (
+            <Button type="button" size="lg" className={primaryClass} onClick={toPayment}>
+              {text.toPayment}
+              <Icon icon="lucide:arrow-right" aria-hidden="true" />
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              size="lg"
+              disabled={pending || picked.length === 0}
+              className={primaryClass}
+              onClick={(event) => {
+                if (fail(checkDetails(formRef.current, copy.check))) event.preventDefault()
+              }}
+            >
+              {pending ? text.submitting : text.submit}
+            </Button>
+          )}
+        </StepNav>
+      </StepPanel>
+
+      {pays && (
+        <StepPanel n={3} active={step === 3} heading={steps[2] ?? ""}>
+          {mountPayment && (
+            <LazyPaymentStep
+              active={step === 3}
+              price={price}
+              audience={audience}
+              offering={title}
+              when={picked.map((slot) => formatRange(slot.startsAt, slot.endsAt, locale))}
+              location={
+                details.location
+                  ? copy.locationLabels[details.location as BookingLocation]
+                  : undefined
+              }
+              email={details.email}
+              state={state}
+              pending={pending}
+              submit={submit}
+              onLockChange={setLocked}
+            />
+          )}
+          <StepNav backLabel={copy.stepper.back} onBack={stepClick && (() => goTo(2))}>
+            <span />
+          </StepNav>
+        </StepPanel>
       )}
     </form>
   )

@@ -17,11 +17,11 @@ for (const app of apps) {
   })
 }
 
-// www defaults to Swedish (English only once picked); the other apps render their chrome in
-// English for an anonymous visitor.
+// www and the blog's root default to Swedish (www's English only once picked, the blog's under
+// /en); the other apps render their chrome in English for an anonymous visitor.
 const english = { nav: "Site", skip: "Skip to content" }
 const swedish = { nav: "Webbplats", skip: "Hoppa till innehållet" }
-const chrome = { www: swedish, app: english, auth: english, docs: english, blog: english } as const
+const chrome = { www: swedish, app: english, auth: english, docs: english, blog: swedish } as const
 
 for (const app of ["www", "app", "auth", "docs", "blog"] as const) {
   test(`${app}: site nav and skip link`, async ({ page }) => {

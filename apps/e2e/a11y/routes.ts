@@ -153,11 +153,15 @@ export const A11Y_PAGES: A11yPage[] = [
   { app: "jobs", path: "/customer-support-specialist", route: "/[slug]", auth: "none" },
   { app: "jobs", path: "/senior-fullstack-engineer/apply", route: "/[slug]/apply", auth: "none" },
   notFound("jobs"),
-  // blog
+  // blog (Swedish at the root, English under /en: one post and its translation, a tag, the author)
   { app: "blog", path: "/", auth: "none" },
-  { app: "blog", path: "/welcome", route: "/[slug]", auth: "none" },
-  { app: "blog", path: "/tags/guides", route: "/tags/[tag]", auth: "none" },
-  { app: "blog", path: "/authors/team", route: "/authors/[author]", auth: "none" },
+  { app: "blog", path: "/en", auth: "none" },
+  { app: "blog", path: "/att-leda-genom-en-kris", route: "/[slug]", auth: "none" },
+  { app: "blog", path: "/en/leading-through-a-crisis", route: "/en/[slug]", auth: "none" },
+  { app: "blog", path: "/tags/kris", route: "/tags/[tag]", auth: "none" },
+  { app: "blog", path: "/en/tags/crisis", route: "/en/tags/[tag]", auth: "none" },
+  { app: "blog", path: "/authors/yasmina", route: "/authors/[author]", auth: "none" },
+  { app: "blog", path: "/en/authors/yasmina", route: "/en/authors/[author]", auth: "none" },
   notFound("blog"),
 ]
 
@@ -186,7 +190,12 @@ export const EXCLUDED: Array<{ app: AppId; route: string; reason: string }> = [
   {
     app: "blog",
     route: "/page/[n]",
-    reason: "built only past 12 posts (dynamicParams false); the starter ships one post",
+    reason: "built only past 12 posts in a language (dynamicParams false)",
+  },
+  {
+    app: "blog",
+    route: "/en/page/[n]",
+    reason: "built only past 12 posts in a language (dynamicParams false)",
   },
 ]
 

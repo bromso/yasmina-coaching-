@@ -7,7 +7,8 @@ and the same shape of build gate, with different frontmatter and routes for what
 ## Writing blog content
 
 `apps/blog` is a fully static shell for MDX posts (`blog.brand.localhost:3009` in development,
-`blog.<SITE_DOMAIN>` in production): every route is prerendered at build time, and the only
+`blog.<SITE_DOMAIN>` in production) for Yasmina Petersson's notes on leadership, in Swedish at the
+root and in English under `/en`: every route is prerendered at build time, and the only
 runtime calls it makes are the shared telemetry/analytics routes every app has. The engine is
 `@repo/content` (pure validation, feeds and link checking — no React, no Next, no fumadocs) plus
 fumadocs-mdx (the MDX compiler) and `@repo/ui/components/mdx` (the components a post's body can
@@ -16,23 +17,35 @@ CLAUDE.md's **Content.** paragraph; this guide is about writing a post.
 
 ### Writing a post
 
-Add a file to `apps/blog/content/posts/`. Its file name, minus `.mdx`, becomes the slug and the
-post's address: `my-first-post.mdx` is published at `/my-first-post`. The name must be lowercase
-kebab-case (letters, digits and hyphens only), and the post must sit directly in that directory —
-no subfolders. A few names are reserved because the blog already serves a route there: `page`,
-`tags`, `authors`, `opengraph-image`, `twitter-image`, `rss`, `atom`, `feed`, `sitemap`, `robots`,
-`manifest`, `api` and `files` — a post with one of them fails the build with
-`slug "<x>" is reserved`.
+Add a file to `apps/blog/content/posts/`. Its file name, minus `.mdx`, becomes the slug, and the
+slug the post's address:
+
+- **A Swedish post** is `<slug>.mdx` with `locale: sv`, published at `/<slug>`:
+  `att-leda-genom-en-kris.mdx` → `/att-leda-genom-en-kris`.
+- **An English post** is `en-<slug>.mdx` with `locale: en`, published at `/en/<slug>`:
+  `en-leading-through-a-crisis.mdx` → `/en/leading-through-a-crisis`. Its slug is the whole file
+  name (`en-leading-through-a-crisis`); the address drops the `en-`.
+
+The name must be lowercase kebab-case (letters, digits and hyphens only — so `å`, `ä` and `ö`
+become `a`, `a` and `o`), and the post must sit directly in that directory — no subfolders. A few
+names are reserved because the blog already serves a route there: `page`, `tags`, `authors`,
+`opengraph-image`, `twitter-image`, `rss`, `atom`, `feed`, `sitemap`, `robots`, `manifest`,
+`api`, `files`, `sv` and `en` — a post with one of them (or an English post whose part after
+`en-` is one of them) fails the build with `slug "<x>" is reserved`.
 
 Frontmatter is YAML between `---` lines at the top of the file:
 
 ```mdx
 ---
-title: My first post
+title: Att leda genom en kris
 description: One sentence for listings, search results and feeds.
 date: 2026-10-08
-author: team
-tags: [guides]
+author: yasmina
+locale: sv
+tags: [ledarskap, kris]
+cover:
+  src: /media/portrait-study-800.jpg
+  alt: Yasmina Petersson sitter i ett arbetsrum med böcker, en tänd lampa och ett skrivbord vid fönstret, och ler.
 ---
 
 The body starts here, as regular MDX.
@@ -46,35 +59,61 @@ The body starts here, as regular MDX.
 | `updated` | no | Same format as `date`. Drives "Updated" on the post header and `lastModified` in feeds and the sitemap. |
 | `author` | yes | A key of `apps/blog/content/authors.ts` (see **Authors** below). |
 | `tags` | no (default `[]`) | Lowercase kebab-case strings. |
-| `cover` | no | `{ src: "/cover.png", alt: "…" }` — `alt` is required once `cover` is set. Make it 1200×630: `PostHeader` renders it at that size (and aspect ratio), and it doubles as the `BlogPosting` JSON-LD image. |
+| `cover` | no | `{ src: "/media/<name>-800.jpg", alt: "…" }` — one of the photos in **Covers** below, `alt` (required once `cover` is set) in the post's language. The post page shows it in a rounded 16:10 frame, WebP first; it doubles as the `BlogPosting` JSON-LD image. |
 | `draft` | no | `true` keeps the post out of production builds (see **Drafts and scheduling**). |
 | `type` | no (default `"Blog Post"`) | Reserved for a later Open Knowledge Format export; leave it unless you know you need it. |
+| `locale` | no (default `"en"`) | `sv` or `en`. On this blog, write it on every post: `sv` for `<slug>.mdx`, `en` for `en-<slug>.mdx` (see **Languages and translations**). |
+| `translationOf` | no | On a translation, the slug of the original in the other language — on this blog, an English post names its Swedish original (`translationOf: att-leda-genom-en-kris`). |
 
 An unknown frontmatter key fails the build — there is no silent typo.
 
 ### Authors
 
-Every post's `author` must be a key of `apps/blog/content/authors.ts`:
+Every post's `author` must be a key of `apps/blog/content/authors.ts`. Today there is one,
+`yasmina`: Yasmina Petersson, with her bio in both languages and a square crop of www's office
+portrait (`/authors/yasmina.jpg`) as the avatar.
 
-```ts
-export const authors: Record<string, Author> = {
-  team: {
-    name: `${BRAND_NAME} team`,
-    bio: "The people building this product.",
-    avatar: "/authors/team.svg",
-  },
-}
-```
+Add a new author there — `name`, `bio` (one per language), `avatar` (a path under `public/`), and
+optionally `links` (`{ label, href }[]`) — before writing a post under their name. A post naming a
+key that isn't there fails the build with `unknown author "<name>"`.
 
-Add a new author there — `name`, `bio`, `avatar` (a path under `public/`), and optionally `links`
-(`{ label, href }[]`) — before writing a post under their name. A post naming a key that isn't
-there fails the build with `unknown author "<name>"`.
+### Languages and translations
+
+The blog has two languages, each with its own index, pages, tags, authors and feeds: Swedish at
+the root, English under `/en`. Every list shows only its own language's posts, so a tag is
+per language too (`/tags/ledarskap` and `/en/tags/leadership` are separate pages).
+
+A post and its translation are linked by `translationOf` on the translation, naming the
+original's slug. Each then links to the other: the header's language link opens the counterpart
+(or the other index, for a post without one), and both pages carry hreflang `alternate` links, as
+does the sitemap. The original needs nothing. `translationOf` must name a post that exists (a
+draft counts) in the other language, and each original has at most one translation per language.
+
+### Covers
+
+The photos under `apps/blog/public/media/`, copied from www at 800 px on the long side, each a
+`<name>-800.jpg` beside a `<name>-800.webp`: `portrait-office`, `portrait-study`, `portrait-park`,
+`portrait-outdoors`, `portrait-library`, `session-lounge`, `workshop-whiteboard`,
+`workshop-table`, `workshop-standing`, `keynote-stage`, `keynote-audience`, `inner-meditation`,
+`inner-greenhouse` and `inner-cafe`. Write the `.jpg` as `cover.src`; the page serves the WebP
+first. `apps/blog/content/media.ts` lists each one's size and www's own alt text in both
+languages — copy the one in the post's language into `cover.alt`.
 
 ### Tags
 
-`tags` is a plain array of lowercase kebab-case strings (`["guides", "release-notes"]`). A tag
-with an uppercase letter, a space or an underscore fails the build. Tags drive `/tags/<tag>` and
-the "most shared tags, then newest" related-posts list — there's nothing else to register.
+`tags` is a plain array of lowercase kebab-case ASCII strings — the tag's address, so no `å`, `ä`
+or `ö`: `[aterhamtning, ledarskap]`. A tag with an uppercase letter, a space, an underscore or a
+non-ASCII letter fails the build. Tags drive `/tags/<tag>` (`/en/tags/<tag>` for English posts)
+and the "most shared tags, then newest" related-posts list.
+
+What the reader sees is the tag's label in the post's language, from `TAG_LABELS` in
+`apps/blog/src/content/ui.ts` — on the cards, the post header and the tag page's title. Swedish
+posts use the Swedish slugs (`aterhamtning` → "återhämtning", `inifran` → "Ledarskap inifrån",
+`kris`, `ledarskap`, `coachning`, `mentorskap`, `forskning`, `samtal`, `reflektion`,
+`medarbetare`), English posts the English ones (`recovery`, `crisis`, `leadership`, `coaching`,
+`mentoring`, `research`, `conversations`, `reflection`, `employees`, `from-within` → "Leading
+from within"). A new tag works without a label (it shows as its slug); add one there when the
+slug alone reads wrong.
 
 ### Drafts and scheduling
 
@@ -157,10 +196,18 @@ the fence as part of the surrounding paragraph instead of its own block.
 </Steps>
 ```
 
-**Links.** A link to anything on the blog itself must be root-relative: `[text](/tags/guides)`,
-never `[text](tags/guides)` or `[text](../tags/guides)` — those can't be resolved without knowing
-the current page's own path, so they fail the build (see **What fails the build** below). An
-external link (`[text](https://example.com)`) is left alone; it is never checked.
+**Links.** A link to anything on the blog itself must be root-relative and use the published
+address: `[text](/att-leda-genom-en-kris)` for a Swedish post, `[text](/en/leading-through-a-crisis)`
+for an English one (never the `en-` file name), `[text](/tags/ledarskap)`. Never
+`[text](tags/x)` or `[text](../tags/x)` — those can't be resolved without knowing the current
+page's own path, so they fail the build (see **What fails the build** below). A link to a post
+that isn't published (a draft, or one dated later) is broken too.
+
+**Links to www** (or another app of the site) are written `www:/<path>` — `[boka ett samtal](www:/book)`,
+`[Ledarskap inifrån](www:/inifran)`, `[startsidan](www:/)` — because a post cannot know the
+production domain. The blog turns them into `siteUrl("www")` + the path when it builds, in the
+page and in the feeds. The path must start with `/`. An external link
+(`[text](https://example.com)`) is left alone; it is never checked.
 
 ### Images
 
@@ -183,9 +230,10 @@ fails the build if it's missing.
 
 ### Feeds
 
-Every published post appears, full content, in all three feeds — `/rss.xml` (RSS 2.0), `/atom.xml`
-(Atom) and `/feed.json` (JSON Feed 1.1) — with nothing extra to do. A draft or a future-dated post
-is excluded from feeds exactly like it's excluded from the site itself.
+Every published post appears, full content, in its language's three feeds — `/rss.xml` (RSS 2.0),
+`/atom.xml` (Atom) and `/feed.json` (JSON Feed 1.1) for Swedish, the same under `/en/` for English
+— with nothing extra to do. A draft or a future-dated post is excluded from feeds exactly like it's
+excluded from the site itself.
 
 ### What fails the build, and how to read the error
 
@@ -231,6 +279,13 @@ between fixes to find the next one. The checks:
 | Reserved slug | `slug "<slug>" is reserved` — the blog serves a route there (see **Writing a post**); rename the file |
 | Duplicate slug | `duplicate slug "<slug>" (also <other file>)` — two files would publish to the same address |
 | Nested post | `posts must sit directly in content/posts/` — no subfolders |
+| An English post not named `en-…` | `a post with locale "en" must be named "en-<slug>.mdx" (it is served at /en/<slug>)` |
+| A Swedish post named `en-…` | ``"en-" names are for posts with locale "en" — set `locale: en` or rename the file`` |
+| A `translationOf` naming nothing | `translationOf "<slug>" names no post` |
+| A `translationOf` in the same language | `translationOf "<slug>" is a post in the same language ("sv")` |
+| Two translations of one original | `"<slug>" already has a "en" translation (<other file>)` |
+| A malformed link to www | `link "www:book" needs a path starting with "/" (like "www:/")`, or `link "blog:/x" points at the blog itself` |
+| A `/media/` cover that isn't a `-800.jpg`, or has no WebP beside it | `cover "<src>" must be a "/media/<name>-800.jpg" photo` / `cover "<webp>" not found in public/` |
 | A body `# h1` | `use "##" for headings — the post title is the page's h1` |
 | A non-root-relative relative link | `link "<href>" must be root-relative (start with "/")` — `./other-post` or `../tags/x` cannot be resolved without knowing the current page's path; write `/other-post` |
 | A broken root-relative link | `broken link "<href>"` — the path doesn't match any route the blog serves (a post, tag, author, list page or feed) |
@@ -240,7 +295,7 @@ between fixes to find the next one. The checks:
 | A missing JSX image or cover | `image "<src>" not found in public/` — an `<img src="…">` / `<MdxImage src="…">` (not a Markdown `![]()`, caught earlier by fumadocs above) or a frontmatter `cover.src` |
 
 Every check above except the link rows (root-relative, broken, unknown app, invalid, local host)
-and the image row runs on *every* post, drafts included — a draft with a malformed tag still fails
+and the image and cover rows runs on *every* post, drafts included — a draft with a malformed tag still fails
 the build, so it never ships broken once you flip the flag. Links and those images are the
 exception: only the posts that would actually publish (not a draft, not dated in the future) have
 them checked — a draft may freely link to, or reference a JSX image or cover meant to ship
@@ -249,16 +304,13 @@ fumadocs measures it while compiling every post, before the publish rule is ever
 independently and merges into the one error, a bad tag on one post never hides a broken link on
 another — fix every line the error names, in one pass.
 
-### Replacing the starter post
+### The posts the blog ships
 
-The repo ships with one post, `apps/blog/content/posts/welcome.mdx` (author `team`), as a working
-example of frontmatter, headings, a callout, a code block and tabs. Delete it (and its line in
-`content/authors.ts` if you don't keep the `team` author) once you have real posts.
-
-One thing *does* reference it by name: `apps/e2e/tests/blog.spec.ts` opens `/welcome`, clicks its
-tags and tabs, and checks its text. Deleting or renaming `welcome.mdx` means updating that spec
-too — either point it at a real post of yours, or keep one fixture post around for the journey to
-exercise.
+Ten posts by Yasmina in Swedish, each with its English translation, dated a week apart. Two are
+referenced by name: `apps/blog/src/lib/feed-render.test.ts` renders `att-leda-genom-en-kris` and
+its translation, and `apps/e2e` uses that post, `/en/leading-through-a-crisis`, `/tags/kris`,
+`/en/tags/crisis` and the author pages (the a11y manifest, the blog journey, the reduced-motion
+check and the Lighthouse page). Renaming or removing those means updating them in the same change.
 
 ## Writing docs
 
@@ -428,7 +480,7 @@ sync.
 `apps/e2e/tests/docs.spec.ts` references the starter content by name — the "Getting started" and
 "Architecture" pages, the "Workspaces" heading on "Authentication", and the sidebar order from
 `meta.json`. Deleting or renaming the starter pages means updating that spec too, the same
-trade-off as the blog's `welcome.mdx`.
+trade-off as the blog's posts.
 
 ## Writing help content
 
@@ -627,4 +679,4 @@ ready — delete the ones you don't need and add new files; there is no `meta.js
 `apps/e2e/tests/help.spec.ts` references the starter content by name — the "Getting started"
 category, its "Create an account" article, and the "Turn on two-step verification" article found
 by search. Deleting or renaming them means updating that spec too, the same trade-off as the
-blog's `welcome.mdx` and the docs' starter pages.
+blog's posts and the docs' starter pages.

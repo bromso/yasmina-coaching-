@@ -2,9 +2,10 @@ import type { FeedEntry, FeedSite } from "@repo/content/feeds"
 import { mdxStaticComponents } from "@repo/ui/components/mdx/static"
 import { createElement } from "react"
 import { renderToReadableStream } from "react-dom/server.edge"
+import { BlogLink } from "@/components/blog-link"
+import type { BlogLocale } from "@/content/ui"
 import { blog, postPage } from "@/lib/blog"
 import { feedEntries, feedSite } from "@/lib/feed-entries"
-import { FEED_TITLE } from "@/lib/feed-types"
 
 /**
  * The post's full-content HTML: its compiled MDX body, rendered with `mdxStaticComponents`
@@ -31,22 +32,23 @@ export async function renderPostHtml(slug: string): Promise<string> {
     throw new Error(`renderPostHtml: no page for published post "${slug}" (post/page mismatch)`)
   }
   const stream = await renderToReadableStream(
-    createElement(page.data.body, { components: mdxStaticComponents })
+    createElement(page.data.body, { components: { ...mdxStaticComponents, a: BlogLink } })
   )
   await stream.allReady
   return new Response(stream).text()
 }
 
-/** Every published post's HTML, rendered once each, as a lookup `feedEntries` can call
- * synchronously. */
-async function renderedEntries(): Promise<FeedEntry[]> {
-  const posts = blog.posts()
+/** Every published post of one language, its HTML rendered once each, as a lookup
+ * `feedEntries` can call synchronously. */
+async function renderedEntries(locale: BlogLocale): Promise<FeedEntry[]> {
+  const own = blog.inLocale(locale)
+  const posts = own.posts()
   const html = new Map(
     await Promise.all(
       posts.map(async (post) => [post.slug, await renderPostHtml(post.slug)] as const)
     )
   )
-  return feedEntries(blog, (slug) => {
+  return feedEntries(own, (slug) => {
     const rendered = html.get(slug)
     if (rendered === undefined) {
       throw new Error(`renderedEntries: "${slug}" was not pre-rendered`)
@@ -56,14 +58,15 @@ async function renderedEntries(): Promise<FeedEntry[]> {
 }
 
 /**
- * Builds one of the three feeds (`rssFeed`, `atomFeed` or `jsonFeed`) and wraps it in a
- * `Response` with the given `content-type`. The one thing each feed route does.
+ * Builds one of the three feeds (`rssFeed`, `atomFeed` or `jsonFeed`) of one language and wraps
+ * it in a `Response` with the given `content-type`. The one thing each feed route does.
  */
 export async function feedResponse(
   feedFn: (site: FeedSite, entries: FeedEntry[]) => string,
-  contentType: string
+  contentType: string,
+  locale: BlogLocale
 ): Promise<Response> {
-  const entries = await renderedEntries()
-  const site = feedSite(FEED_TITLE, entries)
+  const entries = await renderedEntries(locale)
+  const site = feedSite(locale, entries)
   return new Response(feedFn(site, entries), { headers: { "content-type": contentType } })
 }
