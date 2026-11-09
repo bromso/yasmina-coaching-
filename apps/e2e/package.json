@@ -15,7 +15,7 @@
     "@playwright/test": "catalog:",
     "@repo/typescript-config": "workspace:*",
     "@types/node": "catalog:",
-    "lighthouse": "^13.5.0",
+    "lighthouse": "^13.6.0",
     "web-vitals": "catalog:"
   }
 }

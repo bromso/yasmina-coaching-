@@ -8,7 +8,7 @@
     "clean": "rm -rf dist"
   },
   "devDependencies": {
-    "style-dictionary": "^5.7.1"
+    "style-dictionary": "^5.8.0"
   },
   "exports": {
     "./css": "./dist/css/variables.css",
