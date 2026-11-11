@@ -56,6 +56,46 @@ export const Default: Story = {
   },
 }
 
+/** A pill for every selected day, the first column (Monday) and the last (Sunday) included. */
+export const SelectedEdgeDays: Story = {
+  render: function Render() {
+    const [date, setDate] = React.useState<Date | undefined>()
+    return (
+      <Calendar
+        mode="single"
+        selected={date}
+        onSelect={setDate}
+        weekStartsOn={1}
+        defaultMonth={new Date(2026, 10, 1)}
+        className="rounded-md border"
+      />
+    )
+  },
+  play: async ({ canvasElement }) => {
+    // The day buttons re-render on selection, so each one is looked up again after the click.
+    const dayButton = (iso: string) => {
+      const button = canvasElement.querySelector<HTMLButtonElement>(`td[data-day="${iso}"] button`)
+      if (!button) throw new Error(`no day ${iso}`)
+      return button
+    }
+    const isPill = (button: HTMLButtonElement) => {
+      const style = getComputedStyle(button)
+      const half = button.getBoundingClientRect().height / 2
+      return [
+        style.borderTopLeftRadius,
+        style.borderTopRightRadius,
+        style.borderBottomLeftRadius,
+        style.borderBottomRightRadius,
+      ].every((radius) => Number.parseFloat(radius) >= half)
+    }
+    for (const iso of ["2026-11-02", "2026-11-08"]) {
+      await userEvent.click(dayButton(iso))
+      await expect(dayButton(iso)).toHaveAttribute("data-selected-single", "true")
+      await expect(isPill(dayButton(iso))).toBe(true)
+    }
+  },
+}
+
 export const Range: Story = {
   render: function Render() {
     const [range, setRange] = React.useState<{ from: Date | undefined; to?: Date } | undefined>({

@@ -9,6 +9,7 @@ import { Eyebrow } from "@repo/ui/components/eyebrow"
 import { Icon } from "@repo/ui/components/icon"
 import { Reveal, RevealItem } from "@repo/ui/components/motion/reveal"
 import { Picture } from "@repo/ui/components/picture"
+import { SunPanel } from "@repo/ui/components/sun-panel"
 import { bookingFor, priceLineFor } from "@/content/booking"
 import { mediaFor, OFFERING_MEDIA } from "@/content/media"
 import { cn } from "@/lib/utils"
@@ -102,9 +103,10 @@ export function BookView({ audience, locale }: BookViewProps) {
                 const titleId = `offering-${key}-title`
                 return (
                   <RevealItem key={key} as="li" index={i} className="group">
-                    <article
+                    <SunPanel
+                      as="article"
                       aria-labelledby={titleId}
-                      className="flex h-full flex-col gap-5 rounded-4xl bg-sun-soft p-6 transition-transform duration-300 ease-out motion-safe:group-hover:-translate-y-1 sm:p-8"
+                      className="flex h-full flex-col gap-5 p-6 transition-transform duration-300 ease-out motion-safe:group-hover:-translate-y-1 sm:p-8"
                     >
                       <div className="relative aspect-[16/10] overflow-hidden rounded-3xl bg-background/60">
                         <Picture
@@ -155,7 +157,7 @@ export function BookView({ audience, locale }: BookViewProps) {
                           className="w-fit"
                         />
                       </div>
-                    </article>
+                    </SunPanel>
                   </RevealItem>
                 )
               })}

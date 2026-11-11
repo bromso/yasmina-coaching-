@@ -40,6 +40,12 @@ describe("Picture", () => {
     expect(html).not.toContain("/media/")
   })
 
+  test("a trailing slash on basePath is trimmed", () => {
+    const html = renderToStaticMarkup(<Picture image={photo} basePath="/images/" />)
+    expect(html).toContain('src="/images/portrait-office.jpg"')
+    expect(html).not.toContain("//")
+  })
+
   test("small: only the 800 px variant, at its size", () => {
     const html = renderToStaticMarkup(<Picture image={photo} small sizes="50vw" />)
     expect(html).toContain('<source type="image/webp" srcSet="/media/portrait-office-800.webp"/>')

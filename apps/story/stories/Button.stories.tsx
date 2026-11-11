@@ -195,6 +195,16 @@ export const CallToAction: Story = {
   ),
   play: async ({ canvasElement }) => {
     const link = within(canvasElement).getByRole("link", { name: "Boka ett samtal" })
-    await expect(getComputedStyle(link).borderRadius).not.toBe("0px")
+    // A pill: every corner's radius reaches half the height.
+    const half = link.getBoundingClientRect().height / 2
+    const style = getComputedStyle(link)
+    for (const radius of [
+      style.borderTopLeftRadius,
+      style.borderTopRightRadius,
+      style.borderBottomLeftRadius,
+      style.borderBottomRightRadius,
+    ]) {
+      await expect(Number.parseFloat(radius)).toBeGreaterThanOrEqual(half)
+    }
   },
 }

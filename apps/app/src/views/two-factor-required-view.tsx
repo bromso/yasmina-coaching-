@@ -41,18 +41,22 @@ export function TwoFactorRequiredView({
           others.length > 0 ? (
             <>
               <p className="text-muted-foreground text-sm">{t("otherWorkspaces")}</p>
-              <ul className="flex flex-wrap gap-2">
+              <ul className="grid gap-2">
                 {others.map((other) => (
-                  <li key={other.id} className="max-w-full">
+                  <li
+                    key={other.id}
+                    className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1"
+                  >
+                    <span className="min-w-0 wrap-anywhere text-sm">{other.name}</span>
                     <form action={switchWorkspace}>
                       <input type="hidden" name="workspaceId" value={other.id} />
                       <Button
                         type="submit"
                         variant="outline"
                         size="sm"
-                        className="h-auto min-h-8 py-1.5 text-left whitespace-normal wrap-anywhere"
+                        aria-label={t("switchTo", { workspace: other.name })}
                       >
-                        {t("switchTo", { workspace: other.name })}
+                        {t("switch")}
                       </Button>
                     </form>
                   </li>
@@ -69,10 +73,13 @@ export function TwoFactorRequiredView({
         }
         leaveSlot={
           <div className="grid gap-2">
-            <p className="text-muted-foreground text-sm">{t("leaveHint")}</p>
+            <p className="text-muted-foreground wrap-anywhere text-sm">
+              {t("leaveHint", { workspace: workspace.name })}
+            </p>
             <LeaveWorkspaceForm
               workspaceId={workspace.id}
-              label={t("leave", { workspace: workspace.name })}
+              label={t("leaveShort")}
+              accessibleLabel={t("leave", { workspace: workspace.name })}
               pendingLabel={t("leaving")}
             />
           </div>

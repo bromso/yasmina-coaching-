@@ -273,20 +273,25 @@ describe("TwoFactorRequiredView", () => {
       "Acme requires two-step verification. Turn it on, or add a passkey, to continue.",
       '<a href="http://account.brand.localhost:3003/security"',
       ">Set up two-step verification</a>",
-      ">Switch to Beta</button>",
-      ">Switch to Gamma</button>",
       '<input type="hidden" name="workspaceId" value="8"/>',
-      ">Leave Acme</button>",
       '<input type="hidden" name="workspaceId" value="7"/>',
+      ">No longer need Acme?</p>",
     ])
     expect(html).not.toContain("Create another workspace")
-    // Every control's label is unique on the page.
-    for (const label of ["Switch to Beta", "Switch to Gamma", "Leave Acme"]) {
-      expect(html.split(`>${label}<`).length).toBe(2)
+    // Short visible labels; each accessible name starts with it and names its workspace, once.
+    for (const [name, visible] of [
+      ["Switch to Beta", "Switch"],
+      ["Switch to Gamma", "Switch"],
+      ["Leave Acme", "Leave"],
+    ]) {
+      expect(html).toMatch(new RegExp(`aria-label="${name}"[^>]*>${visible}</button>`))
+      expect(html.split(`aria-label="${name}"`).length).toBe(2)
     }
+    // The other workspaces' names are text beside their buttons.
+    expectAll(html, [">Beta</span>", ">Gamma</span>"])
   })
 
-  test("a long workspace name wraps inside its buttons rather than widening the page", () => {
+  test("a long workspace name wraps in the text, never inside a button", () => {
     const long = "Northwind Traders Customer Success and Partner Enablement Team"
     const html = renderIn(
       "en",
@@ -297,10 +302,10 @@ describe("TwoFactorRequiredView", () => {
       />,
       ["app", "ui"]
     )
-    // The Button base is `whitespace-nowrap`; both controls naming the workspace override it.
-    for (const label of [`Switch to ${long}`, `Leave ${long}`]) {
-      expect(html).toMatch(new RegExp(`whitespace-normal wrap-anywhere"[^>]*>${label}</button>`))
-    }
+    expect(html).toMatch(new RegExp(`wrap-anywhere[^"]*"[^>]*>${long}</span>`))
+    expect(html).toContain(`>No longer need ${long}?</p>`)
+    expect(html).not.toContain("whitespace-normal")
+    expect(html).not.toMatch(new RegExp(`>[^<]*${long}[^<]*</button>`))
   })
 
   test("the only workspace: a link to create another instead, in Swedish", () => {
@@ -310,8 +315,9 @@ describe("TwoFactorRequiredView", () => {
       "Acme kräver tvåstegsverifiering. Slå på den, eller lägg till en passkey, för att fortsätta.",
       ">Slå på tvåstegsverifiering</a>",
       '<a class="underline underline-offset-4" href="http://app.brand.localhost:3001/workspaces/new">Skapa en ny arbetsyta</a>',
-      ">Lämna Acme</button>",
+      ">Behöver du inte Acme längre?</p>",
     ])
+    expect(html).toMatch(/aria-label="Lämna Acme"[^>]*>Lämna<\/button>/)
     expect(html).not.toContain("Byt till")
   })
 })

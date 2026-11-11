@@ -1,7 +1,7 @@
 import { MediaClip } from "@repo/ui/components/motion/media-clip"
 import { Picture } from "@repo/ui/components/picture"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { expect, within } from "storybook/test"
+import { expect, waitFor, within } from "storybook/test"
 
 const still = (
   <Picture
@@ -39,7 +39,8 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await expect(canvas.getByRole("img", { name: /bright lobby/ })).toBeInTheDocument()
+    const still = canvas.getByRole("img", { name: /bright lobby/ }) as HTMLImageElement
+    await waitFor(() => expect(still.naturalWidth).toBe(1280))
     await expect(await canvas.findByRole("button", { name: /the clip/ })).toBeInTheDocument()
   },
 }

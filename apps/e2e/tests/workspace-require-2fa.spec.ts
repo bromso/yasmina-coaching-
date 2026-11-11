@@ -25,8 +25,8 @@ async function turnOnTwoFactor(page: Page) {
   await expect(page.getByText("Two-step verification is on.", { exact: true })).toBeVisible()
 }
 
-// Long on purpose (the name allows 100 characters): the notice's "Leave {workspace}" button must
-// wrap rather than widen the page at 320 px (WCAG 1.4.10).
+// Long on purpose (the name allows 100 characters): the notice's text naming the workspace must
+// wrap rather than widen the page at 320 px (WCAG 1.4.10); the "Leave" button itself stays short.
 const WORKSPACE = "2FA Co Northwind Traders Customer Success and Partner Enablement"
 
 test("owner requires two-step verification; a blocked member sets it up and the owner sees it in Activity", async ({

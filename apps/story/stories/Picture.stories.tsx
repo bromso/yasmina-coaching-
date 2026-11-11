@@ -1,8 +1,8 @@
 import { Picture } from "@repo/ui/components/picture"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { expect, within } from "storybook/test"
+import { expect, waitFor, within } from "storybook/test"
 
-/** The 800 px variant is the only one copied into Storybook's `public/media/`. */
+/** www's own `public/media/`, served by Storybook at `/media`. */
 const meta = {
   title: "Components/Coaching/Picture",
   component: Picture,
@@ -31,5 +31,7 @@ export const Small: Story = {
       "srcset",
       "/media/keynote-audience-800.webp"
     )
+    // The file really loads (Storybook serves www's media at /media).
+    await waitFor(() => expect((img as HTMLImageElement).naturalWidth).toBe(800))
   },
 }

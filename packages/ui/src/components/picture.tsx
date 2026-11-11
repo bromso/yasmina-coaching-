@@ -30,7 +30,7 @@ type PictureProps = {
 }
 
 const url = (basePath: string, name: string, ext: "jpg" | "webp", small: boolean) =>
-  `${basePath}/${name}${small ? "-800" : ""}.${ext}`
+  `${basePath.replace(/\/+$/, "")}/${name}${small ? "-800" : ""}.${ext}`
 
 /**
  * A photo from the app's public `basePath` directory: WebP with a JPEG fallback, both at full size and 800 px, with

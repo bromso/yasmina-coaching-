@@ -15,11 +15,15 @@ const initial: FormState = { ok: false }
 export function LeaveWorkspaceForm({
   workspaceId,
   label,
+  accessibleLabel,
   pendingLabel,
 }: {
   /** The workspace the page was rendered for; the action refuses any other. */
   workspaceId: number
+  /** The short visible label ("Leave"); the workspace's name is in the text around it. */
   label: string
+  /** The button's name, starting with `label` and naming the workspace ("Leave Acme"). */
+  accessibleLabel: string
   pendingLabel: string
 }) {
   const [state, action, pending] = useActionState(leave, initial)
@@ -33,7 +37,7 @@ export function LeaveWorkspaceForm({
           variant="outline"
           size="sm"
           disabled={pending}
-          className="h-auto min-h-8 py-1.5 text-left whitespace-normal wrap-anywhere"
+          aria-label={pending ? undefined : accessibleLabel}
         >
           {pending ? pendingLabel : label}
         </Button>
