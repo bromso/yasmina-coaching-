@@ -3,6 +3,9 @@ import { defineConfig, devices } from "@playwright/test"
 import { aiEnv, apiEnv, shared, URLS } from "./e2e.env"
 
 const CI = Boolean(process.env.CI)
+// `VISUAL=1` runs only the visual baseline (tests/visual.spec.ts) against www and blog; the
+// snapshots are platform-specific, so the default run, CI included, never touches them.
+const VISUAL = Boolean(process.env.VISUAL)
 const root = join(import.meta.dirname, "..", "..")
 const next = (app: string, port: number) => ({
   // The app's own `next` binary: `bunx next` from the app directory may resolve another copy.
@@ -23,7 +26,24 @@ export default defineConfig({
   forbidOnly: CI,
   reporter: CI ? [["github"], ["html", { open: "never" }]] : "list",
   use: { trace: "retain-on-failure", screenshot: "only-on-failure" },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: VISUAL
+    ? [
+        {
+          name: "visual",
+          testMatch: "visual.spec.ts",
+          // Baselines are generated locally and git-ignored (platform-specific, ~50 MB).
+          snapshotPathTemplate:
+            "{testDir}/../visual/.snapshots/{arg}{-projectName}{-snapshotSuffix}{ext}",
+          use: { ...devices["Desktop Chrome"], trace: "off" },
+        },
+      ]
+    : [
+        {
+          name: "chromium",
+          testIgnore: "visual.spec.ts",
+          use: { ...devices["Desktop Chrome"] },
+        },
+      ],
   webServer: [
     {
       // The reset runs first, before the api opens its database (see global-setup.ts).
@@ -52,5 +72,5 @@ export default defineConfig({
     next("help", 3005),
     next("jobs", 3006),
     next("blog", 3009),
-  ],
+  ].filter((server, index) => !VISUAL || [0, 2, 9].includes(index)),
 })
