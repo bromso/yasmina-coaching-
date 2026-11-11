@@ -14,20 +14,35 @@ const generated = readFileSync(new URL("./tokens.generated.css", import.meta.url
 
 type Token = (name: string) => Rgb
 
-/** Every opaque `--name: oklch(…)` token of the theme's `selector { … }` block. */
-function block(selector: string): Token {
+/** Every `--name: value;` declaration of the generated theme's `selector { … }` block. */
+function declarations(selector: string): Record<string, string> {
   const start = generated.indexOf(`${selector} {`)
   if (start === -1) throw new Error(`no "${selector}" block`)
   const body = generated.slice(start, generated.indexOf("\n}", start))
-  const tokens: Record<string, Rgb> = {}
-  for (const [, name, value] of body.matchAll(/--([\w-]+):\s*(oklch\([\d.%\s]+\));/g)) {
-    if (name && value) tokens[name] = parseOklch(value)
+  return Object.fromEntries(
+    [...body.matchAll(/--([\w-]+):\s*([^;]+);/g)].map(([, name, value]) => [name, value])
+  )
+}
+
+const root = declarations(":root")
+
+/**
+ * The theme's opaque `oklch()` tokens. A token whose value is `var(--other)` is declared on `:root`
+ * only and resolves to `--other` in the theme being read, as it does in the browser with `.dark` on
+ * `<html>` (the sidebar tokens alias the palette this way).
+ */
+function block(selector: string): Token {
+  const own = selector === ":root" ? root : declarations(selector)
+  const resolve = (name: string, seen: string[] = []): Rgb => {
+    const value = own[name] ?? root[name]
+    const alias = value?.match(/^var\(--([\w-]+)\)$/)?.[1]
+    if (alias && !seen.includes(alias)) return resolve(alias, [...seen, name])
+    if (!value || !/^oklch\([\d.%\s]+\)$/.test(value)) {
+      throw new Error(`${selector} has no --${name} oklch() token`)
+    }
+    return parseOklch(value)
   }
-  return (name) => {
-    const rgb = tokens[name]
-    if (!rgb) throw new Error(`${selector} has no --${name} oklch() token`)
-    return rgb
-  }
+  return (name) => resolve(name)
 }
 
 const white: Rgb = [1, 1, 1]
@@ -102,6 +117,12 @@ function pairs(t: Token, dark: boolean): Pair[] {
       name: "sidebar-foreground on sidebar",
       fg: t("sidebar-foreground"),
       bg: t("sidebar"),
+      min: text,
+    },
+    {
+      name: "sidebar-accent-foreground on sidebar-accent (the current sidebar item)",
+      fg: t("sidebar-accent-foreground"),
+      bg: t("sidebar-accent"),
       min: text,
     },
     {

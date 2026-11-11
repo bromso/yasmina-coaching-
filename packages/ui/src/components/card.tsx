@@ -3,16 +3,29 @@ import type * as React from "react"
 
 type CardProps<T extends React.ElementType = "article"> = {
   as?: T
+  /**
+   * `default` has www's rounded-4xl corners. `compact` is for dense screens (admin stat tiles,
+   * tables, list rows): the same padding and gaps, with a tighter radius that a short card or a
+   * full-width table row does not turn into a stadium.
+   */
+  size?: "default" | "compact"
   className?: string
-} & Omit<React.ComponentPropsWithoutRef<T>, "as" | "className">
+} & Omit<React.ComponentPropsWithoutRef<T>, "as" | "className" | "size">
 
-function Card<T extends React.ElementType = "article">({ as, className, ...props }: CardProps<T>) {
+function Card<T extends React.ElementType = "article">({
+  as,
+  size = "default",
+  className,
+  ...props
+}: CardProps<T>) {
   const Component = as || "article"
   return (
     <Component
       data-slot="card"
+      data-size={size}
       className={cn(
-        "bg-card text-card-foreground flex min-w-0 flex-col gap-6 rounded-4xl border py-6 shadow-sm",
+        "bg-card text-card-foreground flex min-w-0 flex-col gap-6 border py-6 shadow-sm",
+        size === "compact" ? "rounded-2xl" : "rounded-4xl",
         className
       )}
       {...props}

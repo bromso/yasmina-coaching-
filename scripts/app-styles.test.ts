@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test"
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
 import { SITES } from "../packages/sites/src/index"
+import { parseOklch, toHex } from "../packages/tokens/src/color"
 
 // Every Next app takes its whole look from @repo/ui: one stylesheet import, one set of font
 // variables on <body>, Next's smooth-scroll opt-in on <html>, and no colour of its own. Rules that used to live in an app's globals.css
@@ -9,11 +10,20 @@ import { SITES } from "../packages/sites/src/index"
 const ROOT = join(import.meta.dir, "..")
 const NEXT_APPS = Object.keys(SITES)
 
-/**
- * The apps whose source may hold no colour literal. Only www and blog for now: the other apps'
- * literals are replaced in a later task, which widens this to `NEXT_APPS`.
- */
-const COLOUR_CHECKED_APPS = ["www", "blog"]
+/** The apps whose source may hold no colour literal: every Next app. */
+const COLOUR_CHECKED_APPS = NEXT_APPS
+
+/** The browser chrome's colours: the light and dark page background, and the charcoal primary. */
+const CHROME = { background: "#fcfaf4", darkBackground: "#121a1a", primary: "#202829" }
+
+const THEME_COLOR = {
+  literals: [CHROME.background, CHROME.darkBackground],
+  reason: "viewport themeColor is browser-chrome metadata, not CSS: it cannot read a token",
+}
+const MANIFEST_COLOURS = {
+  literals: [CHROME.background, CHROME.primary],
+  reason: "the web manifest's background_color/theme_color are JSON for the OS, not CSS",
+}
 
 /**
  * Colour literals that stay, each with why. `literals` is exact: a new literal in the same file
@@ -22,26 +32,12 @@ const COLOUR_CHECKED_APPS = ["www", "blog"]
  * `ogImage` and hold no colour of their own.
  */
 const ALLOWED_COLOURS: { file: string; literals: string[]; reason: string }[] = [
-  {
-    file: "apps/www/src/app/layout.tsx",
-    literals: ["#fcfaf4", "#121a1a"],
-    reason: "viewport themeColor is browser-chrome metadata, not CSS: it cannot read a token",
-  },
-  {
-    file: "apps/blog/src/components/blog-document.tsx",
-    literals: ["#fcfaf4", "#121a1a"],
-    reason: "viewport themeColor is browser-chrome metadata, not CSS: it cannot read a token",
-  },
-  {
-    file: "apps/www/src/app/manifest.ts",
-    literals: ["#fcfaf4", "#202829"],
-    reason: "the web manifest's background_color/theme_color are JSON for the OS, not CSS",
-  },
-  {
-    file: "apps/blog/src/app/manifest.ts",
-    literals: ["#fcfaf4", "#202829"],
-    reason: "the web manifest's background_color/theme_color are JSON for the OS, not CSS",
-  },
+  ...[
+    ...NEXT_APPS.filter((app) => app !== "blog").map((app) => `apps/${app}/src/app/layout.tsx`),
+    // The blog's two root layouts share one document component, which sets the viewport.
+    "apps/blog/src/components/blog-document.tsx",
+  ].map((file) => ({ file, ...THEME_COLOR })),
+  ...NEXT_APPS.map((app) => ({ file: `apps/${app}/src/app/manifest.ts`, ...MANIFEST_COLOURS })),
   {
     file: "apps/www/src/components/booking/payment-methods.tsx",
     literals: [
@@ -152,5 +148,22 @@ describe("the colour allowlist", () => {
     const present = colours(read(entry.file))
     const stale = entry.literals.filter((literal) => !present.includes(literal))
     expect(stale, `${entry.file}: remove the allowlisted literals it no longer has`).toEqual([])
+  })
+})
+
+describe("the browser chrome's colours", () => {
+  test("are the tokens' own values, as sRGB hex", () => {
+    const css = read("packages/ui/src/styles/tokens.generated.css")
+    const token = (selector: string, name: string) => {
+      const body = css.slice(css.indexOf(`${selector} {`))
+      const value = body.match(new RegExp(`--${name}:\\s*(oklch\\([^)]*\\));`))?.[1]
+      if (!value) throw new Error(`${selector} has no --${name}`)
+      return toHex(parseOklch(value))
+    }
+    expect(CHROME).toEqual({
+      background: token(":root", "background"),
+      darkBackground: token(".dark", "background"),
+      primary: token(":root", "primary"),
+    })
   })
 })

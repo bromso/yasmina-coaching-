@@ -35,6 +35,14 @@ const SAME_IN_BOTH_THEMES = [
   "chart-tooltip-background",
   "chart-tooltip-foreground",
   "chart-tooltip-muted",
+  "sidebar",
+  "sidebar-foreground",
+  "sidebar-primary",
+  "sidebar-primary-foreground",
+  "sidebar-accent",
+  "sidebar-accent-foreground",
+  "sidebar-border",
+  "sidebar-ring",
 ]
 
 const light = vars(":root")
@@ -80,6 +88,12 @@ describe("the generated theme", () => {
     expect([...dark.keys()].filter((name) => MODE_INDEPENDENT.some((re) => re.test(name)))).toEqual(
       []
     )
+  })
+
+  test("the sidebar aliases the coaching palette rather than keeping colours of its own", () => {
+    for (const name of [...light.keys()].filter((key) => key.startsWith("sidebar"))) {
+      expect(light.get(name), name).toMatch(/^var\(--[\w-]+\)$/)
+    }
   })
 
   test("carries the coaching palette, not the boilerplate one", () => {

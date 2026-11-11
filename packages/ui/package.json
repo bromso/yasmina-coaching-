@@ -137,6 +137,7 @@
     "./lib/og": "./src/lib/og.tsx",
     "./components/*": "./src/components/*.tsx",
     "./components/use-consent": "./src/components/use-consent.ts",
+    "./components/nav-pill": "./src/components/nav-pill.ts",
     "./components/mdx": "./src/components/mdx/index.tsx",
     "./components/mdx/static": "./src/components/mdx/mdx-static.tsx",
     "./components/charts": "./src/components/charts/index.ts",

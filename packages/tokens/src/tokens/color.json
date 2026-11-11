@@ -218,75 +218,35 @@
     },
     "sidebar": {
       "$type": "color",
-      "$value": "oklch(0.967 0.0029 264.5419)",
-      "$extensions": {
-        "mode": {
-          "dark": "oklch(0.2795 0.0368 260.031)"
-        }
-      }
+      "$value": "var(--background)"
     },
     "sidebar-foreground": {
       "$type": "color",
-      "$value": "oklch(0.2795 0.0368 260.031)",
-      "$extensions": {
-        "mode": {
-          "dark": "oklch(0.9288 0.0126 255.5078)"
-        }
-      }
+      "$value": "var(--foreground)"
     },
     "sidebar-primary": {
       "$type": "color",
-      "$value": "oklch(0.53 0.2041 277.1173)",
-      "$extensions": {
-        "mode": {
-          "dark": "oklch(0.6801 0.1583 276.9349)"
-        }
-      }
+      "$value": "var(--primary)"
     },
     "sidebar-primary-foreground": {
       "$type": "color",
-      "$value": "oklch(1.0 0 0)",
-      "$extensions": {
-        "mode": {
-          "dark": "oklch(0.2077 0.0398 265.7549)"
-        }
-      }
+      "$value": "var(--primary-foreground)"
     },
     "sidebar-accent": {
       "$type": "color",
-      "$value": "oklch(0.9299 0.0334 272.7879)",
-      "$extensions": {
-        "mode": {
-          "dark": "oklch(0.3729 0.0306 259.7328)"
-        }
-      }
+      "$value": "var(--muted)"
     },
     "sidebar-accent-foreground": {
       "$type": "color",
-      "$value": "oklch(0.3729 0.0306 259.7328)",
-      "$extensions": {
-        "mode": {
-          "dark": "oklch(0.8717 0.0093 258.3382)"
-        }
-      }
+      "$value": "var(--foreground)"
     },
     "sidebar-border": {
       "$type": "color",
-      "$value": "oklch(0.8717 0.0093 258.3382)",
-      "$extensions": {
-        "mode": {
-          "dark": "oklch(0.4461 0.0263 256.8018)"
-        }
-      }
+      "$value": "var(--border)"
     },
     "sidebar-ring": {
       "$type": "color",
-      "$value": "oklch(0.53 0.2041 277.1173)",
-      "$extensions": {
-        "mode": {
-          "dark": "oklch(0.6801 0.1583 276.9349)"
-        }
-      }
+      "$value": "var(--ring)"
     },
     "color-1": {
       "$type": "color",
