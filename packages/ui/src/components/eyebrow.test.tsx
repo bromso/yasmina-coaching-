@@ -9,6 +9,18 @@ describe("Eyebrow", () => {
     expect(html).toContain("tracking-[0.18em]")
   })
 
+  test("renders as the element a caller names, with its own props", () => {
+    const html = renderToStaticMarkup(
+      <Eyebrow as="h3" id="training">
+        Utbildning
+      </Eyebrow>
+    )
+    expect(html).toMatch(/^<h3 [^>]*>Utbildning<\/h3>$/)
+    expect(html).toContain('id="training"')
+    expect(html).toContain("tracking-[0.18em]")
+    expect(renderToStaticMarkup(<Eyebrow as="dt">Pris</Eyebrow>)).toMatch(/^<dt /)
+  })
+
   test("merges a className", () => {
     const html = renderToStaticMarkup(<Eyebrow className="text-foreground">Steg</Eyebrow>)
     expect(html).toContain("text-foreground")

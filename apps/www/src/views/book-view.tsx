@@ -50,9 +50,7 @@ export function BookView({ audience, locale }: BookViewProps) {
         </div>
 
         <nav aria-label={booking.catalog.audienceLegend} className="mt-10">
-          <p className="font-medium text-muted-foreground text-xs uppercase tracking-[0.18em]">
-            {booking.catalog.audienceLegend}
-          </p>
+          <Eyebrow as="p">{booking.catalog.audienceLegend}</Eyebrow>
           <ul className="mt-3 flex flex-wrap gap-2">
             {BOOKING_AUDIENCES.map((option) => {
               const active = option === audience

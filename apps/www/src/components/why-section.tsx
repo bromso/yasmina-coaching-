@@ -61,9 +61,9 @@ export function WhySection({ id, heading, reasons, clip, still, clipLabels }: Wh
                 index={i + 2}
                 className="grid gap-2 py-6 sm:grid-cols-[8rem_1fr] sm:gap-6"
               >
-                <dt className="font-medium text-muted-foreground text-xs uppercase tracking-[0.18em] sm:pt-1">
+                <Eyebrow as="dt" className="sm:pt-1">
                   {reason.title}
-                </dt>
+                </Eyebrow>
                 <dd className="text-pretty text-foreground leading-relaxed">
                   {reason.description}
                 </dd>

@@ -1,3 +1,4 @@
+import { navPill } from "@repo/ui/components/nav-pill"
 import { cn } from "@repo/ui/lib/utils"
 import type * as React from "react"
 import { Fragment } from "react"
@@ -85,17 +86,11 @@ export function SiteHeader({
             {links.map((link) => (
               <Item key={link.href}>
                 {link.current ? (
-                  <span
-                    aria-current="page"
-                    className="inline-flex h-8 items-center rounded-full px-3 text-sm font-medium"
-                  >
+                  <span aria-current="page" className={navPill({ current: true })}>
                     {link.label}
                   </span>
                 ) : (
-                  <a
-                    href={link.href}
-                    className="inline-flex h-8 items-center rounded-full px-3 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                  >
+                  <a href={link.href} className={navPill()}>
                     {link.label}
                   </a>
                 )}

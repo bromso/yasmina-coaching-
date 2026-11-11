@@ -13,7 +13,7 @@ a view or a page. Add shadcn components with `bunx shadcn@latest add <name> -c p
 - **Fonts.** `@repo/ui/lib/fonts`: put `fontVariables` on `<html>` (sans and display families),
   where the `:root` typeface tokens can read them, and `font-sans` on `<body>`.
 - **Look components.** `Eyebrow`, `ArrowLink`, `DashedLine`, `Picture`, `SunPanel`, `Background`,
-  `navPill`, `NativeSelect`, `Card` (`size="compact"`), and in `components/motion/` `Reveal` and
+  `navPill`, `ctaPill`, `NativeSelect`, `Card` (`size="compact"`), and in `components/motion/` `Reveal` and
   `MediaClip` (off under `prefers-reduced-motion`).
 - **Header and footer.** `SiteHeader` (`nav?` slot), `SiteHeaderShell`, `siteHeaderBar`,
   `belowSiteHeader`, `aboveSidebar`, `SiteFooter` and `SiteFooterLegal`. They size from

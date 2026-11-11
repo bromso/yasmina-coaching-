@@ -1,5 +1,7 @@
 import { BRAND_NAME } from "@repo/sites/brand"
 import { SiteHeader } from "@repo/ui/blocks/site-header"
+import { ctaPill } from "@repo/ui/components/cta-pill"
+import { navPill } from "@repo/ui/components/nav-pill"
 import { ThemeToggle } from "@repo/ui/components/theme-toggle"
 import type { BlogLocale, BlogUi } from "@/content/ui"
 import { LanguageLink } from "./language-link"
@@ -17,7 +19,8 @@ export type BlogHeaderProps = {
 }
 
 const focus = "outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-const pill = `inline-flex h-9 items-center rounded-full px-3 transition-colors hover:bg-muted ${focus}`
+/** The nav's links: the shared pill at the h-9 controls' height, in the text's own colour. */
+const pill = navPill({ size: "md", className: "text-foreground" })
 
 /**
  * The blog's header: the shared `SiteHeader` in www's look, with the blog's own content — the
@@ -71,10 +74,7 @@ export function BlogHeader({
             <ThemeToggle label={labels.themeToggle} />
           </li>
           <li>
-            <a
-              href={`${wwwUrl}/book`}
-              className={`inline-flex h-9 items-center rounded-full bg-primary px-4 text-primary-foreground tracking-[0.035em] transition-colors hover:bg-primary/90 ${focus}`}
-            >
+            <a href={`${wwwUrl}/book`} className={ctaPill()}>
               {ui.header.book}
             </a>
           </li>

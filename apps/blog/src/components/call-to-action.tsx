@@ -1,3 +1,4 @@
+import { ctaPill } from "@repo/ui/components/cta-pill"
 import { SunPanel } from "@repo/ui/components/sun-panel"
 import type { BlogUi } from "@/content/ui"
 
@@ -15,10 +16,7 @@ export function CallToAction({ ui, href }: { ui: BlogUi; href: string }) {
         {ui.cta.title}
       </h2>
       <p className="max-w-xl text-balance md:text-lg">{ui.cta.text}</p>
-      <a
-        href={href}
-        className="inline-flex h-11 items-center rounded-full bg-primary px-5 text-primary-foreground tracking-[0.035em] outline-none transition-colors hover:bg-primary/90 focus-visible:ring-[3px] focus-visible:ring-ring/50"
-      >
+      <a href={href} className={ctaPill({ size: "lg" })}>
         {ui.cta.button}
       </a>
     </SunPanel>

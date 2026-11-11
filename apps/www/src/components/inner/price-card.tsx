@@ -1,5 +1,6 @@
 import { ArrowLink } from "@repo/ui/components/arrow-link"
 import { Button } from "@repo/ui/components/button"
+import { Eyebrow } from "@repo/ui/components/eyebrow"
 import { SunPanel } from "@repo/ui/components/sun-panel"
 import type { InnerLabels, InnerService } from "@/content/inner"
 import { formatKr } from "@/content/inner-pricing"
@@ -53,9 +54,7 @@ export function PriceCard({ service, prices, labels, locale }: PriceCardProps) {
             key={row.term}
             className="flex flex-col gap-2 border-foreground/20 border-t pt-5 dark:border-border/70"
           >
-            <dt className="font-medium text-muted-foreground text-xs uppercase tracking-[0.18em]">
-              {row.term}
-            </dt>
+            <Eyebrow as="dt">{row.term}</Eyebrow>
             <dd className="font-display text-4xl text-foreground">{kr(row.amount)}</dd>
             {row.detail && (
               <dd className="text-pretty text-muted-foreground text-sm leading-relaxed">

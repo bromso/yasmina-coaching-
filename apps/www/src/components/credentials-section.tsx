@@ -26,9 +26,7 @@ export function CredentialsSection({
         </Reveal>
         <div className="grid gap-12 lg:col-span-8 lg:grid-cols-5 lg:gap-10">
           <div className="lg:col-span-3">
-            <h3 className="font-medium text-muted-foreground text-xs uppercase tracking-[0.18em]">
-              {labels.experience}
-            </h3>
+            <Eyebrow as="h3">{labels.experience}</Eyebrow>
             <Reveal as="ol" stagger={60} className="mt-4 divide-y divide-border">
               {experience.map((role, i) => (
                 <RevealItem
@@ -52,9 +50,7 @@ export function CredentialsSection({
             </Reveal>
           </div>
           <div className="lg:col-span-2">
-            <h3 className="font-medium text-muted-foreground text-xs uppercase tracking-[0.18em]">
-              {labels.training}
-            </h3>
+            <Eyebrow as="h3">{labels.training}</Eyebrow>
             <Reveal as="ul" stagger={60} className="mt-4 divide-y divide-border">
               {education.map((item, i) => (
                 <RevealItem key={item.title} as="li" index={i} className="py-4">

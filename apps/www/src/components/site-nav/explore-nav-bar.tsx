@@ -1,4 +1,5 @@
 import { siteHeaderBar } from "@repo/ui/blocks/site-header-shell"
+import { ctaPill } from "@repo/ui/components/cta-pill"
 import { cn } from "@/lib/utils"
 import type { ExploreNavLink } from "./explore-nav"
 
@@ -34,10 +35,7 @@ export function ExploreNavBar({ brand, book, sections, labels }: ExploreNavBarPr
           >
             <span>{labels.explore}</span>
           </button>
-          <a
-            href={book.href}
-            className="inline-flex h-[30px] items-center rounded-full bg-primary px-3.5 text-primary-foreground transition-colors hover:bg-primary/90 text-xs tracking-[0.035em] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-          >
+          <a href={book.href} className={ctaPill({ size: "sm" })}>
             <span>{book.label}</span>
           </a>
         </div>

@@ -79,8 +79,11 @@ without `SiteFooterLegal` or an app writes its own "©" line.
 In `packages/ui`, extracted from www so every app can use them: `Eyebrow`, `ArrowLink`,
 `DashedLine`, `Picture`, `SunPanel`, `Background` (`components/`), `Reveal`/`RevealItem` and
 `MediaClip` (`components/motion/`, `motion/react`, off under `prefers-reduced-motion`), `navPill`
-(`components/nav-pill.ts`, the pill-shaped nav link), `NativeSelect`, and `Card` with
-`size="compact"` (smaller radius and padding for dense app screens).
+(`components/nav-pill.ts`, the pill-shaped nav link: the site header's links, the blog's nav at
+`size: "md"`, the admin tabs), `ctaPill` (`components/cta-pill.ts`, the filled "Boka" call to
+action in three sizes, a class helper so a motion element can carry it), `NativeSelect`, and `Card`
+with `size="compact"` (a tighter radius for dense app screens, same padding). `Eyebrow` takes `as`
+for a label that is a heading, a term or a paragraph.
 
 The header and footer are `SiteHeader` / `SiteFooter` (see **Site header & footer** in
 `CLAUDE.md`), built on `SiteHeaderShell` and `siteHeaderBar`. An app with its own navigation passes

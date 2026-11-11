@@ -43,3 +43,22 @@ export const Default: Story = {
     )
   },
 }
+
+/** `size: "md"`: 36 px, next to the h-9 controls of a header row, as in the blog's nav. */
+export const Medium: Story = {
+  render: () => (
+    <ul className="flex flex-wrap items-center gap-2">
+      {["Ledarskap inifrån", "English"].map((label) => (
+        <li key={label}>
+          <a href={`#${label}`} className={navPill({ size: "md", className: "text-foreground" })}>
+            {label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  ),
+  play: async ({ canvasElement }) => {
+    const link = within(canvasElement).getByRole("link", { name: "English" })
+    await expect(link.getBoundingClientRect().height).toBe(36)
+  },
+}

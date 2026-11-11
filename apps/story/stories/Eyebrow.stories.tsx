@@ -27,3 +27,13 @@ export const AboveAHeadline: Story = {
     </div>
   ),
 }
+
+/** `as`: the label is the list's heading, as on www's credentials. */
+export const AsAHeading: Story = {
+  args: { as: "h3", children: "Utbildning" },
+  play: async ({ canvasElement }) => {
+    await expect(
+      within(canvasElement).getByRole("heading", { level: 3, name: "Utbildning" })
+    ).toBeInTheDocument()
+  },
+}
