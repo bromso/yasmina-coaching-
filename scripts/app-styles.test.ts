@@ -40,6 +40,18 @@ const ALLOWED_COLOURS: { file: string; literals: string[]; reason: string }[] = 
   ].map((file) => ({ file, ...THEME_COLOR })),
   ...NEXT_APPS.map((app) => ({ file: `apps/${app}/src/app/manifest.ts`, ...MANIFEST_COLOURS })),
   {
+    file: "apps/www/src/components/booking/payment-step.tsx",
+    literals: ["bg-black", "text-white", "bg-black/85", "bg-white", "text-black", "bg-white/85"],
+    reason:
+      "the Apple Pay / Google Pay button is black with white text (white on black in dark mode), as their brand guidelines require",
+  },
+  {
+    file: "apps/www/src/components/site-nav/explore-nav.tsx",
+    literals: ["rgba(0,0,0,0)"],
+    reason:
+      "motion animates the toggle's fill from transparent to the foreground and interpolates colours, so transparent is written as one",
+  },
+  {
     file: "apps/www/src/components/booking/payment-methods.tsx",
     literals: [
       "#000",
@@ -63,8 +75,55 @@ const BODY = /^\s*<body[\s>][^>]*>/gm
 /** A JSX `<html …>` opening tag, likewise. */
 const HTML = /^\s*<html[\s>][^>]*>/gm
 const SINGLE_IMPORT = '@import "@repo/ui/globals.css";'
-/** `oklch(` or a 3/4/6/8-digit hex colour, not part of a longer word or an HTML entity. */
-const COLOUR = /oklch\(|(?<![\w&])#(?:[0-9a-f]{8}|[0-9a-f]{6}|[0-9a-f]{3,4})(?![\w-])/gi
+/** The CSS named colours (`transparent` and `currentColor` are not colours of their own). */
+const NAMED = `aliceblue antiquewhite aqua aquamarine azure beige bisque black blanchedalmond blue
+blueviolet brown burlywood cadetblue chartreuse chocolate coral cornflowerblue cornsilk crimson cyan
+darkblue darkcyan darkgoldenrod darkgray darkgreen darkgrey darkkhaki darkmagenta darkolivegreen
+darkorange darkorchid darkred darksalmon darkseagreen darkslateblue darkslategray darkslategrey
+darkturquoise darkviolet deeppink deepskyblue dimgray dimgrey dodgerblue firebrick floralwhite
+forestgreen fuchsia gainsboro ghostwhite gold goldenrod gray green greenyellow grey honeydew hotpink
+indianred indigo ivory khaki lavender lavenderblush lawngreen lemonchiffon lightblue lightcoral
+lightcyan lightgoldenrodyellow lightgray lightgreen lightgrey lightpink lightsalmon lightseagreen
+lightskyblue lightslategray lightslategrey lightsteelblue lightyellow lime limegreen linen magenta
+maroon mediumaquamarine mediumblue mediumorchid mediumpurple mediumseagreen mediumslateblue
+mediumspringgreen mediumturquoise mediumvioletred midnightblue mintcream mistyrose moccasin
+navajowhite navy oldlace olive olivedrab orange orangered orchid palegoldenrod palegreen
+paleturquoise palevioletred papayawhip peachpuff peru pink plum powderblue purple rebeccapurple red
+rosybrown royalblue saddlebrown salmon sandybrown seagreen seashell sienna silver skyblue slateblue
+slategray slategrey snow springgreen steelblue tan teal thistle tomato turquoise violet wheat white
+whitesmoke yellow yellowgreen`
+  .split(/\s+/)
+  .join("|")
+/** Tailwind's own palette: `white`, `black` and every hue's numbered shades. */
+const PALETTE = `white|black|(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-\\d{2,3}`
+/** The utilities that take a colour. */
+const COLOUR_UTILITY =
+  "bg|text|border(?:-[trblxyse])?|ring(?:-offset)?|fill|stroke|from|via|to|outline|decoration|divide|shadow|accent|caret|placeholder|inset-shadow|inset-ring"
+/** The properties a named colour would be the value of, in CSS or a React style object. */
+const COLOUR_PROPERTY =
+  "color|background(?:-color)?|backgroundColor|fill|stroke|border(?:-[a-z]+)?-color|border[A-Za-z]*Color|outline-color|outlineColor|stop-color|stopColor|caret-color|caretColor|accent-color|accentColor"
+
+/**
+ * A colour written in source rather than read from a token:
+ * - a 3/4/6/8-digit hex colour, not part of a longer word or an HTML entity;
+ * - a colour function: `rgb()`, `rgba()`, `hsl()`, `hsla()`, `hwb()`, `lab()`, `lch()`, `oklab()`,
+ *   `oklch()`, `color()`;
+ * - one of Tailwind's palette utilities (`text-white`, `bg-black/50`, `border-slate-200`, …),
+ *   with any variant;
+ * - a CSS named colour as the value of a colour property (`color: "white"`,
+ *   `background-color: red`) or in an arbitrary utility (`bg-[white]`).
+ * A named colour in prose ("white space", "Black Friday") is not a colour and is not matched.
+ */
+const COLOUR = new RegExp(
+  [
+    "(?<![\\w&])#(?:[0-9a-f]{8}|[0-9a-f]{6}|[0-9a-f]{3,4})(?![\\w-])",
+    "(?<![\\w-])(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\\([^)]*\\)",
+    `(?<![\\w-])(?:${COLOUR_UTILITY})-(?:${PALETTE})(?:\\/\\d+)?(?![\\w-])`,
+    `(?<![\\w-])(?:${COLOUR_PROPERTY})["']?\\s*:\\s*["']?(?:${NAMED})(?![\\w-])`,
+    `-\\[(?:${NAMED})\\]`,
+  ].join("|"),
+  "gi"
+)
 
 function read(path: string) {
   return readFileSync(join(ROOT, path), "utf8")
@@ -151,6 +210,37 @@ describe.each(COLOUR_CHECKED_APPS)("%s colours", (app) => {
       }
     }
     expect(found, "use a token (`bg-sun`, `var(--primary)`, …) instead").toEqual([])
+  })
+})
+
+describe("the colour scan", () => {
+  test.each([
+    ["a hex colour", 'fill="#4285f4"', "#4285f4"],
+    ["rgb()", "color: rgb(0 0 0)", "rgb(0 0 0)"],
+    ["rgba()", 'backgroundColor: "rgba(0,0,0,0)"', "rgba(0,0,0,0)"],
+    ["hsl()", "border-color: hsl(210 40% 50%)", "hsl(210 40% 50%)"],
+    ["oklch()", "--x: oklch(0.5 0.1 200)", "oklch(0.5 0.1 200)"],
+    ["a palette utility", 'className="text-white"', "text-white"],
+    ["a palette shade with a variant and opacity", "dark:bg-slate-900/50", "bg-slate-900/50"],
+    ["a named colour in a style object", 'style={{ color: "white" }}', 'color: "white'],
+    [
+      "a named colour in CSS",
+      "background-color: rebeccapurple;",
+      "background-color: rebeccapurple",
+    ],
+    ["a named colour as an arbitrary value", "bg-[white]", "-[white]"],
+  ])("catches %s", (_kind, source, literal) => {
+    expect(colours(source)).toEqual([literal.toLowerCase()])
+  })
+
+  test.each([
+    ["a token utility", 'className="bg-primary text-primary-foreground border-border"'],
+    ["a token in CSS", "color: var(--foreground)"],
+    ["transparent and currentColor", 'fill: "currentColor", color: "transparent"'],
+    ["prose", "White space and black coffee, a red thread"],
+    ["an HTML entity", "&#123;"],
+  ])("passes %s", (_kind, source) => {
+    expect(colours(source)).toEqual([])
   })
 })
 

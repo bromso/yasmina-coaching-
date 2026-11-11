@@ -90,7 +90,7 @@ function pairs(t: Token, dark: boolean): Pair[] {
     { name: "primary on card", fg: t("primary"), bg: t("card"), min: text },
     // Focus indicators (WCAG 1.4.11): the solid `--ring` colour at 3:1, which Button and Input
     // draw as their 1px `border-ring` on focus. Their 3px `ring-ring/50` halo is half-opacity and
-    // measures lower — 2.14:1 over the light background (up from 1.94:1) — so it is a known
+    // measures lower — 2.18:1 over the light background and 2.91:1 over the dark one — so it is a known
     // limitation, not guarded here; the solid border is the indicator that meets 3:1.
     { name: "ring on background", fg: t("ring"), bg: t("background"), min: ui },
     { name: "ring on card", fg: t("ring"), bg: t("card"), min: ui },
@@ -159,10 +159,15 @@ function pairs(t: Token, dark: boolean): Pair[] {
   return list
 }
 
-/** The coaching pairs: text on the sun panels, the blue call to action. */
+/** The coaching pairs: text on the sun panels, the blue call to action, focus on the panels. */
 function coachingPairs(t: Token): Pair[] {
   const text = 4.5
+  const ui = 3
   return [
+    // The solid focus border on the sun panels and muted surfaces (www's sections, the sidebar).
+    { name: "ring on sun", fg: t("ring"), bg: t("sun"), min: ui },
+    { name: "ring on sun-soft", fg: t("ring"), bg: t("sun-soft"), min: ui },
+    { name: "ring on muted", fg: t("ring"), bg: t("muted"), min: ui },
     { name: "foreground on sun", fg: t("foreground"), bg: t("sun"), min: text },
     { name: "foreground on sun-soft", fg: t("foreground"), bg: t("sun-soft"), min: text },
     {

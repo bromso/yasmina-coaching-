@@ -68,9 +68,15 @@ their own, so no variable refers to itself. Storybook loads no web fonts: there 
 stand alone.
 
 `scripts/app-styles.test.ts` (in `bun test scripts`) fails when an app's stylesheet is anything but
-the one import, a layout lacks `fontVariables` or `data-scroll-behavior`, or a colour literal
-(hex, `rgb()`, `oklch()`, …) sits in any Next app's `src`. The few that must stay (the viewport
-`themeColor`, the manifest colours: browser metadata, not CSS) are listed there with a reason, and
+the one import, a layout lacks `fontVariables` or `data-scroll-behavior` on `<html>` or `font-sans`
+on `<body>`, or a colour sits in any Next app's `src`: a hex colour, a colour function (`rgb()`,
+`rgba()`, `hsl()`, `hsla()`, `hwb()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `color()`), one of
+Tailwind's palette utilities (`text-white`, `bg-black/50`, `border-slate-200`, any variant), or a CSS
+named colour as a colour property's value (`color: "white"`) or an arbitrary utility (`bg-[white]`).
+Named colours in prose are not matched. The few that must stay (the viewport
+`themeColor` and the manifest colours, which are browser metadata, not CSS; the payment marks and
+the black wallet button their brands prescribe; the transparent fill www's nav animates from) are
+listed there with a reason, and
 a stale entry fails too. `scripts/site-footer.test.ts` fails when a layout renders `SiteFooter`
 without `SiteFooterLegal` or an app writes its own "©" line.
 
@@ -93,7 +99,10 @@ it as the `nav` slot; www draws its animated `ExploreNav` with `siteHeaderBar` i
 ## Retheming
 
 Edit a value in `packages/tokens/src/tokens/`, run `bun run tokens`, commit the two generated
-files. Keep every text pair at WCAG 4.5:1 and every UI pair at 3:1 in both themes:
-`packages/ui/src/styles/contrast.test.ts` reads the generated CSS and fails otherwise. Then
+files. Keep every text pair at WCAG 4.5:1 and the focus ring at 3:1 in both themes:
+`packages/ui/src/styles/contrast.test.ts` reads the generated CSS and fails otherwise. It pins the
+text pairs and the solid `--ring` on the background, card, sun, sun-soft and muted surfaces; the
+`--border` and `--input` hairlines are not pinned (about 1.4:1, below WCAG 1.4.11's 3:1, a pending
+decision). Then
 re-run the visual baseline (`apps/e2e/README.md`, **Visual baseline**: opt-in, with snapshots that
 are local and git-ignored) and the a11y sweep. Mail follows the tokens through the email file.
