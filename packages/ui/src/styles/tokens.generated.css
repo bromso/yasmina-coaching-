@@ -77,6 +77,8 @@
   --brand-blue-foreground: oklch(1 0 0);
   --sun: oklch(0.96 0.09 100);
   --sun-soft: oklch(0.975 0.045 97);
+  --layer-sidebar: 10;
+  --layer-above-sidebar: calc(10 + 1);
   --ease-out-soft: cubic-bezier(0.2, 0.7, 0.2, 1);
   --radius: 0.875rem;
   --shadow-x: 0px;

@@ -65,8 +65,11 @@ describe("SiteFooterLegal", () => {
     }
   })
   test("defaults to this year and the brand name", () => {
+    // The year read on each side of the render: equal unless it ran across New Year.
+    const before = new Date().getFullYear()
     const html = renderToStaticMarkup(<SiteFooterLegal links={[]} />)
-    expect(text(html)).toBe(`© ${new Date().getFullYear()} ${BRAND_NAME}`)
+    const after = new Date().getFullYear()
+    expect([before, after].map((year) => `© ${year} ${BRAND_NAME}`)).toContain(text(html))
   })
   test("in SiteFooter's legal row, inside the one footer landmark", () => {
     const html = renderToStaticMarkup(

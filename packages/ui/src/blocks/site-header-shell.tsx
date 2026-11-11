@@ -19,6 +19,14 @@ export const siteHeaderBar =
 export const belowSiteHeader =
   "top-[calc(var(--site-header-height)+env(safe-area-inset-top,0px))] h-[calc(100svh-var(--site-header-height)-env(safe-area-inset-top,0px))]!"
 
+/**
+ * For what must cover the fixed sidebar where they meet (account's footer, which would otherwise
+ * slide under the sidebar's start): stacked at `--layer-above-sidebar`, which `packages/tokens`
+ * derives from the sidebar's own `--layer-sidebar`, on the page background so the sidebar does not
+ * show through.
+ */
+export const aboveSidebar = "relative z-(--layer-above-sidebar) bg-background"
+
 type SiteHeaderShellProps = React.ComponentProps<"header"> & {
   /** Pins the header to the top of the viewport, above the page. */
   sticky?: boolean

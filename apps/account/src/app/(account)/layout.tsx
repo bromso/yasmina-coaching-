@@ -5,6 +5,7 @@ import { footerGroups, relabelFooter, relabelNav, siteNav, siteUrl } from "@repo
 import { NotificationBell } from "@repo/ui/blocks/notification-bell"
 import { SiteFooter, SiteFooterLegal } from "@repo/ui/blocks/site-footer"
 import { SiteHeader } from "@repo/ui/blocks/site-header"
+import { aboveSidebar } from "@repo/ui/blocks/site-header-shell"
 import { Brand } from "@repo/ui/components/brand"
 import { CookieConsent } from "@repo/ui/components/cookie-consent"
 import { DeletionBanner } from "@repo/ui/components/deletion-banner"
@@ -178,7 +179,7 @@ export default async function AccountLayout({
           </div>
         </SidebarInset>
       </div>
-      {/* Above the fixed sidebar (z-10), which would otherwise cover the footer's start. */}
+      {/* Above the fixed sidebar, which would otherwise cover the footer's start. */}
       <SiteFooter
         brand={<Brand href={siteUrl("www")} />}
         groups={relabelFooter(
@@ -188,7 +189,7 @@ export default async function AccountLayout({
         )}
         navLabel={t("ui.footerNav")}
         legal={legal({ terms: t("account.layout.terms"), privacy: t("account.layout.privacy") })}
-        className="relative z-20 bg-background"
+        className={aboveSidebar}
       />
       <CookieConsent
         domain={COOKIE_DOMAIN}

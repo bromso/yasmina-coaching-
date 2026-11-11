@@ -51,6 +51,7 @@ const MODE_INDEPENDENT = [
   /^text-/,
   /^ease-/,
   /^site-header-/,
+  /^layer-/,
 ]
 
 describe("the generated theme", () => {
