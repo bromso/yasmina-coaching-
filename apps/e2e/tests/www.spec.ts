@@ -32,6 +32,6 @@ test("the home page's contact section leads to the contact page", async ({ page 
   await page.goto(URLS.www)
   await expect(page.getByRole("heading", { level: 2, name: "Börja med ett samtal" })).toBeVisible()
   await page.getByRole("link", { name: "Kontakta Yasmina" }).last().click()
-  await expect(page).toHaveURL(`${URLS.www}/kontakt`)
+  await expect(page).toHaveURL(`${URLS.www}/kontakt?from=/`)
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible()
 })
