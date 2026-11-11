@@ -3,26 +3,44 @@ import { DEFAULT_LOCALE, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
 import { BRAND_NAME } from "@repo/sites/brand"
 import type { ReactNode } from "react"
+import { EMAIL_COLORS, EMAIL_FONTS } from "../tokens.generated"
 
 export const BRAND = BRAND_NAME
 
-const body = { backgroundColor: "#f6f6f6", fontFamily: "ui-sans-serif, system-ui, sans-serif" }
+const body = { backgroundColor: EMAIL_COLORS.muted, fontFamily: EMAIL_FONTS.body }
 const card = {
-  backgroundColor: "#ffffff",
+  backgroundColor: EMAIL_COLORS.background,
+  color: EMAIL_COLORS.foreground,
+  border: `1px solid ${EMAIL_COLORS.border}`,
   borderRadius: 8,
   margin: "24px auto",
   padding: 24,
   maxWidth: 480,
 }
-const footer = { color: "#6b7280", fontSize: 12 }
+const footer = { color: EMAIL_COLORS.mutedForeground, fontSize: 12 }
 
 /** The call-to-action button style every mail shares. */
 export const button = {
-  background: "#111827",
-  color: "#fff",
+  background: EMAIL_COLORS.primary,
+  color: EMAIL_COLORS.primaryForeground,
   padding: "10px 16px",
   borderRadius: 6,
 }
+
+/**
+ * Headings in the display serif and links in the brand blue (`!important`: React Email's `Link`
+ * writes its own inline blue, which is below 4.5:1 on the card). Mail clients differ on what a
+ * `<head>` style reaches, so a client that drops it still shows readable default headings and links.
+ */
+const headStyles = `h1,h2,h3{font-family:${EMAIL_FONTS.display};color:${EMAIL_COLORS.foreground}}a{color:${EMAIL_COLORS.brandBlue} !important}`
+
+/** Every text-on-background pair the shell draws: the test holds each to 4.5:1. */
+export const PAIRS = [
+  { name: "body text on card", fg: EMAIL_COLORS.foreground, bg: EMAIL_COLORS.background },
+  { name: "link on card", fg: EMAIL_COLORS.brandBlue, bg: EMAIL_COLORS.background },
+  { name: "footer on card", fg: EMAIL_COLORS.mutedForeground, bg: EMAIL_COLORS.background },
+  { name: "button text on button", fg: EMAIL_COLORS.primaryForeground, bg: EMAIL_COLORS.primary },
+] as const
 
 /** The shell every mail shares: preview line, white card, brand footer. */
 export function Layout({
@@ -39,7 +57,9 @@ export function Layout({
   const t = translatorFor(locale, "email")
   return (
     <Html lang={locale}>
-      <Head />
+      <Head>
+        <style>{headStyles}</style>
+      </Head>
       <Preview>{preview}</Preview>
       <Body style={body}>
         <Container style={card}>
