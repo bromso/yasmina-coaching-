@@ -1,7 +1,7 @@
-import { Button, Heading, Link, Text } from "@react-email/components"
+import { Button, Text } from "@react-email/components"
 import { DEFAULT_LOCALE, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
-import { BRAND, button, Layout } from "./layout"
+import { BRAND, button, EmailHeading, EmailLink, Layout } from "./layout"
 
 export type InvitationProps = {
   workspaceName: string
@@ -32,9 +32,9 @@ export function Invitation({
       brand={brand}
       locale={locale}
     >
-      <Heading as="h1">
+      <EmailHeading as="h1">
         {t("invitation.heading", { workspace: workspaceName, brand: brand ?? BRAND })}
-      </Heading>
+      </EmailHeading>
       <Text>
         {t("invitation.body", { inviter: inviterName, workspace: workspaceName, role, days: DAYS })}
       </Text>
@@ -43,7 +43,7 @@ export function Invitation({
       </Button>
       <Text>
         {t("layout.orLink")}
-        <Link href={link}>{link}</Link>
+        <EmailLink href={link}>{link}</EmailLink>
       </Text>
       <Text>{t("invitation.footer")}</Text>
     </Layout>

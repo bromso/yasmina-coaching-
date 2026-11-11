@@ -512,6 +512,7 @@
         "react-dom": "catalog:",
       },
       "devDependencies": {
+        "@repo/tokens": "workspace:*",
         "@repo/typescript-config": "workspace:*",
         "@types/bun": "catalog:",
         "@types/react": "catalog:",

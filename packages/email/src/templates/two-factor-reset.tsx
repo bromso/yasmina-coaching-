@@ -1,7 +1,7 @@
-import { Heading, Link, Text } from "@react-email/components"
+import { Text } from "@react-email/components"
 import { DEFAULT_LOCALE, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
-import { greeting, Layout } from "./layout"
+import { EmailHeading, EmailLink, greeting, Layout } from "./layout"
 
 export type TwoFactorResetProps = {
   name?: string
@@ -24,11 +24,11 @@ export function TwoFactorReset({
   const security = `${accountUrl}/security`
   return (
     <Layout preview={t("twoFactorReset.preview")} brand={brand} locale={locale}>
-      <Heading as="h1">{t("twoFactorReset.heading")}</Heading>
+      <EmailHeading as="h1">{t("twoFactorReset.heading")}</EmailHeading>
       <Text>{greeting(t, name)}</Text>
       <Text>{t("twoFactorReset.body")}</Text>
       <Text>
-        {t("twoFactorReset.footer")} <Link href={security}>{security}</Link>.
+        {t("twoFactorReset.footer")} <EmailLink href={security}>{security}</EmailLink>.
       </Text>
     </Layout>
   )

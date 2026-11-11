@@ -1,7 +1,7 @@
-import { Button, Heading, Link, Text } from "@react-email/components"
+import { Button, Text } from "@react-email/components"
 import { DEFAULT_LOCALE, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
-import { button, Layout } from "./layout"
+import { button, EmailHeading, EmailLink, Layout } from "./layout"
 
 export type BookingKind = "instant" | "group" | "request"
 
@@ -59,7 +59,7 @@ export function BookingNew({
   const t = translatorFor(locale, "email")
   return (
     <Layout preview={t("bookingNew.preview", { kind, name })} brand={brand} locale={locale}>
-      <Heading as="h1">{t("bookingNew.heading", { kind })}</Heading>
+      <EmailHeading as="h1">{t("bookingNew.heading", { kind })}</EmailHeading>
       <Text>{t("bookingNew.reference", { reference })}</Text>
       <Text>{t("bookingNew.offering", { offeringLabel })}</Text>
       <Text>{t("bookingNew.name", { name })}</Text>
@@ -98,7 +98,7 @@ export function BookingNew({
       </Button>
       <Text>
         {t("layout.orLink")}
-        <Link href={adminUrl}>{adminUrl}</Link>
+        <EmailLink href={adminUrl}>{adminUrl}</EmailLink>
       </Text>
       <Text>{t("bookingNew.footer", { email })}</Text>
     </Layout>

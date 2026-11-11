@@ -1,8 +1,18 @@
-import { Body, Container, Head, Html, Preview, Section, Text } from "@react-email/components"
+import {
+  Body,
+  Container,
+  Head,
+  Heading,
+  Html,
+  Link,
+  Preview,
+  Section,
+  Text,
+} from "@react-email/components"
 import { DEFAULT_LOCALE, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
 import { BRAND_NAME } from "@repo/sites/brand"
-import type { ReactNode } from "react"
+import type { ComponentProps, ReactNode } from "react"
 import { EMAIL_COLORS, EMAIL_FONTS } from "../tokens.generated"
 
 export const BRAND = BRAND_NAME
@@ -28,11 +38,22 @@ export const button = {
 }
 
 /**
- * Headings in the display serif and links in the brand blue (`!important`: React Email's `Link`
- * writes its own inline blue, which is below 4.5:1 on the card). Mail clients differ on what a
- * `<head>` style reaches, so a client that drops it still shows readable default headings and links.
+ * A link in the brand blue, set inline: React Email's own `Link` writes its own blue, below 4.5:1 on
+ * the card, and clients that strip a `<head>` style would show it.
  */
-const headStyles = `h1,h2,h3{font-family:${EMAIL_FONTS.display};color:${EMAIL_COLORS.foreground}}a{color:${EMAIL_COLORS.brandBlue} !important}`
+export function EmailLink({ style, ...props }: ComponentProps<typeof Link>) {
+  return <Link {...props} style={{ color: EMAIL_COLORS.brandBlue, ...style }} />
+}
+
+/** A heading in the display serif, set inline so it survives clients that strip `<head>` styles. */
+export function EmailHeading({ style, ...props }: ComponentProps<typeof Heading>) {
+  return (
+    <Heading
+      {...props}
+      style={{ fontFamily: EMAIL_FONTS.display, color: EMAIL_COLORS.foreground, ...style }}
+    />
+  )
+}
 
 /** Every text-on-background pair the shell draws: the test holds each to 4.5:1. */
 export const PAIRS = [
@@ -57,9 +78,7 @@ export function Layout({
   const t = translatorFor(locale, "email")
   return (
     <Html lang={locale}>
-      <Head>
-        <style>{headStyles}</style>
-      </Head>
+      <Head />
       <Preview>{preview}</Preview>
       <Body style={body}>
         <Container style={card}>

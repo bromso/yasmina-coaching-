@@ -50,7 +50,9 @@ describe("workspaces", () => {
     expect(p.affected).toEqual(["@repo/api"])
     expect(p.typecheck).toEqual(["@repo/api"])
     expect(p.tests).toEqual(["@repo/api"])
-    expect(p.build).toEqual(["@repo/api"])
+    // @repo/email (an api dependency) declares @repo/tokens for its contrast test, and a build
+    // builds its dependencies first.
+    expect(p.build).toEqual(["@repo/api", "@repo/tokens"])
     expect(p.uiTypecheck).toBe(false)
     expect(p.storybook).toBe(false)
     expect(p.docker.map((r) => r.app)).toEqual(["api"])

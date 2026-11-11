@@ -1,8 +1,8 @@
-import { Button, Heading, Link, Text } from "@react-email/components"
+import { Button, Text } from "@react-email/components"
 import { formatUtcDate } from "@repo/i18n/dates"
 import { DEFAULT_LOCALE, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
-import { button, greeting, Layout } from "./layout"
+import { button, EmailHeading, EmailLink, greeting, Layout } from "./layout"
 
 export type AccountDeletionScheduledProps = {
   name?: string
@@ -32,7 +32,7 @@ export function AccountDeletionScheduled({
       brand={brand}
       locale={locale}
     >
-      <Heading as="h1">{t("accountDeletionScheduled.heading")}</Heading>
+      <EmailHeading as="h1">{t("accountDeletionScheduled.heading")}</EmailHeading>
       <Text>{greeting(t, name)}</Text>
       <Text>{t("accountDeletionScheduled.body", { date: formattedDate })}</Text>
       <Button href={link} style={button}>
@@ -40,7 +40,7 @@ export function AccountDeletionScheduled({
       </Button>
       <Text>
         {t("layout.orLink")}
-        <Link href={link}>{link}</Link>
+        <EmailLink href={link}>{link}</EmailLink>
       </Text>
     </Layout>
   )

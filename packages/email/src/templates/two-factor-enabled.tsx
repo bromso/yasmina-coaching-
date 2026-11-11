@@ -1,7 +1,7 @@
-import { Heading, Link, Text } from "@react-email/components"
+import { Text } from "@react-email/components"
 import { DEFAULT_LOCALE, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
-import { greeting, Layout } from "./layout"
+import { EmailHeading, EmailLink, greeting, Layout } from "./layout"
 
 export type TwoFactorEnabledProps = {
   name?: string
@@ -24,12 +24,12 @@ export function TwoFactorEnabled({
   const security = `${accountUrl}/security`
   return (
     <Layout preview={t("twoFactorEnabled.preview")} brand={brand} locale={locale}>
-      <Heading as="h1">{t("twoFactorEnabled.heading")}</Heading>
+      <EmailHeading as="h1">{t("twoFactorEnabled.heading")}</EmailHeading>
       <Text>{greeting(t, name)}</Text>
       <Text>{t("twoFactorEnabled.body")}</Text>
       <Text>
         {t("twoFactorEnabled.footer")}
-        <Link href={security}>{security}</Link>.
+        <EmailLink href={security}>{security}</EmailLink>.
       </Text>
     </Layout>
   )

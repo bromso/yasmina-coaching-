@@ -1,7 +1,7 @@
-import { Button, Heading, Link, Text } from "@react-email/components"
+import { Button, Text } from "@react-email/components"
 import { DEFAULT_LOCALE, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
-import { button, greeting, Layout } from "./layout"
+import { button, EmailHeading, EmailLink, greeting, Layout } from "./layout"
 
 /** The tailored next step's kind (`LeadNextStepKind` in `@repo/api-contract/leads`). */
 export type LeadNextStepKind = "inner" | "coaching" | "proposal" | "explore"
@@ -34,7 +34,7 @@ export function LeadReceived({
   const t = translatorFor(locale, "email")
   return (
     <Layout preview={t("leadReceived.preview", { reference })} brand={brand} locale={locale}>
-      <Heading as="h1">{t("leadReceived.heading")}</Heading>
+      <EmailHeading as="h1">{t("leadReceived.heading")}</EmailHeading>
       <Text>{greeting(t)}</Text>
       <Text>{t("leadReceived.body", { reference })}</Text>
       <Text>{t("leadReceived.next", { kind: nextStep })}</Text>
@@ -43,7 +43,7 @@ export function LeadReceived({
       </Button>
       <Text>
         {t("layout.orLink")}
-        <Link href={nextStepUrl}>{nextStepUrl}</Link>
+        <EmailLink href={nextStepUrl}>{nextStepUrl}</EmailLink>
       </Text>
       <Text>{t("leadReceived.footer")}</Text>
     </Layout>

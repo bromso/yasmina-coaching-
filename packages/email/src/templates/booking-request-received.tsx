@@ -1,7 +1,7 @@
-import { Button, Heading, Link, Text } from "@react-email/components"
+import { Button, Text } from "@react-email/components"
 import { DEFAULT_LOCALE, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
-import { button, greeting, Layout } from "./layout"
+import { button, EmailHeading, EmailLink, greeting, Layout } from "./layout"
 
 /**
  * Only the reference, the offering and the link: this mail goes to whatever address was typed
@@ -35,7 +35,7 @@ export function BookingRequestReceived({
       brand={brand}
       locale={locale}
     >
-      <Heading as="h1">{t("bookingRequestReceived.heading")}</Heading>
+      <EmailHeading as="h1">{t("bookingRequestReceived.heading")}</EmailHeading>
       <Text>{greeting(t, name)}</Text>
       <Text>{t("bookingRequestReceived.body", { offeringLabel })}</Text>
       <Button href={manageUrl} style={button}>
@@ -43,7 +43,7 @@ export function BookingRequestReceived({
       </Button>
       <Text>
         {t("layout.orLink")}
-        <Link href={manageUrl}>{manageUrl}</Link>
+        <EmailLink href={manageUrl}>{manageUrl}</EmailLink>
       </Text>
     </Layout>
   )

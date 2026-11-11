@@ -1,7 +1,7 @@
-import { Button, Heading, Link, Text } from "@react-email/components"
+import { Button, Text } from "@react-email/components"
 import { DEFAULT_LOCALE, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
-import { button, Layout } from "./layout"
+import { button, EmailHeading, EmailLink, Layout } from "./layout"
 
 export type SupportRequestProps = {
   reference: string
@@ -36,7 +36,7 @@ export function SupportRequest({
   const from = name ? `${name} (${email})` : email
   return (
     <Layout preview={t("supportRequest.preview", { email })} brand={brand} locale={locale}>
-      <Heading as="h1">{t("supportRequest.heading")}</Heading>
+      <EmailHeading as="h1">{t("supportRequest.heading")}</EmailHeading>
       <Text>{t("supportRequest.reference", { reference })}</Text>
       <Text>{t("supportRequest.topic", { topic })}</Text>
       <Text>{t("supportRequest.from", { from })}</Text>
@@ -48,7 +48,7 @@ export function SupportRequest({
       </Button>
       <Text>
         {t("layout.orLink")}
-        <Link href={adminUrl}>{adminUrl}</Link>
+        <EmailLink href={adminUrl}>{adminUrl}</EmailLink>
       </Text>
       <Text>{t("supportRequest.footer", { email })}</Text>
     </Layout>

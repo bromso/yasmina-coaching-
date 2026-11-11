@@ -1,7 +1,7 @@
-import { Button, Heading, Link, Text } from "@react-email/components"
+import { Button, Text } from "@react-email/components"
 import { DEFAULT_LOCALE, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
-import { button, greeting, Layout } from "./layout"
+import { button, EmailHeading, EmailLink, greeting, Layout } from "./layout"
 
 /**
  * Every date and time arrives pre-formatted from apps/api (`when`, `extraSessions`), so this
@@ -47,12 +47,12 @@ export function BookingConfirmed({
       brand={brand}
       locale={locale}
     >
-      <Heading as="h1">{t("bookingConfirmed.heading")}</Heading>
+      <EmailHeading as="h1">{t("bookingConfirmed.heading")}</EmailHeading>
       <Text>{greeting(t, name)}</Text>
       <Text>{t("bookingConfirmed.body", { offeringLabel, when, where })}</Text>
       {extraSessions && extraSessions.length > 0 ? (
         <>
-          <Heading as="h2">{t("bookingConfirmed.extraSessionsHeading")}</Heading>
+          <EmailHeading as="h2">{t("bookingConfirmed.extraSessionsHeading")}</EmailHeading>
           {extraSessions.map((session) => (
             <Text key={session}>{session}</Text>
           ))}
@@ -63,12 +63,12 @@ export function BookingConfirmed({
       </Button>
       <Text>
         {t("layout.orLink")}
-        <Link href={manageUrl}>{manageUrl}</Link>
+        <EmailLink href={manageUrl}>{manageUrl}</EmailLink>
       </Text>
       {memberBookingUrl ? (
         <Text>
           {t("bookingConfirmed.memberBooking")}
-          <Link href={memberBookingUrl}>{memberBookingUrl}</Link>
+          <EmailLink href={memberBookingUrl}>{memberBookingUrl}</EmailLink>
         </Text>
       ) : null}
       <Text>{t("bookingConfirmed.footer", { hours: cancelCutoffHours })}</Text>

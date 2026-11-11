@@ -1,7 +1,7 @@
-import { Button, Heading, Link, Text } from "@react-email/components"
+import { Button, Text } from "@react-email/components"
 import { DEFAULT_LOCALE, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
-import { button, greeting, Layout } from "./layout"
+import { button, EmailHeading, EmailLink, greeting, Layout } from "./layout"
 
 export type WebhookDisabledProps = {
   name?: string
@@ -40,7 +40,7 @@ export function WebhookDisabled({
   const values = { host, workspace: workspaceName, count: failures }
   return (
     <Layout preview={t("webhookDisabled.preview", { host })} brand={brand} locale={locale}>
-      <Heading as="h1">{t("webhookDisabled.heading")}</Heading>
+      <EmailHeading as="h1">{t("webhookDisabled.heading")}</EmailHeading>
       <Text>{greeting(t, name)}</Text>
       <Text>
         {reason === "gone"
@@ -53,7 +53,7 @@ export function WebhookDisabled({
       </Button>
       <Text>
         {t("layout.orLink")}
-        <Link href={link}>{link}</Link>
+        <EmailLink href={link}>{link}</EmailLink>
       </Text>
     </Layout>
   )
