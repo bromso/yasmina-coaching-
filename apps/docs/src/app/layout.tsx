@@ -83,7 +83,7 @@ export default function RootLayout({
   children: ReactNode
 }>): ReactElement {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         {/* Preconnect to external resources for faster loading */}
         <link rel="preconnect" href="https://api.iconify.design" />

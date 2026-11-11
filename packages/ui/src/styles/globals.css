@@ -355,9 +355,6 @@ h2 {
   button {
     cursor: pointer;
   }
-  [class*="border"] {
-    @apply border-border;
-  }
 }
 
 /*
@@ -442,10 +439,14 @@ picture > source {
   }
 
   /* Gradient sections: replace gradients with solid background and visible borders */
+  /* `to-` only at the start of a class or after a variant: `auto-rows-*` / `auto-cols-*` hold it
+     too. */
   [class*="bg-linear-"],
   [class*="from-"],
   [class*="via-"],
-  [class*="to-"] {
+  [class^="to-"],
+  [class*=" to-"],
+  [class*=":to-"] {
     background: Canvas !important;
   }
 
@@ -483,12 +484,29 @@ picture > source {
   }
 }
 
-/* High contrast preference support */
-@media (prefers-contrast: high) {
-  /* Increase border visibility */
-  .border,
-  [class*="border"] {
+/* High contrast preference support (`more`: Media Queries 5; `high` never matched) */
+@media (prefers-contrast: more) {
+  /* Thicken the borders an element already has. Side by side, never `border-width` on every
+     `[class*="border"]`: preflight gives every element `border-style: solid`, so that would draw
+     all four sides of a `border-b`. */
+  .border {
     border-width: 2px;
+  }
+  .border-x,
+  .border-l {
+    border-left-width: 2px;
+  }
+  .border-x,
+  .border-r {
+    border-right-width: 2px;
+  }
+  .border-y,
+  .border-t {
+    border-top-width: 2px;
+  }
+  .border-y,
+  .border-b {
+    border-bottom-width: 2px;
   }
 
   /* Ensure focus rings are prominent */

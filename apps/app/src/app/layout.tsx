@@ -123,7 +123,7 @@ export default async function RootLayout({
   const note = me?.impersonation ? t("app.layout.impersonating") : undefined
   const pending = list?.pendingInvitations.length ?? 0
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         {/* Preconnect to external resources for faster loading */}
         <link rel="preconnect" href="https://api.iconify.design" />

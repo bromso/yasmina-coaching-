@@ -55,7 +55,7 @@ export default async function RootLayout({
   const locale = await getLocale()
   const t = await getTranslations("ui")
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         {/* Preconnect to external resources for faster loading */}
         <link rel="preconnect" href="https://api.iconify.design" />

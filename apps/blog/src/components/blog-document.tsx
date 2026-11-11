@@ -75,7 +75,7 @@ export function BlogDocument({
     </p>
   )
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         {/* The theme toggle's icon loads from Iconify */}
         <link rel="preconnect" href="https://api.iconify.design" />
