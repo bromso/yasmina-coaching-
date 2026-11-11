@@ -155,7 +155,13 @@
     },
     "input": {
       "$type": "color",
-      "$value": "{color.border}"
+      "$value": "oklch(0.62 0.012 90)",
+      "$description": "Form controls' boundaries: at least 3:1 on background, card, muted and sun-soft in both themes (WCAG 1.4.11). --border stays the decorative hairline.",
+      "$extensions": {
+        "mode": {
+          "dark": "oklch(0.56 0.012 200)"
+        }
+      }
     },
     "ring": {
       "$type": "color",

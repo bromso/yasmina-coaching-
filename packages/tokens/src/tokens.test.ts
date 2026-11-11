@@ -86,7 +86,6 @@ describe("the generated theme", () => {
       ["sidebar-ring", "ring"],
       ["card-foreground", "foreground"],
       ["ring", "brand-blue"],
-      ["input", "border"],
       ["chart-line-primary", "chart-1"],
       ["chart-brush-border", "chart-grid"],
     ] as const) {

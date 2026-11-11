@@ -164,6 +164,20 @@ function coachingPairs(t: Token): Pair[] {
   const text = 4.5
   const ui = 3
   return [
+    // Form controls' boundaries (WCAG 1.4.11): Input, Textarea, Select, NativeSelect, Checkbox,
+    // RadioGroup, InputOTP, … draw it with `border-input`, on every surface a form sits on.
+    { name: "input on background", fg: t("input"), bg: t("background"), min: ui },
+    { name: "input on card", fg: t("input"), bg: t("card"), min: ui },
+    { name: "input on muted", fg: t("input"), bg: t("muted"), min: ui },
+    { name: "input on sun-soft", fg: t("input"), bg: t("sun-soft"), min: ui },
+    // Focus turns a control's `border-input` into `border-ring` (plus the halo): the two must not
+    // read as one colour. Not a WCAG minimum, a guard that the change stays visible.
+    {
+      name: "ring against input (focus changes the border)",
+      fg: t("ring"),
+      bg: t("input"),
+      min: 1.5,
+    },
     // The solid focus border on the sun panels and muted surfaces (www's sections, the sidebar).
     { name: "ring on sun", fg: t("ring"), bg: t("sun"), min: ui },
     { name: "ring on sun-soft", fg: t("ring"), bg: t("sun-soft"), min: ui },

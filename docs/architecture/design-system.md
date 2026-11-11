@@ -101,9 +101,11 @@ it as the `nav` slot; www draws its animated `ExploreNav` with `siteHeaderBar` i
 Edit a value in `packages/tokens/src/tokens/`, run `bun run tokens`, commit the two generated
 files. Keep every text pair at WCAG 4.5:1 and the focus ring at 3:1 in both themes:
 `packages/ui/src/styles/contrast.test.ts` reads the generated CSS and fails otherwise. It pins the
-text pairs and the solid `--ring` on the background, card, sun, sun-soft and muted surfaces; the
-`--border` and `--input` hairlines are not pinned (about 1.4:1, below WCAG 1.4.11's 3:1, a pending
-decision). Then
+text pairs, the solid `--ring` on the background, card, sun, sun-soft and muted surfaces, and
+`--input` (every form control's boundary: `border-input`) at 3:1 on background, card, muted and
+sun-soft. `--border` is the decorative hairline (dividers, card outlines) and is exempt from WCAG
+1.4.11, so it stays light; a control whose border is its only visible boundary draws it with
+`border-input`, never `border-border`. Then
 re-run the visual baseline (`apps/e2e/README.md`, **Visual baseline**: opt-in, with snapshots that
 are local and git-ignored) and the a11y sweep. Mail follows the tokens through the email file, and so does Storybook's manager chrome
 (`apps/story/.storybook/theme.ts` reads the same hex from `@repo/email/tokens`).
