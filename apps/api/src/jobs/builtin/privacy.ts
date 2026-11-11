@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto"
 import { ORPCError } from "@orpc/server"
 import {
+  bookingReference,
   EXPORT_REQUEST_INTERVAL_MS,
   EXPORT_TTL_MS,
   jobReference,
@@ -297,6 +298,29 @@ export function buildExport(
     // Contact requests sent from the account's verified address (address-keyed, not linked to the
     // account): the visitor's own answers, never the ip hash, Yasmina's notes or the admin.
     leads: data.leads.map(toExportedLead),
+    // Coaching bookings made with the account's verified address (address-keyed like leads):
+    // what the customer booked and sent, by explicit field — never the manage-token hash, the
+    // order or package ids, a payment reference or the admin who decided a request.
+    bookings: data.bookings.map((row) => ({
+      reference: bookingReference(row.id),
+      offering: row.offering,
+      kind: row.kind,
+      status: row.status,
+      audience: row.audience,
+      name: row.customer_name,
+      email: row.customer_email,
+      organisation: row.organisation,
+      phone: row.phone,
+      location: row.location,
+      startsAt: row.starts_at,
+      endsAt: row.ends_at,
+      notes: row.notes,
+      preferredDates: parseJson(row.preferred_dates),
+      attendees: row.attendees,
+      venue: row.venue,
+      createdAt: row.created_at,
+      cancelledAt: row.cancelled_at,
+    })),
   }
 }
 

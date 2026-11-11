@@ -2116,7 +2116,7 @@ Constants live in `@repo/api-contract`'s `privacy.ts`: `EXPORT_TTL_MS` (7 days),
   keeps only the keys `EXPORTED_AUDIT_METADATA` lists for its action, so an admin id such as
   `impersonatedBy` never reaches the file), `notifications` (type, created, read, data — see
   [Notifications](#notifications) above), `analyticsEvents`, `pageviews`, `supportRequests`,
-  `jobApplications` and `leads` — the last two only those sent from the account's own address, and
+  `jobApplications`, `leads` and `bookings` — the last three only those sent from the account's own address, and
   only once that address is verified (an unverified account has not proven it owns the address an
   application or a contact request was sent from; a lead never carries Yasmina's notes). The file is written through the storage seam under `exports/<userId>/<random>.json`
   (`EXPORT_KEY_PATTERN` in `@repo/api-contract`, apart from `FILE_KEY_PATTERN` on purpose — only
