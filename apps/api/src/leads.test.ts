@@ -303,6 +303,7 @@ describe("admin.leads", () => {
       () => user.client.admin.leads.list({}),
       () => user.client.admin.leads.get({ id: idOf(reference) }),
       () => user.client.admin.leads.update({ id: idOf(reference), status: "won" }),
+      () => user.client.admin.leads.delete({ id: idOf(reference) }),
     ]
     for (const call of calls) {
       const [err] = await safe(call())
@@ -386,6 +387,39 @@ describe("admin.leads", () => {
     expect((await app.db.leads.find(id))?.notes).toBeNull()
     const [err] = await safe(root.client.admin.leads.update({ id: 999_999, status: "won" }))
     expect((err as { code?: string })?.code).toBe("NOT_FOUND")
+  })
+})
+
+describe("admin.leads, retention by hand", () => {
+  test("leaving new erases the ip hash; going back to new never restores it", async () => {
+    const { reference } = await clientFor(app).leads.create(lead())
+    const id = idOf(reference)
+    expect((await app.db.leads.find(id))?.ip_hash).toBe("test-client")
+    await root.client.admin.leads.update({ id, notes: "Notes alone keep it" })
+    expect((await app.db.leads.find(id))?.ip_hash).toBe("test-client")
+    await root.client.admin.leads.update({ id, status: "contacted" })
+    expect((await app.db.leads.find(id))?.ip_hash).toBeNull()
+    await root.client.admin.leads.update({ id, status: "new" })
+    expect((await app.db.leads.find(id))?.ip_hash).toBeNull()
+  })
+
+  test("delete removes the lead on request and audits its id only", async () => {
+    const { reference } = await clientFor(app).leads.create(
+      lead({ name: "Forget Me", message: "Please delete everything about me." })
+    )
+    const id = idOf(reference)
+    expect(await root.client.admin.leads.delete({ id })).toEqual({ ok: true })
+    expect(await app.db.leads.find(id)).toBeUndefined()
+    const { items } = await root.client.admin.audit.list({
+      targetType: "lead",
+      targetId: String(id),
+    })
+    expect(items).toHaveLength(1)
+    expect(items[0]).toMatchObject({ action: "lead.deleted", actor: { id: root.user.id } })
+    expect(items[0]?.metadata).toBeNull()
+    expect(JSON.stringify(items[0])).not.toContain("Forget Me")
+    const [again] = await safe(root.client.admin.leads.delete({ id }))
+    expect((again as { code?: string })?.code).toBe("NOT_FOUND")
   })
 })
 

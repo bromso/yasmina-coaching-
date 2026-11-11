@@ -1,7 +1,12 @@
 import { afterEach, beforeEach, describe, expect, type Mock, spyOn, test } from "bun:test"
 import { ORPCError } from "@orpc/client"
 import { UNAVAILABLE } from "./admin-actions"
-import { type LeadActionDeps, updateLeadCore } from "./admin-lead-actions"
+import {
+  DELETE_CONFIRM_REQUIRED,
+  deleteLeadCore,
+  type LeadActionDeps,
+  updateLeadCore,
+} from "./admin-lead-actions"
 
 let logged: Mock<typeof console.error>
 beforeEach(() => {
@@ -33,14 +38,20 @@ function deps(update: LeadActionDeps["api"]["leads"]["update"] = async () => ({ 
 }
 
 describe("updateLeadCore", () => {
-  test("saves the status and the notes together", async () => {
+  test("saves a changed status and the notes together", async () => {
     const { deps: d, calls } = deps()
     const out = await updateLeadCore(
       d,
-      fd({ id: "4", status: "contacted", notes: "Ringde tisdag" })
+      fd({ id: "4", status: "contacted", currentStatus: "new", notes: "Ringde tisdag" })
     )
     expect(out).toEqual({ ok: true, message: "Saved." })
     expect(calls).toEqual([{ id: 4, status: "contacted", notes: "Ringde tisdag" }])
+  })
+
+  test("an unchanged select sends the notes alone, so a stale tab never resets the status", async () => {
+    const { deps: d, calls } = deps()
+    await updateLeadCore(d, fd({ id: "4", status: "new", currentStatus: "new", notes: "Later" }))
+    expect(calls).toEqual([{ id: 4, notes: "Later" }])
   })
 
   test("a bad id or status never reaches the api", async () => {
@@ -80,5 +91,54 @@ describe("updateLeadCore", () => {
       message: UNAVAILABLE,
     })
     expect(logged).toHaveBeenCalled()
+  })
+})
+
+describe("deleteLeadCore", () => {
+  test("nothing is sent until the confirm box is ticked", async () => {
+    const calls: unknown[] = []
+    const api = {
+      leads: {
+        delete: async (input: unknown) => {
+          calls.push(input)
+          return { ok: true as const }
+        },
+      },
+    }
+    expect(await deleteLeadCore({ api } as never, fd({ id: "4" }))).toEqual({
+      ok: false,
+      fieldErrors: { confirm: DELETE_CONFIRM_REQUIRED },
+    })
+    expect(calls).toHaveLength(0)
+    expect(await deleteLeadCore({ api } as never, fd({ id: "4", confirm: "yes" }))).toEqual({
+      ok: true,
+      message: "Lead deleted.",
+    })
+    expect(calls).toEqual([{ id: 4 }])
+  })
+
+  test("a gone lead shows the api's NOT_FOUND; a crash is unavailable", async () => {
+    const gone = {
+      leads: {
+        delete: async () => {
+          throw new ORPCError("NOT_FOUND", { message: "Not found" })
+        },
+      },
+    }
+    expect(await deleteLeadCore({ api: gone } as never, fd({ id: "4", confirm: "yes" }))).toEqual({
+      ok: false,
+      message: "Not found",
+    })
+    const down = {
+      leads: {
+        delete: async () => {
+          throw new Error("down")
+        },
+      },
+    }
+    expect(await deleteLeadCore({ api: down } as never, fd({ id: "4", confirm: "yes" }))).toEqual({
+      ok: false,
+      message: UNAVAILABLE,
+    })
   })
 })

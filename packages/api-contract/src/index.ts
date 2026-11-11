@@ -1800,6 +1800,15 @@ export const contract = {
         .errors(ADMIN_ERRORS)
         .input(AdminLeadUpdateSchema)
         .output(OkSchema),
+      delete: oc
+        .route({
+          method: "DELETE",
+          path: "/admin/leads/{id}",
+          summary: "Delete a contact request, its answers and notes",
+        })
+        .errors(ADMIN_ERRORS)
+        .input(AdminIdSchema)
+        .output(OkSchema),
     },
     bookings: {
       calendar: oc

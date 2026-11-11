@@ -28,6 +28,8 @@ export function LeadUpdateForm({
   return (
     <form action={action} className="grid gap-4">
       <input type="hidden" name="id" value={id} />
+      {/* The status this form was rendered with: an unchanged select sends no status at all. */}
+      <input type="hidden" name="currentStatus" value={status} />
       <div className="grid gap-1.5">
         <Label htmlFor="lead-status">Status</Label>
         {/* key: a fresh default once the action re-renders with the new status. */}

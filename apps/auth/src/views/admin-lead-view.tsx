@@ -11,6 +11,7 @@ import { Badge } from "@repo/ui/components/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/card"
 import Link from "next/link"
 import { AdminNav } from "@/components/admin/admin-nav"
+import { DeleteLeadForm } from "@/components/admin/delete-lead-form"
 import { LeadUpdateForm } from "@/components/admin/lead-update-form"
 import { formatDateTime } from "@/lib/admin"
 
@@ -129,6 +130,9 @@ export function AdminLeadView({ lead }: { lead: AdminLead }) {
           </CardHeader>
           <CardContent>
             <LeadUpdateForm id={lead.id} status={lead.status} notes={lead.notes} />
+            <div className="mt-6 border-t pt-4">
+              <DeleteLeadForm id={lead.id} />
+            </div>
           </CardContent>
         </Card>
       </div>

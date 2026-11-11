@@ -36,6 +36,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Search
       nextCursor={page.nextCursor}
       counts={page.counts}
       status={status}
+      deleted={first(params.deleted) === "1"}
     />
   )
 }

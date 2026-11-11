@@ -84,6 +84,7 @@ describe("privacy template: contact requests", () => {
       "hash of your IP address",
       "deleted 12 months after it arrived",
       "we do not send a newsletter today",
+      "if you ask us to delete it",
     ]) {
       expect(text).toContain(item)
     }

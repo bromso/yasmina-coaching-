@@ -23,11 +23,14 @@ export function AdminLeadsView({
   nextCursor,
   counts,
   status,
+  deleted = false,
 }: {
   items: AdminLead[]
   nextCursor: number | null
   counts: Record<LeadStatus, number>
   status: AdminLeadStatusFilter
+  /** Landed here from a lead's delete form (`?deleted=1`). */
+  deleted?: boolean
 }) {
   const total = LEAD_STATUSES.reduce((sum, s) => sum + counts[s], 0)
   const tabs: { value: AdminLeadStatusFilter; label: string; count: number }[] = [
@@ -38,6 +41,9 @@ export function AdminLeadsView({
     <>
       <h1 className="text-2xl font-semibold">Leads</h1>
       <AdminNav current="/admin/leads" />
+      <p role="status" className="text-sm">
+        {deleted ? "Lead deleted." : ""}
+      </p>
       <nav aria-label="Status" className="flex flex-wrap gap-1 border-b pb-3">
         {tabs.map((tab) => (
           <Link

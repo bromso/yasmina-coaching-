@@ -5497,6 +5497,14 @@ export const router = api.router({
         })
         return { ok: true as const }
       }),
+
+      // On request (someone asks to be forgotten before the 12 months pass). The audit row names
+      // the lead's id only: nothing the visitor typed outlives the row.
+      delete: adminApi.admin.leads.delete.handler(async ({ input, context, errors }) => {
+        if (!(await context.db.leads.delete(input.id))) throw errors.NOT_FOUND()
+        await audit(context, { action: "lead.deleted", targetType: "lead", targetId: input.id })
+        return { ok: true as const }
+      }),
     },
     bookings: {
       calendar: adminApi.admin.bookings.calendar.handler(async ({ input, context }) => {

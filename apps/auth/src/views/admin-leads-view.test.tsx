@@ -52,6 +52,13 @@ describe("AdminLeadsView", () => {
     expect(html).toContain("Team development or supervision")
   })
 
+  test("after a delete the list says so in a status region", () => {
+    const html = renderToStaticMarkup(
+      <AdminLeadsView items={[]} nextCursor={null} counts={counts} status="all" deleted />
+    )
+    expect(html).toContain('<p role="status" class="text-sm">Lead deleted.</p>')
+  })
+
   test("an empty list says so; a next page links Older with the status", () => {
     const empty = renderToStaticMarkup(
       <AdminLeadsView items={[]} nextCursor={null} counts={counts} status="all" />
@@ -74,6 +81,10 @@ describe("AdminLeadView", () => {
     expect(html).toContain("(/book/workshop)")
     expect(html).toContain('name="status"')
     expect(html).toContain('name="notes"')
+    // The stale-tab guard and the two-step delete.
+    expect(html).toContain('<input type="hidden" name="currentStatus" value="new"/>')
+    expect(html).toContain("Delete lead…")
+    expect(html).toMatch(/<input type="checkbox"[^>]*name="confirm"[^>]*value="yes"/)
   })
 
   test("the message is plain text in a pre-wrap block, never HTML", () => {

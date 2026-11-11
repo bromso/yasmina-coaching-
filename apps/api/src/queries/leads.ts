@@ -143,12 +143,15 @@ export function leadsQueries(sql: SQL) {
     /**
      * Sets the status, stamped with who and when. Guarded to `status != <new status>`, so setting
      * it to what it already is returns `false` without re-stamping (a stale tab, two admins making
-     * the same change), like `applications.setStatus`.
+     * the same change), like `applications.setStatus`. Leaving `new` also erases the ip hash: its
+     * abuse-limiting job is done once Yasmina has picked the lead up (like a resolved support
+     * request's), and moving back to `new` never restores it.
      */
     async setStatus(id: number, status: LeadStatus, by: number, at: string): Promise<boolean> {
       const rows: Array<{ id: number }> = await sql`
         UPDATE leads
-        SET status = ${status}, status_changed_at = ${at}, status_changed_by = ${by}
+        SET status = ${status}, status_changed_at = ${at}, status_changed_by = ${by},
+          ip_hash = CASE WHEN ${status} = 'new' THEN ip_hash ELSE NULL END
         WHERE id = ${id} AND status != ${status}
         RETURNING id
       `
@@ -160,6 +163,12 @@ export function leadsQueries(sql: SQL) {
       const rows: Array<{ id: number }> = await sql`
         UPDATE leads SET notes = ${notes} WHERE id = ${id} RETURNING id
       `
+      return rows.length > 0
+    },
+
+    /** Deletes one lead (on request, from admin); false when it is already gone. */
+    async delete(id: number): Promise<boolean> {
+      const rows: Array<{ id: number }> = await sql`DELETE FROM leads WHERE id = ${id} RETURNING id`
       return rows.length > 0
     },
 
