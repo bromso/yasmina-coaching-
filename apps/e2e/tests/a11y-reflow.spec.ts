@@ -19,7 +19,7 @@ for (const entry of A11Y_PAGES) {
     const page = await context.newPage()
     await page.goto(urlFor(entry.app, await resolvePath(page, entry)))
     await page.waitForLoadState("networkidle")
-    // @repo/ui clips horizontal overflow on html and body (so a decorative glow never pans the
+    // @repo/ui clips horizontal overflow on body (so a decorative glow never pans the
     // page), which would also hide real overflow from scrollWidth. Lift the clip to measure: what
     // overflows here would be cut off, unreachable, on the real page.
     await page.addStyleTag({ content: UNCLIP })

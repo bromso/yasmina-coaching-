@@ -387,17 +387,13 @@ html:has([data-slot="site-header"][data-sticky]) {
     --sticky-header-offset: var(--site-header-offset);
   }
 }
-html {
-  /* Keeps body's own overflow below from propagating to the viewport (CSS Overflow: a root with
-     `visible` hands body's value up, where `clip` becomes `hidden` — the document then still
-     measures wider than 320 px and pans sideways on touch). With the root set, body clips
-     itself. */
-  overflow-x: clip;
-}
 body {
   position: relative;
-  /* Glows (a section's sun) may spill past their section; clip them at the viewport, never scroll
-     sideways. `clip`, not `hidden`: no scroll container, so a sticky header keeps working. */
+  /* A safety net: a glow that spills past its section is clipped, never scrolled to sideways
+     (each glow's own section clips it already). Only on body, never on html: with the root left
+     `visible`, body's overflow belongs to the viewport, so a modal menu's scroll lock (overflow
+     hidden on body) still locks the window. Clipping html too makes body its own scroll box under
+     that lock, and a sticky header then sticks to body and jumps off-screen. */
   overflow-x: clip;
 }
 
