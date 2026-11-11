@@ -230,8 +230,26 @@ describe("the create form", () => {
     )
     // Hidden by default; a `group-has-*` variant (no JavaScript) reveals it only when the "No
     // expiry" option is the one selected, exactly as the browser's own select state changes.
-    expect(html).toContain("group-has-[option[value=none]:checked]:block")
+    expect(html).toContain("group-has-[option[value=none]:checked]:flex")
     expect(html).toContain("A key with no expiry keeps working until you revoke it.")
+  })
+
+  test("the no-expiry warning is a muted caution, its icon decorative, never the error red", () => {
+    const html = renderIn(
+      "en",
+      <ApiKeysCard
+        apiKeys={[]}
+        workspaceId={5}
+        isImpersonating={false}
+        locale="en"
+        docsUrl="https://docs.brand.localhost:3004"
+      />
+    )
+    const warning = html.match(/<p class="([^"]*group-has-\[option[^"]*)">(.*?)<\/p>/)
+    expect(warning?.[1]).toContain("text-muted-foreground")
+    expect(warning?.[1]).not.toContain("text-destructive")
+    expect(warning?.[2]).toMatch(/<svg[^>]*aria-hidden="true"/)
+    expect(warning?.[2]).toContain("A key with no expiry keeps working until you revoke it.")
   })
 
   test("the checkboxes are native, not the Radix component that needs hydration to submit", () => {
