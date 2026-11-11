@@ -104,13 +104,13 @@
   --site-header-radius: 1.125rem;
   --site-header-max-width: 64rem;
   --spacing: 0.25rem;
-  --font-sans: Inter, sans-serif;
-  --font-serif: Merriweather, serif;
-  --font-mono: JetBrains Mono, monospace;
+  --typeface-sans: var(--font-inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif);
+  --typeface-display: var(--font-fraunces, Georgia, "Times New Roman", serif), Georgia, "Times New Roman", serif;
+  --typeface-mono: JetBrains Mono, monospace;
+  --typeface-system: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --typeface-serif: Georgia, "Times New Roman", serif;
   --tracking-normal: 0em;
-  --display-family: var(--font-display), Georgia, "Times New Roman", serif;
   --display-weight: 400;
-  --text-family: var(--font-sans);
   --text-weight: 400;
 }
 

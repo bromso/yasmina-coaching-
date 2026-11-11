@@ -191,8 +191,8 @@ has no rules or colours of its own (`scripts/app-styles.test.ts` fails on both),
 breakpoints, motion and high-contrast rules are the shared stylesheet's. To retune a colour, edit
 the token and run `bun run tokens`; every text pair must stay at WCAG 4.5:1 in both themes
 (`packages/ui`'s contrast test), and every other app changes with it. Headlines are set in
-`fontDisplay` (Fraunces, `@repo/ui/lib/fonts`): the layout puts `fontVariables` on `<body>`, the
-tokens point `--display-family` at it, and an unlayered `h1, h2` rule applies it at weight 400 even
+`fontDisplay` (Fraunces, `@repo/ui/lib/fonts`): the layout puts `fontVariables` on `<html>`, the
+`--typeface-display` token names it first (Georgia after it), and an unlayered `h1, h2` rule applies it at weight 400 even
 where a shared block says `font-semibold`. The look components (`Eyebrow`, `ArrowLink`,
 `DashedLine`, `Picture`, `SunPanel`, `Background`) and the motion (`Reveal`, `MediaClip`, off under
 `prefers-reduced-motion`) are `@repo/ui`'s; www's own `ExploreNav` draws its bar with

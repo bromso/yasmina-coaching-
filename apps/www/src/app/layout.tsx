@@ -120,8 +120,13 @@ export default async function RootLayout({
     />
   )
   return (
-    <html lang={locale} data-scroll-behavior="smooth" suppressHydrationWarning>
-      <body className={`${fontVariables} font-sans antialiased`}>
+    <html
+      className={fontVariables}
+      lang={locale}
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
+      <body className="font-sans antialiased">
         <SkipLink label={t("skipLink")} />
         <WebVitals />
         <BrowserTelemetry />

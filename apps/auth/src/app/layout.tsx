@@ -123,13 +123,18 @@ export default async function RootLayout({
   const note = me?.impersonation ? t("auth.layout.impersonating") : undefined
   const pending = list?.pendingInvitations.length ?? 0
   return (
-    <html lang={locale} data-scroll-behavior="smooth" suppressHydrationWarning>
+    <html
+      className={fontVariables}
+      lang={locale}
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
       <head>
         {/* Preconnect to external resources for faster loading */}
         <link rel="preconnect" href="https://api.iconify.design" />
         <link rel="dns-prefetch" href="https://api.iconify.design" />
       </head>
-      <body className={`${fontVariables} group/body flex min-h-svh flex-col font-sans antialiased`}>
+      <body className="group/body flex min-h-svh flex-col font-sans antialiased">
         <SkipLink label={t("ui.skipLink")} />
         <WebVitals consent={initialConsent} />
         <BrowserTelemetry />

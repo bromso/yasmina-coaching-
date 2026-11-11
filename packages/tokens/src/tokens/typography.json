@@ -1,16 +1,28 @@
 {
-  "font": {
+  "typeface": {
     "sans": {
       "$type": "fontFamily",
-      "$value": "Inter, sans-serif"
+      "$value": "var(--font-inter, {typeface.system})",
+      "$description": "Body text: Inter as next/font loads it (`--font-inter`, with its metric-matched fallback), the system sans where nothing set that variable (Storybook)"
     },
-    "serif": {
+    "display": {
       "$type": "fontFamily",
-      "$value": "Merriweather, serif"
+      "$value": "var(--font-fraunces, {typeface.serif}), {typeface.serif}",
+      "$description": "Headlines: Fraunces as next/font loads it (`--font-fraunces`), then the serif fallback, which stands alone where nothing set that variable (Storybook)"
     },
     "mono": {
       "$type": "fontFamily",
       "$value": "JetBrains Mono, monospace"
+    },
+    "system": {
+      "$type": "fontFamily",
+      "$value": "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+      "$description": "The system sans stack: mail's body text, and the sans's fallback on the web"
+    },
+    "serif": {
+      "$type": "fontFamily",
+      "$value": "Georgia, \"Times New Roman\", serif",
+      "$description": "The display serif's fallback: mail's headings, and the web's after Fraunces"
     }
   },
   "tracking": {
@@ -20,20 +32,12 @@
     }
   },
   "display": {
-    "family": {
-      "$type": "fontFamily",
-      "$value": "var(--font-display), {email.font.display}"
-    },
     "weight": {
       "$type": "fontWeight",
       "$value": "400"
     }
   },
   "text": {
-    "family": {
-      "$type": "fontFamily",
-      "$value": "var(--font-sans)"
-    },
     "weight": {
       "$type": "fontWeight",
       "$value": "400"
@@ -43,12 +47,12 @@
     "font": {
       "display": {
         "$type": "fontFamily",
-        "$value": "Georgia, \"Times New Roman\", serif",
-        "$description": "Headings in mail, and the display serif's fallback on the web (display.family): web fonts are unreliable in mail clients"
+        "$value": "{typeface.serif}",
+        "$description": "Headings in mail: web fonts are unreliable in mail clients"
       },
       "body": {
         "$type": "fontFamily",
-        "$value": "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+        "$value": "{typeface.system}",
         "$description": "Body text in mail: the system sans stack"
       }
     }

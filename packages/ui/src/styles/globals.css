@@ -48,9 +48,10 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-mono);
-  --font-serif: var(--font-serif);
+  /* The typeface tokens under Tailwind's names: `font-sans`, `font-display`, `font-mono`. */
+  --font-sans: var(--typeface-sans);
+  --font-display: var(--typeface-display);
+  --font-mono: var(--typeface-mono);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -262,26 +263,23 @@
   --color-sun: var(--sun);
   --color-sun-soft: var(--sun-soft);
 
-  --font-display: var(--display-family);
-  --font-text: var(--text-family);
   --font-weight-display: var(--display-weight);
   --font-weight-text: var(--text-weight);
 }
 
 /* Typography utilities: body text in the sans, `.font-display` in the serif. */
 @layer utilities {
-  body,
-  .font-text {
-    font-family: var(--font-text);
+  body {
+    font-family: var(--typeface-sans);
     font-weight: var(--text-weight);
   }
   .font-display {
-    font-family: var(--font-display);
+    font-family: var(--typeface-display);
     font-weight: var(--display-weight);
     font-variation-settings: "SOFT" 30;
   }
   .font-mono {
-    font-family: var(--font-mono), monospace;
+    font-family: var(--typeface-mono), monospace;
   }
 }
 
@@ -292,7 +290,7 @@
  */
 h1,
 h2 {
-  font-family: var(--font-display);
+  font-family: var(--typeface-display);
   font-weight: var(--display-weight);
   font-variation-settings: "SOFT" 30;
   letter-spacing: -0.02em;

@@ -57,10 +57,15 @@ that file's one import (`@import "@repo/ui/globals.css";`) and nothing else: no 
 (`themes/coaching.css` is gone), no colour, no rule of its own. An app that needs a style writes
 Tailwind classes on a shared component, or the style goes in `packages/ui`.
 
-Every root layout sets `<body className={`${fontVariables} font-sans antialiased`}>`
-(`fontVariables` from `@repo/ui/lib/fonts` carries the sans and display families) and puts
-`data-scroll-behavior="smooth"` on `<html>`, which is Next's opt-in so its router does not fight
-the CSS smooth scrolling.
+Every root layout puts `fontVariables` (from `@repo/ui/lib/fonts`: the sans and display families)
+and `data-scroll-behavior="smooth"` on `<html>`, and `font-sans antialiased` on `<body>`. The
+attribute is Next's opt-in so its router does not fight the CSS smooth scrolling. The fonts go on
+`<html>` because the typeface tokens are declared on `:root` and a custom property resolves where
+it is declared: `--typeface-sans` is `var(--font-inter, <system sans>)` and `--typeface-display` is
+Fraunces (`--font-fraunces`) then Georgia, so they need next/font's variables on that element.
+Tailwind's `font-sans`, `font-display` and `font-mono` read the `--typeface-*` tokens under names of
+their own, so no variable refers to itself. Storybook loads no web fonts: there the fallbacks
+stand alone.
 
 `scripts/app-styles.test.ts` (in `bun test scripts`) fails when an app's stylesheet is anything but
 the one import, a layout lacks `fontVariables` or `data-scroll-behavior`, or a colour literal

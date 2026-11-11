@@ -5,7 +5,8 @@ import { SITES } from "../packages/sites/src/index"
 import { parseOklch, toHex } from "../packages/tokens/src/color"
 
 // Every Next app takes its whole look from @repo/ui: one stylesheet import, one set of font
-// variables on <body>, Next's smooth-scroll opt-in on <html>, and no colour of its own. Rules that used to live in an app's globals.css
+// variables and Next's smooth-scroll opt-in on <html>, `font-sans` on <body>, and no colour of its
+// own. Rules that used to live in an app's globals.css
 // (www's motion, breakpoints, forced-colors support, …) are packages/ui/src/styles/globals.css's.
 const ROOT = join(import.meta.dir, "..")
 const NEXT_APPS = Object.keys(SITES)
@@ -101,15 +102,27 @@ describe.each(NEXT_APPS)("%s", (app) => {
     expect(css).toBe(SINGLE_IMPORT.replace(/\s+/g, ""))
   })
 
-  test("every <body> it renders carries fontVariables", () => {
-    // global-error.tsx replaces a layout that threw; it loads no fonts on purpose.
-    const files = sourceFiles(app, "**/*.tsx").filter((file) => !file.endsWith("/global-error.tsx"))
-    const bodies = tags(files, BODY)
+  // global-error.tsx replaces a layout that threw; it loads no fonts on purpose.
+  const layouts = sourceFiles(app, "**/*.tsx").filter((file) => !file.endsWith("/global-error.tsx"))
+
+  test("every <html> it renders carries fontVariables, where the typeface tokens resolve", () => {
+    // The tokens are declared on :root, and a custom property resolves where it is declared: the
+    // variables next/font sets (`--font-inter`, `--font-fraunces`) must be on that element too.
+    const roots = tags(layouts, HTML)
+    expect(roots.length).toBeGreaterThan(0)
+    for (const { file, tag } of roots) {
+      expect(tag, `${file}: <html> must use fontVariables from @repo/ui/lib/fonts`).toMatch(
+        /className=\{fontVariables\}/
+      )
+    }
+  })
+
+  test("every <body> it renders is set in font-sans, and none carries the font variables", () => {
+    const bodies = tags(layouts, BODY)
     expect(bodies.length).toBeGreaterThan(0)
     for (const { file, tag } of bodies) {
-      expect(tag, `${file}: <body> must use fontVariables from @repo/ui/lib/fonts`).toMatch(
-        /\$\{fontVariables\}/
-      )
+      expect(tag, `${file}: <body> needs font-sans`).toMatch(/[\s"`{]font-sans[\s"`}]/)
+      expect(tag, `${file}: fontVariables belong on <html>`).not.toContain("fontVariables")
     }
   })
 

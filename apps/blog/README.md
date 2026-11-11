@@ -105,7 +105,7 @@ The blog ships ten posts by Yasmina in Swedish, each with its English translatio
 - **Styles** — `src/styles/globals.css` is the one import of
   `@repo/ui/globals.css`, which carries the palette, sun tokens and display serif every app
   shares (the tokens live in `packages/tokens`, `bun run tokens`); the layouts put `fontVariables`
-  on `<body>`. Fonts, theme, skip link and web vitals come from `@repo/ui`. See
+  on `<html>`. Fonts, theme, skip link and web vitals come from `@repo/ui`. See
   `docs/architecture/design-system.md`.
 
 See the root [README](../../README.md) and [CLAUDE.md](../../CLAUDE.md) for the conventions shared by

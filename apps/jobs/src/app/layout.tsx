@@ -71,13 +71,18 @@ export default function RootLayout({
   children: ReactNode
 }>): ReactElement {
   return (
-    <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
+    <html
+      className={fontVariables}
+      lang="en"
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
       <head>
         {/* Preconnect to external resources for faster loading */}
         <link rel="preconnect" href="https://api.iconify.design" />
         <link rel="dns-prefetch" href="https://api.iconify.design" />
       </head>
-      <body className={`${fontVariables} group/body font-sans antialiased`}>
+      <body className="group/body font-sans antialiased">
         <SkipLink />
         <WebVitals />
         <BrowserTelemetry />

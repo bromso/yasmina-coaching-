@@ -42,7 +42,7 @@ const MODE_INDEPENDENT = [
   /^radius$/,
   /^spacing$/,
   /^shadow/,
-  /^font-/,
+  /^typeface-/,
   /^tracking-/,
   /^display-/,
   /^text-/,
@@ -94,7 +94,7 @@ describe("the generated theme", () => {
       expect(dark.get(alias), alias).toBe(dark.get(target))
     }
     // No colour is a `var()` alias, which would resolve where `:root` declares it, light or dark.
-    const colours = [...light].filter(([name]) => !/^(font|display|text)-/.test(name))
+    const colours = [...light].filter(([name]) => !/^(typeface|display|text)-/.test(name))
     expect(colours.filter(([, value]) => value.startsWith("var("))).toEqual([])
   })
 
@@ -113,11 +113,25 @@ describe("the generated theme", () => {
     expect(light.get("radius")).toBe("0.875rem")
   })
 
-  test("keeps the easing and the display serif's fallback", () => {
+  test("keeps the easing", () => {
     expect(light.get("ease-out-soft")).toBe("cubic-bezier(0.2, 0.7, 0.2, 1)")
-    expect(light.get("display-family")).toBe(
-      'var(--font-display), Georgia, "Times New Roman", serif'
-    )
+  })
+
+  test("the typefaces name what next/font loads, then their fallbacks, never themselves", () => {
+    const serif = 'Georgia, "Times New Roman", serif'
+    expect(light.get("typeface-serif")).toBe(serif)
+    // Fraunces, then Georgia; Georgia alone where next/font set no --font-fraunces (Storybook).
+    expect(light.get("typeface-display")).toBe(`var(--font-fraunces, ${serif}), ${serif}`)
+    expect(light.get("typeface-sans")).toBe(`var(--font-inter, ${light.get("typeface-system")})`)
+    const typefaces = [...light].filter(([name]) => name.startsWith("typeface-"))
+    for (const [name, value] of typefaces) {
+      expect(value, name).not.toContain(`var(--${name})`)
+      expect(value, name).not.toMatch(/\b(Inter|Merriweather)\b(?!\w)/)
+    }
+    // No indirection left for a theme variable to loop through.
+    for (const gone of ["display-family", "text-family", "font-sans", "font-serif", "font-mono"]) {
+      expect(light.has(gone), gone).toBe(false)
+    }
   })
 
   test("never writes the email-only tokens into the stylesheet", () => {
@@ -166,8 +180,8 @@ describe("the build", () => {
   })
 
   test("resolves {…} references the way style-dictionary does", () => {
-    const display = readTokens().find((token) => token.path.join(".") === "display.family")
-    expect(display?.value).toBe('var(--font-display), Georgia, "Times New Roman", serif')
+    const display = readTokens().find((token) => token.path.join(".") === "email.font.display")
+    expect(display?.value).toBe('Georgia, "Times New Roman", serif')
   })
 
   test("writes no colour value twice: a repeat is a {reference}", () => {

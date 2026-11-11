@@ -10,7 +10,8 @@ a view or a page. Add shadcn components with `bunx shadcn@latest add <name> -c p
   `src/styles/globals.css` is `@import "@repo/ui/globals.css";` and nothing else. It imports
   `src/styles/tokens.generated.css`, generated from [`packages/tokens`](../tokens/README.md) by
   `bun run tokens`: change a value there, never in a generated file.
-- **Fonts.** `@repo/ui/lib/fonts`: put `fontVariables` on `<body>` (sans and display families).
+- **Fonts.** `@repo/ui/lib/fonts`: put `fontVariables` on `<html>` (sans and display families),
+  where the `:root` typeface tokens can read them, and `font-sans` on `<body>`.
 - **Look components.** `Eyebrow`, `ArrowLink`, `DashedLine`, `Picture`, `SunPanel`, `Background`,
   `navPill`, `NativeSelect`, `Card` (`size="compact"`), and in `components/motion/` `Reveal` and
   `MediaClip` (off under `prefers-reduced-motion`).

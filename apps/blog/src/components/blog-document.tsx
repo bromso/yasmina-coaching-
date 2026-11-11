@@ -71,13 +71,18 @@ export function BlogDocument({
     />
   )
   return (
-    <html lang={locale} data-scroll-behavior="smooth" suppressHydrationWarning>
+    <html
+      className={fontVariables}
+      lang={locale}
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
       <head>
         {/* The theme toggle's icon loads from Iconify */}
         <link rel="preconnect" href="https://api.iconify.design" />
         <link rel="dns-prefetch" href="https://api.iconify.design" />
       </head>
-      <body className={`${fontVariables} group/body font-sans antialiased`}>
+      <body className="group/body font-sans antialiased">
         <SkipLink label={t("skipLink")} />
         <WebVitals />
         <BrowserTelemetry />
