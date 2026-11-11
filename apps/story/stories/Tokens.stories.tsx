@@ -380,17 +380,17 @@ export const AllTypography: Story = {
     const fonts: TypographySwatchProps[] = [
       {
         name: "Sans",
-        value: tokens.font.sans,
-        description: "Default sans-serif for body text",
+        value: tokens.typeface.sans,
+        description: "Body text: Inter (next/font), the system sans where it is not loaded",
       },
       {
-        name: "Serif",
-        value: tokens.font.serif,
-        description: "Serif for headings and editorial",
+        name: "Display",
+        value: tokens.typeface.display,
+        description: "Headlines: Fraunces (next/font), then Georgia",
       },
       {
         name: "Mono",
-        value: tokens.font.mono,
+        value: tokens.typeface.mono,
         description: "Monospace for code and technical content",
       },
     ]
@@ -453,7 +453,7 @@ export const AllTypography: Story = {
                   style={{
                     fontSize: type.size,
                     lineHeight: type.lineHeight,
-                    fontFamily: tokens.font.sans,
+                    fontFamily: tokens.typeface.sans,
                   }}
                 >
                   The quick brown fox
