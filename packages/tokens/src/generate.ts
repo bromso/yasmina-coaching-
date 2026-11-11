@@ -15,14 +15,22 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import StyleDictionary from "style-dictionary"
 import type { TransformedToken } from "style-dictionary/types"
-import { cssName, OUTPUTS, renderEmail, renderTheme, type Token } from "./render"
+import { cssName, OUTPUTS, renderEmail, renderTheme, resolveTokens, type Token } from "./render"
 
 const local = (relative: string) => fileURLToPath(new URL(relative, import.meta.url))
 
-const toToken = (token: TransformedToken): Token => {
-  const dark: string | undefined = token.$extensions?.mode?.dark
-  return { path: token.path, value: String(token.$value), ...(dark === undefined ? {} : { dark }) }
-}
+/**
+ * The tokens as written (style-dictionary's `original`, references unresolved), resolved in both
+ * themes by `resolveTokens`: style-dictionary resolves `$value` alone, never the dark value.
+ */
+const themed = (tokens: TransformedToken[]): Token[] =>
+  resolveTokens(
+    tokens.map((token) => {
+      const dark: string | undefined = token.original.$extensions?.mode?.dark
+      const value = String(token.original.$value)
+      return { path: token.path, value, ...(dark === undefined ? {} : { dark }) }
+    })
+  )
 
 function dictionary(): StyleDictionary {
   return new StyleDictionary({
@@ -31,8 +39,8 @@ function dictionary(): StyleDictionary {
     hooks: {
       transforms: { "name/theme": { type: "name", transform: (token) => cssName(token.path) } },
       formats: {
-        "css/theme": ({ dictionary }) => renderTheme(dictionary.allTokens.map(toToken)),
-        "typescript/email": ({ dictionary }) => renderEmail(dictionary.allTokens.map(toToken)),
+        "css/theme": ({ dictionary }) => renderTheme(themed(dictionary.allTokens)),
+        "typescript/email": ({ dictionary }) => renderEmail(themed(dictionary.allTokens)),
       },
     },
     platforms: {

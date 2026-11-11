@@ -11,8 +11,6 @@ a view or a page. Add shadcn components with `bunx shadcn@latest add <name> -c p
   `src/styles/tokens.generated.css`, generated from [`packages/tokens`](../tokens/README.md) by
   `bun run tokens`: change a value there, never in a generated file.
 - **Fonts.** `@repo/ui/lib/fonts`: put `fontVariables` on `<body>` (sans and display families).
-- **`.dark` on `<html>`.** The sidebar and chart-line tokens are `var()` aliases defined on `:root`
-  only, so the dark class must stay on the root element.
 - **Look components.** `Eyebrow`, `ArrowLink`, `DashedLine`, `Picture`, `SunPanel`, `Background`,
   `navPill`, `NativeSelect`, `Card` (`size="compact"`), and in `components/motion/` `Reveal` and
   `MediaClip` (off under `prefers-reduced-motion`).

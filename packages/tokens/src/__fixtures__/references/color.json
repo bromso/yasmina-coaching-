@@ -1,0 +1,20 @@
+{
+  "palette": {
+    "grey": { "$type": "color", "$value": "oklch(0.5 0 0)" }
+  },
+  "color": {
+    "base": {
+      "$type": "color",
+      "$value": "oklch(1 0 0)",
+      "$extensions": { "mode": { "dark": "oklch(0 0 0)" } }
+    },
+    "alias": { "$type": "color", "$value": "{color.base}" },
+    "alias-of-alias": { "$type": "color", "$value": "{color.alias}" },
+    "mixed": {
+      "$type": "color",
+      "$value": "oklch(0 0 0)",
+      "$extensions": { "mode": { "dark": "{palette.grey}" } }
+    },
+    "fixed": { "$type": "color", "$value": "{palette.grey}" }
+  }
+}

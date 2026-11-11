@@ -30,8 +30,11 @@ changed.
 
 - A colour has a light `$value` and, when dark differs, `$extensions.mode.dark`.
 - Anything that is not a colour is emitted for `:root` only.
-- `{group.name}` references another token; `var(--x)` makes a CSS alias. The `sidebar-*` and three
-  chart tokens are `var()` aliases defined on `:root` only, so `.dark` must stay on `<html>`.
+- A value is written once. A repeat is a `{group.name}` reference, resolved at build time in each
+  theme: in `$value` it takes the named token's light value, in the dark value its dark one, and a
+  token with no dark value of its own inherits the one it references. Values two roles share
+  across themes live in the `palette` group in `color.json`, which is never emitted as CSS.
+  `src/tokens.test.ts` fails on a colour literal written twice.
 - Keep text pairs at 4.5:1 and UI pairs at 3:1 in both themes (`packages/ui`'s `contrast.test.ts`).
 
 `bun test` here runs `src/tokens.test.ts` over the renderers; `bun run typecheck` checks the package.

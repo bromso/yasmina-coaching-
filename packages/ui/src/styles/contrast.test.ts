@@ -27,22 +27,19 @@ function declarations(selector: string): Record<string, string> {
 const root = declarations(":root")
 
 /**
- * The theme's opaque `oklch()` tokens. A token whose value is `var(--other)` is declared on `:root`
- * only and resolves to `--other` in the theme being read, as it does in the browser with `.dark` on
- * `<html>` (the sidebar tokens alias the palette this way).
+ * The theme's opaque `oklch()` tokens. `.dark` repeats only what differs, so a token it does not
+ * declare is read from `:root`, as in the browser. References between tokens are resolved at build
+ * time, per theme, so every value here is a plain colour.
  */
 function block(selector: string): Token {
   const own = selector === ":root" ? root : declarations(selector)
-  const resolve = (name: string, seen: string[] = []): Rgb => {
+  return (name) => {
     const value = own[name] ?? root[name]
-    const alias = value?.match(/^var\(--([\w-]+)\)$/)?.[1]
-    if (alias && !seen.includes(alias)) return resolve(alias, [...seen, name])
     if (!value || !/^oklch\([\d.%\s]+\)$/.test(value)) {
       throw new Error(`${selector} has no --${name} oklch() token`)
     }
     return parseOklch(value)
   }
-  return (name) => resolve(name)
 }
 
 const white: Rgb = [1, 1, 1]

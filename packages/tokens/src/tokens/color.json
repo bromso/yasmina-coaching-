@@ -1,4 +1,39 @@
 {
+  "palette": {
+    "$description": "Primitives: a value two colour roles share across themes, written once here and referenced. Never emitted as CSS variables.",
+    "white": {
+      "$type": "color",
+      "$value": "oklch(1 0 0)"
+    },
+    "charcoal-270": {
+      "$type": "color",
+      "$value": "oklch(0.27 0.012 200)"
+    },
+    "indigo-511": {
+      "$type": "color",
+      "$value": "oklch(0.5106 0.2301 276.9656)"
+    },
+    "indigo-457": {
+      "$type": "color",
+      "$value": "oklch(0.4568 0.2146 277.0229)"
+    },
+    "indigo-398": {
+      "$type": "color",
+      "$value": "oklch(0.3984 0.1773 277.3662)"
+    },
+    "neutral-985": {
+      "$type": "color",
+      "$value": "oklch(0.985 0 0)"
+    },
+    "slate-650": {
+      "$type": "color",
+      "$value": "oklch(0.65 0.01 260)"
+    },
+    "neutral-900": {
+      "$type": "color",
+      "$value": "oklch(0.9 0 0)"
+    }
+  },
   "color": {
     "background": {
       "$type": "color",
@@ -20,7 +55,7 @@
     },
     "card": {
       "$type": "color",
-      "$value": "oklch(1 0 0)",
+      "$value": "{palette.white}",
       "$extensions": {
         "mode": {
           "dark": "oklch(0.26 0.012 200)"
@@ -29,73 +64,43 @@
     },
     "card-foreground": {
       "$type": "color",
-      "$value": "oklch(0.24 0.012 200)",
-      "$extensions": {
-        "mode": {
-          "dark": "oklch(0.95 0.01 90)"
-        }
-      }
+      "$value": "{color.foreground}"
     },
     "popover": {
       "$type": "color",
-      "$value": "oklch(1 0 0)",
-      "$extensions": {
-        "mode": {
-          "dark": "oklch(0.26 0.012 200)"
-        }
-      }
+      "$value": "{color.card}"
     },
     "popover-foreground": {
       "$type": "color",
-      "$value": "oklch(0.24 0.012 200)",
-      "$extensions": {
-        "mode": {
-          "dark": "oklch(0.95 0.01 90)"
-        }
-      }
+      "$value": "{color.foreground}"
     },
     "primary": {
       "$type": "color",
-      "$value": "oklch(0.27 0.012 200)",
+      "$value": "{palette.charcoal-270}",
       "$extensions": {
         "mode": {
-          "dark": "oklch(0.95 0.01 90)"
+          "dark": "{color.foreground}"
         }
       }
     },
     "primary-foreground": {
       "$type": "color",
-      "$value": "oklch(0.985 0.008 90)",
-      "$extensions": {
-        "mode": {
-          "dark": "oklch(0.21 0.012 200)"
-        }
-      }
+      "$value": "{color.background}"
     },
     "secondary": {
       "$type": "color",
-      "$value": "oklch(0.955 0.012 95)",
-      "$extensions": {
-        "mode": {
-          "dark": "oklch(0.27 0.012 200)"
-        }
-      }
+      "$value": "{color.muted}"
     },
     "secondary-foreground": {
       "$type": "color",
-      "$value": "oklch(0.24 0.012 200)",
-      "$extensions": {
-        "mode": {
-          "dark": "oklch(0.95 0.01 90)"
-        }
-      }
+      "$value": "{color.foreground}"
     },
     "muted": {
       "$type": "color",
       "$value": "oklch(0.955 0.012 95)",
       "$extensions": {
         "mode": {
-          "dark": "oklch(0.27 0.012 200)"
+          "dark": "{palette.charcoal-270}"
         }
       }
     },
@@ -119,12 +124,7 @@
     },
     "accent-foreground": {
       "$type": "color",
-      "$value": "oklch(0.24 0.012 200)",
-      "$extensions": {
-        "mode": {
-          "dark": "oklch(0.95 0.01 90)"
-        }
-      }
+      "$value": "{color.foreground}"
     },
     "destructive": {
       "$type": "color",
@@ -137,7 +137,7 @@
     },
     "destructive-foreground": {
       "$type": "color",
-      "$value": "oklch(1.0 0 0)",
+      "$value": "{palette.white}",
       "$extensions": {
         "mode": {
           "dark": "oklch(0.2077 0.0398 265.7549)"
@@ -155,21 +155,11 @@
     },
     "input": {
       "$type": "color",
-      "$value": "oklch(0.88 0.012 90)",
-      "$extensions": {
-        "mode": {
-          "dark": "oklch(0.36 0.012 200)"
-        }
-      }
+      "$value": "{color.border}"
     },
     "ring": {
       "$type": "color",
-      "$value": "oklch(0.5 0.13 235)",
-      "$extensions": {
-        "mode": {
-          "dark": "oklch(0.74 0.11 235)"
-        }
-      }
+      "$value": "{color.brand-blue}"
     },
     "chart-1": {
       "$type": "color",
@@ -182,7 +172,7 @@
     },
     "chart-2": {
       "$type": "color",
-      "$value": "oklch(0.5106 0.2301 276.9656)",
+      "$value": "{palette.indigo-511}",
       "$extensions": {
         "mode": {
           "dark": "oklch(0.5854 0.2041 277.1173)"
@@ -191,19 +181,19 @@
     },
     "chart-3": {
       "$type": "color",
-      "$value": "oklch(0.4568 0.2146 277.0229)",
+      "$value": "{palette.indigo-457}",
       "$extensions": {
         "mode": {
-          "dark": "oklch(0.5106 0.2301 276.9656)"
+          "dark": "{palette.indigo-511}"
         }
       }
     },
     "chart-4": {
       "$type": "color",
-      "$value": "oklch(0.3984 0.1773 277.3662)",
+      "$value": "{palette.indigo-398}",
       "$extensions": {
         "mode": {
-          "dark": "oklch(0.4568 0.2146 277.0229)"
+          "dark": "{palette.indigo-457}"
         }
       }
     },
@@ -212,41 +202,41 @@
       "$value": "oklch(0.3588 0.1354 278.6973)",
       "$extensions": {
         "mode": {
-          "dark": "oklch(0.3984 0.1773 277.3662)"
+          "dark": "{palette.indigo-398}"
         }
       }
     },
     "sidebar": {
       "$type": "color",
-      "$value": "var(--background)"
+      "$value": "{color.background}"
     },
     "sidebar-foreground": {
       "$type": "color",
-      "$value": "var(--foreground)"
+      "$value": "{color.foreground}"
     },
     "sidebar-primary": {
       "$type": "color",
-      "$value": "var(--primary)"
+      "$value": "{color.primary}"
     },
     "sidebar-primary-foreground": {
       "$type": "color",
-      "$value": "var(--primary-foreground)"
+      "$value": "{color.primary-foreground}"
     },
     "sidebar-accent": {
       "$type": "color",
-      "$value": "var(--muted)"
+      "$value": "{color.muted}"
     },
     "sidebar-accent-foreground": {
       "$type": "color",
-      "$value": "var(--foreground)"
+      "$value": "{color.foreground}"
     },
     "sidebar-border": {
       "$type": "color",
-      "$value": "var(--border)"
+      "$value": "{color.border}"
     },
     "sidebar-ring": {
       "$type": "color",
-      "$value": "var(--ring)"
+      "$value": "{color.ring}"
     },
     "color-1": {
       "$type": "color",
@@ -360,7 +350,7 @@
     },
     "legend": {
       "$type": "color",
-      "$value": "oklch(1 0 0)",
+      "$value": "{palette.white}",
       "$extensions": {
         "mode": {
           "dark": "oklch(0.21 0.006 285.885)"
@@ -372,7 +362,7 @@
       "$value": "oklch(0.141 0.005 285.823)",
       "$extensions": {
         "mode": {
-          "dark": "oklch(0.985 0 0)"
+          "dark": "{palette.neutral-985}"
         }
       }
     },
@@ -399,13 +389,13 @@
       "$value": "oklch(0.92 0.004 286.32)",
       "$extensions": {
         "mode": {
-          "dark": "oklch(0.274 0.006 286.033)"
+          "dark": "{color.legend-muted}"
         }
       }
     },
     "chart-background": {
       "$type": "color",
-      "$value": "oklch(1 0 0)",
+      "$value": "{palette.white}",
       "$extensions": {
         "mode": {
           "dark": "oklch(0.145 0 0)"
@@ -426,30 +416,30 @@
       "$value": "oklch(0.55 0.014 260)",
       "$extensions": {
         "mode": {
-          "dark": "oklch(0.65 0.01 260)"
+          "dark": "{palette.slate-650}"
         }
       }
     },
     "chart-line-primary": {
       "$type": "color",
-      "$value": "var(--chart-1)"
+      "$value": "{color.chart-1}"
     },
     "chart-line-secondary": {
       "$type": "color",
-      "$value": "var(--chart-2)"
+      "$value": "{color.chart-2}"
     },
     "chart-crosshair": {
       "$type": "color",
       "$value": "oklch(0.4 0.1828 274.34)",
       "$extensions": {
         "mode": {
-          "dark": "oklch(0.45 0 0)"
+          "dark": "{color.chart-foreground}"
         }
       }
     },
     "chart-grid": {
       "$type": "color",
-      "$value": "oklch(0.9 0 0)",
+      "$value": "{palette.neutral-900}",
       "$extensions": {
         "mode": {
           "dark": "oklch(0.25 0 0)"
@@ -458,7 +448,7 @@
     },
     "chart-brush-border": {
       "$type": "color",
-      "$value": "var(--chart-grid)"
+      "$value": "{color.chart-grid}"
     },
     "chart-tooltip-background": {
       "$type": "color",
@@ -466,11 +456,11 @@
     },
     "chart-tooltip-foreground": {
       "$type": "color",
-      "$value": "oklch(0.985 0 0)"
+      "$value": "{palette.neutral-985}"
     },
     "chart-tooltip-muted": {
       "$type": "color",
-      "$value": "oklch(0.65 0.01 260)"
+      "$value": "{palette.slate-650}"
     },
     "chart-marker-background": {
       "$type": "color",
@@ -495,7 +485,7 @@
       "$value": "oklch(0.3 0.01 260)",
       "$extensions": {
         "mode": {
-          "dark": "oklch(0.9 0 0)"
+          "dark": "{palette.neutral-900}"
         }
       }
     },
@@ -558,7 +548,7 @@
       "$value": "oklch(0.96 0.005 106)",
       "$extensions": {
         "mode": {
-          "dark": "oklch(0.145 0 0)"
+          "dark": "{color.chart-background}"
         }
       }
     },
@@ -573,10 +563,10 @@
     },
     "brand-blue-foreground": {
       "$type": "color",
-      "$value": "oklch(1 0 0)",
+      "$value": "{palette.white}",
       "$extensions": {
         "mode": {
-          "dark": "oklch(0.21 0.012 200)"
+          "dark": "{color.background}"
         }
       }
     },

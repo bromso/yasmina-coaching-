@@ -8,7 +8,7 @@ reference behind **Design System Single Points** in `CLAUDE.md`.
 
 `packages/tokens/src/tokens/*.json` (`color`, `radius`, `shadow`, `spacing`, `typography`, `motion`,
 `layer`, `site-header`) are the only place a value is written. A colour carries its dark value in
-`$extensions.mode.dark`; a token whose value is `var(--x)` is an alias. `bun run tokens` (root
+`$extensions.mode.dark`. `bun run tokens` (root
 script, `bun --filter @repo/tokens build`, which runs `bun sd.config.js`) generates:
 
 - `packages/ui/src/styles/tokens.generated.css`: every token as a CSS variable, `:root` for light,
@@ -24,11 +24,15 @@ The writer only touches a file whose content changed. `@repo/tokens/color` (`okl
 `contrast`, `toHex`, …) is the one colour implementation: the email hex values and
 `packages/ui`'s `contrast.test.ts` both use it.
 
-**`.dark` must stay on `<html>`.** The `sidebar-*` tokens and `chart-line-primary`,
-`chart-line-secondary` and `chart-brush-border` are `var()` aliases of other tokens, defined on
-`:root` only. A custom property is resolved where it is declared, so they follow the theme only
-because `.dark` and `:root` are the same element. Put `.dark` on a descendant (`<body>`, a wrapper)
-and those aliases keep their light value.
+**A value is written once.** A repeat is a `{group.name}` reference, resolved at build time in each
+theme: in `$value` it takes the named token's light value, in `$extensions.mode.dark` its dark
+value, and a token with no dark value of its own inherits the dark value of the token it references
+(`card-foreground` is `{color.foreground}`, so it follows the foreground in both themes). A value
+two roles share across themes (the charcoal that is the light primary and the dark muted) is a
+primitive in `color.json`'s `palette` group, which is never emitted as CSS. The generated stylesheet
+therefore holds plain values only, with no `var()` alias that would resolve where `:root` declares
+it, so `.dark` works on any element. `packages/tokens/src/tokens.test.ts` fails when a colour
+literal is written twice.
 
 Two token groups exist for layout, not looks:
 
