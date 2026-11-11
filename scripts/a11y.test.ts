@@ -99,7 +99,8 @@ describe("a11y route manifest", () => {
   test("translated apps get Swedish variants, admin and static apps do not", () => {
     const login = A11Y_PAGES.find((p) => p.app === "auth" && p.path === "/login")
     const admin = A11Y_PAGES.find((p) => p.app === "auth" && p.path === "/admin")
-    const terms = A11Y_PAGES.find((p) => p.app === "www" && p.path === "/terms")
+    // A www page with no variants of its own (the legal pages add an English one).
+    const terms = A11Y_PAGES.find((p) => p.app === "www" && p.path === "/book")
     if (!login || !admin || !terms) throw new Error("manifest is missing a page this test needs")
     expect(variantsFor(login)).toEqual(["light", "dark", "sv-light", "sv-dark"])
     expect(variantsFor(admin)).toEqual(["light", "dark"])

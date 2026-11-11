@@ -1,18 +1,27 @@
 import { LegalPage } from "@repo/ui/blocks/legal-page"
 import type { Metadata } from "next"
-import { LEGAL_NOTICE } from "@/content/legal-notice"
-import { terms } from "@/content/terms"
+import { LEGAL_CHROME } from "@/content/legal-notice"
+import { termsFor } from "@/content/terms"
+import { getLocale } from "@/lib/locale"
 
-export const metadata: Metadata = { title: "Terms" }
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: termsFor(await getLocale()).metaTitle }
+}
 
-export default function Page() {
+/** Swedish by default, English through the `locale` cookie, like every www page. */
+export default async function Page() {
+  const locale = await getLocale()
+  const doc = termsFor(locale)
+  const chrome = LEGAL_CHROME[locale]
   return (
     <main id="main">
       <LegalPage
-        title="Terms of service"
-        updatedAt={terms.updatedAt}
-        sections={terms.sections}
-        notice={LEGAL_NOTICE}
+        title={doc.title}
+        updatedAt={doc.updatedAt}
+        sections={doc.sections}
+        notice={chrome.notice}
+        labels={{ lastUpdated: chrome.lastUpdated, contents: chrome.contents }}
+        dateLocale={chrome.dateLocale}
       />
     </main>
   )

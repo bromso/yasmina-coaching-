@@ -502,3 +502,36 @@ describe("ContactDoneView", () => {
     expect(count(html, /<h1[\s>]/g)).toBe(1)
   })
 })
+
+describe("the legal pages render in both languages", () => {
+  test("privacy and terms, with the page's own words around the sections", async () => {
+    const { LegalPage } = await import("@repo/ui/blocks/legal-page")
+    const { LEGAL_CHROME } = await import("@/content/legal-notice")
+    const { PRIVACY } = await import("@/content/privacy")
+    const { TERMS } = await import("@/content/terms")
+    for (const locale of LOCALES) {
+      const chrome = LEGAL_CHROME[locale]
+      for (const doc of [PRIVACY[locale], TERMS[locale]]) {
+        const html = render(
+          <LegalPage
+            title={doc.title}
+            updatedAt={doc.updatedAt}
+            sections={doc.sections}
+            notice={chrome.notice}
+            labels={{ lastUpdated: chrome.lastUpdated, contents: chrome.contents }}
+            dateLocale={chrome.dateLocale}
+          />
+        )
+        expect(count(html, /<h1[\s>]/g)).toBe(1)
+        expect(html).toContain(esc(doc.title))
+        expect(html).toContain(`aria-label="${chrome.contents}"`)
+        expect(html).toContain(chrome.lastUpdated)
+        for (const section of doc.sections) expect(html).toContain(`id="${section.id}"`)
+      }
+    }
+    const sv = render(
+      <LegalPage title="x" updatedAt="2026-11-11" sections={[]} dateLocale="sv-SE" />
+    )
+    expect(sv).toContain("11 november 2026")
+  })
+})

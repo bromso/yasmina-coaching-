@@ -137,4 +137,20 @@ describe("LegalPage", () => {
     )
     expect(html).toContain("October 2, 2026")
   })
+
+  test("takes its words and the date's language as props", () => {
+    const html = renderToStaticMarkup(
+      <LegalPage
+        title="Integritetspolicy"
+        updatedAt="2026-10-02"
+        sections={[]}
+        labels={{ lastUpdated: "Senast uppdaterad", contents: "Innehåll" }}
+        dateLocale="sv-SE"
+      />
+    )
+    expect(html).toContain('<nav aria-label="Innehåll"')
+    expect(html).toContain("Senast uppdaterad")
+    expect(html).toContain("2 oktober 2026")
+    expect(html).not.toContain("Last updated")
+  })
 })

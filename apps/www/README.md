@@ -49,8 +49,11 @@ www is **bilingual**: Swedish by default, English when the visitor picks it.
   `error.tsx` (a client component) reads `<html lang>`; `global-error.tsx` stays Swedish.
 - **Dates** on the booking pages format with `sv-SE` or `en-GB`, 24-hour, in `Europe/Stockholm`
   (`src/lib/booking-dates.ts`; every formatter takes the locale).
-- **Left alone on purpose.** `/terms` and `/privacy` are English templates in both languages
-  (placeholders for counsel, see **Content**), rendered inside the localized layout. The web
+- **Legal pages.** `/terms` and `/privacy` follow the page's language like every other page:
+  Swedish by default, English through the cookie (`TERMS` / `PRIVACY`, `termsFor` / `privacyFor`;
+  `LEGAL_CHROME` in `src/content/legal-notice.ts` for the notice, "Senast uppdaterad" /
+  "Innehåll" and the date's locale, passed to `@repo/ui`'s `LegalPage` as props). Both are still
+  templates for counsel (see **Content**). The web
   manifest and the OG image stay Swedish (one file each, fetched without the visitor's cookie).
   Zod's own field messages on the forms (an invalid email, a too-short message) come from the
   contract in English, as before.
@@ -104,10 +107,14 @@ All copy lives in data files; the views and pages only arrange sections.
   pause/play button. The originals sit in `assets/originals/`, outside `public/`, and the service
   worker precaches only the offline page, icons and logo (`globPublicPatterns` in
   `next.config.ts`), never the media.
-- `src/content/terms.ts`, `src/content/privacy.ts` — the legal templates, one `LegalSection` per
-  heading, still English placeholders (their page titles too). Replace `[Company]`, `[Jurisdiction]`
-  and `[Contact email]`, update `updatedAt`, and have counsel review them — in Swedish and
-  English, since the rest of the site is both. Each page shows the notice in `src/content/legal-notice.ts` until you remove it.
+- `src/content/terms.ts`, `src/content/privacy.ts` — the legal templates in Swedish and English
+  (`TERMS`, `PRIVACY`: one `LegalDoc` per language, the same section ids and paragraph counts,
+  checked by `privacy.test.ts`; the Swedish written with the terms Swedish policies use —
+  personuppgiftsansvarig, rättslig grund, berättigat intresse, samtycke, lagringstid, de
+  registrerades rättigheter, IMY — not word for word). Replace `[Company]`, `[Jurisdiction]`,
+  `[Contact email]` and the privacy policy's `[legal basis …]` in both languages, update
+  `updatedAt`, and have counsel review them. Each page shows the notice in
+  `src/content/legal-notice.ts` (`LEGAL_CHROME`) until you remove it.
 
 ## Booking
 

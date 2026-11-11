@@ -5,9 +5,12 @@ import { BOOKING_FORMS } from "./booking-forms"
 import { CONTACT } from "./contact"
 import { BOOK_HREF, HOME, homeFor, SECTION_IDS } from "./home"
 import { INNER_HREF } from "./inner"
+import { LEGAL_CHROME } from "./legal-notice"
 import { MEDIA_TEXT, mediaFor } from "./media"
+import { PRIVACY } from "./privacy"
 import { SITE } from "./site"
 import { STATUS } from "./status"
+import { TERMS } from "./terms"
 
 const ids: readonly string[] = SECTION_IDS
 
@@ -93,6 +96,9 @@ const MODULES = {
   booking: BOOKING,
   bookingForms: BOOKING_FORMS,
   contact: CONTACT,
+  privacy: PRIVACY,
+  terms: TERMS,
+  legalChrome: LEGAL_CHROME,
   media: {
     sv: { alt: mediaFor("sv"), text: MEDIA_TEXT.sv },
     en: { alt: mediaFor("en"), text: MEDIA_TEXT.en },
