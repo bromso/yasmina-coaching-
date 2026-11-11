@@ -1,7 +1,8 @@
 import { describe, expect, test } from "bun:test"
+import { statSync } from "node:fs"
 import { contrast, oklchToRgb, parseOklch, toHex } from "./color"
-import { generate } from "./generate"
-import { render } from "./render"
+import { build, generate } from "./generate"
+import { OUTPUTS, readTokens, render } from "./render"
 
 const { css, email } = await generate()
 
@@ -16,6 +17,25 @@ function vars(selector: ":root" | ".dark"): Map<string, string> {
   }
   return tokens
 }
+
+/**
+ * The colours that are deliberately the same in both themes (no `$extensions.mode.dark`): the
+ * vendored components' fixed hues and the references that resolve per theme on their own. A colour
+ * missing from here needs a dark value, so a new light-only colour cannot slip through.
+ */
+const SAME_IN_BOTH_THEMES = [
+  "color-1",
+  "color-2",
+  "color-3",
+  "color-4",
+  "color-5",
+  "chart-line-primary",
+  "chart-line-secondary",
+  "chart-brush-border",
+  "chart-tooltip-background",
+  "chart-tooltip-foreground",
+  "chart-tooltip-muted",
+]
 
 const light = vars(":root")
 const dark = vars(".dark")
@@ -35,9 +55,19 @@ const MODE_INDEPENDENT = [
 describe("the generated theme", () => {
   test("every :root token has a .dark twin, apart from the mode-independent ones", () => {
     const missing = [...light.keys()].filter(
-      (name) => !dark.has(name) && !MODE_INDEPENDENT.some((re) => re.test(name))
+      (name) =>
+        !dark.has(name) &&
+        !MODE_INDEPENDENT.some((re) => re.test(name)) &&
+        !SAME_IN_BOTH_THEMES.includes(name)
     )
     expect(missing).toEqual([])
+  })
+
+  test("a colour that is the same in both themes is written once, under :root", () => {
+    for (const name of ["color-1", "chart-tooltip-background", "chart-line-primary"]) {
+      expect(light.has(name)).toBe(true)
+      expect(dark.has(name)).toBe(false)
+    }
   })
 
   test(".dark only sets tokens :root defines", () => {
@@ -101,11 +131,28 @@ describe("the email constants", () => {
   })
 
   test("set headings in Georgia, the display serif's fallback", () => {
-    expect(email).toContain(`display: "Georgia, 'Times New Roman', serif"`)
+    expect(email).toContain(`display: 'Georgia, "Times New Roman", serif'`)
   })
 })
 
 describe("the build", () => {
+  test("leaves a committed file untouched when its content is unchanged", async () => {
+    const mtimes = () => Object.values(OUTPUTS).map((path) => statSync(path).mtimeMs)
+    const before = mtimes()
+    await build()
+    expect(mtimes()).toEqual(before)
+  })
+
+  test("resolves {…} references the way style-dictionary does", () => {
+    const display = readTokens().find((token) => token.path.join(".") === "display.family")
+    expect(display?.value).toBe('var(--font-display), Georgia, "Times New Roman", serif')
+  })
+
+  test("names the token behind an unknown reference", () => {
+    const dir = `${import.meta.dir}/__fixtures__/bad-reference`
+    expect(() => readTokens(dir)).toThrow("color.broken refers to {color.missing}")
+  })
+
   test("style-dictionary renders what the dependency-free drift check renders", async () => {
     expect(await generate()).toEqual(render())
   })

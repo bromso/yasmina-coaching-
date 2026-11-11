@@ -290,48 +290,23 @@
     },
     "color-1": {
       "$type": "color",
-      "$value": "oklch(66.2% 0.225 25.9)",
-      "$extensions": {
-        "mode": {
-          "dark": "oklch(66.2% 0.225 25.9)"
-        }
-      }
+      "$value": "oklch(66.2% 0.225 25.9)"
     },
     "color-2": {
       "$type": "color",
-      "$value": "oklch(60.4% 0.26 302)",
-      "$extensions": {
-        "mode": {
-          "dark": "oklch(60.4% 0.26 302)"
-        }
-      }
+      "$value": "oklch(60.4% 0.26 302)"
     },
     "color-3": {
       "$type": "color",
-      "$value": "oklch(69.6% 0.165 251)",
-      "$extensions": {
-        "mode": {
-          "dark": "oklch(69.6% 0.165 251)"
-        }
-      }
+      "$value": "oklch(69.6% 0.165 251)"
     },
     "color-4": {
       "$type": "color",
-      "$value": "oklch(80.2% 0.134 225)",
-      "$extensions": {
-        "mode": {
-          "dark": "oklch(80.2% 0.134 225)"
-        }
-      }
+      "$value": "oklch(80.2% 0.134 225)"
     },
     "color-5": {
       "$type": "color",
-      "$value": "oklch(90.7% 0.231 133)",
-      "$extensions": {
-        "mode": {
-          "dark": "oklch(90.7% 0.231 133)"
-        }
-      }
+      "$value": "oklch(90.7% 0.231 133)"
     },
     "kanban-board-circle-blue": {
       "$type": "color",
@@ -497,21 +472,11 @@
     },
     "chart-line-primary": {
       "$type": "color",
-      "$value": "var(--chart-1)",
-      "$extensions": {
-        "mode": {
-          "dark": "var(--chart-1)"
-        }
-      }
+      "$value": "var(--chart-1)"
     },
     "chart-line-secondary": {
       "$type": "color",
-      "$value": "var(--chart-2)",
-      "$extensions": {
-        "mode": {
-          "dark": "var(--chart-2)"
-        }
-      }
+      "$value": "var(--chart-2)"
     },
     "chart-crosshair": {
       "$type": "color",
@@ -533,39 +498,19 @@
     },
     "chart-brush-border": {
       "$type": "color",
-      "$value": "var(--chart-grid)",
-      "$extensions": {
-        "mode": {
-          "dark": "var(--chart-grid)"
-        }
-      }
+      "$value": "var(--chart-grid)"
     },
     "chart-tooltip-background": {
       "$type": "color",
-      "$value": "oklch(0.21 0.006 285 / 0.8)",
-      "$extensions": {
-        "mode": {
-          "dark": "oklch(0.21 0.006 285 / 0.8)"
-        }
-      }
+      "$value": "oklch(0.21 0.006 285 / 0.8)"
     },
     "chart-tooltip-foreground": {
       "$type": "color",
-      "$value": "oklch(0.985 0 0)",
-      "$extensions": {
-        "mode": {
-          "dark": "oklch(0.985 0 0)"
-        }
-      }
+      "$value": "oklch(0.985 0 0)"
     },
     "chart-tooltip-muted": {
       "$type": "color",
-      "$value": "oklch(0.65 0.01 260)",
-      "$extensions": {
-        "mode": {
-          "dark": "oklch(0.65 0.01 260)"
-        }
-      }
+      "$value": "oklch(0.65 0.01 260)"
     },
     "chart-marker-background": {
       "$type": "color",

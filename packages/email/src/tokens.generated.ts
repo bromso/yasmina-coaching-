@@ -28,6 +28,6 @@ export const EMAIL_COLORS: Record<EmailColor, string> = {
 
 /** Headings in the display serif's own fallback, body text in the system sans. */
 export const EMAIL_FONTS = {
-  display: "Georgia, 'Times New Roman', serif",
+  display: 'Georgia, "Times New Roman", serif',
   body: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
 } as const

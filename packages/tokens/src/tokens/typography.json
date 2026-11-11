@@ -22,7 +22,7 @@
   "display": {
     "family": {
       "$type": "fontFamily",
-      "$value": "var(--font-display), Georgia, \"Times New Roman\", serif"
+      "$value": "var(--font-display), {email.font.display}"
     },
     "weight": {
       "$type": "fontWeight",
@@ -43,8 +43,8 @@
     "font": {
       "display": {
         "$type": "fontFamily",
-        "$value": "Georgia, 'Times New Roman', serif",
-        "$description": "Headings in mail: Fraunces' fallback, since web fonts are unreliable in mail clients"
+        "$value": "Georgia, \"Times New Roman\", serif",
+        "$description": "Headings in mail, and the display serif's fallback on the web (display.family): web fonts are unreliable in mail clients"
       },
       "body": {
         "$type": "fontFamily",
