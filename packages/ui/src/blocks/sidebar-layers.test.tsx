@@ -50,13 +50,18 @@ describe("the header's offsets and layer come from the tokens", () => {
       globals.match(
         new RegExp(`(?:^|\\})\\s*${selector.replace(/[[\]()]/g, "\\$&")}\\s*\\{([^}]*)\\}`)
       )?.[1]
-    expect(rule("html")).toContain("--sticky-header-offset: 0px;")
-    const stuck = rule('html:has([data-slot="site-header"][data-sticky])')
-    expect(stuck).toContain("--sticky-header-offset: var(--site-header-offset);")
-    expect(stuck).toContain(
+    const root = rule("html")
+    expect(root).toContain("--sticky-header-offset: 0px;")
+    expect(root).toContain(
       "scroll-padding-top: calc(var(--sticky-header-offset) + env(safe-area-inset-top, 0px));"
     )
+    const stuck = rule('html:has([data-slot="site-header"][data-sticky])')
+    expect(stuck).toContain("--sticky-header-offset: var(--site-header-offset);")
     expect(globals.match(/scroll-padding-top/g)).toHaveLength(1)
+    // Without :has() a browser can't see a stuck header; it keeps the offset rather than lose it.
+    expect(globals).toMatch(
+      /@supports not selector\(:has\(\*\)\)\s*\{\s*html\s*\{\s*--sticky-header-offset: var\(--site-header-offset\);/
+    )
   })
   test("the header stacks at --layer-header", () => {
     expect(Number(token("layer-header"))).toBe(50)

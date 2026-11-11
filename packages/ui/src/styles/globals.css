@@ -375,10 +375,17 @@ h2 {
    The page's scroll padding and any element's `scroll-mt-(--sticky-header-offset)` read it. */
 html {
   --sticky-header-offset: 0px;
+  scroll-padding-top: calc(var(--sticky-header-offset) + env(safe-area-inset-top, 0px));
 }
 html:has([data-slot="site-header"][data-sticky]) {
   --sticky-header-offset: var(--site-header-offset);
-  scroll-padding-top: calc(var(--sticky-header-offset) + env(safe-area-inset-top, 0px));
+}
+/* Browsers without `:has()` (Firefox before 121, inside www's browserslist) can't tell whether a
+   header is stuck, so they keep the offset everywhere rather than hide anchors under it. */
+@supports not selector(:has(*)) {
+  html {
+    --sticky-header-offset: var(--site-header-offset);
+  }
 }
 html {
   /* Keeps body's own overflow below from propagating to the viewport (CSS Overflow: a root with
