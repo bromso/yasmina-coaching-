@@ -13,7 +13,7 @@ import { Toaster } from "@repo/ui/components/sonner"
 import { StaticLocaleSwitcher } from "@repo/ui/components/static-locale-switcher"
 import { ThemeToggle } from "@repo/ui/components/theme-toggle"
 import { WebVitals } from "@repo/ui/components/web-vitals"
-import { fontSans } from "@repo/ui/lib/fonts"
+import { fontVariables } from "@repo/ui/lib/fonts"
 import type { Metadata, Viewport } from "next"
 import type { ReactElement, ReactNode } from "react"
 import { Providers } from "./providers"
@@ -89,7 +89,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://api.iconify.design" />
         <link rel="dns-prefetch" href="https://api.iconify.design" />
       </head>
-      <body className={`${fontSans.variable} group/body font-sans antialiased`}>
+      <body className={`${fontVariables} group/body font-sans antialiased`}>
         <SkipLink />
         <WebVitals />
         <BrowserTelemetry />

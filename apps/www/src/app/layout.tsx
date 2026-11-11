@@ -13,7 +13,7 @@ import { StaticLocaleSwitcher } from "@repo/ui/components/static-locale-switcher
 import { ThemeProvider } from "@repo/ui/components/theme-provider"
 import { ThemeToggle } from "@repo/ui/components/theme-toggle"
 import { WebVitals } from "@repo/ui/components/web-vitals"
-import { fontDisplay, fontSans } from "@repo/ui/lib/fonts"
+import { fontVariables } from "@repo/ui/lib/fonts"
 import type { Metadata, Viewport } from "next"
 import type { ExploreNavOffering } from "@/components/site-nav/explore-nav"
 import { ExploreNavLoader } from "@/components/site-nav/explore-nav-loader"
@@ -136,7 +136,7 @@ export default async function RootLayout({
   )
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body className={`${fontSans.variable} ${fontDisplay.variable} font-sans antialiased`}>
+      <body className={`${fontVariables} font-sans antialiased`}>
         <SkipLink label={t("skipLink")} />
         <WebVitals />
         <BrowserTelemetry />

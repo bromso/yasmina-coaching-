@@ -3,6 +3,8 @@
 @import "./shiki.css";
 /* Every token value (`:root` and `.dark`), generated from packages/tokens: `bun run tokens`. */
 @import "./tokens.generated.css";
+/* `prose` for long-form text; resolved from this package, so it is a dependency of @repo/ui. */
+@plugin "@tailwindcss/typography";
 @source "../../../apps/**/*.{ts,tsx}";
 @source "../../../components/**/*.{ts,tsx}";
 @source "../**/*.{ts,tsx}";
@@ -295,4 +297,211 @@ h2 {
   font-variation-settings: "SOFT" 30;
   letter-spacing: -0.02em;
   line-height: 1.05;
+}
+
+/* Breakpoints, and the motion every app shares. */
+@theme inline {
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1400px;
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  /* An entrance: the piece rises 16 px into place, staggered with `[animation-delay:…]`. */
+  --animate-rise: rise 0.6s var(--ease-out-soft) both;
+  /* A step's ring, once, when it becomes current. */
+  --animate-ring-pulse: ring-pulse 0.6s ease-out 1;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes ring-pulse {
+    from {
+      box-shadow: 0 0 0 0 color-mix(in oklch, var(--primary) 45%, transparent);
+    }
+    to {
+      box-shadow: 0 0 0 10px transparent;
+    }
+  }
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+}
+
+@layer components {
+  button {
+    cursor: pointer;
+  }
+  [class*="border"] {
+    @apply border-border;
+  }
+}
+
+/*
+ * Motion. Everything here is behind `prefers-reduced-motion: no-preference`: with motion
+ * reduced none of it applies, and the page is the server's HTML, still.
+ *
+ * `.reveal` / `.reveal-hidden` are a scroll reveal's two states (www's
+ * `src/components/motion/reveal.tsx`): an element below the fold is put in `.reveal-hidden` right
+ * after hydration (no transition, so nothing blinks) and rises when `.reveal-hidden` is removed as
+ * it scrolls into view, after `--reveal-delay` (its place in a stagger). The buttons' press is the
+ * one global touch.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal {
+    transition:
+      opacity 0.55s var(--ease-out-soft),
+      transform 0.55s var(--ease-out-soft);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+  .reveal-hidden {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: none;
+  }
+  [data-slot="button"]:active:not(:disabled),
+  .arrow-link:active {
+    transform: scale(0.98);
+  }
+  html,
+  body {
+    scroll-behavior: smooth;
+  }
+}
+
+html {
+  /* Keeps focused elements clear of a sticky header. */
+  scroll-padding-top: 6rem;
+  /* Keeps body's own overflow below from propagating to the viewport (CSS Overflow: a root with
+     `visible` hands body's value up, where `clip` becomes `hidden` — the document then still
+     measures wider than 320 px and pans sideways on touch). With the root set, body clips
+     itself. */
+  overflow-x: clip;
+}
+body {
+  position: relative;
+  /* Glows (a section's sun) may spill past their section; clip them at the viewport, never scroll
+     sideways. `clip`, not `hidden`: no scroll container, so a sticky header keeps working. */
+  overflow-x: clip;
+}
+
+/* `Picture` renders `<picture class="contents">` so its `<img>` is the grid or flex item. Browsers
+   do not hide `<source>` by default, so without this it becomes an item too, takes a grid cell and
+   pushes the photo onto the next row. */
+picture > source {
+  display: none;
+}
+
+/* Windows High Contrast Mode support */
+@media (forced-colors: active) {
+  /* Ensure borders remain visible */
+  .border,
+  [class*="border"] {
+    border-color: CanvasText !important;
+  }
+
+  /* Preserve focus indicators */
+  *:focus-visible {
+    outline: 3px solid Highlight !important;
+    outline-offset: 3px !important;
+  }
+
+  /* Ensure icons remain visible */
+  svg {
+    forced-color-adjust: auto;
+  }
+
+  /* Ensure cards and backgrounds have proper contrast */
+  .bg-card,
+  .bg-background,
+  .bg-muted {
+    background-color: Canvas !important;
+  }
+
+  /* Gradient sections: replace gradients with solid background and visible borders */
+  [class*="bg-linear-"],
+  [class*="from-"],
+  [class*="via-"],
+  [class*="to-"] {
+    background: Canvas !important;
+  }
+
+  /* Add visible borders to rounded gradient sections for structure */
+  [class*="rounded-4xl"],
+  [class*="rounded-t-4xl"],
+  [class*="rounded-b-4xl"],
+  [class*="rounded-t-2xl"],
+  [class*="rounded-b-2xl"] {
+    border: 2px solid CanvasText !important;
+  }
+
+  /* Interactive elements: ensure visibility */
+  a,
+  button,
+  [role="button"] {
+    border: 2px solid LinkText;
+    background: ButtonFace;
+    color: ButtonText;
+  }
+
+  a:hover,
+  button:hover,
+  [role="button"]:hover {
+    border-color: Highlight;
+    background: Highlight;
+    color: HighlightText;
+  }
+
+  /* Links with gradient backgrounds */
+  a[class*="bg-linear-"],
+  a[class*="from-"] {
+    background: ButtonFace !important;
+    border: 2px solid LinkText !important;
+  }
+}
+
+/* High contrast preference support */
+@media (prefers-contrast: high) {
+  /* Increase border visibility */
+  .border,
+  [class*="border"] {
+    border-width: 2px;
+  }
+
+  /* Ensure focus rings are prominent */
+  *:focus-visible {
+    outline-width: 3px;
+  }
+
+  /* Add borders to gradient sections for better structure visibility */
+  [class*="rounded-4xl"],
+  [class*="rounded-t-4xl"],
+  [class*="rounded-b-4xl"],
+  [class*="rounded-t-2xl"],
+  [class*="rounded-b-2xl"] {
+    border: 1px solid currentColor;
+  }
 }

@@ -7,7 +7,7 @@ import { BrowserTelemetry } from "@repo/ui/components/browser-telemetry"
 import { CookieConsent } from "@repo/ui/components/cookie-consent"
 import { SkipLink } from "@repo/ui/components/skip-link"
 import { WebVitals } from "@repo/ui/components/web-vitals"
-import { fontDisplay, fontSans } from "@repo/ui/lib/fonts"
+import { fontVariables } from "@repo/ui/lib/fonts"
 import type { Metadata, Viewport } from "next"
 import type { ReactElement, ReactNode } from "react"
 import { Providers } from "@/app/providers"
@@ -81,9 +81,7 @@ export function BlogDocument({
         <link rel="preconnect" href="https://api.iconify.design" />
         <link rel="dns-prefetch" href="https://api.iconify.design" />
       </head>
-      <body
-        className={`${fontSans.variable} ${fontDisplay.variable} group/body font-sans antialiased`}
-      >
+      <body className={`${fontVariables} group/body font-sans antialiased`}>
         <SkipLink label={t("skipLink")} />
         <WebVitals />
         <BrowserTelemetry />

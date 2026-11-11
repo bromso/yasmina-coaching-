@@ -57,7 +57,6 @@
   "devDependencies": {
     "@next/bundle-analyzer": "catalog:",
     "@tailwindcss/postcss": "catalog:",
-    "@tailwindcss/typography": "catalog:",
     "@types/bun": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",

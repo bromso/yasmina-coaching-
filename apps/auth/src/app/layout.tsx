@@ -19,7 +19,7 @@ import { ThemeToggle } from "@repo/ui/components/theme-toggle"
 import { UserMenu } from "@repo/ui/components/user-menu"
 import { WebVitals } from "@repo/ui/components/web-vitals"
 import { parseConsent } from "@repo/ui/lib/consent"
-import { fontSans } from "@repo/ui/lib/fonts"
+import { fontVariables } from "@repo/ui/lib/fonts"
 import type { Metadata, Viewport } from "next"
 import { headers } from "next/headers"
 import { connection } from "next/server"
@@ -139,9 +139,7 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://api.iconify.design" />
         <link rel="dns-prefetch" href="https://api.iconify.design" />
       </head>
-      <body
-        className={`${fontSans.variable} group/body flex min-h-svh flex-col font-sans antialiased`}
-      >
+      <body className={`${fontVariables} group/body flex min-h-svh flex-col font-sans antialiased`}>
         <SkipLink label={t("ui.skipLink")} />
         <WebVitals consent={initialConsent} />
         <BrowserTelemetry />

@@ -110,6 +110,7 @@
     "@repo/tokens": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "catalog:",
+    "@tailwindcss/typography": "catalog:",
     "@types/bun": "catalog:",
     "@types/d3-array": "^3.2.1",
     "@types/d3-geo": "^3.1.1",

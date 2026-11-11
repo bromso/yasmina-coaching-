@@ -5,7 +5,7 @@ import { BrowserTelemetry } from "@repo/ui/components/browser-telemetry"
 import { SkipLink } from "@repo/ui/components/skip-link"
 import { Toaster } from "@repo/ui/components/sonner"
 import { WebVitals } from "@repo/ui/components/web-vitals"
-import { fontSans } from "@repo/ui/lib/fonts"
+import { fontVariables } from "@repo/ui/lib/fonts"
 import type { Metadata, Viewport } from "next"
 import { connection } from "next/server"
 import { NextIntlClientProvider } from "next-intl"
@@ -61,7 +61,7 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://api.iconify.design" />
         <link rel="dns-prefetch" href="https://api.iconify.design" />
       </head>
-      <body className={`${fontSans.variable} group/body font-sans antialiased`}>
+      <body className={`${fontVariables} group/body font-sans antialiased`}>
         <SkipLink label={t("skipLink")} />
         <WebVitals />
         <BrowserTelemetry />

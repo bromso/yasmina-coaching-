@@ -1,3 +1,2 @@
-/* Import the design system from @repo/ui — the single source of truth.
-   Add app-specific theme extensions below this line. */
+/* The whole look — tokens, fonts, base rules, motion — is @repo/ui's; an app adds nothing here. */
 @import "@repo/ui/globals.css";
