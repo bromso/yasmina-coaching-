@@ -155,45 +155,48 @@ export function InnerHubView({ locale }: { locale: Locale }) {
         note={hub.yoga.note}
       />
 
-      <section aria-labelledby="model-title" className="container py-24 lg:py-32">
-        <Reveal className="mx-auto max-w-2xl text-center">
-          <Eyebrow>{hub.model.heading.eyebrow}</Eyebrow>
-          <h2
-            id="model-title"
-            className="mt-5 hyphens-auto text-balance break-words text-4xl sm:text-5xl"
-          >
-            {hub.model.heading.title}
-          </h2>
-          <p className="mt-5 text-pretty text-lg text-muted-foreground">
-            {hub.model.heading.description}
-          </p>
-        </Reveal>
-        <div className="relative isolate mt-16 px-2 py-14 sm:px-10 lg:py-20">
-          {/* The sun glow behind the timeline; body's `overflow-x: clip` keeps it from scrolling sideways. */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -inset-x-[12%] -inset-y-[25%] -z-10 bg-[radial-gradient(closest-side,var(--sun)_0%,var(--sun-soft)_55%,transparent_100%)] opacity-90 blur-3xl"
-          />
-          <Reveal
-            as="ol"
-            stagger={110}
-            className="mx-auto grid max-w-6xl grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8"
-          >
-            {hub.model.steps.map((step, i) => (
-              <RevealItem key={step.title} as="li" index={i} className="flex flex-col">
-                <span
-                  aria-hidden="true"
-                  className="flex size-12 items-center justify-center rounded-full border border-foreground/20 bg-background/60 font-display text-lg"
-                >
-                  {i + 1}
-                </span>
-                <h3 className="mt-5 font-display text-2xl">{step.title}</h3>
-                <p className="mt-3 text-pretty text-muted-foreground">{step.description}</p>
-              </RevealItem>
-            ))}
+      {/* Full-bleed, so the timeline's glow is clipped at the viewport's edges. */}
+      <div className="overflow-x-clip">
+        <section aria-labelledby="model-title" className="container py-24 lg:py-32">
+          <Reveal className="mx-auto max-w-2xl text-center">
+            <Eyebrow>{hub.model.heading.eyebrow}</Eyebrow>
+            <h2
+              id="model-title"
+              className="mt-5 hyphens-auto text-balance break-words text-4xl sm:text-5xl"
+            >
+              {hub.model.heading.title}
+            </h2>
+            <p className="mt-5 text-pretty text-lg text-muted-foreground">
+              {hub.model.heading.description}
+            </p>
           </Reveal>
-        </div>
-      </section>
+          <div className="relative isolate mt-16 px-2 py-14 sm:px-10 lg:py-20">
+            {/* The sun glow behind the timeline; the wrapper's `overflow-x: clip` keeps it from scrolling sideways. */}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -inset-x-[12%] -inset-y-[25%] -z-10 bg-[radial-gradient(closest-side,var(--sun)_0%,var(--sun-soft)_55%,transparent_100%)] opacity-90 blur-3xl"
+            />
+            <Reveal
+              as="ol"
+              stagger={110}
+              className="mx-auto grid max-w-6xl grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8"
+            >
+              {hub.model.steps.map((step, i) => (
+                <RevealItem key={step.title} as="li" index={i} className="flex flex-col">
+                  <span
+                    aria-hidden="true"
+                    className="flex size-12 items-center justify-center rounded-full border border-foreground/20 bg-background/60 font-display text-lg"
+                  >
+                    {i + 1}
+                  </span>
+                  <h3 className="mt-5 font-display text-2xl">{step.title}</h3>
+                  <p className="mt-3 text-pretty text-muted-foreground">{step.description}</p>
+                </RevealItem>
+              ))}
+            </Reveal>
+          </div>
+        </section>
+      </div>
 
       <section aria-labelledby="certification-title" className="container pb-24 lg:pb-32">
         <Reveal className="grid grid-cols-1 gap-10 rounded-4xl border border-foreground/15 p-6 sm:p-10 lg:grid-cols-12 lg:p-14 dark:border-border/70">

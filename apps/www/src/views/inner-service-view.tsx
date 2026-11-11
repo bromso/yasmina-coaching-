@@ -107,11 +107,13 @@ export function InnerServiceView({ id, locale }: InnerServiceViewProps) {
                 </Button>
               )}
               {service.memberOffering && (
+                // `shrink` undoes Button's `shrink-0`: the long label wraps at 320 px instead of
+                // running past the viewport.
                 <Button
                   asChild
                   size="lg"
                   variant="outline"
-                  className="h-auto min-h-12 whitespace-normal rounded-full bg-background/70 px-6 py-2 text-left text-base backdrop-blur"
+                  className="h-auto min-h-12 shrink whitespace-normal rounded-full bg-background/70 px-6 py-2 text-left text-base backdrop-blur"
                 >
                   <a href={`/book/${service.memberOffering}`}>{labels.book.member}</a>
                 </Button>
