@@ -2,11 +2,13 @@ import { BRAND_NAME } from "@repo/sites"
 import { create } from "storybook/theming/create"
 
 /**
- * Custom Storybook theme that matches the design system.
- * Colors are derived from the design tokens in globals.css
+ * Custom Storybook theme for the manager chrome (toolbar, sidebar, panels).
+ * The stories themselves render with the real tokens (`packages/tokens`, via
+ * `packages/ui`'s stylesheet); this file does not.
  *
- * Note: Storybook theming uses hex/rgb values, not CSS variables.
- * These are the resolved values from your oklch tokens.
+ * Note: Storybook theming uses hex/rgb values, not CSS variables, and these are the old
+ * indigo/slate values from before the coaching look, not resolved from the current tokens.
+ * Re-derive them with `@repo/tokens/color` (`toHex`) if the manager should match.
  */
 
 // Light theme (default)
@@ -19,16 +21,11 @@ export const lightTheme = create({
   brandTarget: "_self",
   // brandImage: "/logo.svg", // Add when available
 
-  // Typography - matches your design tokens
+  // Typography
   fontBase: '"Inter", system-ui, sans-serif',
   fontCode: '"JetBrains Mono", monospace',
 
-  // Colors derived from your oklch tokens
-  // --primary: oklch(0.53 0.2041 277.1173) ≈ #5554de (indigo)
-  // --background: oklch(0.9842 0.0034 247.8575) ≈ #f8fafc
-  // --foreground: oklch(0.2795 0.0368 260.031) ≈ #1e293b
-  // --muted: oklch(0.967 0.0029 264.5419) ≈ #f1f5f9
-  // --border: oklch(0.8717 0.0093 258.3382) ≈ #e2e8f0
+  // Colors (see the note at the top)
 
   colorPrimary: "#5554de",
   colorSecondary: "#5554de",
@@ -80,12 +77,7 @@ export const darkTheme = create({
   fontBase: '"Inter", system-ui, sans-serif',
   fontCode: '"JetBrains Mono", monospace',
 
-  // Colors derived from your dark mode oklch tokens
-  // --primary: oklch(0.6801 0.1583 276.9349) ≈ #818cf8
-  // --background: oklch(0.2077 0.0398 265.7549) ≈ #0f172a
-  // --foreground: oklch(0.9288 0.0126 255.5078) ≈ #e2e8f0
-  // --card: oklch(0.2795 0.0368 260.031) ≈ #1e293b
-  // --border: oklch(0.4461 0.0263 256.8018) ≈ #334155
+  // Colors (see the note at the top)
 
   colorPrimary: "#818cf8",
   colorSecondary: "#818cf8",
