@@ -35,6 +35,8 @@ import {
   JobApplicationReceived,
   type JobApplicationReceivedProps,
 } from "./templates/job-application-received"
+import { LeadNew, type LeadNewProps } from "./templates/lead-new"
+import { LeadReceived, type LeadReceivedProps } from "./templates/lead-received"
 import { MagicLink, type MagicLinkProps } from "./templates/magic-link"
 import { PasskeyAdded, type PasskeyAddedProps } from "./templates/passkey-added"
 import { PasskeyRemoved, type PasskeyRemovedProps } from "./templates/passkey-removed"
@@ -227,6 +229,20 @@ export const emails = {
       }),
       <BookingNew {...props} locale={locale} />
     ),
+  // The contact form's mails: the internal one gets labels, the visitor's only the next step.
+  leadNew: (props: LeadNewProps, locale: Locale = DEFAULT_LOCALE) =>
+    rendered(
+      translatorFor(locale, "email")("leadNew.subject", {
+        reference: props.reference,
+        need: props.need,
+      }),
+      <LeadNew {...props} locale={locale} />
+    ),
+  leadReceived: (props: LeadReceivedProps, locale: Locale = DEFAULT_LOCALE) =>
+    rendered(
+      translatorFor(locale, "email")("leadReceived.subject", { reference: props.reference }),
+      <LeadReceived {...props} locale={locale} />
+    ),
   emailChangeConfirm: (props: EmailChangeConfirmProps, locale: Locale = DEFAULT_LOCALE) =>
     rendered(
       translatorFor(locale, "email")("emailChangeConfirm.subject"),
@@ -372,6 +388,13 @@ export {
   jobApplicationReceivedSubject,
 } from "./templates/job-application-received"
 export { BRAND } from "./templates/layout"
+export { LeadNew, type LeadNewProps, leadNewSubject } from "./templates/lead-new"
+export {
+  type LeadNextStepKind,
+  LeadReceived,
+  type LeadReceivedProps,
+  leadReceivedSubject,
+} from "./templates/lead-received"
 export { MagicLink, type MagicLinkProps, magicLinkSubject } from "./templates/magic-link"
 export {
   PasskeyAdded,

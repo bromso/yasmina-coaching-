@@ -11,6 +11,7 @@ import {
 import { DEFAULT_LOCALE, isLocale } from "@repo/i18n/locales"
 import { z } from "zod"
 import type { Queries } from "../../db"
+import { toExportedLead } from "../../leads"
 import { notifyUser } from "../../notifications"
 import type { ExportData } from "../../queries/exports"
 import { emitWebhookEvent } from "../../webhooks/emit"
@@ -293,6 +294,9 @@ export function buildExport(
       status: row.status,
       createdAt: row.created_at,
     })),
+    // Contact requests sent from the account's verified address (address-keyed, not linked to the
+    // account): the visitor's own answers, never the ip hash, Yasmina's notes or the admin.
+    leads: data.leads.map(toExportedLead),
   }
 }
 

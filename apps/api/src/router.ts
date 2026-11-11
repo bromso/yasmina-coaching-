@@ -1,6 +1,7 @@
 import { implement, ORPCError } from "@orpc/server"
 import {
   ADMIN_APPLICATIONS_PAGE_SIZE,
+  ADMIN_LEADS_PAGE_SIZE,
   ADMIN_SUPPORT_PAGE_SIZE,
   type AdminApplication,
   type AdminJob,
@@ -146,6 +147,7 @@ import { privacyExportJob } from "./jobs/builtin/privacy"
 import { enqueueStorageDelete } from "./jobs/builtin/storage"
 import type { JobDefinition } from "./jobs/define"
 import type { EnqueueOptions } from "./jobs/enqueue"
+import { submitLead, toAdminLead } from "./leads"
 import { detach, type Mailer, maskEmail } from "./mail/mailer"
 import {
   notificationPreferencesFor,
@@ -285,6 +287,15 @@ export type Context = {
   bookingGlobalLimiter: RateLimiter
   /** Where new bookings and requests are mailed: BOOKING_EMAIL, else `supportEmail`. */
   bookingEmail: string
+  /** Throttles contact requests (`leads.create`) per calling client (`leads:<ip hash>`); first. */
+  leadsLimiter: RateLimiter
+  /**
+   * Throttles contact requests per typed address (`leads-to:<normalised email>`): each one mails
+   * a confirmation to it, so this caps what one address can be sent. Checked second.
+   */
+  leadsRecipientLimiter: RateLimiter
+  /** Caps contact requests api-wide (rotating client ids); checked last of the three. */
+  leadsGlobalLimiter: RateLimiter
   /** Caps sign-ups api-wide: the client id is not trusted for this (it is ip-derived). */
   signUpLimiter: RateLimiter
   /** Caps sign-ups per normalised email, before anything is checked or mailed. */
@@ -4293,6 +4304,27 @@ export const router = api.router({
       return { reference }
     }),
   },
+  // The coaching site's contact form (see docs/architecture/leads.md). Anonymous like
+  // `support.create`: the same three limits run before anything is stored, then the row, both
+  // mails and the analytics event commit together (see `submitLead`).
+  leads: {
+    create: api.leads.create.handler(async ({ input, context, errors }) => {
+      const perClient = await context.leadsLimiter.hit(`leads:${context.clientId ?? "unknown"}`)
+      if (!perClient.allowed)
+        throw errors.TOO_MANY_REQUESTS({ message: apiMessage(context, "leadsRate") })
+      const perRecipient = await context.leadsRecipientLimiter.hit(
+        `leads-to:${normalizeEmail(input.email)}`
+      )
+      if (!perRecipient.allowed)
+        throw errors.TOO_MANY_REQUESTS({ message: apiMessage(context, "leadsRate") })
+      const global = await context.leadsGlobalLimiter.hit("leads:global")
+      if (!global.allowed) {
+        context.noteCapTripped("leads:global")
+        throw errors.TOO_MANY_REQUESTS({ message: apiMessage(context, "leadsRate") })
+      }
+      return submitLead(context, input)
+    }),
+  },
   // The coaching site's booking calendar (see docs/architecture/booking.md). Anonymous like
   // `support.create`: the three limiters run before anything is stored, every slot a visitor sends
   // is re-derived from the rules inside the transaction (never trusted), and the row, the
@@ -5407,6 +5439,61 @@ export const router = api.router({
           action: "support.reopened",
           targetType: "support",
           targetId: input.id,
+        })
+        return { ok: true as const }
+      }),
+    },
+    leads: {
+      list: adminApi.admin.leads.list.handler(async ({ input, context }) => {
+        const rows = await context.db.leads.list({
+          status: input.status === "all" ? undefined : input.status,
+          cursor: input.cursor,
+          limit: ADMIN_LEADS_PAGE_SIZE + 1,
+        })
+        const { items, nextCursor } = page(rows, ADMIN_LEADS_PAGE_SIZE)
+        return {
+          items: items.map(toAdminLead),
+          nextCursor,
+          counts: await context.db.leads.counts(),
+        }
+      }),
+
+      get: adminApi.admin.leads.get.handler(async ({ input, context, errors }) => {
+        const row = await context.db.leads.find(input.id)
+        if (!row) throw errors.NOT_FOUND()
+        return toAdminLead(row)
+      }),
+
+      // Status and notes in one transaction, so the "from" status read here is the one the update
+      // changes. Nothing changed (the same status, the same notes) is a no-op success with no
+      // re-stamp and no audit row, like `admin.applications.setStatus`. The audit row says the
+      // notes changed, never what they say.
+      update: adminApi.admin.leads.update.handler(async ({ input, context, errors }) => {
+        const changedAt = context.now().toISOString()
+        const result = await context.db.transaction(async (tx) => {
+          const row = await tx.leads.find(input.id)
+          if (!row) return null
+          const statusChanged =
+            input.status !== undefined && input.status !== row.status
+              ? await tx.leads.setStatus(input.id, input.status, context.user.id, changedAt)
+              : false
+          const notes = input.notes === undefined ? undefined : input.notes || null
+          const notesChanged =
+            notes !== undefined && notes !== row.notes
+              ? await tx.leads.setNotes(input.id, notes)
+              : false
+          return { from: row.status, statusChanged, notesChanged }
+        })
+        if (!result) throw errors.NOT_FOUND()
+        if (!result.statusChanged && !result.notesChanged) return { ok: true as const }
+        await audit(context, {
+          action: "lead.updated",
+          targetType: "lead",
+          targetId: input.id,
+          metadata: {
+            ...(result.statusChanged ? { from: result.from, to: input.status } : {}),
+            ...(result.notesChanged ? { notes: true } : {}),
+          },
         })
         return { ok: true as const }
       }),

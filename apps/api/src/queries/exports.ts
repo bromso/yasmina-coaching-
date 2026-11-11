@@ -1,6 +1,7 @@
 import type { SQL } from "bun"
 import { applicationsQueries, type ExportedApplicationRow } from "./applications"
 import { bookingQueries, type ExportedBookingRow } from "./booking"
+import { type ExportedLeadRow, leadsQueries } from "./leads"
 import {
   type NotificationPreferenceRow,
   notificationPreferencesQueries,
@@ -98,6 +99,8 @@ export type ExportData = {
   jobApplications: ExportedApplicationRow[]
   /** Coaching bookings made with the account's address — verified addresses only, like applications. */
   bookings: ExportedBookingRow[]
+  /** Contact requests sent from the account's address — verified addresses only, like applications. */
+  leads: ExportedLeadRow[]
   /** The user's own notifications (type, display data, created and read times). */
   notifications: ExportedNotificationRow[]
   /** The email settings the user changed from their defaults (type, on/off, when). */
@@ -269,6 +272,8 @@ export function exportsQueries(sql: SQL) {
         user.email_verified_at === null ? [] : await applicationsQueries(sql).forEmail(user.email)
       const bookings =
         user.email_verified_at === null ? [] : await bookingQueries(sql).forEmail(user.email)
+      const leads =
+        user.email_verified_at === null ? [] : await leadsQueries(sql).forEmail(user.email)
       const notifications = await notificationsQueries(sql).forExport(userId)
       const notificationPreferences = await notificationPreferencesQueries(sql).list(userId)
       return {
@@ -285,6 +290,7 @@ export function exportsQueries(sql: SQL) {
         supportRequests,
         jobApplications,
         bookings,
+        leads,
         notifications,
         notificationPreferences,
       }

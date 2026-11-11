@@ -161,6 +161,12 @@ export type ServerOptions = {
   bookingGlobalLimiter?: RateLimiter
   /** Where new bookings and requests are mailed (BOOKING_EMAIL, else `supportEmail`). */
   bookingEmail?: string
+  /** Throttles contact requests per x-api-client-id (an ip hash). Defaults to 5 per hour. */
+  leadsLimiter?: RateLimiter
+  /** Throttles contact requests per typed (normalised) email. Defaults to 3 per hour. */
+  leadsRecipientLimiter?: RateLimiter
+  /** Caps contact requests api-wide, whatever the client id. Defaults to 100 per hour. */
+  leadsGlobalLimiter?: RateLimiter
   /** Caps sign-ups api-wide, whatever the client id. Defaults to 30 per 10 minutes. */
   signUpLimiter?: RateLimiter
   /** Caps sign-ups per normalised email. Defaults to 3 per hour. */
@@ -417,6 +423,13 @@ export async function createServer(options: ServerOptions) {
   const bookingGlobalLimiter =
     options.bookingGlobalLimiter ?? createMemoryRateLimiter({ limit: 200, windowMs: 60 * 60_000 })
   const bookingEmail = options.bookingEmail ?? supportEmail
+  // The same limits as support's: the contact form mails a confirmation to the typed address too.
+  const leadsLimiter =
+    options.leadsLimiter ?? createMemoryRateLimiter({ limit: 5, windowMs: 60 * 60_000 })
+  const leadsRecipientLimiter =
+    options.leadsRecipientLimiter ?? createMemoryRateLimiter({ limit: 3, windowMs: 60 * 60_000 })
+  const leadsGlobalLimiter =
+    options.leadsGlobalLimiter ?? createMemoryRateLimiter({ limit: 100, windowMs: 60 * 60_000 })
   const inviteLimiter =
     options.inviteLimiter ?? createMemoryRateLimiter({ limit: 20, windowMs: 60 * 60_000 })
   const inviterLimiter =
@@ -667,6 +680,9 @@ export async function createServer(options: ServerOptions) {
         bookingRecipientLimiter,
         bookingGlobalLimiter,
         bookingEmail,
+        leadsLimiter,
+        leadsRecipientLimiter,
+        leadsGlobalLimiter,
         signUpLimiter,
         signUpEmailLimiter,
         inviteLimiter,

@@ -324,6 +324,7 @@ export function usersQueries(sql: SQL) {
      *                                           de-linked
      *   support_requests.resolved_by            SET NULL (no FK); the admin who resolved it
      *   job_applications.status_changed_by      SET NULL (no FK); the admin who last set a status
+     *   leads.status_changed_by                 SET NULL (no FK); the admin who last set a status
      *   notes.user_id                           KEPT — the note belongs to its workspace; the
      *                                           author id then points at no user
      *   users.avatar_key                        returned for storage.delete; the row is deleted
@@ -353,6 +354,9 @@ export function usersQueries(sql: SQL) {
      *   job_applications                        address-keyed, never linked to an account id;
      *                                           `applications.prune` deletes each one (and its
      *                                           CV) six months after it was sent
+     *   leads                                   address-keyed contact requests, never linked to
+     *                                           an account id; `leads.prune` deletes each one
+     *                                           twelve months after it was sent
      *
      * Concurrent inserts: a request racing the purge can write a row for the id after it commits.
      * A session is inert without its user row (every lookup joins or re-reads the user); an
@@ -399,6 +403,7 @@ export function usersQueries(sql: SQL) {
       await sql`UPDATE support_requests SET user_id = NULL WHERE user_id = ${id}`
       await sql`UPDATE support_requests SET resolved_by = NULL WHERE resolved_by = ${id}`
       await sql`UPDATE job_applications SET status_changed_by = NULL WHERE status_changed_by = ${id}`
+      await sql`UPDATE leads SET status_changed_by = NULL WHERE status_changed_by = ${id}`
       // Stored as the provider reported it (any case); users.email is normalised already.
       if (user)
         await sql`UPDATE billing_customers SET email = NULL WHERE lower(email) = ${user.email}`

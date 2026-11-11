@@ -17,6 +17,7 @@
     "./invite-domains": "./src/invite-domains.ts",
     "./jobs": "./src/jobs.ts",
     "./jobs-limits": "./src/jobs-limits.ts",
+    "./leads": "./src/leads.ts",
     "./notifications": "./src/notifications.ts",
     "./passkey-limits": "./src/passkey-limits.ts",
     "./realtime": "./src/realtime.ts",

@@ -8,6 +8,7 @@ import {
 import { applicationsPruneJob } from "./builtin/applications"
 import { auditPruneJob } from "./builtin/audit"
 import { backupRunJob } from "./builtin/backup"
+import { leadsPruneJob } from "./builtin/leads"
 import { sendMailJob } from "./builtin/mail"
 import { notificationsPruneJob } from "./builtin/notifications"
 import { privacyExportJob, privacyExportPruneJob, privacyPurgeJob } from "./builtin/privacy"
@@ -39,6 +40,7 @@ export const JOBS: readonly JobDefinition<any>[] = [
   webhookDeliverJob,
   webhooksPruneJob,
   notificationsPruneJob,
+  leadsPruneJob,
 ]
 
 export const SCHEDULES: readonly ScheduleDefinition[] = [
@@ -107,6 +109,7 @@ export const SCHEDULES: readonly ScheduleDefinition[] = [
     job: notificationsPruneJob,
     payload: {},
   }),
+  defineSchedule({ name: "leads.prune", cron: "10 4 * * *", job: leadsPruneJob, payload: {} }),
 ]
 
 export function jobByName(name: string): JobDefinition<unknown> | undefined {
