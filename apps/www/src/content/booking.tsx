@@ -9,6 +9,7 @@ import {
 } from "@repo/api-contract/booking-limits"
 import type { Locale } from "@repo/i18n/locales"
 import { BOOKING_FORMS, type BookingFormCopy } from "@/content/booking-forms"
+import { CONTACT_HREF } from "@/content/contact"
 import { INNER, INNER_SERVICE_IDS } from "@/content/inner"
 import { formatKr, INNER_PRICES, type InnerServiceId } from "@/content/inner-pricing"
 import type { DonePayment } from "@/lib/mock-payment"
@@ -273,7 +274,7 @@ const sv: BookingContent = {
     introCall: {
       lead: "Osäker på vilket?",
       label: "Be om ett kostnadsfritt introsamtal",
-      href: "/#contact",
+      href: CONTACT_HREF,
     },
   },
   offering: { back: "Alla sätt att boka" },
@@ -493,7 +494,7 @@ const en: BookingContent = {
     introCall: {
       lead: "Not sure which?",
       label: "Request a free intro call",
-      href: "/#contact",
+      href: CONTACT_HREF,
     },
   },
   offering: { back: "All ways to book" },

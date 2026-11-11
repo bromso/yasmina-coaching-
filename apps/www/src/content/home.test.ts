@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test"
 import { LOCALES } from "@repo/i18n/locales"
 import { BOOKING, bookingFor } from "./booking"
 import { BOOKING_FORMS } from "./booking-forms"
+import { CONTACT } from "./contact"
 import { BOOK_HREF, HOME, homeFor, SECTION_IDS } from "./home"
 import { INNER_HREF } from "./inner"
 import { MEDIA_TEXT, mediaFor } from "./media"
@@ -91,6 +92,7 @@ const MODULES = {
   home: HOME,
   booking: BOOKING,
   bookingForms: BOOKING_FORMS,
+  contact: CONTACT,
   media: {
     sv: { alt: mediaFor("sv"), text: MEDIA_TEXT.sv },
     en: { alt: mediaFor("en"), text: MEDIA_TEXT.en },
@@ -175,7 +177,7 @@ describe("Yasmina's voice", () => {
     expect(HOME.en.why.heading.title).toBe("She has sat in your chair.")
     expect(HOME.en.steps.items.map((s) => s.title)).toEqual(["Listen", "Clarify", "Act"])
     expect(HOME.en.contact.title).toBe("Start with a conversation")
-    expect(HOME.en.contact.button).toBe("Request an intro call")
+    expect(HOME.en.contact.link).toEqual({ label: "Contact Yasmina", href: "/kontakt" })
     expect(bookingFor("en").kindLines).toEqual({
       instant: "Pick a time",
       group: "Reserve a seat",

@@ -2,7 +2,7 @@ import { expect, test } from "bun:test"
 import { sitemapFor } from "@repo/sites"
 import { PUBLIC_ROUTES } from "./routes"
 
-test("www's sitemap lists the home page, Ledarskap inifrån, the booking catalog and the legal pages", () => {
+test("www's sitemap lists the home page, Ledarskap inifrån, the booking catalog, the contact page and the legal pages", () => {
   const urls = sitemapFor("www", PUBLIC_ROUTES, { SITE_DOMAIN: "example.com" }).map((e) => e.url)
   expect(urls).toEqual([
     "https://www.example.com/",
@@ -13,6 +13,7 @@ test("www's sitemap lists the home page, Ledarskap inifrån, the booking catalog
     "https://www.example.com/inifran/grupp",
     "https://www.example.com/inifran/forskning",
     "https://www.example.com/book",
+    "https://www.example.com/kontakt",
     "https://www.example.com/terms",
     "https://www.example.com/privacy",
   ])

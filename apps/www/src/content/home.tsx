@@ -1,5 +1,6 @@
 import type { Locale } from "@repo/i18n/locales"
 import type { FaqItem } from "@repo/ui/blocks/faq"
+import { CONTACT_HREF } from "@/content/contact"
 import { INNER_HREF } from "@/content/inner"
 import { SITE_META } from "@/content/site-meta"
 
@@ -59,13 +60,12 @@ export type HomeContent = {
   steps: { heading: Heading; items: Step[] }
   credentials: { heading: Heading; experience: Role[]; education: Credential[] }
   faq: { heading: Heading; items: FaqItem[] }
+  /** The closing teaser: a few lines and the way to the contact page. */
   contact: {
     title: string
     description: string
-    button: string
-    legal: string
-    emailLabel: string
-    placeholder: string
+    link: { label: string; href: typeof CONTACT_HREF }
+    note: string
   }
 }
 
@@ -284,11 +284,9 @@ const sv: HomeContent = {
   contact: {
     title: "Börja med ett samtal",
     description:
-      "Trettio minuter på telefon, kostnadsfritt, och du går därifrån med minst en sak att prova. Lämna din e-postadress så hör Yasmina av sig för att hitta en tid.",
-    button: "Be om ett introsamtal",
-    legal: "Yasmina svarar personligen inom några dagar. Din adress används bara för det svaret.",
-    emailLabel: "E-post",
-    placeholder: "du@exempel.se",
+      "Trettio minuter på telefon, kostnadsfritt, och du går därifrån med minst en sak att prova. Berätta kort vem du är och vad du behöver, så ser du direkt vad nästa steg är.",
+    link: { label: "Kontakta Yasmina", href: CONTACT_HREF },
+    note: "Du får svar inom två arbetsdagar.",
   },
 }
 
@@ -508,12 +506,9 @@ const en: HomeContent = {
   contact: {
     title: "Start with a conversation",
     description:
-      "Thirty minutes by phone, free of charge, and you leave with at least one thing to try. Leave your email address and Yasmina will get in touch to find a time.",
-    button: "Request an intro call",
-    legal:
-      "Yasmina replies personally within a few days. Your address is used only for that reply.",
-    emailLabel: "Email",
-    placeholder: "you@example.com",
+      "Thirty minutes by phone, free of charge, and you leave with at least one thing to try. Tell Yasmina briefly who you are and what you need, and you see your next step straight away.",
+    link: { label: "Contact Yasmina", href: CONTACT_HREF },
+    note: "You'll hear back within two working days.",
   },
 }
 

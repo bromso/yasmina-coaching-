@@ -171,7 +171,7 @@ export function postRoute(locale: BlogLocale) {
             authors={authorsFor(locale)}
             ui={ui}
             prefix={prefix}
-            ctaHref={`${siteUrl("www")}/#contact`}
+            ctaHref={`${siteUrl("www")}/kontakt`}
           />
         </>
       )

@@ -33,7 +33,7 @@ describe("feed rendering, end to end", () => {
     const html = await feedRender.renderPostHtml("att-leda-genom-en-kris")
     expect(html).toContain("<p")
     expect(html).toContain("En kris på jobbet har oftast ett namn.")
-    expect(html).toContain('href="http://www.brand.localhost:3000/#contact"')
+    expect(html).toContain('href="http://www.brand.localhost:3000/kontakt"')
     expect(html).not.toContain("www:/")
   })
 

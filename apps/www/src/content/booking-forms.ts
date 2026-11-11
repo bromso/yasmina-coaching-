@@ -4,6 +4,7 @@ import type {
   BookingLocation,
 } from "@repo/api-contract/booking-limits"
 import type { Locale } from "@repo/i18n/locales"
+import { CONTACT_HREF } from "@/content/contact"
 import type { BookingFlow } from "@/lib/booking-flow"
 import type { PaymentMethod } from "@/lib/mock-payment"
 
@@ -323,7 +324,7 @@ const sv: BookingFormCopy = {
   },
   timezoneNote: "Tiderna visas i svensk tid (Europe/Stockholm).",
   calendar: { previous: "Föregående månad", next: "Nästa månad", today: "I dag", selected: "Vald" },
-  noScriptLink: { label: "Be om ett introsamtal", href: "/#contact" },
+  noScriptLink: { label: "Be om ett introsamtal", href: CONTACT_HREF },
   retry: "Försök igen",
   instant: {
     noScript:
@@ -527,7 +528,7 @@ const en: BookingFormCopy = {
     today: "Today",
     selected: "Selected",
   },
-  noScriptLink: { label: "Request an intro call", href: "/#contact" },
+  noScriptLink: { label: "Request an intro call", href: CONTACT_HREF },
   retry: "Try again",
   instant: {
     noScript:

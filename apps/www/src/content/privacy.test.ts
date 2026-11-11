@@ -67,3 +67,37 @@ describe("privacy template: API access", () => {
     expect(text).toContain("short prefix")
   })
 })
+
+const section = (id: string) =>
+  (privacy.sections.find((s) => s.id === id)?.paragraphs ?? []).join(" ")
+
+describe("privacy template: contact requests", () => {
+  test("names what the contact form stores, who sees it and the 12-month deletion", () => {
+    const text = section("what-we-collect")
+    for (const item of [
+      "/kontakt",
+      "what you want help with and how soon",
+      "optional phone number",
+      "organisation and role",
+      "consent to be contacted",
+      "separate newsletter box",
+      "hash of your IP address",
+      "deleted 12 months after it arrived",
+      "we do not send a newsletter today",
+    ]) {
+      expect(text).toContain(item)
+    }
+    expect(section("retention")).toContain("Contact requests")
+    expect(section("retention")).toContain("12 months")
+  })
+
+  test("the analytics section says the contact form's event carries the choices only", () => {
+    const text = section("analytics")
+    expect(text).toContain("sending the contact form")
+    expect(text).toContain("never your name, email address, message or any account")
+  })
+
+  test("updatedAt moved with the contact section", () => {
+    expect(privacy.updatedAt >= "2026-11-11").toBe(true)
+  })
+})

@@ -365,3 +365,104 @@ describe("DoneView", () => {
     }
   })
 })
+
+const { ContactView } = await import("./contact-view")
+const { ContactDoneView } = await import("./contact-done-view")
+const { CONTACT } = await import("@/content/contact")
+/** A string as React writes it into markup. */
+const esc = (text: string) =>
+  text.replaceAll("&", "&amp;").replaceAll("'", "&#x27;").replaceAll('"', "&quot;")
+
+describe("ContactView", () => {
+  for (const locale of LOCALES) {
+    test(`${locale}: one h1, the response time, and three steps in one plain form`, () => {
+      const copy = CONTACT[locale]
+      const html = render(<ContactView page="/kontakt" locale={locale} />)
+      expect(count(html, /<h1[\s>]/g)).toBe(1)
+      expect(html).toContain(esc(copy.hero.title))
+      expect(html).toContain(esc(copy.hero.response))
+      // Every step is in the markup (hidden but mounted), so the form also works as one long page.
+      for (const heading of copy.form.steps.slice(0, 3)) expect(html).toContain(esc(heading))
+      expect(count(html, /class="step-panel /g)).toBe(3)
+      expect(html).toContain("<noscript>")
+      expect(html).toContain(".step-panel{display:grid!important}")
+      expect(html).toContain('<input type="hidden" name="page" value="/kontakt"/>')
+      for (const label of Object.values(copy.form.need.labels)) expect(html).toContain(esc(label))
+      for (const label of Object.values(copy.form.timeline.labels))
+        expect(html).toContain(esc(label))
+      expect(html).toContain('href="/privacy"')
+    })
+  }
+
+  test("neither consent box is ticked to start with; e-mail is the preselected contact method", () => {
+    const html = render(<ContactView page="/kontakt" locale="sv" />)
+    for (const name of ["consent", "newsletter"]) {
+      const input = html.match(new RegExp(`<input[^>]*name="${name}"[^>]*>`))?.[0] ?? ""
+      expect(input).toContain('type="checkbox"')
+      expect(input).not.toContain('checked=""')
+    }
+    const email = html.match(/<input[^>]*name="contactMethod"[^>]*value="email"[^>]*>/)?.[0] ?? ""
+    expect(email).toContain('checked=""')
+  })
+
+  test("the organisation fields are hidden until an organisation is picked, but shown without JavaScript", () => {
+    const html = render(<ContactView page="/kontakt" locale="sv" />)
+    expect(html).toMatch(/class="org-fields [^"]*hidden"/)
+    expect(html).toContain(".org-fields{display:grid!important}")
+  })
+})
+
+describe("ContactDoneView", () => {
+  const blogUrl = "https://blog.example.com"
+  const done = (
+    answers: Parameters<typeof ContactDoneView>[0]["answers"],
+    locale: "sv" | "en" = "sv"
+  ) =>
+    render(
+      <ContactDoneView reference="LEAD-7" answers={answers} blogUrl={blogUrl} locale={locale} />
+    )
+
+  test("Ledarskap inifrån links the matching start call", () => {
+    const html = done({ audience: "private", need: "inner_mentoring", timeline: "month" })
+    expect(html).toContain('href="/book/inner_start_mentoring"')
+    expect(html).toContain(CONTACT.sv.done.next.inner.title)
+  })
+
+  test("leadership coaching offers the intro call and a session", () => {
+    const html = done({ audience: "private", need: "coaching", timeline: "quarter" })
+    expect(html).toContain('href="/book/session"')
+    expect(html).toContain(CONTACT.sv.done.next.coaching.title)
+  })
+
+  test("an organisation's team day, workshop or talk gets a proposal and the request form", () => {
+    expect(done({ audience: "organisation", need: "team", timeline: "month" })).toContain(
+      'href="/book/workshop"'
+    )
+    const talk = done({ audience: "organisation", need: "talk", timeline: "exploring" })
+    expect(talk).toContain('href="/book/keynote"')
+    expect(talk).toContain(CONTACT.sv.done.next.proposal.title)
+  })
+
+  test("exploring reads two posts in the page's language and the inifrån hub", () => {
+    for (const locale of LOCALES) {
+      const html = done({ audience: "private", need: "unsure", timeline: "exploring" }, locale)
+      expect(html).toContain(esc(CONTACT[locale].done.next.explore.title))
+      expect(html).toContain('href="/inifran"')
+      const posts =
+        locale === "sv"
+          ? ["mentor-eller-coach", "vad-forskningen-sager-om-coachning"]
+          : ["en-mentor-or-coach", "en-what-research-says-about-coaching"]
+      for (const slug of posts) expect(html).toContain(`href="${blogUrl}/${slug}"`)
+    }
+  })
+
+  test("without known answers there is no tailored step, only the reference and what happens now", () => {
+    const html = done(null)
+    expect(html).not.toContain('id="next-step-title"')
+    expect(html).toContain("LEAD-7")
+    expect(html).toContain(CONTACT.sv.done.whatNow.heading)
+    for (const item of CONTACT.sv.done.whatNow.items) expect(html).toContain(item)
+    expect(html).toContain('aria-current="step"')
+    expect(count(html, /<h1[\s>]/g)).toBe(1)
+  })
+})

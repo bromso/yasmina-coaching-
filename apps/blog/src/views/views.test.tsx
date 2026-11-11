@@ -45,7 +45,7 @@ function renderPost(props: Partial<PostViewProps> = {}): string {
       authors={authors}
       ui={UI.en}
       prefix=""
-      ctaHref="https://www.example.com/#contact"
+      ctaHref="https://www.example.com/kontakt"
       {...props}
     />
   )
@@ -289,7 +289,7 @@ describe("the coaching look and the two languages", () => {
   test("a post closes with the booking call to action and links its author under its prefix", () => {
     const html = renderPost({ ui: UI.sv, prefix: "" })
     expect(html).toContain("Be om ett kostnadsfritt introsamtal")
-    expect(html).toContain('href="https://www.example.com/#contact"')
+    expect(html).toContain('href="https://www.example.com/kontakt"')
     const en = renderPost({
       post: post("en-hello", { url: "/en/hello", locale: "en" }),
       prefix: "/en",

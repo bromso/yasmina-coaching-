@@ -1,5 +1,6 @@
 import type { Locale } from "@repo/i18n/locales"
 import { Faq } from "@repo/ui/blocks/faq"
+import { Button } from "@repo/ui/components/button"
 import { ArrowLink } from "@/components/arrow-link"
 import { CredentialsSection } from "@/components/credentials-section"
 import { Eyebrow } from "@/components/eyebrow"
@@ -10,7 +11,6 @@ import { OffersSection } from "@/components/offers-section"
 import { Picture } from "@/components/picture"
 import { StatementSection } from "@/components/statement-section"
 import { StepsSection } from "@/components/steps-section"
-import { WaitlistForm } from "@/components/waitlist-form"
 import { WhySection } from "@/components/why-section"
 import { homeFor } from "@/content/home"
 import { clipsFor, mediaFor, mediaTextFor } from "@/content/media"
@@ -72,20 +72,25 @@ export function HomeView({ locale }: { locale: Locale }) {
       </Reveal>
       <div id="contact" className="scroll-mt-24 px-2.5 pb-2.5 lg:px-4 lg:pb-4">
         <Reveal className="relative overflow-hidden rounded-4xl bg-linear-to-b from-sun-soft via-sun to-sun px-6 py-24 lg:py-32">
-          {/* On wide screens a small portrait leans into the band's right edge; the form keeps its centre. */}
+          {/* On wide screens a small portrait leans into the band's right edge; the teaser keeps its centre. */}
           <Picture
             image={media.portraitOutdoors}
             small
             className="absolute top-1/2 right-10 hidden w-56 -translate-y-1/2 rotate-2 rounded-3xl object-cover shadow-lg xl:block 2xl:right-24 2xl:w-64"
           />
-          <WaitlistForm
-            title={home.contact.title}
-            description={home.contact.description}
-            buttonLabel={home.contact.button}
-            legal={home.contact.legal}
-            emailLabel={home.contact.emailLabel}
-            placeholder={home.contact.placeholder}
-          />
+          <section
+            aria-labelledby="contact-teaser-title"
+            className="mx-auto flex max-w-2xl flex-col items-center gap-6 text-center"
+          >
+            <h2 id="contact-teaser-title" className="text-balance text-4xl sm:text-5xl">
+              {home.contact.title}
+            </h2>
+            <p className="text-pretty text-lg text-muted-foreground">{home.contact.description}</p>
+            <Button asChild size="lg" className="h-12 rounded-full px-7 text-base">
+              <a href={home.contact.link.href}>{home.contact.link.label}</a>
+            </Button>
+            <p className="text-muted-foreground text-sm">{home.contact.note}</p>
+          </section>
         </Reveal>
       </div>
     </main>

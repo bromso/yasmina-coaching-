@@ -2,7 +2,7 @@ import type { LegalSection } from "@repo/ui/blocks/legal-page"
 
 /** Template privacy policy. Replace every `[Placeholder]` and have counsel review before publishing. */
 export const privacy: { updatedAt: string; sections: LegalSection[] } = {
-  updatedAt: "2026-10-21",
+  updatedAt: "2026-11-11",
   sections: [
     {
       id: "what-we-collect",
@@ -11,6 +11,7 @@ export const privacy: { updatedAt: string; sections: LegalSection[] } = {
         "Account data: your email address, name and a hash of your password. Sign-in data: the browser and IP address of each session.",
         "Waitlist data: the email address you submit and where you submitted it.",
         "Support requests: the email address, optional name, topic, message and help-center page you submit through our contact form, plus a hash of your IP address used only to limit abuse.",
+        "Contact requests: when you write through the contact page (/kontakt), we store who you are writing for (yourself or an organisation), what you want help with and how soon, the optional description of your situation, your name, email address, optional phone number, your organisation and role if you write for one, how you prefer to be contacted, the page you wrote from, the language of the page, when you gave your consent to be contacted about the request and whether you also ticked the separate newsletter box, plus a hash of your IP address used only to limit abuse. Only Yasmina and our team can see a request, together with the notes and the follow-up status they add to it. We use it only to answer you. A request is tied to the email address you wrote from, not to any account, and is deleted 12 months after it arrived. The newsletter choice is only stored: we do not send a newsletter today, and will ask again before we ever do.",
         "Job applications: if you apply for a role through our jobs site, we store your name, email address, optional link and note, and your CV, plus a hash of your IP address used only to limit abuse. Only our hiring team can view or download the CV. We keep an application for 6 months, after which it and the CV are deleted. An application is tied to the email address you applied with, not to any account, so deleting your account has no effect on an application you sent.",
         "Notifications: your account has an in-app notification inbox for things that happened to it — such as being invited to a workspace, a role change, or a workspace now requiring two-step verification — never another person's email address. Once you have read a notification it is deleted 30 days after it arrived, and every notification, read or not, is deleted 90 days after it arrived; your notifications are included in your data export. You can turn off the email copy of some of these — a role change, being removed from a workspace, or a workspace's plan changing — from your notification settings or the unsubscribe link in the email itself; emails that keep your account or workspaces working, such as an invitation or a required security step, always arrive.",
       ],
@@ -34,7 +35,7 @@ export const privacy: { updatedAt: string; sections: LegalSection[] } = {
       id: "retention",
       title: "Retention",
       paragraphs: [
-        "We keep account data while your account exists and delete it when you delete the account. Expired sessions are removed. Support requests are kept until an operator deletes them; the IP hash on a request is erased once it is resolved.",
+        "We keep account data while your account exists and delete it when you delete the account. Expired sessions are removed. Support requests are kept until an operator deletes them; the IP hash on a request is erased once it is resolved. Contact requests from the contact page are deleted automatically 12 months after they arrived.",
       ],
     },
     {
@@ -68,8 +69,9 @@ export const privacy: { updatedAt: string; sections: LegalSection[] } = {
       id: "analytics",
       title: "Analytics",
       paragraphs: [
-        "We record which pages are visited and the product events that matter to running the service — such as signing up, verifying an email, creating a workspace, inviting someone or changing plan — in our own database. A visitor is counted with a one-day hash computed from an IP address and browser that are discarded immediately and never stored; only the hash is kept, and it cannot identify you or follow you from one day to the next. We also record the host of the site that referred you, never the full page you came from.",
+        "We record which pages are visited and the product events that matter to running the service — such as signing up, verifying an email, creating a workspace, inviting someone, changing plan or sending the contact form — in our own database. A visitor is counted with a one-day hash computed from an IP address and browser that are discarded immediately and never stored; only the hash is kept, and it cannot identify you or follow you from one day to the next. We also record the host of the site that referred you, never the full page you came from.",
         "Product events are recorded by our servers when you take the action, so they are linked to your account (and, where there is one, your workspace) whatever you choose in the cookie banner.",
+        "Sending the contact form records one event with only the three choices you picked (who you are writing for, what you want help with and how soon) — never your name, email address, message or any account.",
         "What Accept all adds is your account and workspace id on your pageviews and on the events your browser sends, so we can see which pages a signed-in customer visits. With Necessary only, those stay anonymous.",
         "We never record an IP address, browser user agent, your name, email address or anything you type into a form as part of this.",
         "[Company] keeps this data for [90] days and keeps only daily totals after that. [We forward the same pageviews and events to [PostHog/Plausible] for our own dashboards, including the account-linked product events and, with Accept all, the ids on your pageviews — delete this sentence if you do not enable a provider.]",
