@@ -1,5 +1,5 @@
-import { Eyebrow } from "@/components/eyebrow"
-import { Reveal, RevealItem } from "@/components/motion/reveal"
+import { Eyebrow } from "@repo/ui/components/eyebrow"
+import { Reveal, RevealItem } from "@repo/ui/components/motion/reveal"
 import type { HomeContent } from "@/content/home"
 
 type StepsSectionProps = HomeContent["steps"] & { id: string }

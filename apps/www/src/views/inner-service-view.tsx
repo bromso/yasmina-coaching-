@@ -1,14 +1,15 @@
 import { Faq } from "@repo/ui/blocks/faq"
+import { ArrowLink } from "@repo/ui/components/arrow-link"
 import { Button } from "@repo/ui/components/button"
+import { Eyebrow } from "@repo/ui/components/eyebrow"
 import { Icon } from "@repo/ui/components/icon"
-import { ArrowLink } from "@/components/arrow-link"
+import { MediaClip } from "@repo/ui/components/motion/media-clip"
+import { Reveal, RevealItem } from "@repo/ui/components/motion/reveal"
+import { Picture } from "@repo/ui/components/picture"
+import { SunPanel } from "@repo/ui/components/sun-panel"
 import { PauseIcon, PlayIcon } from "@/components/clip-icons"
-import { Eyebrow } from "@/components/eyebrow"
 import { PriceCard } from "@/components/inner/price-card"
 import { YogaPractice } from "@/components/inner/yoga-practice"
-import { MediaClip } from "@/components/motion/media-clip"
-import { Reveal, RevealItem } from "@/components/motion/reveal"
-import { Picture } from "@/components/picture"
 import { INNER_HREF, innerFor } from "@/content/inner"
 import { INNER_PRICES, type InnerServiceId } from "@/content/inner-pricing"
 import { clipsFor, INNER_CLIPS, mediaFor, mediaTextFor } from "@/content/media"
@@ -74,9 +75,10 @@ export function InnerServiceView({ id, locale }: InnerServiceViewProps) {
   const frame = "aspect-[4/3] w-full sm:aspect-[16/10] lg:aspect-auto lg:h-full"
   return (
     <main id="main">
-      <section
+      <SunPanel
+        as="section"
         aria-labelledby="service-title"
-        className="mx-2.5 mt-2.5 overflow-hidden rounded-4xl bg-sun-soft lg:mx-4"
+        className="mx-2.5 mt-2.5 overflow-hidden lg:mx-4"
       >
         <div className="grid grid-cols-1 lg:min-h-[min(80vh,48rem)] lg:grid-cols-2">
           <div className="flex flex-col justify-center px-6 py-10 sm:px-10 lg:order-first lg:px-16 lg:py-16">
@@ -99,7 +101,7 @@ export function InnerServiceView({ id, locale }: InnerServiceViewProps) {
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3 motion-safe:animate-rise motion-safe:[animation-delay:270ms]">
               {primary && (
-                <Button asChild size="lg" className="h-12 rounded-full px-6 text-base">
+                <Button asChild size="lg" className="h-12 px-6 text-base">
                   <a href={primary.href}>
                     {primary.label}
                     <Icon icon="lucide:arrow-right" aria-hidden="true" />
@@ -113,7 +115,7 @@ export function InnerServiceView({ id, locale }: InnerServiceViewProps) {
                   asChild
                   size="lg"
                   variant="outline"
-                  className="h-auto min-h-12 shrink whitespace-normal rounded-full bg-background/70 px-6 py-2 text-left text-base backdrop-blur"
+                  className="h-auto min-h-12 shrink whitespace-normal bg-background/70 px-6 py-2 text-left text-base backdrop-blur"
                 >
                   <a href={`/book/${service.memberOffering}`}>{labels.book.member}</a>
                 </Button>
@@ -150,7 +152,7 @@ export function InnerServiceView({ id, locale }: InnerServiceViewProps) {
             )}
           </div>
         </div>
-      </section>
+      </SunPanel>
 
       <div className="container grid grid-cols-1 gap-14 py-20 md:grid-cols-3 md:gap-10 lg:py-28">
         <ListBlock id="for-whom" title={labels.forWhom} items={service.forWhom} />

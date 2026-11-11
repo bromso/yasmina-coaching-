@@ -103,7 +103,7 @@ All copy lives in data files; the views and pages only arrange sections.
   `@repo/ui`, and the closing `#contact` section is a short teaser linking `/kontakt`.
 - Photos and the five clips live under `public/media/` (JPEG + WebP at full size and an `-800`
   width, MP4 without audio plus posters), described in `src/content/media.ts` (`MEDIA`, `CLIPS`,
-  `OFFERING_MEDIA`, alt texts in both languages: `mediaFor(locale)`, `clipsFor(locale)`). `<Picture>` (`src/components/picture.tsx`) renders them
+  `OFFERING_MEDIA`, alt texts in both languages: `mediaFor(locale)`, `clipsFor(locale)`). `<Picture>` (`@repo/ui/components/picture`) renders them
   with explicit sizes; `MediaClip` plays a clip once, only where motion is welcome, behind a
   pause/play button. The originals sit in `assets/originals/`, outside `public/`, and the service
   worker precaches only the offline page, icons and logo (`globPublicPatterns` in

@@ -1,12 +1,13 @@
 import { Faq } from "@repo/ui/blocks/faq"
+import { ArrowLink } from "@repo/ui/components/arrow-link"
 import { Button } from "@repo/ui/components/button"
+import { Eyebrow } from "@repo/ui/components/eyebrow"
 import { Icon } from "@repo/ui/components/icon"
-import { ArrowLink } from "@/components/arrow-link"
-import { Eyebrow } from "@/components/eyebrow"
+import { Reveal, RevealItem } from "@repo/ui/components/motion/reveal"
+import { Picture } from "@repo/ui/components/picture"
+import { SunPanel } from "@repo/ui/components/sun-panel"
 import { ServiceCard } from "@/components/inner/service-card"
 import { YogaPractice } from "@/components/inner/yoga-practice"
-import { Reveal, RevealItem } from "@/components/motion/reveal"
-import { Picture } from "@/components/picture"
 import { INNER_SERVICE_IDS, innerFor, innerServiceHref } from "@/content/inner"
 import { mediaFor } from "@/content/media"
 import type { Locale } from "@/lib/site-locale"
@@ -23,9 +24,10 @@ export function InnerHubView({ locale }: { locale: Locale }) {
   const media = mediaFor(locale)
   return (
     <main id="main">
-      <section
+      <SunPanel
+        as="section"
         aria-labelledby="hub-title"
-        className="mx-2.5 mt-2.5 overflow-hidden rounded-4xl bg-sun-soft lg:mx-4"
+        className="mx-2.5 mt-2.5 overflow-hidden lg:mx-4"
       >
         <div className="grid grid-cols-1 lg:min-h-[min(84vh,52rem)] lg:grid-cols-2">
           <div className="flex flex-col justify-center px-6 py-10 sm:px-10 lg:px-16 lg:py-16">
@@ -40,7 +42,7 @@ export function InnerHubView({ locale }: { locale: Locale }) {
               {hub.hero.description}
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3 motion-safe:animate-rise motion-safe:[animation-delay:270ms]">
-              <Button asChild size="lg" className="h-12 rounded-full px-6 text-base">
+              <Button asChild size="lg" className="h-12 px-6 text-base">
                 <a href={hub.hero.primary.href}>
                   {hub.hero.primary.label}
                   <Icon icon="lucide:arrow-down" aria-hidden="true" />
@@ -50,7 +52,7 @@ export function InnerHubView({ locale }: { locale: Locale }) {
                 asChild
                 size="lg"
                 variant="outline"
-                className="h-12 rounded-full bg-background/70 px-6 text-base backdrop-blur"
+                className="h-12 bg-background/70 px-6 text-base backdrop-blur"
               >
                 <a href={hub.hero.secondary.href}>{hub.hero.secondary.label}</a>
               </Button>
@@ -63,7 +65,7 @@ export function InnerHubView({ locale }: { locale: Locale }) {
             className="aspect-[4/3] w-full object-cover object-[62%_40%] sm:aspect-[16/10] lg:aspect-auto lg:h-full"
           />
         </div>
-      </section>
+      </SunPanel>
 
       <div className="container py-24 lg:py-32">
         <Reveal
@@ -253,7 +255,7 @@ export function InnerHubView({ locale }: { locale: Locale }) {
               {hub.cta.title}
             </h2>
             <p className="mt-5 text-pretty text-lg text-foreground/80">{hub.cta.description}</p>
-            <Button asChild size="lg" className="mt-8 h-12 rounded-full px-6 text-base">
+            <Button asChild size="lg" className="mt-8 h-12 px-6 text-base">
               <a href={hub.cta.button.href}>
                 {hub.cta.button.label}
                 <Icon icon="lucide:arrow-right" aria-hidden="true" />

@@ -1,7 +1,7 @@
 "use client"
 
+import { useReveal } from "@repo/ui/components/motion/reveal"
 import { type CSSProperties, Fragment, useRef } from "react"
-import { useReveal } from "@/components/motion/reveal"
 import { cn } from "@/lib/utils"
 
 type ManifestoTextProps = {

@@ -288,7 +288,7 @@ export function RequestForm({ offering, locations, minDate }: RequestFormProps) 
           <Button
             type="button"
             variant="ghost"
-            className="step-nav min-h-11 rounded-full px-4"
+            className="step-nav min-h-11 px-4"
             onClick={() => goTo(2)}
           >
             <Icon icon="lucide:arrow-left" aria-hidden="true" />

@@ -12,7 +12,7 @@ function Card<T extends React.ElementType = "article">({ as, className, ...props
     <Component
       data-slot="card"
       className={cn(
-        "bg-card text-card-foreground flex min-w-0 flex-col gap-6 rounded-xl border py-6 shadow-sm",
+        "bg-card text-card-foreground flex min-w-0 flex-col gap-6 rounded-4xl border py-6 shadow-sm",
         className
       )}
       {...props}

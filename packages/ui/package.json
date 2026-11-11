@@ -136,6 +136,7 @@
     "./lib/get-strict-context": "./src/lib/get-strict-context.tsx",
     "./lib/og": "./src/lib/og.tsx",
     "./components/*": "./src/components/*.tsx",
+    "./components/motion/*": "./src/components/motion/*.tsx",
     "./components/use-consent": "./src/components/use-consent.ts",
     "./components/mdx": "./src/components/mdx/index.tsx",
     "./components/mdx/static": "./src/components/mdx/mdx-static.tsx",

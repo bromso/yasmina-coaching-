@@ -1,5 +1,5 @@
 import { Icon } from "@repo/ui/components/icon"
-import { Picture } from "@/components/picture"
+import { Picture } from "@repo/ui/components/picture"
 import type { MediaImage } from "@/content/media"
 
 type ServiceCardProps = {

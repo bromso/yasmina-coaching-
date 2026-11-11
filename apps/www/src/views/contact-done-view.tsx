@@ -1,9 +1,9 @@
 import { leadNextStep } from "@repo/api-contract/leads"
 import type { Locale } from "@repo/i18n/locales"
+import { ArrowLink } from "@repo/ui/components/arrow-link"
 import { Button } from "@repo/ui/components/button"
-import { ArrowLink } from "@/components/arrow-link"
+import { Eyebrow } from "@repo/ui/components/eyebrow"
 import { StepIndicator } from "@/components/booking/step-indicator"
-import { Eyebrow } from "@/components/eyebrow"
 import { contactFor, EXPLORE_POSTS } from "@/content/contact"
 import type { LeadAnswers } from "@/lib/leads"
 
@@ -75,7 +75,7 @@ export function ContactDoneView({ reference, answers, blogUrl, locale }: Contact
                   <ArrowLink href={next.path} label={step.cta} className="mt-2" />
                 </>
               ) : (
-                <Button asChild size="lg" className="h-12 w-fit rounded-full px-6 text-base">
+                <Button asChild size="lg" className="h-12 w-fit px-6 text-base">
                   <a href={next.path}>{step.cta}</a>
                 </Button>
               )}
@@ -95,11 +95,7 @@ export function ContactDoneView({ reference, answers, blogUrl, locale }: Contact
               </li>
             ))}
           </ol>
-          <Button
-            asChild
-            variant="outline"
-            className="mt-12 min-h-11 rounded-full bg-background/70 px-6"
-          >
+          <Button asChild variant="outline" className="mt-12 min-h-11 bg-background/70 px-6">
             <a href="/">{copy.done.home}</a>
           </Button>
         </div>

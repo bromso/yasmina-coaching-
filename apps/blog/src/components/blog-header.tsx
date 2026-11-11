@@ -65,7 +65,7 @@ export function BlogHeader({
             </LanguageLink>
           </li>
           <li>
-            <ThemeToggle label={labels.themeToggle} className="rounded-full" />
+            <ThemeToggle label={labels.themeToggle} />
           </li>
           <li>
             <a

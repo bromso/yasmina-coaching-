@@ -8,6 +8,7 @@ import {
   PaginationItem,
   PaginationLink,
 } from "@repo/ui/components/pagination"
+import { SunPanel } from "@repo/ui/components/sun-panel"
 import { cn } from "@repo/ui/lib/utils"
 import { CoverImage } from "@/components/cover"
 import type { BlogUi } from "@/content/ui"
@@ -91,13 +92,17 @@ export function PostListView({
           )}
         </header>
       ) : isIndex ? (
-        <header className="flex flex-col gap-4 rounded-4xl bg-sun px-5 py-10 sm:px-8 sm:py-12 md:px-12 md:py-16">
+        <SunPanel
+          as="header"
+          tone="sun"
+          className="flex flex-col gap-4 px-5 py-10 sm:px-8 sm:py-12 md:px-12 md:py-16"
+        >
           <p className="text-sm tracking-[0.035em]">{ui.hero.eyebrow}</p>
           <h1 className="max-w-3xl text-balance break-words text-4xl sm:text-6xl md:text-7xl">
             {ui.hero.title}
           </h1>
           <p className="max-w-2xl text-balance text-lg md:text-xl">{ui.hero.lead}</p>
-        </header>
+        </SunPanel>
       ) : (
         <h1 className="sr-only">{ui.list.page(page)}</h1>
       )}

@@ -361,7 +361,7 @@ h2 {
  * Motion. Everything here is behind `prefers-reduced-motion: no-preference`: with motion
  * reduced none of it applies, and the page is the server's HTML, still.
  *
- * `.reveal` / `.reveal-hidden` are a scroll reveal's two states (www's
+ * `.reveal` / `.reveal-hidden` are a scroll reveal's two states (`Reveal`,
  * `src/components/motion/reveal.tsx`): an element below the fold is put in `.reveal-hidden` right
  * after hydration (no transition, so nothing blinks) and rises when `.reveal-hidden` is removed as
  * it scrolls into view, after `--reveal-delay` (its place in a stagger). The buttons' press is the

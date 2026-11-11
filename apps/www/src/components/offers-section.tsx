@@ -1,6 +1,6 @@
-import { Eyebrow } from "@/components/eyebrow"
-import { Reveal, RevealItem } from "@/components/motion/reveal"
-import { Picture } from "@/components/picture"
+import { Eyebrow } from "@repo/ui/components/eyebrow"
+import { Reveal, RevealItem } from "@repo/ui/components/motion/reveal"
+import { Picture } from "@repo/ui/components/picture"
 import type { HomeContent } from "@/content/home"
 import { type MediaImage, type MediaKey, OFFER_MEDIA } from "@/content/media"
 

@@ -1,9 +1,10 @@
 import { Button } from "@repo/ui/components/button"
+import { Eyebrow } from "@repo/ui/components/eyebrow"
 import { Icon } from "@repo/ui/components/icon"
+import { MediaClip } from "@repo/ui/components/motion/media-clip"
+import { Picture } from "@repo/ui/components/picture"
+import { SunPanel } from "@repo/ui/components/sun-panel"
 import { PauseIcon, PlayIcon } from "@/components/clip-icons"
-import { Eyebrow } from "@/components/eyebrow"
-import { MediaClip } from "@/components/motion/media-clip"
-import { Picture } from "@/components/picture"
 import type { HomeContent } from "@/content/home"
 import type { MediaClip as Clip, MediaText } from "@/content/media"
 
@@ -44,9 +45,10 @@ export function HeroSection({
   clipLabels,
 }: HeroSectionProps) {
   return (
-    <section
+    <SunPanel
+      as="section"
       aria-labelledby="hero-title"
-      className="relative mx-2.5 mt-2.5 overflow-hidden rounded-4xl bg-sun-soft lg:mx-4 lg:min-h-[min(88vh,56rem)]"
+      className="relative mx-2.5 mt-2.5 overflow-hidden lg:mx-4 lg:min-h-[min(88vh,56rem)]"
     >
       {/*
         From lg up the clip fills the whole card, untouched where Yasmina walks (the middle and
@@ -94,7 +96,7 @@ export function HeroSection({
             {description}
           </p>
           <div className={`mt-8 flex flex-wrap items-center gap-3 ${rise(3)}`}>
-            <Button asChild size="lg" className="h-12 rounded-full px-6 text-base">
+            <Button asChild size="lg" className="h-12 px-6 text-base">
               <a href={primary.href}>
                 {primary.label}
                 <Icon icon="lucide:arrow-right" aria-hidden="true" />
@@ -104,7 +106,7 @@ export function HeroSection({
               asChild
               size="lg"
               variant="outline"
-              className="h-12 rounded-full bg-background/70 px-6 text-base backdrop-blur"
+              className="h-12 bg-background/70 px-6 text-base backdrop-blur"
             >
               <a href={secondary.href}>{secondary.label}</a>
             </Button>
@@ -121,6 +123,6 @@ export function HeroSection({
           </dl>
         </div>
       </div>
-    </section>
+    </SunPanel>
   )
 }

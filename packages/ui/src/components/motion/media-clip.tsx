@@ -1,7 +1,7 @@
 "use client"
 
+import { cn } from "@repo/ui/lib/utils"
 import { type ReactNode, useEffect, useRef, useState } from "react"
-import { cn } from "@/lib/utils"
 
 type MediaClipProps = {
   /** The MP4, muted; plays once and rests on its last frame unless `loop` is set. */

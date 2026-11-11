@@ -4,15 +4,16 @@ import {
   type OfferingKey,
 } from "@repo/api-contract/booking-limits"
 import type { Locale } from "@repo/i18n/locales"
+import { Eyebrow } from "@repo/ui/components/eyebrow"
 import { Icon } from "@repo/ui/components/icon"
+import { MediaClip } from "@repo/ui/components/motion/media-clip"
+import { Picture } from "@repo/ui/components/picture"
+import { SunPanel } from "@repo/ui/components/sun-panel"
 import { GroupBooking } from "@/components/booking/group-booking"
 import { InstantBooking } from "@/components/booking/instant-booking"
 import { LocaleProvider } from "@/components/booking/locale-provider"
 import { RequestForm } from "@/components/booking/request-form"
 import { PauseIcon, PlayIcon } from "@/components/clip-icons"
-import { Eyebrow } from "@/components/eyebrow"
-import { MediaClip } from "@/components/motion/media-clip"
-import { Picture } from "@/components/picture"
 import { amountFor, bookingFor, priceLineFor } from "@/content/booking"
 import { clipsFor, mediaFor, mediaTextFor, OFFERING_CLIPS, OFFERING_MEDIA } from "@/content/media"
 import { flowFor } from "@/lib/booking-flow"
@@ -59,7 +60,7 @@ export function OfferingView({
         </a>
         <div className="mt-8 grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-16">
           <div>
-            <div className="mb-8 overflow-hidden rounded-4xl bg-sun-soft">
+            <SunPanel className="mb-8 overflow-hidden">
               {clip ? (
                 <MediaClip
                   src={clip.src}
@@ -79,7 +80,7 @@ export function OfferingView({
                   className={frame}
                 />
               )}
-            </div>
+            </SunPanel>
             <Eyebrow>{booking.kindLines[spec.kind]}</Eyebrow>
             <h1
               id="offering-title"
@@ -101,7 +102,7 @@ export function OfferingView({
               {priceLineFor(offering, audience, locale)}
             </p>
           </div>
-          <div className="min-w-0 rounded-4xl bg-sun-soft p-4 sm:p-8 lg:p-10">
+          <SunPanel className="min-w-0 p-4 sm:p-8 lg:p-10">
             <LocaleProvider locale={locale}>
               {spec.kind === "instant" && (
                 <InstantBooking
@@ -129,7 +130,7 @@ export function OfferingView({
                 <RequestForm offering={offering} locations={spec.locations} minDate={minDate} />
               )}
             </LocaleProvider>
-          </div>
+          </SunPanel>
         </div>
       </section>
     </main>

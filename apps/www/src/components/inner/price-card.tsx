@@ -1,5 +1,6 @@
+import { ArrowLink } from "@repo/ui/components/arrow-link"
 import { Button } from "@repo/ui/components/button"
-import { ArrowLink } from "@/components/arrow-link"
+import { SunPanel } from "@repo/ui/components/sun-panel"
 import type { InnerLabels, InnerService } from "@/content/inner"
 import { formatKr } from "@/content/inner-pricing"
 import type { Locale } from "@/lib/site-locale"
@@ -37,10 +38,11 @@ export function PriceCard({ service, prices, labels, locale }: PriceCardProps) {
     { term: text.quarter, amount: prices.quarter, detail: undefined },
   ].filter((row) => row !== undefined)
   return (
-    <section
+    <SunPanel
+      as="section"
       id="price"
       aria-labelledby="price-title"
-      className="scroll-mt-24 rounded-4xl bg-sun-soft px-6 py-10 sm:px-10 lg:px-14 lg:py-14"
+      className="scroll-mt-24 px-6 py-10 sm:px-10 lg:px-14 lg:py-14"
     >
       <h2 id="price-title" className="text-balance text-4xl sm:text-5xl">
         {text.title}
@@ -72,7 +74,7 @@ export function PriceCard({ service, prices, labels, locale }: PriceCardProps) {
       </p>
       <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-6">
         {primary && (
-          <Button asChild size="lg" className="h-12 rounded-full px-6 text-base">
+          <Button asChild size="lg" className="h-12 px-6 text-base">
             <a href={primary.href}>{primary.label}</a>
           </Button>
         )}
@@ -80,6 +82,6 @@ export function PriceCard({ service, prices, labels, locale }: PriceCardProps) {
           <ArrowLink href={`/book/${service.memberOffering}`} label={book.member} />
         )}
       </div>
-    </section>
+    </SunPanel>
   )
 }

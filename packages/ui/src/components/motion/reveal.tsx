@@ -1,5 +1,6 @@
 "use client"
 
+import { cn } from "@repo/ui/lib/utils"
 import { useInView, useReducedMotion } from "motion/react"
 import {
   type CSSProperties,
@@ -12,7 +13,6 @@ import {
   useRef,
   useState,
 } from "react"
-import { cn } from "@/lib/utils"
 
 /**
  * What a revealed element is doing. `static` is the server's HTML and the only state without

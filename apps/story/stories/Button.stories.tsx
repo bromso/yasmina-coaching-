@@ -3,6 +3,7 @@ import { Icon } from "@repo/ui/components/icon"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, fn, userEvent, within } from "storybook/test"
 
+/** Every size is a pill (`rounded-full`), www's shape; the default is the charcoal `--primary`. */
 const meta = {
   title: "Components/Inputs/Button",
   component: Button,
@@ -20,7 +21,7 @@ const meta = {
     },
     size: {
       control: "select",
-      options: ["default", "sm", "lg", "icon"],
+      options: ["default", "xs", "sm", "lg", "icon", "icon-xs", "icon-sm", "icon-lg"],
     },
     disabled: {
       control: "boolean",
@@ -169,6 +170,7 @@ export const AllVariants: Story = {
 export const AllSizes: Story = {
   render: () => (
     <div className="flex items-center gap-4">
+      <Button size="xs">Extra small</Button>
       <Button size="sm">Small</Button>
       <Button size="default">Default</Button>
       <Button size="lg">Large</Button>
@@ -177,4 +179,22 @@ export const AllSizes: Story = {
       </Button>
     </div>
   ),
+}
+
+/** www's call to action: `lg` at 48 px with the larger text, next to an outline secondary. */
+export const CallToAction: Story = {
+  render: () => (
+    <div className="flex flex-wrap items-center gap-3">
+      <Button asChild size="lg" className="h-12 px-6 text-base">
+        <a href="#book">Boka ett samtal</a>
+      </Button>
+      <Button asChild size="lg" variant="outline" className="h-12 px-6 text-base">
+        <a href="#more">Läs mer</a>
+      </Button>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const link = within(canvasElement).getByRole("link", { name: "Boka ett samtal" })
+    await expect(getComputedStyle(link).borderRadius).not.toBe("0px")
+  },
 }

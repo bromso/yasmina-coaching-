@@ -1,5 +1,5 @@
-import { Icon } from "@repo/ui/components/icon"
-import { cn } from "@/lib/utils"
+import { cn } from "@repo/ui/lib/utils"
+import { Icon } from "./icon"
 
 type ArrowLinkProps = {
   href: string

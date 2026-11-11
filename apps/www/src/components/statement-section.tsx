@@ -1,6 +1,7 @@
-import { ArrowLink } from "@/components/arrow-link"
-import { Reveal } from "@/components/motion/reveal"
-import { Picture } from "@/components/picture"
+import { ArrowLink } from "@repo/ui/components/arrow-link"
+import { Reveal } from "@repo/ui/components/motion/reveal"
+import { Picture } from "@repo/ui/components/picture"
+import { SunPanel } from "@repo/ui/components/sun-panel"
 import type { HomeContent } from "@/content/home"
 import type { MediaImage } from "@/content/media"
 
@@ -30,13 +31,13 @@ export function StatementSection({ title, body, link, image, caption }: Statemen
         </div>
       </Reveal>
       <Reveal as="figure" className="mt-16 lg:mt-24">
-        <div className="overflow-hidden rounded-4xl bg-sun-soft">
+        <SunPanel className="overflow-hidden">
           <Picture
             image={image}
             sizes="(min-width: 1400px) 1336px, 100vw"
             className="aspect-[4/3] w-full object-cover sm:aspect-[16/9] lg:aspect-[21/9]"
           />
-        </div>
+        </SunPanel>
         <figcaption className="mt-4 text-muted-foreground text-sm">{caption}</figcaption>
       </Reveal>
     </section>

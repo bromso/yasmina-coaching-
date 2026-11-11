@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils"
+import { cn } from "@repo/ui/lib/utils"
 
 /** The small uppercase label above a section's headline. */
 export function Eyebrow({ children, className }: { children: string; className?: string }) {

@@ -1,8 +1,8 @@
+import { Eyebrow } from "@repo/ui/components/eyebrow"
+import { MediaClip } from "@repo/ui/components/motion/media-clip"
+import { Reveal, RevealItem } from "@repo/ui/components/motion/reveal"
+import { Picture } from "@repo/ui/components/picture"
 import { PauseIcon, PlayIcon } from "@/components/clip-icons"
-import { Eyebrow } from "@/components/eyebrow"
-import { MediaClip } from "@/components/motion/media-clip"
-import { Reveal, RevealItem } from "@/components/motion/reveal"
-import { Picture } from "@/components/picture"
 import type { HomeContent } from "@/content/home"
 import type { MediaClip as Clip, MediaImage, MediaText } from "@/content/media"
 

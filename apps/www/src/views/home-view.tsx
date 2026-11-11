@@ -1,14 +1,14 @@
 import type { Locale } from "@repo/i18n/locales"
 import { Faq } from "@repo/ui/blocks/faq"
+import { ArrowLink } from "@repo/ui/components/arrow-link"
 import { Button } from "@repo/ui/components/button"
-import { ArrowLink } from "@/components/arrow-link"
+import { Eyebrow } from "@repo/ui/components/eyebrow"
+import { Reveal } from "@repo/ui/components/motion/reveal"
+import { Picture } from "@repo/ui/components/picture"
 import { CredentialsSection } from "@/components/credentials-section"
-import { Eyebrow } from "@/components/eyebrow"
 import { HeroSection } from "@/components/hero-section"
 import { ManifestoSection } from "@/components/manifesto-section"
-import { Reveal } from "@/components/motion/reveal"
 import { OffersSection } from "@/components/offers-section"
-import { Picture } from "@/components/picture"
 import { StatementSection } from "@/components/statement-section"
 import { StepsSection } from "@/components/steps-section"
 import { WhySection } from "@/components/why-section"
@@ -86,7 +86,7 @@ export function HomeView({ locale }: { locale: Locale }) {
               {home.contact.title}
             </h2>
             <p className="text-pretty text-lg text-muted-foreground">{home.contact.description}</p>
-            <Button asChild size="lg" className="h-12 rounded-full px-7 text-base">
+            <Button asChild size="lg" className="h-12 px-7 text-base">
               <a href={home.contact.link.href}>{home.contact.link.label}</a>
             </Button>
             <p className="text-muted-foreground text-sm">{home.contact.note}</p>

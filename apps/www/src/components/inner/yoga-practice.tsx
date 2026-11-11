@@ -1,5 +1,5 @@
-import { Eyebrow } from "@/components/eyebrow"
-import { Reveal } from "@/components/motion/reveal"
+import { Eyebrow } from "@repo/ui/components/eyebrow"
+import { Reveal } from "@repo/ui/components/motion/reveal"
 
 type YogaPracticeProps = {
   id: string

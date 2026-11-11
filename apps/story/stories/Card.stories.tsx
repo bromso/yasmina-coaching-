@@ -14,6 +14,7 @@ import { Label } from "@repo/ui/components/label"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, within } from "storybook/test"
 
+/** www's rounded-4xl corners; padding and density are unchanged. */
 const meta = {
   title: "Components/Surfaces/Card",
   component: Card,
