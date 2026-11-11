@@ -106,10 +106,11 @@ export function leadPage(page: string | null | undefined): string | null {
  * The tailored next step a visitor sees on `/kontakt/tack` and in their confirmation mail:
  *
  * - `inner` — a Ledarskap inifrån answer: book that service's start call (`/book/inner_start_*`).
- * - `coaching` — leadership coaching: Yasmina offers the free intro call; a session can be booked
- *   straight away (`/book/session`).
- * - `proposal` — team development, a workshop or a talk: Yasmina comes back with a proposal; the
- *   matching request form (`/book/workshop`, `/book/keynote`) is there for dates.
+ * - `coaching` — leadership coaching for a private person: Yasmina offers the free intro call; a
+ *   session can be booked straight away (`/book/session`).
+ * - `proposal` — team development, a workshop or a talk, or one-to-one coaching an organisation
+ *   buys for its managers: Yasmina comes back with a proposal; the matching request form
+ *   (`/book/workshop`, `/book/keynote`, `/book/enterprise`) is there for dates.
  * - `explore` — not sure yet, or only exploring coaching or the inifrån track: reading first (two
  *   blog posts and `/inifran`), with no booking pushed.
  *
@@ -130,10 +131,15 @@ export function leadNextStep(answers: {
   need: LeadNeed
   timeline: LeadTimeline
 }): LeadNextStep {
-  const { need, timeline } = answers
+  const { audience, need, timeline } = answers
   if (need === "unsure") return { kind: "explore", path: "/inifran" }
   if (need === "team") return { kind: "proposal", path: "/book/workshop" }
   if (need === "talk") return { kind: "proposal", path: "/book/keynote" }
+  // An organisation buying coaching for its managers gets a written proposal (the enterprise
+  // programme's request form), never a self-booked session.
+  if (need === "coaching" && audience === "organisation") {
+    return { kind: "proposal", path: "/book/enterprise" }
+  }
   // Coaching and the inifrån track are personal: someone only exploring is not pushed to book.
   if (timeline === "exploring") return { kind: "explore", path: "/inifran" }
   if (need === "coaching") return { kind: "coaching", path: "/book/session" }

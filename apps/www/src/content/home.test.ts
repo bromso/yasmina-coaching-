@@ -177,7 +177,7 @@ describe("Yasmina's voice", () => {
     expect(HOME.en.why.heading.title).toBe("She has sat in your chair.")
     expect(HOME.en.steps.items.map((s) => s.title)).toEqual(["Listen", "Clarify", "Act"])
     expect(HOME.en.contact.title).toBe("Start with a conversation")
-    expect(HOME.en.contact.link).toEqual({ label: "Contact Yasmina", href: "/kontakt" })
+    expect(HOME.en.contact.link).toEqual({ label: "Contact Yasmina", href: "/kontakt?from=/" })
     expect(bookingFor("en").kindLines).toEqual({
       instant: "Pick a time",
       group: "Reserve a seat",

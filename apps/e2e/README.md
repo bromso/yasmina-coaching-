@@ -157,7 +157,9 @@ they stop at one app's boundary:
   next step its answers lead to (the inifrån start call), gets the Swedish confirmation mail with
   that link and none of their own text; the e2e superadmin finds the lead on `/admin/leads`, opens
   it, and saves a status and a note. With JavaScript disabled an organisation's request shows every
-  step at once and gets the proposal step (the keynote request form).
+  step at once and gets the proposal step (the keynote request form). Each run sends its own `x-real-ip`
+  (a `198.51.100.x` address), so `leads.create`'s 5-per-hour per-ip limit never trips on reruns
+  against reused servers.
 - `blog.spec.ts` — the Swedish index (`<html lang="sv">`) opens on its hero; the header links home
   to www, to `/inifran` and `/book` there, and to the English index (`/en`, `<html lang="en">`) and
   back; `/rss.xml` and `/en/rss.xml` each answer in their own `<language>`; an unknown address is a

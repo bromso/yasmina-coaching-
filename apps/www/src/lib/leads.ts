@@ -33,6 +33,9 @@ export const TOO_MANY_REQUESTS: Record<Locale, string> = {
   en: "Too many requests, please try again in a while.",
 }
 
+/** What `leadReference` produces: `LEAD-` and up to twelve digits. */
+export const LEAD_REFERENCE_PATTERN = /^LEAD-\d{1,12}$/
+
 export type LeadsApi = Pick<ApiClient["leads"], "create">
 export type LeadOutcome = { ok: true; redirectTo: string } | (FormState & { ok: false })
 export type LeadAnswers = { audience: LeadAudience; need: LeadNeed; timeline: LeadTimeline }
@@ -89,9 +92,10 @@ export function doneHref(reference: string, answers: LeadAnswers): string {
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? ""
 
 /**
- * The done page's query, untrusted: the reference is shown as text (cut to 40 characters), and
- * the answers count only when all three are known options — otherwise there is no tailored step,
- * never a guess.
+ * The done page's query, untrusted: the reference is shown only when it is a real lead reference
+ * (`LEAD-<digits>`, `LEAD_REFERENCE_PATTERN`) — anything else, even plain text, renders nothing,
+ * so the page cannot be made to show a message of someone else's choosing — and the answers count
+ * only when all three are known options; otherwise there is no tailored step, never a guess.
  */
 export function parseDone(query: Record<string, string | string[] | undefined>): {
   reference: string
@@ -101,7 +105,7 @@ export function parseDone(query: Record<string, string | string[] | undefined>):
   const need = one(query.need)
   const timeline = one(query.when)
   return {
-    reference: one(query.ref).slice(0, 40),
+    reference: LEAD_REFERENCE_PATTERN.test(one(query.ref)) ? one(query.ref) : "",
     answers:
       isLeadAudience(audience) && isLeadNeed(need) && isLeadTimeline(timeline)
         ? { audience, need, timeline }

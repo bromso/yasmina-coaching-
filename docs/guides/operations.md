@@ -79,7 +79,7 @@ and a new one is generated. One id follows a browser's request through every hop
    `resolveWorkspaceFromRequest`), `createTelemetryRoute`, `createAnalyticsRoute`,
    `createFileRoute` and `createEventsRoute` (all in `@repo/session` / `@repo/telemetry`) forward
    the request's id as `x-request-id` on their own call to `apps/api` or `apps/ai`. The few
-   app-owned clients that build their own request — `apps/www`'s waitlist action, `apps/help`'s
+   app-owned clients that build their own request — `apps/www`'s contact and booking actions, `apps/help`'s
    contact action, `apps/jobs`'s apply action and `apps/app`'s `/api/chat` proxy to `apps/ai` — do
    the same.
 

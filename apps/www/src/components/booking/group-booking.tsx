@@ -3,7 +3,7 @@
 import type { GroupEvent } from "@repo/api-contract"
 import type { BookingAudience, OfferingKey } from "@repo/api-contract/booking-limits"
 import { Button } from "@repo/ui/components/button"
-import { FieldError, FormMessage } from "@repo/ui/components/form-feedback"
+import { FormMessage } from "@repo/ui/components/form-feedback"
 import { Icon } from "@repo/ui/components/icon"
 import { useActionState, useCallback, useEffect, useRef, useState } from "react"
 import { reserveSeats } from "@/app/actions"
@@ -172,7 +172,7 @@ export function GroupBooking({
         <Fieldset
           legend={text.heading}
           hint={text.seriesHint}
-          error={<FieldError name="eventIds" state={shown} />}
+          field={{ name: "eventIds", state: shown }}
         >
           <p role="status" aria-live="polite" className="text-muted-foreground text-sm">
             {events.status === "loading" && text.loading}

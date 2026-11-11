@@ -120,11 +120,21 @@ describe("leadNextStep", () => {
     expect(step("inner_lifestyle")).toEqual({ kind: "inner", path: "/book/inner_start_lifestyle" })
   })
 
-  test("leadership coaching offers the intro call and a session", () => {
+  test("leadership coaching offers a private person the intro call and a session", () => {
     expect(step("coaching")).toEqual({ kind: "coaching", path: "/book/session" })
-    expect(
-      leadNextStep({ need: "coaching", timeline: "quarter", audience: "organisation" })
-    ).toEqual({ kind: "coaching", path: "/book/session" })
+    expect(step("coaching", "quarter" as "month")).toEqual({
+      kind: "coaching",
+      path: "/book/session",
+    })
+  })
+
+  test("an organisation buying coaching gets a proposal and the enterprise request form", () => {
+    for (const timeline of LEAD_TIMELINES) {
+      expect(leadNextStep({ need: "coaching", timeline, audience: "organisation" })).toEqual({
+        kind: "proposal",
+        path: "/book/enterprise",
+      })
+    }
   })
 
   test("team, workshop and talk get a proposal and the matching request form", () => {

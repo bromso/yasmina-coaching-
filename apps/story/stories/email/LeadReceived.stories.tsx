@@ -55,6 +55,6 @@ export const Swedish: Story = {
         "Tack för att du hörde av dig (LEAD-12)"
       )
     )
-    await expect(canvas.getByTestId("text")).toHaveTextContent("Boka ett samtal")
+    await expect(canvas.getByTestId("text")).toHaveTextContent("Boka ett coachingsamtal")
   },
 }

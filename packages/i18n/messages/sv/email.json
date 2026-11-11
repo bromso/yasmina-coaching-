@@ -340,8 +340,8 @@
     "preview": "Tack för att du hörde av dig ({reference})",
     "heading": "Tack för att du hörde av dig",
     "body": "Ditt meddelande har referensen {reference}, och du får svar inom två arbetsdagar.",
-    "next": "{kind, select, inner {Vill du komma igång redan nu kan du boka ett startsamtal direkt i kalendern.} coaching {Yasmina hör av sig för att boka ett kostnadsfritt introsamtal. Vill du hellre välja en tid själv kan du boka ett samtal direkt.} proposal {Yasmina återkommer med ett förslag. Har du redan datum i tankarna kan du skicka dem med förfrågningsformuläret.} other {Det är ingen brådska. Under tiden kan du läsa mer om Ledarskap inifrån.}}",
-    "button": "{kind, select, inner {Boka ett startsamtal} coaching {Boka ett samtal} proposal {Föreslå datum} other {Läs om Ledarskap inifrån}}",
+    "next": "{kind, select, inner {Vill du komma igång redan nu kan du boka ett startsamtal direkt i kalendern.} coaching {Yasmina hör av sig för att boka ett kostnadsfritt introsamtal. Vill du hellre välja en tid själv kan du boka ett coachingsamtal direkt.} proposal {Yasmina återkommer med ett förslag. Har du redan datum i tankarna kan du skicka dem med förfrågningsformuläret.} other {Det är ingen brådska. Under tiden kan du läsa mer om Ledarskap inifrån.}}",
+    "button": "{kind, select, inner {Boka ett startsamtal} coaching {Boka ett coachingsamtal} proposal {Föreslå datum} other {Läs om Ledarskap inifrån}}",
     "footer": "Vill du lägga till något kan du svara på det här mejlet."
   }
 }

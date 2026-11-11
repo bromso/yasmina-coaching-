@@ -6,6 +6,12 @@ import { latestMailTo } from "../fixtures/mail"
 
 // www is Swedish by default: the copy below is `apps/www/src/content/contact.ts`.
 
+// `leads.create` allows 5 requests an hour per browser ip (`anon:<ip hash>`). Each run sends its
+// own documentation-range address as `x-real-ip` (which `requestInfo` prefers, and `next start`
+// leaves alone), so re-running against reused servers never trips the limit.
+const RUN_IP = `198.51.100.${(Date.now() % 250) + 1}`
+test.use({ extraHTTPHeaders: { "x-real-ip": RUN_IP } })
+
 test("a visitor contacts Yasmina and gets a tailored next step; the admin sees the lead", async ({
   page,
 }) => {

@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test"
 import { ORPCError } from "@orpc/client"
 import type { LeadCreateInput } from "@repo/api-contract"
 import { CONTACT } from "@/content/contact"
+import { contactFrom } from "@/content/contact-links"
 import {
   doneHref,
   GENERIC_FAILURE,
@@ -170,18 +171,35 @@ describe("the done page's query", () => {
     })
   })
 
-  test("anything untrusted is dropped: a bad answer leaves no tailored step, a long reference is cut", () => {
+  test("anything untrusted is dropped: a bad answer leaves no tailored step, a spoofed ref no reference", () => {
     expect(parseDone({ ref: "LEAD-1", for: "private", need: "sales", when: "month" })).toEqual({
       reference: "LEAD-1",
       answers: null,
     })
     expect(parseDone({}).reference).toBe("")
-    expect(parseDone({ ref: "x".repeat(100) }).reference).toHaveLength(40)
+    for (const spoofed of [
+      "x".repeat(100),
+      "Ring 070-123 45 67 för att avsluta",
+      "LEAD-",
+      "LEAD-1 ",
+      "lead-1",
+      "LEAD-1234567890123",
+      "BK-12",
+    ]) {
+      expect(parseDone({ ref: spoofed }).reference).toBe("")
+    }
+    expect(parseDone({ ref: "LEAD-123456789012" }).reference).toBe("LEAD-123456789012")
     expect(parseDone({ ref: ["LEAD-2", "LEAD-3"] }).reference).toBe("LEAD-2")
   })
 
   test("sourcePage keeps a www path from ?from= and falls back to /kontakt", () => {
     expect(sourcePage("/inifran/coachning")).toBe("/inifran/coachning")
+    // What the site's own links send: the home teaser, the booking pages, a blog post.
+    for (const from of ["/", "/book", "/blog/att-leda-genom-en-kris", "/blog/en/mentor-or-coach"]) {
+      expect(
+        sourcePage(new URL(contactFrom(from), "http://x").searchParams.get("from") ?? "")
+      ).toBe(from)
+    }
     expect(sourcePage("https://evil.example")).toBe("/kontakt")
     expect(sourcePage(undefined)).toBe("/kontakt")
   })

@@ -30,14 +30,21 @@ The browser checks each step before the next and the server checks everything ag
 JavaScript every step shows at once (a `<noscript>` style, like the request form's), the stepper
 and Continue buttons are hidden, the organisation fields show whatever was picked (the server
 ignores them for a private person), and the one submit button posts a plain `<form action>`.
-`?from=<www path>` on `/kontakt` is carried as a hidden `page` field (anything else is
-`/kontakt`). All copy is in `src/content/contact.ts` (`CONTACT`, both languages, one shape,
+`?from=<path>` on `/kontakt` is carried as a hidden `page` field when it is a lowercase
+root-relative path (`leadPage`; anything else is `/kontakt`). The site's own links send one through
+`contactFrom` (`src/content/contact-links.ts`): the home teaser `?from=/`, the booking pages'
+intro-call and no-JavaScript links `?from=/book`, and the blog's closing call to action
+`?from=/blog/<slug>` (`/blog/en/<slug>` for an English post — a marker for "the blog", since
+the blog is another host; the posts' own inline `www:/kontakt` links carry none). The header and
+footer links carry none either. All copy is in `src/content/contact.ts` (`CONTACT`, both languages, one shape,
 client-safe because the form reads `stepOf`, a function). `sendLeadCore` (`src/lib/leads.ts`,
 tested) maps every refusal to that field's own message in the page's language, never Zod's English,
 keeps what was typed, never sends a private person's organisation or role, and on success
 `redirect()`s to `/kontakt/tack?ref=LEAD-<id>&for=…&need=…&when=…` — the reference and the three
 fixed answers only. The done page re-checks all three (`parseDone`); a missing or unknown one shows
-no tailored step rather than a guess. `/kontakt` is in the sitemap; `/kontakt/tack` is not and
+no tailored step rather than a guess, and the reference is shown only when it matches
+`LEAD_REFERENCE_PATTERN` (`/^LEAD-\d{1,12}$/`) — any other `ref`, plain text included, renders
+nothing, so the page can never be made to display a message of someone else's choosing. `/kontakt` is in the sitemap; `/kontakt/tack` is not and
 `robots.ts` disallows it.
 
 The home page's `#contact` section is a teaser now (a few lines and **Kontakta Yasmina** →
@@ -56,12 +63,14 @@ done page and the confirmation mail follow, returning a kind and a www path:
 | `unsure` (any timeline) | `explore` | `/inifran`, plus two blog posts in the page's language (`EXPLORE_POSTS`) |
 | `team` | `proposal` — "Yasmina återkommer med ett förslag" | `/book/workshop` |
 | `talk` | `proposal` | `/book/keynote` |
-| `coaching` or `inner_*`, timeline `exploring` | `explore` | `/inifran` |
-| `coaching` | `coaching` — the free intro call, or book a session | `/book/session` |
+| a private person's `coaching`, or `inner_*`, timeline `exploring` | `explore` | `/inifran` |
+| `coaching`, an organisation (any timeline) | `proposal` — coaching for its managers, quoted in writing | `/book/enterprise` |
+| `coaching`, a private person | `coaching` — the free intro call, or book a coaching session | `/book/session` |
 | `inner_coaching` / `inner_mentoring` / `inner_lifestyle` | `inner` — book the start call | `/book/inner_start_coaching` / `_mentoring` / `_lifestyle` |
 
 Team days, workshops and talks get a proposal for a private person too (rare, and the request form
-is the same). Someone only exploring coaching or the inifrån track is not pushed to book.
+is the same). An organisation choosing one-to-one coaching never self-books a session: it gets a
+proposal and the enterprise programme's request form. Someone only exploring coaching or the inifrån track is not pushed to book.
 
 ## The api (`leads.create`)
 
@@ -92,7 +101,9 @@ moment the lead arrived, since it is required), `newsletter` (0/1), `locale` (th
 the request named, null for none), `page`, `ip_hash` (the client id, for abuse review), `status`
 (`LEAD_STATUSES`: `new`, `contacted`, `call_booked`, `won`, `lost`), `notes` (Yasmina's),
 `created_at`, `status_changed_at`, `status_changed_by` (no foreign key, like support's) and
-`delete_after`. Address-keyed like `job_applications`, never linked to an account: `users.purge`
+`delete_after`. `ip_hash` is erased in the same update that moves a lead out of `new` (its
+abuse-limiting job is done once Yasmina has picked the lead up, like a resolved support request's);
+moving it back to `new` never restores it. Address-keyed like `job_applications`, never linked to an account: `users.purge`
 leaves the rows (it nulls `status_changed_by` when the purged account is the admin who set it) and
 `privacy.export`'s `leads` lists those sent from the account's own address only once it is
 verified — the answers, never `ip_hash`, the notes or the admin.
@@ -104,14 +115,17 @@ to send anything. Sending one later needs its own unsubscribe path and an update
 
 `LEAD_RETENTION_MONTHS` = 12: `delete_after` is twelve calendar months after `created_at`, and the
 nightly `leads.prune` schedule (`10 4 * * *`; see **Jobs**) deletes every row past it in one
-statement (idempotent; a lead has no file to clean up). The `/privacy` template says so.
+statement (idempotent; a lead has no file to clean up). Someone who asks to be forgotten sooner is
+deleted by hand: `admin.leads.delete` (below). The `/privacy` page says both.
 
 ## Admin (`apps/auth`)
 
 `admin.leads.list` (`GET /admin/leads`, `status` = a real status or `all`, the default; newest
 first, keyset by id, 50 a page, plus `counts` per status whatever the filter), `admin.leads.get`
 and `admin.leads.update` (`PATCH /admin/leads/{id}`, `status` and/or `notes`, at least one) are
-superadmin-only (`NOT_FOUND` to anyone else, impersonation included). `update` reads and writes in
+superadmin-only (`NOT_FOUND` to anyone else, impersonation included), as is `admin.leads.delete`
+(`DELETE /admin/leads/{id}`: the row, its answers and notes go at once; one `lead.deleted` audit row
+names the lead's id only, no metadata; an id already gone is `NOT_FOUND`). `update` reads and writes in
 one transaction; nothing changed (the same status, the same notes) is a no-op with no re-stamp and
 no audit row, like `admin.applications.setStatus`; otherwise one `lead.updated` audit row
 (`targetType` `lead`) carries `{ from, to }` for a status change and `{ notes: true }` for a notes
@@ -121,8 +135,13 @@ change — never the notes' text. Empty notes clear them.
 the sum), each lead as a link to `/admin/leads/<id>`: every answer, the next step the visitor was
 shown, `mailto:` and `tel:` links, the message as plain text in a `whitespace-pre-wrap` block, the
 newsletter answer ("stored only"), the language, the page, when it is deleted, and one form for the
-status and the notes (`updateLeadCore`, `src/lib/admin-lead-actions.ts`, tested). English like the
-rest of `/admin`.
+status and the notes (`updateLeadCore`, `src/lib/admin-lead-actions.ts`, tested). The form posts
+the status it was rendered with as `currentStatus`, and the status is sent only when the select
+differs from it, so saving notes from a stale tab never puts back a status someone else has since
+changed. Below it, **Delete lead…** opens a second step: a required "Yes, delete this lead
+permanently" box (checked again on the server, `deleteLeadCore`) and **Delete permanently**, no
+browser dialog; success lands on `/admin/leads?deleted=1`, which says "Lead deleted." in a status
+region. English like the rest of `/admin`.
 
 ## Analytics
 

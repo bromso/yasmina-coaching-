@@ -98,7 +98,7 @@ describe("leadReceived", () => {
   test("each kind has its own wording and button", async () => {
     const button = {
       inner: "Book a start call",
-      coaching: "Book a session",
+      coaching: "Book a coaching session",
       proposal: "Suggest dates",
       explore: "Read about Ledarskap inifrån",
     } as const

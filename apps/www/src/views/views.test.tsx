@@ -405,6 +405,26 @@ describe("ContactView", () => {
     expect(email).toContain('checked=""')
   })
 
+  test("a group's error is tied to its fieldset: aria-invalid and aria-describedby", async () => {
+    const { Fieldset } = await import("@/components/booking/details-fields")
+    const state = { ok: false as const, fieldErrors: { need: "Välj vad du vill ha hjälp med." } }
+    const html = render(
+      <Fieldset legend="Vad?" hint="En sak" field={{ name: "need", state }}>
+        <input type="radio" name="need" value="x" />
+      </Fieldset>
+    )
+    expect(html).toContain('aria-invalid="true"')
+    expect(html).toContain('aria-describedby="need-hint need-error"')
+    expect(html).toContain('<p id="need-error"')
+    const fine = render(
+      <Fieldset legend="Vad?" field={{ name: "need", state: { ok: false } }}>
+        <span />
+      </Fieldset>
+    )
+    expect(fine).not.toContain("aria-invalid")
+    expect(fine).not.toContain("aria-describedby")
+  })
+
   test("the organisation fields are hidden until an organisation is picked, but shown without JavaScript", () => {
     const html = render(<ContactView page="/kontakt" locale="sv" />)
     expect(html).toMatch(/class="org-fields [^"]*hidden"/)
@@ -454,6 +474,22 @@ describe("ContactDoneView", () => {
           : ["en-mentor-or-coach", "en-what-research-says-about-coaching"]
       for (const slug of posts) expect(html).toContain(`href="${blogUrl}/${slug}"`)
     }
+  })
+
+  test("an organisation buying coaching gets the proposal and the enterprise request form", () => {
+    const html = done({ audience: "organisation", need: "coaching", timeline: "month" })
+    expect(html).toContain('href="/book/enterprise"')
+    expect(html).not.toContain('href="/book/session"')
+  })
+
+  test("a spoofed reference renders nothing: only LEAD-<digits> reaches the page", async () => {
+    const { parseDone } = await import("@/lib/leads")
+    const { reference } = parseDone({ ref: "Ring 070-123 45 67 för att avsluta" })
+    const html = render(
+      <ContactDoneView reference={reference} answers={null} blogUrl={blogUrl} locale="sv" />
+    )
+    expect(html).not.toContain("070-123")
+    expect(html).not.toContain(CONTACT.sv.done.reference)
   })
 
   test("without known answers there is no tailored step, only the reference and what happens now", () => {

@@ -174,7 +174,7 @@ export function ContactForm({ locale, page }: ContactFormProps) {
       <StepPanel n={1} active={step === 1} heading={copy.steps[0]}>
         <Fieldset
           legend={copy.audience.legend}
-          error={<FieldError name="audience" state={shown} />}
+          field={{ name: "audience", state: shown }}
           className="[&>legend]:sr-only"
         >
           {radios("audience", LEAD_AUDIENCES, copy.audience.labels, {
@@ -192,13 +192,10 @@ export function ContactForm({ locale, page }: ContactFormProps) {
       </StepPanel>
 
       <StepPanel n={2} active={step === 2} heading={copy.steps[1]}>
-        <Fieldset legend={copy.need.legend} error={<FieldError name="need" state={shown} />}>
+        <Fieldset legend={copy.need.legend} field={{ name: "need", state: shown }}>
           {radios("need", LEAD_NEEDS, copy.need.labels)}
         </Fieldset>
-        <Fieldset
-          legend={copy.timeline.legend}
-          error={<FieldError name="timeline" state={shown} />}
-        >
+        <Fieldset legend={copy.timeline.legend} field={{ name: "timeline", state: shown }}>
           {radios("timeline", LEAD_TIMELINES, copy.timeline.labels)}
         </Fieldset>
         <div className="grid gap-2">
@@ -262,7 +259,7 @@ export function ContactForm({ locale, page }: ContactFormProps) {
         </div>
         <Fieldset
           legend={copy.contactMethod.legend}
-          error={<FieldError name="contactMethod" state={shown} />}
+          field={{ name: "contactMethod", state: shown }}
         >
           <div className="grid gap-2 sm:grid-cols-2">
             {LEAD_CONTACT_METHODS.map((method) => (

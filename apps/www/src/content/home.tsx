@@ -1,6 +1,6 @@
 import type { Locale } from "@repo/i18n/locales"
 import type { FaqItem } from "@repo/ui/blocks/faq"
-import { CONTACT_HREF } from "@/content/contact-links"
+import { contactFrom } from "@/content/contact-links"
 import { INNER_HREF } from "@/content/inner"
 import { SITE_META } from "@/content/site-meta"
 
@@ -64,7 +64,7 @@ export type HomeContent = {
   contact: {
     title: string
     description: string
-    link: { label: string; href: typeof CONTACT_HREF }
+    link: { label: string; href: string }
     note: string
   }
 }
@@ -285,7 +285,7 @@ const sv: HomeContent = {
     title: "Börja med ett samtal",
     description:
       "Trettio minuter på telefon, kostnadsfritt, och du går därifrån med minst en sak att prova. Berätta kort vem du är och vad du behöver, så ser du direkt vad nästa steg är.",
-    link: { label: "Kontakta Yasmina", href: CONTACT_HREF },
+    link: { label: "Kontakta Yasmina", href: contactFrom("/") },
     note: "Du får svar inom två arbetsdagar.",
   },
 }
@@ -507,7 +507,7 @@ const en: HomeContent = {
     title: "Start with a conversation",
     description:
       "Thirty minutes by phone, free of charge, and you leave with at least one thing to try. Tell Yasmina briefly who you are and what you need, and you see your next step straight away.",
-    link: { label: "Contact Yasmina", href: CONTACT_HREF },
+    link: { label: "Contact Yasmina", href: contactFrom("/") },
     note: "You'll hear back within two working days.",
   },
 }

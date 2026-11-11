@@ -83,7 +83,6 @@ export type ContactCopy = {
     next: Record<LeadNextStepKind, { title: string; body: string; cta: string }>
     /** The explore step's reading list heading and its link to the inifrån hub. */
     readHeading: string
-    inner: string
     whatNow: { heading: string; items: readonly [string, string, string] }
     home: string
   }
@@ -154,8 +153,7 @@ const sv: ContactCopy = {
     },
     consent: "Yasmina får kontakta mig om det här ärendet.",
     newsletter: "Jag vill gärna få nyhetsbrev från Yasmina då och då.",
-    legal:
-      "Dina svar används bara för att besvara ditt meddelande och sparas i tolv månader. Läs mer i",
+    legal: "Dina svar används för att besvara ditt meddelande och sparas i tolv månader. Läs mer i",
     privacyLink: "integritetspolicyn",
     continueLabel: "Fortsätt",
     submit: "Skicka",
@@ -185,8 +183,8 @@ const sv: ContactCopy = {
       },
       coaching: {
         title: "Nästa steg: ett kostnadsfritt introsamtal",
-        body: "Yasmina hör av sig för att boka trettio minuter i telefon, utan kostnad. Vill du hellre välja en tid själv kan du boka ett samtal direkt.",
-        cta: "Boka ett samtal",
+        body: "Yasmina hör av sig för att boka trettio minuter i telefon, utan kostnad. Vill du hellre välja en tid själv kan du boka ett coachingsamtal direkt.",
+        cta: "Boka ett coachingsamtal",
       },
       proposal: {
         title: "Nästa steg: ett förslag från Yasmina",
@@ -200,7 +198,6 @@ const sv: ContactCopy = {
       },
     },
     readHeading: "Att läsa under tiden",
-    inner: "Ledarskap inifrån",
     whatNow: {
       heading: "Vad händer nu",
       items: [
@@ -236,7 +233,7 @@ const en: ContactCopy = {
       legend: "Who are you writing for?",
       labels: { private: "Myself", organisation: "An organisation" },
       hints: {
-        private: "You are looking for support for your own part.",
+        private: "You are looking for support for yourself.",
         organisation: "You are writing for a workplace, a unit or a leadership team.",
       },
     },
@@ -279,7 +276,7 @@ const en: ContactCopy = {
     consent: "Yasmina may contact me about this request.",
     newsletter: "I would like to receive Yasmina's newsletter now and then.",
     legal:
-      "Your answers are used only to reply to your message and are kept for twelve months. Read more in the",
+      "Your answers are used to reply to your message and are kept for twelve months. Read more in the",
     privacyLink: "privacy policy",
     continueLabel: "Continue",
     submit: "Send",
@@ -289,10 +286,10 @@ const en: ContactCopy = {
       need: "Choose what you would like help with.",
       timeline: "Choose how soon.",
       message: "The message can be at most 2,000 characters.",
-      name: "Write your name.",
-      email: "Write an email address that works, for example you@example.com.",
-      organisation: "Write which organisation you are writing for.",
-      phone: "Write a phone number, or choose email.",
+      name: "Enter your name.",
+      email: "Enter an email address that works, for example you@example.com.",
+      organisation: "Enter the organisation you are writing for.",
+      phone: "Enter a phone number, or choose email.",
       consent: "Tick the box so that Yasmina can reply to you.",
     },
   },
@@ -309,8 +306,8 @@ const en: ContactCopy = {
       },
       coaching: {
         title: "Next step: a free intro call",
-        body: "Yasmina will get in touch to set up thirty minutes by phone, free of charge. If you would rather pick a time yourself, you can book a session directly.",
-        cta: "Book a session",
+        body: "Yasmina will get in touch to set up thirty minutes by phone, free of charge. If you would rather pick a time yourself, you can book a coaching session directly.",
+        cta: "Book a coaching session",
       },
       proposal: {
         title: "Next step: a proposal from Yasmina",
@@ -324,13 +321,12 @@ const en: ContactCopy = {
       },
     },
     readHeading: "To read in the meantime",
-    inner: "Ledarskap inifrån",
     whatNow: {
       heading: "What happens now",
       items: [
         "Yasmina reads your message and thinks through what would suit you.",
         "Within two working days she gets in touch, the way you chose.",
-        "Together you decide whether and how to work on.",
+        "Together you decide whether and how to continue.",
       ],
     },
     home: "Back to the home page",
