@@ -175,7 +175,9 @@ export function LocaleSwitcher({
         >
           <TriggerContent label={label} option={selected} />
         </summary>
-        <ul className="bg-popover text-popover-foreground absolute top-full right-0 z-50 mt-1 min-w-44 rounded-md border p-1 shadow-md">
+        {/* Left-aligned where the header's controls wrap onto their own row (below sm), so the
+            list never opens off the left edge of a 320 px screen; right-aligned above. */}
+        <ul className="bg-popover text-popover-foreground absolute top-full left-0 z-50 mt-1 min-w-44 rounded-md border p-1 shadow-md sm:right-0 sm:left-auto">
           {items}
         </ul>
       </details>
