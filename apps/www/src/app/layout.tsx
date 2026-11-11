@@ -3,6 +3,7 @@ import { LOCALE_NAMES, LOCALES, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
 import { BRAND_NAME, footerGroups, relabelFooter, siteUrl } from "@repo/sites"
 import { SiteFooter } from "@repo/ui/blocks/site-footer"
+import { SiteHeaderShell } from "@repo/ui/blocks/site-header-shell"
 import { Analytics } from "@repo/ui/components/analytics"
 import { Brand } from "@repo/ui/components/brand"
 import { BrowserTelemetry } from "@repo/ui/components/browser-telemetry"
@@ -143,7 +144,7 @@ export default async function RootLayout({
         <DevServiceWorkerReset />
         <Analytics />
         <ThemeProvider>
-          <header className="sticky top-0 z-50 flex justify-center px-2.5 pt-2.5 lg:px-4">
+          <SiteHeaderShell sticky>
             <ExploreNavLoader
               brand={{ label: BRAND_NAME, href: siteUrl("www") }}
               book={{ label: site.book, href: BOOK_HREF }}
@@ -168,7 +169,7 @@ export default async function RootLayout({
               }
               labels={{ nav: t("siteNav"), ...site.nav }}
             />
-          </header>
+          </SiteHeaderShell>
           {children}
           <SiteFooter
             brand={<Brand href={siteUrl("www")} />}

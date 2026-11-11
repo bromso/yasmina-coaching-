@@ -218,7 +218,7 @@
     }
   }}
 
-/* Site-wide content width: used by SiteHeader/SiteFooter and page sections. Change here, not per app. */
+/* Site-wide content width: used by SiteFooter and page sections. Change here, not per app. */
 @utility container {
   margin-inline: auto;
   padding-inline: 1.5rem;

@@ -1,3 +1,5 @@
+import { siteHeaderBar } from "@repo/ui/blocks/site-header-shell"
+import { cn } from "@/lib/utils"
 import type { ExploreNavLink } from "./explore-nav"
 
 type ExploreNavBarProps = {
@@ -17,7 +19,7 @@ export function ExploreNavBar({ brand, book, sections, labels }: ExploreNavBarPr
     <nav
       aria-label={labels.nav}
       style={{ paddingBlock: 12, borderRadius: 18 }}
-      className="w-full max-w-[1024px] overflow-hidden bg-background/85 shadow-[0_0_0_1px_var(--border)] backdrop-blur-xl"
+      className={cn(siteHeaderBar, "overflow-hidden")}
     >
       <div className="flex min-h-8 w-full items-center justify-between gap-3 px-4">
         <div className="min-w-0">

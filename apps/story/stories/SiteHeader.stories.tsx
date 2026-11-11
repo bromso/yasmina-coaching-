@@ -148,3 +148,48 @@ export const Narrow: Story = {
     }
   },
 }
+
+/**
+ * An app's own navigation in the `nav` slot, as the blog passes it: the whole bar becomes one
+ * nav landmark (brand, these links, the controls and the primary action). At 320 px the links
+ * take a row of their own under the brand and the primary action, and nothing scrolls sideways.
+ */
+export const OwnNav: Story = {
+  args: {
+    brand: <a href="https://www.brand.com">{BRAND_NAME}</a>,
+    links: [],
+    navLabel: "Site",
+    nav: (
+      <ul className="flex flex-wrap items-center gap-1 text-sm">
+        <li>
+          <a href="https://www.brand.com/inner" className="inline-flex h-9 items-center px-3">
+            Leadership from within
+          </a>
+        </li>
+        <li>
+          <a href="/sv" className="inline-flex h-9 items-center px-3">
+            Läs på svenska
+          </a>
+        </li>
+      </ul>
+    ),
+    end: <a href="https://www.brand.com/book">Book</a>,
+  },
+  globals: { viewport: { value: "mobile1", isRotated: false } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const doc = canvasElement.ownerDocument.documentElement
+    await expect(doc.scrollWidth).toBeLessThanOrEqual(doc.clientWidth)
+    await expect(canvas.getAllByRole("navigation")).toHaveLength(1)
+    const nav = canvas.getByRole("navigation", { name: "Site" })
+    const brand = within(nav).getByRole("link", { name: BRAND_NAME })
+    const book = within(nav).getByRole("link", { name: "Book" })
+    const inner = within(nav).getByRole("link", { name: "Leadership from within" })
+    for (const el of [brand, book, inner]) await expect(el).toBeVisible()
+    const middle = (rect: DOMRect) => rect.top + rect.height / 2
+    const rowOne = brand.getBoundingClientRect()
+    await expect(Math.abs(middle(book.getBoundingClientRect()) - middle(rowOne))).toBeLessThan(6)
+    await expect(inner.getBoundingClientRect().top).toBeGreaterThanOrEqual(rowOne.bottom)
+    await expect(canvas.queryByRole("button", { name: "Open menu" })).toBeNull()
+  },
+}

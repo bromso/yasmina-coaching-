@@ -1,5 +1,6 @@
 "use client"
 
+import { siteHeaderBar } from "@repo/ui/blocks/site-header-shell"
 import { Carousel, CarouselContent, CarouselItem, useCarousel } from "@repo/ui/components/carousel"
 import { Icon } from "@repo/ui/components/icon"
 import { LazyMotion, MotionConfig, m } from "motion/react"
@@ -153,7 +154,7 @@ export function ExploreNav({
           layout
           style={{ paddingBlock: 12 }}
           className={cn(
-            "w-full max-w-[1024px] bg-background/85 shadow-[0_0_0_1px_var(--border)] backdrop-blur-xl",
+            siteHeaderBar,
             open ? "max-h-[calc(100dvh-1.5rem)] overflow-y-auto" : "overflow-hidden"
           )}
         >
