@@ -1,5 +1,6 @@
 "use client"
 
+import { belowSiteHeader } from "@repo/ui/blocks/site-header-shell"
 import { Icon } from "@repo/ui/components/icon"
 import {
   Sidebar,
@@ -34,7 +35,7 @@ export function AccountSidebar() {
   const t = useTranslations("account.nav")
 
   return (
-    <Sidebar className="top-14 h-[calc(100svh-3.5rem)]!">
+    <Sidebar className={belowSiteHeader}>
       <SidebarContent>
         <SidebarGroup>
           <SidebarMenu>

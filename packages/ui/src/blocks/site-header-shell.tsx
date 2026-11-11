@@ -11,6 +11,14 @@ import type * as React from "react"
 export const siteHeaderBar =
   "w-full max-w-[1024px] rounded-[18px] bg-background/85 py-3 shadow-[0_0_0_1px_var(--border)] backdrop-blur-xl"
 
+/**
+ * For a fixed element that starts below the stuck header (account's desktop sidebar): its `top`
+ * and height from `--site-header-height` (`packages/tokens`), the safe-area inset the shell sticks
+ * below included. `!` on the height beats the sidebar's own `h-svh`.
+ */
+export const belowSiteHeader =
+  "top-[calc(var(--site-header-height)+env(safe-area-inset-top,0px))] h-[calc(100svh-var(--site-header-height)-env(safe-area-inset-top,0px))]!"
+
 type SiteHeaderShellProps = React.ComponentProps<"header"> & {
   /** Pins the header to the top of the viewport, above the page. */
   sticky?: boolean
@@ -26,8 +34,9 @@ export function SiteHeaderShell({ sticky, className, children, ...props }: SiteH
     <header
       data-slot="site-header"
       className={cn(
-        "flex justify-center px-2.5 pt-2.5 lg:px-4",
-        sticky && "sticky top-0 z-50",
+        "flex justify-center px-2.5 pt-(--site-header-inset) lg:px-4",
+        // Stuck below a notch or status bar when the page draws under it (`viewport-fit=cover`).
+        sticky && "sticky top-[env(safe-area-inset-top,0px)] z-50",
         className
       )}
       {...props}

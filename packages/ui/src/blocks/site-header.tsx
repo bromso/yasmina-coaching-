@@ -63,7 +63,9 @@ export function SiteHeader({
         data-slot="site-header-bar"
         className={cn(
           siteHeaderBar,
-          "flex min-h-14 flex-wrap items-center gap-x-3 gap-y-2 px-4 sm:flex-nowrap"
+          // From sm up one row of h-9 controls, exactly `--site-header-bar` tall, so the
+          // header is `--site-header-height`; below sm the rows wrap and it grows.
+          "flex min-h-(--site-header-bar) flex-wrap items-center gap-x-3 gap-y-2 px-4 sm:h-(--site-header-bar) sm:flex-nowrap"
         )}
       >
         {start}
@@ -121,11 +123,14 @@ export function SiteHeader({
             {controls}
           </div>
         )}
-        {/* With nav or controls, -ml-1 turns the bar's gap-3 into the gap-2 between controls. */}
-        <div className={cn("ml-auto flex items-center gap-2", (nav || controls) && "sm:-ml-1")}>
-          {end}
-          <SiteHeaderMobile links={links} navLabel={navLabel} labels={mobileLabels} />
-        </div>
+        {/* With nav or controls, -ml-1 turns the bar's gap-3 into the gap-2 between controls.
+            Nothing to hold (no `end`, no links for the hamburger): no empty item, so no stray gap. */}
+        {(end || links.length > 0) && (
+          <div className={cn("ml-auto flex items-center gap-2", (nav || controls) && "sm:-ml-1")}>
+            {end}
+            <SiteHeaderMobile links={links} navLabel={navLabel} labels={mobileLabels} />
+          </div>
+        )}
       </Bar>
     </SiteHeaderShell>
   )

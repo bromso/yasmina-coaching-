@@ -1,7 +1,16 @@
 import { BRAND_NAME } from "@repo/sites"
 import { SiteHeader } from "@repo/ui/blocks/site-header"
+import { belowSiteHeader } from "@repo/ui/blocks/site-header-shell"
 import { Brand } from "@repo/ui/components/brand"
 import { LocaleSwitcher } from "@repo/ui/components/locale-switcher"
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+} from "@repo/ui/components/sidebar"
 import { SignInLink } from "@repo/ui/components/sign-in-link"
 import { ThemeToggle } from "@repo/ui/components/theme-toggle"
 import { UserMenu } from "@repo/ui/components/user-menu"
@@ -87,8 +96,64 @@ export const SignedIn: Story = {
   },
 }
 
+/** `--site-header-height` resolved to px, measured on a probe element sized by it. */
+function headerHeightToken(doc: Document): number {
+  const probe = doc.createElement("div")
+  probe.style.height = "var(--site-header-height)"
+  doc.body.append(probe)
+  const height = probe.getBoundingClientRect().height
+  probe.remove()
+  return height
+}
+
+/**
+ * From sm up the header is exactly `--site-header-height` tall with the signed-in apps' h-9
+ * controls, user menu and all: what account's sidebar (`belowSiteHeader`) starts after.
+ */
 export const Sticky: Story = {
-  args: { sticky: true },
+  args: { sticky: true, controls: signedInControls, end: userMenu },
+  play: async ({ canvasElement }) => {
+    const header = within(canvasElement).getByRole("banner")
+    const token = headerHeightToken(canvasElement.ownerDocument)
+    await expect(token).toBeGreaterThan(0)
+    await expect(Math.abs(header.getBoundingClientRect().height - token)).toBeLessThan(0.5)
+  },
+}
+
+/**
+ * Account's layout from md up: the sticky header above a fixed sidebar placed with
+ * `belowSiteHeader`. The sidebar's top is at or below the header's bottom, so the translucent
+ * pill never covers its first item.
+ */
+export const AboveSidebar: Story = {
+  args: { sticky: true, controls: signedInControls, end: userMenu },
+  render: (args) => (
+    <SidebarProvider className="flex-col">
+      <SiteHeader {...args} />
+      <Sidebar className={belowSiteHeader}>
+        <SidebarContent>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive>
+                <a href="/">Home</a>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarContent>
+      </Sidebar>
+    </SidebarProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const header = canvas.getByRole("banner").getBoundingClientRect()
+    const home = canvas.getByRole("link", { name: "Home" })
+    await expect(home).toBeVisible()
+    const sidebar = home.closest("[data-slot='sidebar-container']")
+    await expect(sidebar).not.toBeNull()
+    const top = (sidebar as HTMLElement).getBoundingClientRect().top
+    await expect(top).toBeGreaterThanOrEqual(header.bottom - 0.5)
+    await expect(top - header.bottom).toBeLessThan(0.5)
+  },
 }
 
 export const Mobile: Story = {

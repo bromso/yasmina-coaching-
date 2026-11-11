@@ -1,0 +1,19 @@
+{
+  "site-header": {
+    "inset": {
+      "$type": "dimension",
+      "$value": "0.625rem",
+      "$description": "The gap between the screen's top edge and the header's pill."
+    },
+    "bar": {
+      "$type": "dimension",
+      "$value": "3.75rem",
+      "$description": "SiteHeader's pill from sm up: 0.75rem padding around a 2.25rem row of controls."
+    },
+    "height": {
+      "$type": "dimension",
+      "$value": "calc({site-header.inset} + {site-header.bar})",
+      "$description": "The whole header from sm up: what a fixed sidebar below it starts after."
+    }
+  }
+}

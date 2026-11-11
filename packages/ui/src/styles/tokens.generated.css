@@ -93,6 +93,9 @@
   --shadow-lg: 0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 4px 6px -2px hsl(0 0% 0% / 0.1);
   --shadow-xl: 0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 8px 10px -2px hsl(0 0% 0% / 0.1);
   --shadow-2xl: 0px 4px 8px -1px hsl(0 0% 0% / 0.25);
+  --site-header-inset: 0.625rem;
+  --site-header-bar: 3.75rem;
+  --site-header-height: calc(0.625rem + 3.75rem);
   --spacing: 0.25rem;
   --font-sans: Inter, sans-serif;
   --font-serif: Merriweather, serif;

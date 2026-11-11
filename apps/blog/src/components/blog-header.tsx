@@ -22,8 +22,8 @@ const pill = `inline-flex h-9 items-center rounded-full px-3 transition-colors h
 /**
  * The blog's header: the shared `SiteHeader` in www's look, with the blog's own content — the
  * brand linking home to www, www's Ledarskap inifrån page and this page in the other language as
- * its nav, the theme toggle, and the booking button. Server-rendered and static. Below `sm` the
- * links and the toggle take rows of their own under the brand and "Boka", and the header scrolls
+ * its nav, with the theme toggle and the booking button. Server-rendered and static. Below `sm`
+ * that list wraps onto rows under the brand, and the header scrolls
  * away with the page instead of covering it; from `sm` up it stays at the top.
  */
 export function BlogHeader({
@@ -64,16 +64,21 @@ export function BlogHeader({
               {ui.header.language.label}
             </LanguageLink>
           </li>
+          {/* The toggle and "Boka" are list items too, not `controls` and `end`: at 320 px they
+              wrap under the links as they always have, and from sm up the one list keeps the
+              old spacing. */}
+          <li>
+            <ThemeToggle label={labels.themeToggle} />
+          </li>
+          <li>
+            <a
+              href={`${wwwUrl}/book`}
+              className={`inline-flex h-9 items-center rounded-full bg-primary px-4 text-primary-foreground tracking-[0.035em] transition-colors hover:bg-primary/90 ${focus}`}
+            >
+              {ui.header.book}
+            </a>
+          </li>
         </ul>
-      }
-      controls={<ThemeToggle label={labels.themeToggle} />}
-      end={
-        <a
-          href={`${wwwUrl}/book`}
-          className={`inline-flex h-9 items-center rounded-full bg-primary px-4 text-primary-foreground text-sm tracking-[0.035em] transition-colors hover:bg-primary/90 ${focus}`}
-        >
-          {ui.header.book}
-        </a>
       }
     />
   )
