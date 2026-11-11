@@ -8,6 +8,7 @@ import { LazyMotion, MotionConfig, m } from "motion/react"
 import { usePathname } from "next/navigation"
 import { type ReactNode, useEffect, useId, useRef, useState } from "react"
 import { cn } from "@/lib/utils"
+import { CLOSED_RADIUS } from "./radius"
 
 export type ExploreNavLink = { label: string; href: string }
 
@@ -151,9 +152,9 @@ export function ExploreNav({
         <m.nav
           aria-label={labels.nav}
           initial={false}
-          // Inline, so the layout animation can correct the corners while the pill scales: the
-          // closed bar's radius is the token `siteHeaderBar` draws with.
-          animate={{ borderRadius: open ? 28 : "var(--site-header-radius)" }}
+          // Inline numbers, so the layout animation can correct the corners while the pill scales
+          // (a `var()` here leaves them distorted once it closes).
+          animate={{ borderRadius: open ? 28 : CLOSED_RADIUS }}
           layout
           className={cn(
             siteHeaderBar,
