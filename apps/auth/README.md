@@ -335,6 +335,8 @@ the sign-in redirect first). The gate is `canUseAdmin(me)` in `src/lib/admin.ts`
 | `/admin/workspaces/<id>` | Members, the mirrored subscription, recent audit entries |
 | `/admin/support?status=open\|resolved\|all` | Help-center contact requests, newest first; the message as text in a `white-space: pre-wrap` block, never HTML; **Mark resolved** / **Reopen** per request |
 | `/admin/applications?status=all\|new\|reviewing\|rejected\|hired&job=` | Job applications, newest first; status tabs (`all` first and the default) and a role-slug filter, both GET forms; **Download CV**, a **Set status** select and **Delete** per application |
+| `/admin/leads?status=all\|new\|contacted\|call_booked\|won\|lost` | The coaching site's contact-form leads, newest first; a tab per status with its count (`all` first and the default), each lead linking its detail page (see **Leads.** in `CLAUDE.md`) |
+| `/admin/leads/<id>` | One lead: every answer, the next step the visitor was shown, `mailto:` / `tel:` links, the message as text in a `white-space: pre-wrap` block, and one form for the status and Yasmina's notes (`updateLeadCore`, audited as `lead.updated` without the notes' text) |
 | `/admin/audit?actorId=&targetType=&targetId=` | The audit log, filterable; the retention limits; an **Export** card (CSV or JSON Lines) |
 | `/admin/analytics?days=7\|30\|90` | Visitors/pageviews chart and table, top pages, top referrers, events per day, and the sign-up funnel |
 | `/admin/stop` | Outside the gate: the page the banner's **Stop impersonating** links to |

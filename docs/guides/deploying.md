@@ -249,7 +249,7 @@ From `packages/session/src/env.ts`: `src/instrumentation.ts` in each calls `asse
 
 `apps/www/src/instrumentation.ts`, `apps/help/src/instrumentation.ts` and
 `apps/jobs/src/instrumentation.ts` all call `assertEnv(["API_URL", "API_SERVICE_TOKEN"])`: both
-vars are required at boot — for `www`'s waitlist form server action, for `help`'s `/contact` form
+vars are required at boot — for `www`'s contact and booking server actions (`leads.create`, `booking.*`), for `help`'s `/contact` form
 server action (`support.create`), for `jobs`'s `/<slug>/apply` form server action (`jobs.apply`).
 `SITE_DOMAIN` and `COOKIE_DOMAIN` were baked in at build.
 

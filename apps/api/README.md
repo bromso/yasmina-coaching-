@@ -291,6 +291,25 @@ REST paths are under `/openapi` (`POST /openapi/auth/sign-up`); the contract in
   `delete_after` and queues its CV. Applications are address-keyed, not account-linked — there is
   no `user_id` column — so `users.purge` never touches them; `privacy.export`'s `jobApplications`
   lists only those sent from the account's own, verified address (see **Privacy** below).
+- **Leads.** `leads.create({ audience, need, timeline, message?, name, email, phone?,
+  organisation?, role?, contactMethod, consent: true, newsletter?, page? })` → `{ reference }`
+  (`LEAD-<id>`, `leadReference`) is `apps/www`'s `/kontakt` form: service token only, anonymous,
+  like support. `LeadCreateSchema` (organisation required for an organisation, a phone number for a
+  call) runs first, then three in-memory limits: 5 per hour per client (`leads:<x-api-client-id>`),
+  3 per hour per typed address (`leads-to:<normalised email>`) and 100 per hour api-wide
+  (`leads:global`), each `429` `LEAD_RATE_MESSAGE` (`leadsRate`). `submitLead` (`src/leads.ts`)
+  inserts the row (`leads`, migration `0036_leads`, `src/queries/leads.ts`; a private person's
+  organisation and role dropped) and, in the same transaction, queues `leadNew` to `BOOKING_EMAIL`
+  (else wherever support requests go) with every answer, `Reply-To:` the sender and a link to
+  `${AUTH_URL}/admin/leads/<id>`; `leadReceived` to the sender in the request's locale — the
+  reference and the next step (`leadNextStep`, a www link) only, `Reply-To:` Yasmina's inbox; and
+  the `lead_submitted` event (the three answers, no ids). `admin.leads.list/get/update` back
+  `apps/auth`'s `/admin/leads` (superadmin only; `update` is a no-op with no audit row when nothing
+  changes, else one `lead.updated` row without the notes' text). Leads are kept
+  `LEAD_RETENTION_MONTHS` (12): the nightly `leads.prune` (`10 4 * * *`) deletes every row past
+  `delete_after`. Address-keyed like applications: `users.purge` only nulls `status_changed_by`,
+  and `privacy.export`'s `leads` lists those sent from the account's verified address. The
+  newsletter box is stored only — nothing sends a newsletter. See `docs/architecture/leads.md`.
 - **Pruning.** Issuing a session deletes the user's expired ones, and the sessions list shows live
   sessions only. Used and expired `tokens` rows of every purpose are deleted hourly by the
   `tokens.prune` schedule (see [Jobs](#jobs)), not on any request path; a successful reset or a password change invalidates every other outstanding reset link of that
@@ -2096,10 +2115,10 @@ Constants live in `@repo/api-contract`'s `privacy.ts`: `EXPORT_TTL_MS` (7 days),
   session wrote keeps its `ip` / `userAgent` — an admin-written row's are the admin's; `metadata`
   keeps only the keys `EXPORTED_AUDIT_METADATA` lists for its action, so an admin id such as
   `impersonatedBy` never reaches the file), `notifications` (type, created, read, data — see
-  [Notifications](#notifications) above), `analyticsEvents`, `pageviews`, `supportRequests` and
-  `jobApplications` — the last only those sent from the account's own address, and only once that
-  address is verified (an unverified account has not proven it owns the address an application was
-  sent from). The file is written through the storage seam under `exports/<userId>/<random>.json`
+  [Notifications](#notifications) above), `analyticsEvents`, `pageviews`, `supportRequests`,
+  `jobApplications` and `leads` — the last two only those sent from the account's own address, and
+  only once that address is verified (an unverified account has not proven it owns the address an
+  application or a contact request was sent from; a lead never carries Yasmina's notes). The file is written through the storage seam under `exports/<userId>/<random>.json`
   (`EXPORT_KEY_PATTERN` in `@repo/api-contract`, apart from `FILE_KEY_PATTERN` on purpose — only
   `account.export.download` ever serves one, never `files.get`), then, in a transaction that
   re-reads the row (a concurrent run of the same job may have already won), marks it `ready` with
@@ -2463,6 +2482,7 @@ it. Adding your own jobs and schedules, and running a dedicated worker: `docs/gu
   | `backup.run` | `0 2 * * *` | off unless `BACKUP_ENABLED=true` (checked on every tick; the process's env is fixed at start, so toggling it is a restart); dumps the whole database to `backups/<date>/<engine>-<time>.jsonl.gz` through the storage seam, then deletes its own objects there past `BACKUP_RETENTION_DAYS` — see **Backups** below |
   | `webhooks.prune` | `55 3 * * *` | deletes `webhook_deliveries` rows older than 30 days (see [Webhooks](#webhooks)) |
   | `notifications.prune` | `5 4 * * *` | deletes every read notification older than 30 days and every notification, read or not, older than 90 days (see [Notifications](#notifications)) |
+  | `leads.prune` | `10 4 * * *` | deletes every contact-form lead past its `delete_after` (12 months after it arrived; see Leads above) |
 
 - **Built-in jobs.** `mail.send` (`{ template, to, props, idempotencyKey? }`), `storage.delete`
   (`{ key }`), `storage.sweep`, `telemetry.forward` (`{ errorId }`; a pruned row is a no-op),
@@ -2472,8 +2492,8 @@ it. Adding your own jobs and schedules, and running a dedicated worker: `docs/gu
   `privacy.export.prune` and `privacy.purge` (`{ pageSize? }`, for tests — see [Privacy](#privacy));
   `applications.prune` (see Hiring above); `backup.run` (`{}`; see **Backups** below);
   `webhook.deliver` (`{ endpointId, eventId, type, timestamp, data }`, `maxAttempts` 8),
-  `webhooks.prune` (see [Webhooks](#webhooks)) and `notifications.prune` (see
-  [Notifications](#notifications)).
+  `webhooks.prune` (see [Webhooks](#webhooks)), `notifications.prune` (see
+  [Notifications](#notifications)) and `leads.prune` (see Leads above).
 - **A dedicated worker.** `src/worker.ts` (bundled as `dist/worker.js`; `bun --filter @repo/api
   dev:worker` in development, `start:worker` for the bundle): the worker and scheduler only, migrating on boot under the migration lock, serving
   `GET /health` on `HOST:PORT` (default 3007 like the api — give it its own port; 503 when the

@@ -2,7 +2,7 @@
 
 Browser end-to-end tests (Playwright) against **production builds** of `www`, `app`, `auth`,
 `account`, `blog`, `docs`, `help` and `jobs`, plus `apps/api` and `apps/ai`, all started by
-`playwright.config.ts` on their real `*.brand.localhost` hosts and ports. 320 tests across 38 spec
+`playwright.config.ts` on their real `*.brand.localhost` hosts and ports. 420 tests across 41 spec
 files, Chromium only, run serially (`workers: 1`) because every test shares one database and the
 api's in-memory rate limiters.
 
@@ -150,13 +150,19 @@ they stop at one app's boundary:
   file named `.png` holding `<svg/>` is refused with the api's `IMAGE_UPLOAD_MESSAGE` and the saved
   photo stays, in the card and the header. The api runs with `STORAGE_PROVIDER=local` and `STORAGE_DIR` under
   `.tmp/storage`, so uploads are reset with everything else.
-- `www.spec.ts` — the home page shows the header, footer and pricing tiers; the waitlist form accepts
-  an email, also with JavaScript disabled; `/terms` and `/privacy` render.
+- `www.spec.ts` — the home page shows the header, footer and the four coaching formats; its contact
+  section leads to `/kontakt`; `/terms` and `/privacy` render.
+- `contact.spec.ts` — a visitor goes through `/kontakt`'s three steps (each refusing to move on
+  without its answer, the consent box required), lands on `/kontakt/tack` with the reference and the
+  next step its answers lead to (the inifrån start call), gets the Swedish confirmation mail with
+  that link and none of their own text; the e2e superadmin finds the lead on `/admin/leads`, opens
+  it, and saves a status and a note. With JavaScript disabled an organisation's request shows every
+  step at once and gets the proposal step (the keynote request form).
 - `blog.spec.ts` — the Swedish index (`<html lang="sv">`) opens on its hero; the header links home
   to www, to `/inifran` and `/book` there, and to the English index (`/en`, `<html lang="en">`) and
   back; `/rss.xml` and `/en/rss.xml` each answer in their own `<language>`; an unknown address is a
   Swedish 404 with the blog's chrome; the newest post opens with its title and the call to action
-  linking to www's intro-call form, and its language link opens the English twin; with JavaScript disabled, the index
+  linking to www's contact page, and its language link opens the English twin; with JavaScript disabled, the index
   still shows its hero and the header's site nav.
 - `docs.spec.ts` — the landing page shows the intro and the sidebar; a sidebar link opens its page
   with breadcrumbs, and a table-of-contents link jumps to its heading (a URL hash); scrolled to a
