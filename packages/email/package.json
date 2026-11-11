@@ -6,6 +6,7 @@
   "private": true,
   "exports": {
     ".": "./src/index.tsx",
+    "./tokens": "./src/tokens.generated.ts",
     "./templates/*": "./src/templates/*.tsx"
   },
   "scripts": {
