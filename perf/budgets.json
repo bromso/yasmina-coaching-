@@ -27,6 +27,8 @@
       "/admin/bookings/[id]": 298,
       "/admin/bookings/availability": 298,
       "/admin/bookings/groups": 298.2,
+      "/admin/leads": 291.7,
+      "/admin/leads/[id]": 296.5,
       "/admin/stop": 283.1,
       "/admin/support": 285.4,
       "/admin/users": 284,
@@ -81,6 +83,8 @@
       "/inifran": 266,
       "/inifran/[service]": 266.6,
       "/inifran/forskning": 265.3,
+      "/kontakt": 280.7,
+      "/kontakt/tack": 265,
       "/privacy": 255.9,
       "/terms": 255.9
     }

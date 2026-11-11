@@ -24,7 +24,7 @@ import { siteFor } from "@/content/site"
 import { getLocale } from "@/lib/locale"
 import { OG_LOCALE } from "@/lib/site-locale"
 import "@/styles/globals.css"
-import { CONTACT_HREF } from "@/content/contact"
+import { CONTACT_HREF } from "@/content/contact-links"
 
 const LOCALE_OPTIONS = LOCALES.map((value) => ({ value, label: LOCALE_NAMES[value] }))
 

@@ -1,6 +1,6 @@
 import type { Locale } from "@repo/i18n/locales"
 import type { FaqItem } from "@repo/ui/blocks/faq"
-import { CONTACT_HREF } from "@/content/contact"
+import { CONTACT_HREF } from "@/content/contact-links"
 import { INNER_HREF } from "@/content/inner"
 import { SITE_META } from "@/content/site-meta"
 

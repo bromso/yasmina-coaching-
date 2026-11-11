@@ -9,7 +9,7 @@ import {
 } from "@repo/api-contract/booking-limits"
 import type { Locale } from "@repo/i18n/locales"
 import { BOOKING_FORMS, type BookingFormCopy } from "@/content/booking-forms"
-import { CONTACT_HREF } from "@/content/contact"
+import { CONTACT_HREF } from "@/content/contact-links"
 import { INNER, INNER_SERVICE_IDS } from "@/content/inner"
 import { formatKr, INNER_PRICES, type InnerServiceId } from "@/content/inner-pricing"
 import type { DonePayment } from "@/lib/mock-payment"

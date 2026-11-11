@@ -4,7 +4,7 @@ import type {
   BookingLocation,
 } from "@repo/api-contract/booking-limits"
 import type { Locale } from "@repo/i18n/locales"
-import { CONTACT_HREF } from "@/content/contact"
+import { CONTACT_HREF } from "@/content/contact-links"
 import type { BookingFlow } from "@/lib/booking-flow"
 import type { PaymentMethod } from "@/lib/mock-payment"
 
