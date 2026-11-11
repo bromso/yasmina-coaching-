@@ -1,9 +1,9 @@
 import { NOTIFICATION_UNREAD_CAP, roleAtLeast } from "@repo/api-contract"
 import { formatUtcDate } from "@repo/i18n/dates"
 import { loadEnv } from "@repo/session"
-import { BRAND_NAME, footerGroups, relabelFooter, relabelNav, siteNav, siteUrl } from "@repo/sites"
+import { footerGroups, relabelFooter, relabelNav, siteNav, siteUrl } from "@repo/sites"
 import { NotificationBell } from "@repo/ui/blocks/notification-bell"
-import { SiteFooter } from "@repo/ui/blocks/site-footer"
+import { SiteFooter, SiteFooterLegal } from "@repo/ui/blocks/site-footer"
 import { SiteHeader } from "@repo/ui/blocks/site-header"
 import { Brand } from "@repo/ui/components/brand"
 import { CookieConsent } from "@repo/ui/components/cookie-consent"
@@ -26,22 +26,12 @@ import { isNotificationsUrl, NOTIFICATIONS_PATH } from "@/lib/bell-current"
 import { LOCALE_OPTIONS } from "@/lib/locale"
 
 const legal = (labels: { terms: string; privacy: string }) => (
-  <p className="text-muted-foreground text-xs">
-    © {new Date().getFullYear()} {BRAND_NAME} ·{" "}
-    <a
-      href={`${siteUrl("www")}/terms`}
-      className="underline underline-offset-4 hover:text-foreground"
-    >
-      {labels.terms}
-    </a>{" "}
-    ·{" "}
-    <a
-      href={`${siteUrl("www")}/privacy`}
-      className="underline underline-offset-4 hover:text-foreground"
-    >
-      {labels.privacy}
-    </a>
-  </p>
+  <SiteFooterLegal
+    links={[
+      { label: labels.terms, href: `${siteUrl("www")}/terms` },
+      { label: labels.privacy, href: `${siteUrl("www")}/privacy` },
+    ]}
+  />
 )
 
 /** The bell's accessible name: the ICU plural, "More than 99", or plain when the count is unknown. */

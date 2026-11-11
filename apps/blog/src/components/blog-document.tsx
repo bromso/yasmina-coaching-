@@ -1,6 +1,6 @@
 import { translatorFor } from "@repo/i18n/translate"
 import { BRAND_NAME, footerGroups, relabelFooter, siteUrl } from "@repo/sites"
-import { SiteFooter } from "@repo/ui/blocks/site-footer"
+import { SiteFooter, SiteFooterLegal } from "@repo/ui/blocks/site-footer"
 import { Analytics } from "@repo/ui/components/analytics"
 import { Brand } from "@repo/ui/components/brand"
 import { BrowserTelemetry } from "@repo/ui/components/browser-telemetry"
@@ -63,16 +63,12 @@ export function BlogDocument({
   const t = translatorFor(locale, "ui")
   const www = siteUrl("www")
   const legal = (
-    <p className="text-muted-foreground text-xs">
-      © {new Date().getFullYear()} {BRAND_NAME} ·{" "}
-      <a href={`${www}/terms`} className="underline underline-offset-4 hover:text-foreground">
-        {ui.legal.terms}
-      </a>{" "}
-      ·{" "}
-      <a href={`${www}/privacy`} className="underline underline-offset-4 hover:text-foreground">
-        {ui.legal.privacy}
-      </a>
-    </p>
+    <SiteFooterLegal
+      links={[
+        { label: ui.legal.terms, href: `${www}/terms` },
+        { label: ui.legal.privacy, href: `${www}/privacy` },
+      ]}
+    />
   )
   return (
     <html lang={locale} data-scroll-behavior="smooth" suppressHydrationWarning>

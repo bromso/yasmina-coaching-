@@ -1,6 +1,6 @@
 import { LOCALE_NAMES, LOCALES } from "@repo/i18n/locales"
 import { BRAND_NAME, footerGroups, siteNav, siteUrl } from "@repo/sites"
-import { SiteFooter } from "@repo/ui/blocks/site-footer"
+import { SiteFooter, SiteFooterLegal } from "@repo/ui/blocks/site-footer"
 import { SiteHeader } from "@repo/ui/blocks/site-header"
 import { Analytics } from "@repo/ui/components/analytics"
 import { Brand } from "@repo/ui/components/brand"
@@ -57,22 +57,12 @@ const cookieDomain =
   (process.env.NODE_ENV === "production" ? undefined : ".brand.localhost")
 
 const legal = (
-  <p className="text-muted-foreground text-xs">
-    © {new Date().getFullYear()} {BRAND_NAME} ·{" "}
-    <a
-      href={`${siteUrl("www")}/terms`}
-      className="underline underline-offset-4 hover:text-foreground"
-    >
-      Terms
-    </a>{" "}
-    ·{" "}
-    <a
-      href={`${siteUrl("www")}/privacy`}
-      className="underline underline-offset-4 hover:text-foreground"
-    >
-      Privacy
-    </a>
-  </p>
+  <SiteFooterLegal
+    links={[
+      { label: "Terms", href: `${siteUrl("www")}/terms` },
+      { label: "Privacy", href: `${siteUrl("www")}/privacy` },
+    ]}
+  />
 )
 
 export default function RootLayout({

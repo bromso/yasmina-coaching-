@@ -2,7 +2,7 @@ import { MEMBER_OFFERING_KEYS, OFFERING_KEYS, OFFERINGS } from "@repo/api-contra
 import { LOCALE_NAMES, LOCALES, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
 import { BRAND_NAME, footerGroups, relabelFooter, siteUrl } from "@repo/sites"
-import { SiteFooter } from "@repo/ui/blocks/site-footer"
+import { SiteFooter, SiteFooterLegal } from "@repo/ui/blocks/site-footer"
 import { SiteHeaderShell } from "@repo/ui/blocks/site-header-shell"
 import { Analytics } from "@repo/ui/components/analytics"
 import { Brand } from "@repo/ui/components/brand"
@@ -111,29 +111,13 @@ export default async function RootLayout({
   const t = translatorFor(locale, "ui")
   const site = siteFor(locale)
   const legal = (
-    <p className="text-muted-foreground text-xs">
-      © {new Date().getFullYear()} {BRAND_NAME} ·{" "}
-      <a
-        href={`${siteUrl("www")}/terms`}
-        className="underline underline-offset-4 hover:text-foreground"
-      >
-        {site.legal.terms}
-      </a>{" "}
-      ·{" "}
-      <a
-        href={`${siteUrl("www")}/privacy`}
-        className="underline underline-offset-4 hover:text-foreground"
-      >
-        {site.legal.privacy}
-      </a>{" "}
-      ·{" "}
-      <a
-        href={`${siteUrl("www")}${CONTACT_HREF}`}
-        className="underline underline-offset-4 hover:text-foreground"
-      >
-        {site.legal.contact}
-      </a>
-    </p>
+    <SiteFooterLegal
+      links={[
+        { label: site.legal.terms, href: `${siteUrl("www")}/terms` },
+        { label: site.legal.privacy, href: `${siteUrl("www")}/privacy` },
+        { label: site.legal.contact, href: `${siteUrl("www")}${CONTACT_HREF}` },
+      ]}
+    />
   )
   return (
     <html lang={locale} data-scroll-behavior="smooth" suppressHydrationWarning>
