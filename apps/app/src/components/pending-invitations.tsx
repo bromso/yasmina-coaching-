@@ -4,6 +4,7 @@ import type { PendingInvitation } from "@repo/api-contract"
 import { formatUtcDate } from "@repo/i18n/dates"
 import type { Locale } from "@repo/i18n/locales"
 import { Button } from "@repo/ui/components/button"
+import { Card } from "@repo/ui/components/card"
 import { FormMessage } from "@repo/ui/components/form-feedback"
 import { useTranslations } from "next-intl"
 import { useActionState } from "react"
@@ -17,7 +18,7 @@ function InvitationRow({ invitation, locale }: { invitation: PendingInvitation; 
   const [state, action, pending] = useActionState(acceptPending, { ok: false } as CreateResult)
   const { invitedBy, workspace, role, expiresAt } = invitation
   return (
-    <li className="grid gap-3 rounded-lg border p-4">
+    <Card as="li" size="compact" className="grid gap-3 p-4">
       <div className="grid gap-1">
         <p id={`invitation-${invitation.id}-summary`}>
           {t("invitations.summary", {
@@ -47,7 +48,7 @@ function InvitationRow({ invitation, locale }: { invitation: PendingInvitation; 
           </Button>
         </div>
       </form>
-    </li>
+    </Card>
   )
 }
 

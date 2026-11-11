@@ -11,7 +11,7 @@ export function AdminWorkspaceView({ workspace: w }: { workspace: AdminWorkspace
       <h1 className="text-2xl font-semibold">{w.name}</h1>
       <AdminNav current="/admin/workspaces" />
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Card>
+        <Card size="compact">
           <CardHeader>
             <CardTitle>Workspace</CardTitle>
             <CardDescription className="font-mono text-xs">{w.slug}</CardDescription>
@@ -31,7 +31,7 @@ export function AdminWorkspaceView({ workspace: w }: { workspace: AdminWorkspace
             </dl>
           </CardContent>
         </Card>
-        <Card>
+        <Card size="compact">
           <CardHeader>
             <CardTitle>Billing</CardTitle>
           </CardHeader>
@@ -56,7 +56,7 @@ export function AdminWorkspaceView({ workspace: w }: { workspace: AdminWorkspace
             )}
           </CardContent>
         </Card>
-        <Card className="lg:col-span-2">
+        <Card size="compact" className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Members</CardTitle>
           </CardHeader>

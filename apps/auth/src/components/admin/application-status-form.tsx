@@ -4,6 +4,7 @@ import type { ApplicationStatus } from "@repo/api-contract"
 import { APPLICATION_STATUSES } from "@repo/api-contract/application-statuses"
 import { Button } from "@repo/ui/components/button"
 import { FormMessage } from "@repo/ui/components/form-feedback"
+import { NativeSelect } from "@repo/ui/components/native-select"
 import { useActionState, useId } from "react"
 import { setApplicationStatus } from "@/app/admin/(gated)/applications/actions"
 import type { FormState } from "@/lib/admin-actions"
@@ -14,9 +15,6 @@ const LABELS: Record<ApplicationStatus, string> = {
   rejected: "Rejected",
   hired: "Hired",
 }
-
-const selectClass =
-  "h-8 rounded-md border border-input bg-background px-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
 
 export function ApplicationStatusForm({ id, status }: { id: number; status: ApplicationStatus }) {
   const [state, action, pending] = useActionState(setApplicationStatus, { ok: false } as FormState)
@@ -29,19 +27,19 @@ export function ApplicationStatusForm({ id, status }: { id: number; status: Appl
           Status
         </label>
         {/* key: a fresh default once the action re-renders with the new status. */}
-        <select
+        <NativeSelect
           key={status}
           id={selectId}
           name="status"
           defaultValue={status}
-          className={selectClass}
+          className="h-8 w-auto"
         >
           {APPLICATION_STATUSES.map((s) => (
             <option key={s} value={s}>
               {LABELS[s]}
             </option>
           ))}
-        </select>
+        </NativeSelect>
         <Button type="submit" size="sm" variant="outline" disabled={pending}>
           Set status
         </Button>

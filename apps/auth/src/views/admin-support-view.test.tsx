@@ -1,5 +1,6 @@
 import { describe, expect, mock, test } from "bun:test"
 import type { SupportRequest } from "@repo/api-contract"
+import { navPill } from "@repo/ui/components/nav-pill"
 import { renderToStaticMarkup } from "react-dom/server"
 
 // The resolve/reopen forms import their server actions, which reach @repo/session: `server-only`
@@ -72,7 +73,7 @@ describe("AdminSupportView", () => {
       <AdminSupportView items={[]} nextCursor={null} status="resolved" />
     )
     expect(html).toContain(
-      '<a aria-current="page" class="rounded-md px-3 py-1.5 text-sm font-medium hover:bg-muted bg-muted" href="/admin/support?status=resolved">Resolved</a>'
+      `<a aria-current="page" class="${navPill({ current: true })}" href="/admin/support?status=resolved">Resolved</a>`
     )
   })
 

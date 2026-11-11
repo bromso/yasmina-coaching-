@@ -7,7 +7,7 @@ import { JobsCard } from "@/components/admin/jobs-card"
 import { VitalsCard } from "@/components/admin/vitals-card"
 
 const Stat = ({ label, value, href }: { label: string; value: number | string; href?: string }) => (
-  <Card className="gap-1 py-4">
+  <Card size="compact" className="gap-1 py-4">
     <CardHeader className="px-4">
       <CardDescription>
         {href ? (

@@ -5,9 +5,9 @@ import type { Locale } from "@repo/i18n/locales"
 import { Badge } from "@repo/ui/components/badge"
 import { Button } from "@repo/ui/components/button"
 import { Label } from "@repo/ui/components/label"
+import { NativeSelect } from "@repo/ui/components/native-select"
 import Link from "next/link"
 import { useFormatter, useTranslations } from "next-intl"
-import { NativeSelect } from "@/components/native-select"
 import { SettingsCard } from "@/components/settings-card"
 import {
   ACTION_KEYS,
@@ -63,6 +63,7 @@ export function ActivityCard({
         <div className="flex min-w-0 flex-col gap-1.5">
           <Label htmlFor={FILTER_ID}>{t("activity.filterLabel")}</Label>
           <NativeSelect
+            className="w-auto"
             id={FILTER_ID}
             name={ACTIVITY_ACTION_PARAM}
             defaultValue={params.action ?? ""}

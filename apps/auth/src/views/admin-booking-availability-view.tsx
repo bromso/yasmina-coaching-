@@ -20,7 +20,7 @@ export function AdminBookingAvailabilityView({
       <h1 className="text-2xl font-semibold">Availability</h1>
       <AdminNav current="/admin/bookings" />
       <BookingsSubnav current="/admin/bookings/availability" />
-      <Card>
+      <Card size="compact">
         <CardHeader>
           <CardTitle>Weekly hours</CardTitle>
           <CardDescription>
@@ -32,7 +32,7 @@ export function AdminBookingAvailabilityView({
         </CardContent>
       </Card>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Card>
+        <Card size="compact">
           <CardHeader>
             <CardTitle>Blocked days</CardTitle>
             <CardDescription>Holidays and travel: nothing can be booked on these.</CardDescription>
@@ -67,7 +67,7 @@ export function AdminBookingAvailabilityView({
             )}
           </CardContent>
         </Card>
-        <Card>
+        <Card size="compact">
           <CardHeader>
             <CardTitle>Block days</CardTitle>
             <CardDescription>Existing bookings on those days are kept.</CardDescription>

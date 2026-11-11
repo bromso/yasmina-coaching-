@@ -1,6 +1,7 @@
 import type { AdminSupportStatusFilter, SupportRequest } from "@repo/api-contract"
 import { Badge } from "@repo/ui/components/badge"
-import { cn } from "@repo/ui/lib/utils"
+import { Card } from "@repo/ui/components/card"
+import { navPill } from "@repo/ui/components/nav-pill"
 import Link from "next/link"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { Pager } from "@/components/admin/pager"
@@ -33,10 +34,7 @@ export function AdminSupportView({
             key={tab.value}
             href={tab.value === "open" ? "/admin/support" : `/admin/support?status=${tab.value}`}
             aria-current={tab.value === status ? "page" : undefined}
-            className={cn(
-              "rounded-md px-3 py-1.5 text-sm font-medium hover:bg-muted",
-              tab.value === status && "bg-muted"
-            )}
+            className={navPill({ current: tab.value === status })}
           >
             {tab.label}
           </Link>
@@ -47,7 +45,7 @@ export function AdminSupportView({
       ) : (
         <ul className="flex flex-col gap-4">
           {items.map((r) => (
-            <li key={r.id} className="rounded-lg border p-4">
+            <Card as="li" key={r.id} size="compact" className="gap-0 p-4">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-xs text-muted-foreground">{r.reference}</span>
@@ -107,7 +105,7 @@ export function AdminSupportView({
                   <ReopenSupportForm id={r.id} />
                 )}
               </div>
-            </li>
+            </Card>
           ))}
         </ul>
       )}

@@ -1,6 +1,7 @@
 import type { AnalyticsSummary } from "@repo/api-contract"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/card"
 import { Area, AreaChart, ChartTooltip, Grid, XAxis } from "@repo/ui/components/charts"
+import { navPill } from "@repo/ui/components/nav-pill"
 import {
   Table,
   TableBody,
@@ -9,7 +10,6 @@ import {
   TableHeader,
   TableRow,
 } from "@repo/ui/components/table"
-import { cn } from "@repo/ui/lib/utils"
 import Link from "next/link"
 import { AdminNav } from "@/components/admin/admin-nav"
 
@@ -30,10 +30,7 @@ function RangeNav({ current }: { current: 7 | 30 | 90 }) {
           key={n}
           href={`/admin/analytics?days=${n}`}
           aria-current={n === current ? "page" : undefined}
-          className={cn(
-            "rounded-md px-3 py-1.5 text-sm font-medium hover:bg-muted",
-            n === current && "bg-muted"
-          )}
+          className={navPill({ current: n === current })}
         >
           {n} days
         </Link>
@@ -77,7 +74,7 @@ export function AdminAnalyticsView({
         <h2 id="traffic" className="text-lg font-medium">
           Visitors and pageviews
         </h2>
-        <Card>
+        <Card size="compact">
           <CardHeader>
             <CardTitle>Last {days} days</CardTitle>
             <CardDescription>Area chart of daily visitors and pageviews</CardDescription>
@@ -131,7 +128,7 @@ export function AdminAnalyticsView({
           Top pages and referrers
         </h2>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <Card>
+          <Card size="compact">
             <CardHeader>
               <CardTitle>Top pages</CardTitle>
             </CardHeader>
@@ -163,7 +160,7 @@ export function AdminAnalyticsView({
               )}
             </CardContent>
           </Card>
-          <Card>
+          <Card size="compact">
             <CardHeader>
               <CardTitle>Top referrers</CardTitle>
             </CardHeader>
@@ -202,7 +199,7 @@ export function AdminAnalyticsView({
         <h2 id="events" className="text-lg font-medium">
           Events
         </h2>
-        <Card>
+        <Card size="compact">
           <CardHeader>
             <CardDescription>Product event counts per day</CardDescription>
           </CardHeader>
@@ -242,7 +239,7 @@ export function AdminAnalyticsView({
         <h2 id="funnel" className="text-lg font-medium">
           Funnel
         </h2>
-        <Card>
+        <Card size="compact">
           <CardHeader>
             <CardDescription>
               Signed up, then of those verified their email, then created a workspace, then

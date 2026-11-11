@@ -10,12 +10,12 @@ import { Button } from "@repo/ui/components/button"
 import { FieldError, FormMessage, fieldAria } from "@repo/ui/components/form-feedback"
 import { Input } from "@repo/ui/components/input"
 import { Label } from "@repo/ui/components/label"
+import { NativeSelect } from "@repo/ui/components/native-select"
 import { Textarea } from "@repo/ui/components/textarea"
 import { useActionState } from "react"
 import { createGroupEvent } from "@/app/admin/(gated)/bookings/actions"
 import type { FormState } from "@/lib/admin-booking-actions"
 import { LOCATION_LABELS } from "@/lib/booking-labels"
-import { NativeSelect } from "./native-select"
 
 const group = OFFERINGS.group
 

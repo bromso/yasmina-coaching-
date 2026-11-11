@@ -1,4 +1,4 @@
-import { cn } from "@repo/ui/lib/utils"
+import { navPill } from "@repo/ui/components/nav-pill"
 import Link from "next/link"
 
 const items = [
@@ -18,10 +18,7 @@ export function BookingsSubnav({ current }: { current: BookingsSection }) {
           key={item.href}
           href={item.href}
           aria-current={item.href === current ? "page" : undefined}
-          className={cn(
-            "rounded-md px-3 py-1.5 text-sm hover:bg-muted",
-            item.href === current && "bg-muted font-medium"
-          )}
+          className={navPill({ current: item.href === current })}
         >
           {item.label}
         </Link>

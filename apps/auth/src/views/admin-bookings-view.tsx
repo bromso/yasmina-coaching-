@@ -2,6 +2,7 @@ import type { AdminBooking, AvailabilityBlock, GroupEvent } from "@repo/api-cont
 import { OFFERINGS } from "@repo/api-contract/booking-limits"
 import { Badge } from "@repo/ui/components/badge"
 import { Button } from "@repo/ui/components/button"
+import { Card } from "@repo/ui/components/card"
 import { cn } from "@repo/ui/lib/utils"
 import Link from "next/link"
 import { AdminNav } from "@/components/admin/admin-nav"
@@ -87,7 +88,7 @@ export function AdminBookingsView({
         ) : (
           <ul className="flex flex-col gap-3">
             {pending.map((b) => (
-              <li key={b.id} className="rounded-lg border p-4">
+              <Card as="li" key={b.id} size="compact" className="gap-0 p-4">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-xs text-muted-foreground">{b.reference}</span>
@@ -128,7 +129,7 @@ export function AdminBookingsView({
                     <Link href={`/admin/bookings/${b.id}`}>Open {b.reference}</Link>
                   </Button>
                 </div>
-              </li>
+              </Card>
             ))}
           </ul>
         )}

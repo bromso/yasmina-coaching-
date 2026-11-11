@@ -4,6 +4,7 @@ import { Button } from "@repo/ui/components/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/card"
 import { Input } from "@repo/ui/components/input"
 import { Label } from "@repo/ui/components/label"
+import { NativeSelect } from "@repo/ui/components/native-select"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { AuditTable } from "@/components/admin/audit-table"
 import { Pager } from "@/components/admin/pager"
@@ -11,9 +12,6 @@ import { auditExportDateBounds, auditExportDefaultRange } from "@/lib/admin"
 import { auditExportErrorMessage } from "@/lib/audit-export"
 
 export type AuditFilters = { actorId?: string; targetType?: string; targetId?: string }
-
-const selectClass =
-  "h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
 
 export function AdminAuditView({
   items,
@@ -75,7 +73,7 @@ export function AdminAuditView({
           Filter
         </Button>
       </form>
-      <Card>
+      <Card size="compact">
         <CardHeader>
           <CardTitle>Export</CardTitle>
         </CardHeader>
@@ -116,10 +114,10 @@ export function AdminAuditView({
             </div>
             <div className="grid gap-1.5">
               <Label htmlFor="export-format">Format</Label>
-              <select id="export-format" name="format" defaultValue="csv" className={selectClass}>
+              <NativeSelect id="export-format" name="format" defaultValue="csv">
                 <option value="csv">CSV</option>
                 <option value="jsonl">JSON Lines</option>
-              </select>
+              </NativeSelect>
             </div>
             <input type="hidden" name="actorId" value={filters.actorId ?? ""} />
             <input type="hidden" name="targetType" value={filters.targetType ?? ""} />

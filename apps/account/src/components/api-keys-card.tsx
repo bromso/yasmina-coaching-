@@ -19,6 +19,7 @@ import {
 } from "@repo/ui/components/form-feedback"
 import { Input } from "@repo/ui/components/input"
 import { Label } from "@repo/ui/components/label"
+import { NativeSelect } from "@repo/ui/components/native-select"
 import { useTranslations } from "next-intl"
 import {
   type KeyboardEvent,
@@ -31,7 +32,6 @@ import {
 } from "react"
 import { flushSync } from "react-dom"
 import { createApiKey, revokeApiKey } from "@/app/(account)/workspace/actions"
-import { NativeSelect } from "@/components/native-select"
 import { dismissCreatedKey, focusApiKeysHeadingAfterRevoke } from "@/lib/api-keys-focus"
 import { discardOnPersistedPageHide } from "@/lib/discard-on-page-hide"
 import type { CreateApiKeyState } from "@/lib/workspace-actions"
@@ -350,7 +350,7 @@ function CreateApiKeyForm({
         {/* No JavaScript needed: `:checked` on the option is the browser's own live state, and
             `group-has-*` reacts to it purely in CSS — the warning shows and hides exactly when
             "No expiry" is the selected option, scripting or not. */}
-        <p className="text-xs text-amber-600 group-has-[option[value=none]:checked]:block hidden dark:text-amber-500">
+        <p className="text-destructive text-xs group-has-[option[value=none]:checked]:block hidden">
           {t("expiryWarning")}
         </p>
       </div>

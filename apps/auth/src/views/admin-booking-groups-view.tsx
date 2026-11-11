@@ -23,7 +23,7 @@ export function AdminBookingGroupsView({
       <AdminNav current="/admin/bookings" />
       <BookingsSubnav current="/admin/bookings/groups" />
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Card>
+        <Card size="compact">
           <CardHeader>
             <CardTitle>Upcoming</CardTitle>
             <CardDescription>The next {horizonDays} days, Stockholm time.</CardDescription>
@@ -36,7 +36,7 @@ export function AdminBookingGroupsView({
                 {sorted.map((e) => {
                   const booked = e.capacity - e.seatsLeft
                   return (
-                    <li key={e.id} className="rounded-lg border p-4">
+                    <Card as="li" key={e.id} size="compact" className="gap-0 p-4">
                       <div className="flex flex-wrap items-baseline justify-between gap-2">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="font-mono text-xs text-muted-foreground">
@@ -65,14 +65,14 @@ export function AdminBookingGroupsView({
                       <div className="mt-3">
                         <GroupEventCancelForm id={e.id} />
                       </div>
-                    </li>
+                    </Card>
                   )
                 })}
               </ul>
             )}
           </CardContent>
         </Card>
-        <Card>
+        <Card size="compact">
           <CardHeader>
             <CardTitle>Schedule a group event</CardTitle>
             <CardDescription>

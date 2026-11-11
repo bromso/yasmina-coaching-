@@ -10,7 +10,7 @@ export type StopDetails = { name: string; impersonation: NonNullable<Me["imperso
 export function AdminStopView({ details }: { details: StopDetails | null }) {
   return (
     <AuthLayout>
-      <Card>
+      <Card size="compact">
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Impersonating</CardTitle>
           <CardDescription>
