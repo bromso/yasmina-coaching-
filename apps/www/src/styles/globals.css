@@ -1,7 +1,5 @@
-/* Import the design system from @repo/ui, then the coaching palette and display serif it shares
-   with the blog (`themes/coaching.css`, one change restyles both). */
+/* The design system from @repo/ui: the coaching palette and display serif every app shares. */
 @import "@repo/ui/globals.css";
-@import "@repo/ui/themes/coaching.css";
 
 /* Import typography plugin for www */
 @plugin "@tailwindcss/typography";

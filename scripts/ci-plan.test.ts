@@ -448,6 +448,7 @@ test("filtersIn reads the root scripts' --filter lists", () => {
     "@repo/api-contract",
     "@repo/public-api-contract",
     "@repo/sites",
+    "@repo/tokens",
     "@repo/content",
     "@repo/email",
     "@repo/session",

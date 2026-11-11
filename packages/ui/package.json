@@ -107,6 +107,7 @@
     "web-vitals": "catalog:"
   },
   "devDependencies": {
+    "@repo/tokens": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "catalog:",
     "@types/bun": "catalog:",
@@ -129,7 +130,6 @@
       "default": "./src/styles/globals.css",
       "types": "./src/globals.d.ts"
     },
-    "./themes/coaching.css": "./src/styles/themes/coaching.css",
     "./postcss.config": "./postcss.config.mjs",
     "./lib/*": "./src/lib/*.ts",
     "./lib/get-strict-context": "./src/lib/get-strict-context.tsx",

@@ -4,16 +4,18 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "node sd.config.js",
-    "clean": "rm -rf dist"
+    "build": "bun sd.config.js",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test"
   },
   "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/bun": "catalog:",
     "style-dictionary": "^5.8.0"
   },
   "exports": {
-    "./css": "./dist/css/variables.css",
-    "./js": "./dist/js/tokens.js",
-    "./ts": "./dist/ts/tokens.ts",
+    "./color": "./src/color.ts",
     "./json": "./dist/json/tokens.json"
   }
 }

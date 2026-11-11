@@ -128,10 +128,10 @@ export const AllColors: Story = {
         colors: [
           {
             name: "Background",
-            value: tokens.color.base.background,
+            value: tokens.color.background,
             description: "Default background",
           },
-          { name: "Foreground", value: tokens.color.base.foreground, description: "Default text" },
+          { name: "Foreground", value: tokens.color.foreground, description: "Default text" },
         ],
       },
       {
@@ -139,12 +139,12 @@ export const AllColors: Story = {
         colors: [
           {
             name: "Primary",
-            value: tokens.color.primary.default,
+            value: tokens.color.primary,
             description: "Primary brand color",
           },
           {
             name: "Primary Foreground",
-            value: tokens.color.primary.foreground,
+            value: tokens.color["primary-foreground"],
             description: "Text on primary",
           },
         ],
@@ -154,12 +154,12 @@ export const AllColors: Story = {
         colors: [
           {
             name: "Secondary",
-            value: tokens.color.secondary.default,
+            value: tokens.color.secondary,
             description: "Secondary color",
           },
           {
             name: "Secondary Foreground",
-            value: tokens.color.secondary.foreground,
+            value: tokens.color["secondary-foreground"],
             description: "Text on secondary",
           },
         ],
@@ -167,10 +167,10 @@ export const AllColors: Story = {
       {
         title: "Muted",
         colors: [
-          { name: "Muted", value: tokens.color.muted.default, description: "Muted background" },
+          { name: "Muted", value: tokens.color.muted, description: "Muted background" },
           {
             name: "Muted Foreground",
-            value: tokens.color.muted.foreground,
+            value: tokens.color["muted-foreground"],
             description: "Text on muted",
           },
         ],
@@ -178,10 +178,10 @@ export const AllColors: Story = {
       {
         title: "Accent",
         colors: [
-          { name: "Accent", value: tokens.color.accent.default, description: "Accent color" },
+          { name: "Accent", value: tokens.color.accent, description: "Accent color" },
           {
             name: "Accent Foreground",
-            value: tokens.color.accent.foreground,
+            value: tokens.color["accent-foreground"],
             description: "Text on accent",
           },
         ],
@@ -191,12 +191,12 @@ export const AllColors: Story = {
         colors: [
           {
             name: "Destructive",
-            value: tokens.color.destructive.default,
+            value: tokens.color.destructive,
             description: "Error/destructive",
           },
           {
             name: "Destructive Foreground",
-            value: tokens.color.destructive.foreground,
+            value: tokens.color["destructive-foreground"],
             description: "Text on destructive",
           },
         ],
@@ -204,20 +204,20 @@ export const AllColors: Story = {
       {
         title: "Card & Popover",
         colors: [
-          { name: "Card", value: tokens.color.card.default, description: "Card background" },
+          { name: "Card", value: tokens.color.card, description: "Card background" },
           {
             name: "Card Foreground",
-            value: tokens.color.card.foreground,
+            value: tokens.color["card-foreground"],
             description: "Card text",
           },
           {
             name: "Popover",
-            value: tokens.color.popover.default,
+            value: tokens.color.popover,
             description: "Popover background",
           },
           {
             name: "Popover Foreground",
-            value: tokens.color.popover.foreground,
+            value: tokens.color["popover-foreground"],
             description: "Popover text",
           },
         ],
@@ -233,24 +233,24 @@ export const AllColors: Story = {
       {
         title: "Chart Colors",
         colors: [
-          { name: "Chart 1", value: tokens.color.chart["1"] },
-          { name: "Chart 2", value: tokens.color.chart["2"] },
-          { name: "Chart 3", value: tokens.color.chart["3"] },
-          { name: "Chart 4", value: tokens.color.chart["4"] },
-          { name: "Chart 5", value: tokens.color.chart["5"] },
+          { name: "Chart 1", value: tokens.color["chart-1"] },
+          { name: "Chart 2", value: tokens.color["chart-2"] },
+          { name: "Chart 3", value: tokens.color["chart-3"] },
+          { name: "Chart 4", value: tokens.color["chart-4"] },
+          { name: "Chart 5", value: tokens.color["chart-5"] },
         ],
       },
       {
         title: "Sidebar",
         colors: [
-          { name: "Sidebar", value: tokens.color.sidebar.default },
-          { name: "Sidebar Foreground", value: tokens.color.sidebar.foreground },
-          { name: "Sidebar Primary", value: tokens.color.sidebar.primary },
-          { name: "Sidebar Primary Foreground", value: tokens.color.sidebar["primary-foreground"] },
-          { name: "Sidebar Accent", value: tokens.color.sidebar.accent },
-          { name: "Sidebar Accent Foreground", value: tokens.color.sidebar["accent-foreground"] },
-          { name: "Sidebar Border", value: tokens.color.sidebar.border },
-          { name: "Sidebar Ring", value: tokens.color.sidebar.ring },
+          { name: "Sidebar", value: tokens.color.sidebar },
+          { name: "Sidebar Foreground", value: tokens.color["sidebar-foreground"] },
+          { name: "Sidebar Primary", value: tokens.color["sidebar-primary"] },
+          { name: "Sidebar Primary Foreground", value: tokens.color["sidebar-primary-foreground"] },
+          { name: "Sidebar Accent", value: tokens.color["sidebar-accent"] },
+          { name: "Sidebar Accent Foreground", value: tokens.color["sidebar-accent-foreground"] },
+          { name: "Sidebar Border", value: tokens.color["sidebar-border"] },
+          { name: "Sidebar Ring", value: tokens.color["sidebar-ring"] },
         ],
       },
     ]
@@ -278,7 +278,7 @@ export const AllShadows: Story = {
       { name: "2xs", value: tokens.shadow["2xs"], description: "Extra extra small" },
       { name: "xs", value: tokens.shadow.xs, description: "Extra small" },
       { name: "sm", value: tokens.shadow.sm, description: "Small" },
-      { name: "default", value: tokens.shadow.default, description: "Default" },
+      { name: "default", value: tokens.shadow.DEFAULT, description: "Default" },
       { name: "md", value: tokens.shadow.md, description: "Medium" },
       { name: "lg", value: tokens.shadow.lg, description: "Large" },
       { name: "xl", value: tokens.shadow.xl, description: "Extra large" },
@@ -333,7 +333,7 @@ export const AllSpacing: Story = {
         <div className="space-y-2">
           <h1 className="text-3xl font-bold">Spacing Tokens</h1>
           <p className="text-muted-foreground">
-            Consistent spacing scale based on a {tokens.spacing.base} ({4 * 4}px) base unit.
+            Consistent spacing scale based on a {tokens.spacing.DEFAULT} ({4 * 4}px) base unit.
           </p>
         </div>
 
@@ -352,9 +352,9 @@ export const AllSpacing: Story = {
             {[
               { name: "none", value: "0px" },
               { name: "sm", value: "calc(0.5rem - 4px)" },
-              { name: "default", value: tokens.radius.default },
+              { name: "default", value: tokens.radius.DEFAULT },
               { name: "md", value: "calc(0.5rem - 2px)" },
-              { name: "lg", value: tokens.radius.default },
+              { name: "lg", value: tokens.radius.DEFAULT },
               { name: "xl", value: "0.75rem" },
               { name: "2xl", value: "1rem" },
               { name: "full", value: "9999px" },
@@ -380,17 +380,17 @@ export const AllTypography: Story = {
     const fonts: TypographySwatchProps[] = [
       {
         name: "Sans",
-        value: tokens.font.family.sans,
+        value: tokens.font.sans,
         description: "Default sans-serif for body text",
       },
       {
         name: "Serif",
-        value: tokens.font.family.serif,
+        value: tokens.font.serif,
         description: "Serif for headings and editorial",
       },
       {
         name: "Mono",
-        value: tokens.font.family.mono,
+        value: tokens.font.mono,
         description: "Monospace for code and technical content",
       },
     ]
@@ -453,7 +453,7 @@ export const AllTypography: Story = {
                   style={{
                     fontSize: type.size,
                     lineHeight: type.lineHeight,
-                    fontFamily: tokens.font.family.sans,
+                    fontFamily: tokens.font.sans,
                   }}
                 >
                   The quick brown fox

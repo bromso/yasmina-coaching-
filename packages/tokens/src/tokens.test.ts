@@ -1,0 +1,128 @@
+import { describe, expect, test } from "bun:test"
+import { contrast, oklchToRgb, parseOklch, toHex } from "./color"
+import { generate } from "./generate"
+import { render } from "./render"
+
+const { css, email } = await generate()
+
+/** Every `--name: value` of the generated `selector { … }` block. */
+function vars(selector: ":root" | ".dark"): Map<string, string> {
+  const start = css.indexOf(`${selector} {`)
+  if (start === -1) throw new Error(`no "${selector}" block`)
+  const body = css.slice(start, css.indexOf("\n}", start))
+  const tokens = new Map<string, string>()
+  for (const [, name, value] of body.matchAll(/--([\w-]+):\s*([^;]+);/g)) {
+    if (name && value) tokens.set(name, value)
+  }
+  return tokens
+}
+
+const light = vars(":root")
+const dark = vars(".dark")
+
+/** The tokens that are the same in both themes, so `.dark` never repeats them. */
+const MODE_INDEPENDENT = [
+  /^radius$/,
+  /^spacing$/,
+  /^shadow/,
+  /^font-/,
+  /^tracking-/,
+  /^display-/,
+  /^text-/,
+  /^ease-/,
+]
+
+describe("the generated theme", () => {
+  test("every :root token has a .dark twin, apart from the mode-independent ones", () => {
+    const missing = [...light.keys()].filter(
+      (name) => !dark.has(name) && !MODE_INDEPENDENT.some((re) => re.test(name))
+    )
+    expect(missing).toEqual([])
+  })
+
+  test(".dark only sets tokens :root defines", () => {
+    expect([...dark.keys()].filter((name) => !light.has(name))).toEqual([])
+  })
+
+  test("mode-independent tokens are not repeated in .dark", () => {
+    expect([...dark.keys()].filter((name) => MODE_INDEPENDENT.some((re) => re.test(name)))).toEqual(
+      []
+    )
+  })
+
+  test("carries the coaching palette, not the boilerplate one", () => {
+    expect(light.get("background")).toBe("oklch(0.985 0.008 90)")
+    expect(dark.get("background")).toBe("oklch(0.21 0.012 200)")
+    expect(light.get("sun-soft")).toBe("oklch(0.975 0.045 97)")
+    expect(dark.get("sun-soft")).toBe("oklch(0.26 0.03 95)")
+  })
+
+  test("--radius is the coaching radius", () => {
+    expect(light.get("radius")).toBe("0.875rem")
+  })
+
+  test("keeps the easing and the display serif's fallback", () => {
+    expect(light.get("ease-out-soft")).toBe("cubic-bezier(0.2, 0.7, 0.2, 1)")
+    expect(light.get("display-family")).toBe(
+      'var(--font-display), Georgia, "Times New Roman", serif'
+    )
+  })
+
+  test("never writes the email-only tokens into the stylesheet", () => {
+    expect([...light.keys()].filter((name) => name.startsWith("email"))).toEqual([])
+  })
+})
+
+describe("the email constants", () => {
+  const hexOf = (name: string) => toHex(parseOklch(light.get(name) ?? ""))
+  const color = (key: string) => email.match(new RegExp(`\\b${key}: "(#[0-9a-f]{6})"`))?.[1]
+
+  test("are the light theme's colours as sRGB hex", () => {
+    expect(color("background")).toBe(toHex(parseOklch("oklch(0.985 0.008 90)")))
+    expect(color("sunSoft")).toBe(hexOf("sun-soft"))
+    expect(color("brandBlue")).toBe(hexOf("brand-blue"))
+  })
+
+  test("name every colour the templates use", () => {
+    for (const key of [
+      "background",
+      "foreground",
+      "muted",
+      "mutedForeground",
+      "primary",
+      "primaryForeground",
+      "border",
+      "brandBlue",
+      "sun",
+      "sunSoft",
+    ]) {
+      expect(color(key)).toMatch(/^#[0-9a-f]{6}$/)
+    }
+  })
+
+  test("set headings in Georgia, the display serif's fallback", () => {
+    expect(email).toContain(`display: "Georgia, 'Times New Roman', serif"`)
+  })
+})
+
+describe("the build", () => {
+  test("style-dictionary renders what the dependency-free drift check renders", async () => {
+    expect(await generate()).toEqual(render())
+  })
+})
+
+describe("color", () => {
+  test("parses oklch() in numbers and percentages", () => {
+    expect(parseOklch("oklch(1 0 0)")).toEqual(oklchToRgb(1, 0, 0))
+    expect(parseOklch("oklch(66.2% 0.225 25.9)")).toEqual(oklchToRgb(0.662, 0.225, 25.9))
+  })
+
+  test("writes white and black as hex", () => {
+    expect(toHex(oklchToRgb(1, 0, 0))).toBe("#ffffff")
+    expect(toHex(oklchToRgb(0, 0, 0))).toBe("#000000")
+  })
+
+  test("matches axe's figure for the old primary (#6366f1) behind white", () => {
+    expect(contrast([1, 1, 1], oklchToRgb(0.5854, 0.2041, 277.1173))).toBeCloseTo(4.47, 2)
+  })
+})

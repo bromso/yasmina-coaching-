@@ -1,7 +1,6 @@
-/* Import the design system from @repo/ui — the single source of truth — then the coaching look
-   (palette, sun tokens, display serif) the blog shares with www. App-specific extensions below. */
+/* Import the design system from @repo/ui — the single source of truth, the coaching look (palette,
+   sun tokens, display serif) included. App-specific extensions below. */
 @import "@repo/ui/globals.css";
-@import "@repo/ui/themes/coaching.css";
 
 /* Keep focused headings and anchors clear of the sticky header. */
 html {
