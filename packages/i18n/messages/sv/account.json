@@ -19,7 +19,6 @@
   },
   "locale": {
     "label": "Språk",
-    "submit": "Byt",
     "error": "Det gick inte att spara språket. Försök igen."
   },
   "status": {

@@ -2,7 +2,7 @@
 
 import { localeCookie, parseLocaleCookie } from "@repo/i18n/cookie"
 import { DEFAULT_LOCALE, isLocale, type Locale } from "@repo/i18n/locales"
-import { LocaleSwitcher } from "@repo/ui/components/locale-switcher"
+import { type LocaleOption, LocaleSwitcher } from "@repo/ui/components/locale-switcher"
 import { cn } from "@repo/ui/lib/utils"
 import { type ReactElement, useEffect, useState, useSyncExternalStore } from "react"
 
@@ -12,11 +12,9 @@ export type StaticLocaleSwitcherProps = {
   /** Passed to the cookie's `Domain` attribute, as `CookieConsent` already gets for the same app. */
   domain?: string
   /** Every locale, each labelled in its own language (`LOCALE_NAMES` from `@repo/i18n`). */
-  options: { value: string; label: string }[]
-  /** The select's accessible name. English: the static apps' own copy stays English. */
+  options: LocaleOption[]
+  /** Prefixes the menu trigger's accessible name. English: the static apps' copy stays English. */
   label?: string
-  /** The button's text. */
-  submitLabel?: string
   /** Shown in a polite live region once the pick is saved. */
   savedNote?: string
   /**
@@ -46,7 +44,7 @@ export function writeLocaleCookie(
 }
 
 /**
- * What pressing the button does, pure and separate from the component so a test can drive it
+ * What choosing a language in the menu does, pure and separate from the component so a test can drive it
  * without a browser: write the cookie, then either reload (`reloadOnChange`) or report that the
  * note should show. Returns whether the saved note is due.
  */
@@ -64,11 +62,12 @@ export function chooseLocale(
 }
 
 /**
- * The five static apps' header switcher. There is no form to fall back to (a static app has no
- * per-request server render to post to), so it stays unusable until hydrated — the
+ * The static apps' header switcher: `LocaleSwitcher`'s language menu, applied as soon as a
+ * language is chosen. There is no form to fall back to (a static app has no per-request server
+ * render to post to), so it stays unusable until hydrated — the
  * `useSyncExternalStore(subscribeNever, () => true, () => false)` probe `danger-zone.tsx` uses —
- * and writes the `locale` cookie itself on pick, the only persistence a static page can offer.
- * Before hydration it renders the same controls as an invisible placeholder
+ * and writes the `locale` cookie itself when a language is chosen, the only persistence a static
+ * page can offer. Before hydration it renders the same trigger as an invisible placeholder
  * (`visibility: hidden`, `aria-hidden`, `inert`: out of the accessibility tree, never focusable)
  * so the header's row keeps its width and nothing shifts when the real switcher appears.
  * Switching does not re-render the current (still English, still static) page: `savedNote` says
@@ -80,7 +79,6 @@ export function StaticLocaleSwitcher({
   domain,
   options,
   label,
-  submitLabel,
   savedNote = "Saved — signed-in pages will use it.",
   reloadOnChange = false,
   className,
@@ -103,7 +101,7 @@ export function StaticLocaleSwitcher({
   if (!hydrated) {
     return (
       <div aria-hidden="true" inert className={cn("invisible flex items-center gap-2", className)}>
-        <LocaleSwitcher current={value} options={options} label={label} submitLabel={submitLabel} />
+        <LocaleSwitcher current={value} options={options} label={label} />
       </div>
     )
   }
@@ -114,7 +112,6 @@ export function StaticLocaleSwitcher({
         current={value}
         options={options}
         label={label}
-        submitLabel={submitLabel}
         onChange={(locale) => {
           if (!isLocale(locale)) return
           const note = chooseLocale(

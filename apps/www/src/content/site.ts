@@ -20,7 +20,7 @@ export type SiteChrome = {
     overview: string
   }
   legal: { terms: string; privacy: string; contact: string }
-  switcher: { label: string; submit: string }
+  switcher: { label: string }
 }
 
 export const SITE: Record<Locale, SiteChrome> = {
@@ -41,7 +41,7 @@ export const SITE: Record<Locale, SiteChrome> = {
       overview: "På sidan",
     },
     legal: { terms: "Villkor", privacy: "Integritet", contact: "Kontakt" },
-    switcher: { label: "Språk", submit: "Byt" },
+    switcher: { label: "Språk" },
   },
   en: {
     book: "Book",
@@ -60,7 +60,7 @@ export const SITE: Record<Locale, SiteChrome> = {
       overview: "On this page",
     },
     legal: { terms: "Terms", privacy: "Privacy", contact: "Contact" },
-    switcher: { label: "Language", submit: "Change" },
+    switcher: { label: "Language" },
   },
 }
 

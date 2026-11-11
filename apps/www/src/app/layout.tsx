@@ -162,7 +162,6 @@ export default async function RootLayout({
                     domain={cookieDomain}
                     options={LOCALE_OPTIONS}
                     label={site.switcher.label}
-                    submitLabel={site.switcher.submit}
                     reloadOnChange
                   />
                 </>

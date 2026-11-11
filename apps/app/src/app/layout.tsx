@@ -188,7 +188,6 @@ export default async function RootLayout({
                       options={LOCALE_OPTIONS}
                       action={setLocale}
                       label={t("app.locale.label")}
-                      submitLabel={t("app.locale.submit")}
                     />
                     <ThemeToggle label={t("ui.themeToggle")} />
                   </>

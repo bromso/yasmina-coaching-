@@ -9,11 +9,12 @@ const options = [
 ]
 
 describe("StaticLocaleSwitcher, server render", () => {
-  test("an invisible, inert placeholder of the same controls until hydrated (no form fallback)", () => {
+  test("an invisible, inert placeholder of the same trigger until hydrated (no form fallback)", () => {
     const html = renderToStaticMarkup(<StaticLocaleSwitcher options={options} />)
-    // Same size as the real switcher, so nothing in the header shifts when it appears…
-    expect(html).toContain("<select")
-    expect(html).toContain(">Change</button>")
+    // Same size as the real switcher's trigger, so nothing in the header shifts when it appears…
+    expect(html).toContain("<summary")
+    expect(html).toContain('<span lang="en">English</span>')
+    expect(html).not.toContain("<select")
     // …but out of the accessibility tree and never focusable.
     expect(html).toMatch(/^<div aria-hidden="true" inert="" class="invisible /)
     expect(html).not.toContain('role="status"')

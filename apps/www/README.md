@@ -18,8 +18,9 @@ www is **bilingual**: Swedish by default, English when the visitor picks it.
   `src/lib/site-locale.ts`. Reading the cookie makes every page dynamic (ƒ); that is the price of
   switching the page itself.
 - **Switching.** The header's `StaticLocaleSwitcher` (in the navigation's panel) gets
-  `current={locale}` and `reloadOnChange`: pressing **Byt** / **Change** writes the cookie on the
-  shared cookie domain and reloads, so the page comes back in the other language at once (no
+  `current={locale}` and `reloadOnChange`: choosing **English** / **Svenska** in its language
+  menu (the trigger shows the current flag and name) writes the cookie on the shared cookie domain
+  and reloads, so the page comes back in the other language at once (no
   saved note). Switching needs JavaScript; reading the page in either language does not.
 - **Where each language's copy lives.** Every content file exports both languages with one type
   and a picker: `src/content/home.tsx` (`HOME`, `homeFor` — the landing page, the nav links, the
@@ -244,8 +245,8 @@ The banner reads the cookie after mount (a one-frame check on first visit).
 The header's `StaticLocaleSwitcher` (`@repo/ui/components/static-locale-switcher`) switches this
 page's language (see **Language**) and, through the shared `locale` cookie, the signed-in apps'
 too. Until hydrated it renders an invisible, `aria-hidden`, `inert` placeholder of the same size
-(the header must not shift when it appears), then adopts the cookie's own value; picking a
-language writes the cookie itself (`writeLocaleCookie`, the same `document.cookie = …` pattern
+(the header must not shift when it appears), then adopts the cookie's own value; choosing a
+language in its menu writes the cookie itself (`writeLocaleCookie`, the same `document.cookie = …` pattern
 `CookieConsent` above already uses, built from `@repo/i18n/cookie`'s `localeCookie`) and, with
 `reloadOnChange`, reloads the page. It takes the same build-time `cookieDomain` the consent banner
 does: building without `COOKIE_DOMAIN` writes a host-only cookie, so the choice holds on `www` only

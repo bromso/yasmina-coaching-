@@ -5,6 +5,13 @@ export const LOCALES = ["en", "sv"] as const
 export type Locale = (typeof LOCALES)[number]
 export const DEFAULT_LOCALE: Locale = "en"
 export const LOCALE_NAMES: Record<Locale, string> = { en: "English", sv: "Svenska" }
+/**
+ * Each locale's flag in the header's language menu: an Iconify name from the `circle-flags` set,
+ * bundled offline by `bun icons:bundle` (which scans this file). English shows the British flag,
+ * the spelling the site uses. Decorative only — the language's name always carries the meaning.
+ * A new locale is one entry here (and one in `LOCALE_NAMES`), then `bun icons:bundle`.
+ */
+export const LOCALE_FLAGS: Record<Locale, string> = { en: "circle-flags:gb", sv: "circle-flags:se" }
 
 export function isLocale(value: unknown): value is Locale {
   return typeof value === "string" && (LOCALES as readonly string[]).includes(value)
