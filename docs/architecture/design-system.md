@@ -38,8 +38,16 @@ Two token groups exist for layout, not looks:
 
 - `--site-header-inset`, `--site-header-bar` and `--site-header-height` (their sum): the header's
   pill from `sm` up. A fixed sidebar below it starts at `--site-header-height` (`belowSiteHeader`).
+  `--site-header-radius` and `--site-header-max-width` are the pill's corners and widest width
+  (`siteHeaderBar`).
+- `--site-header-offset` (`--site-header-height` plus `--site-header-gap`, 96 px): where an in-page
+  jump stops below a stuck header. `SiteHeaderShell sticky` marks the header `data-sticky`; only
+  then does `globals.css` set `--sticky-header-offset` to it (otherwise `0px`) and give `<html>` a
+  `scroll-padding-top` of it plus the safe-area inset. An element that needs its own scroll margin
+  (www's sections, the MDX headings) uses `scroll-mt-(--sticky-header-offset)`, never a literal.
 - `--layer-sidebar` (10) and `--layer-above-sidebar` (always one above it): what covers the fixed
-  sidebar where they meet, i.e. account's footer (`aboveSidebar`).
+  sidebar where they meet, i.e. account's footer (`aboveSidebar`). `--layer-header` (50) stacks the
+  sticky header.
 
 ## One stylesheet
 

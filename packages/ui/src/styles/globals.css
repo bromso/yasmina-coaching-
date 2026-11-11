@@ -389,9 +389,18 @@ h2 {
   }
 }
 
+/* Keeps in-page jumps and focused elements clear of a stuck header (`SiteHeaderShell sticky`
+   marks it `data-sticky`): `--sticky-header-offset` is the header's height plus a gap
+   (`--site-header-offset`, from the tokens) when one is stuck, and 0 when the header scrolls away.
+   The page's scroll padding and any element's `scroll-mt-(--sticky-header-offset)` read it. */
 html {
-  /* Keeps focused elements clear of a sticky header. */
-  scroll-padding-top: 6rem;
+  --sticky-header-offset: 0px;
+}
+html:has([data-slot="site-header"][data-sticky]) {
+  --sticky-header-offset: var(--site-header-offset);
+  scroll-padding-top: calc(var(--sticky-header-offset) + env(safe-area-inset-top, 0px));
+}
+html {
   /* Keeps body's own overflow below from propagating to the viewport (CSS Overflow: a root with
      `visible` hands body's value up, where `clip` becomes `hidden` — the document then still
      measures wider than 320 px and pans sideways on touch). With the root set, body clips

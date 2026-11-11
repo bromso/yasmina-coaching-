@@ -3,13 +3,14 @@ import type * as React from "react"
 
 /**
  * The bar's look, www's floating pill: rounded, translucent over the page, a hairline ring and a
- * blur behind. `SiteHeader` draws its bar with it; an app whose navigation draws (and animates)
+ * blur behind. Its radius and widest width are `--site-header-radius` and
+ * `--site-header-max-width` (`packages/tokens`). `SiteHeader` draws its bar with it; an app whose navigation draws (and animates)
  * its own bar, as www's `ExploreNav` does, puts these classes on that element instead.
  * Kept in this server- and client-safe file so a client component can import it without pulling
  * the header's sheet into its bundle.
  */
 export const siteHeaderBar =
-  "w-full max-w-[1024px] rounded-[18px] bg-background/85 py-3 shadow-[0_0_0_1px_var(--border)] backdrop-blur-xl"
+  "w-full max-w-(--site-header-max-width) rounded-(--site-header-radius) bg-background/85 py-3 shadow-[0_0_0_1px_var(--border)] backdrop-blur-xl"
 
 /**
  * For a fixed element that starts below the stuck header (account's desktop sidebar): its `top`
@@ -28,7 +29,12 @@ export const belowSiteHeader =
 export const aboveSidebar = "relative z-(--layer-above-sidebar) bg-background"
 
 type SiteHeaderShellProps = React.ComponentProps<"header"> & {
-  /** Pins the header to the top of the viewport, above the page. */
+  /**
+   * Pins the header to the top of the viewport, above the page (`--layer-header`). It also marks
+   * the header `data-sticky`, which gives the page its scroll padding (`--site-header-offset`), so
+   * an in-page jump stops below the header instead of under it; a header that scrolls away gives
+   * none.
+   */
   sticky?: boolean
 }
 
@@ -41,10 +47,11 @@ export function SiteHeaderShell({ sticky, className, children, ...props }: SiteH
   return (
     <header
       data-slot="site-header"
+      data-sticky={sticky ? "" : undefined}
       className={cn(
         "flex justify-center px-2.5 pt-(--site-header-inset) lg:px-4",
         // Stuck below a notch or status bar when the page draws under it (`viewport-fit=cover`).
-        sticky && "sticky top-[env(safe-area-inset-top,0px)] z-50",
+        sticky && "sticky top-[env(safe-area-inset-top,0px)] z-(--layer-header)",
         className
       )}
       {...props}

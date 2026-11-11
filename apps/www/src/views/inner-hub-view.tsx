@@ -109,7 +109,7 @@ export function InnerHubView({ locale }: { locale: Locale }) {
       <section
         id="services"
         aria-labelledby="services-title"
-        className="scroll-mt-24 bg-linear-to-b from-background via-sun-soft to-background py-24 lg:py-32"
+        className="scroll-mt-(--sticky-header-offset) bg-linear-to-b from-background via-sun-soft to-background py-24 lg:py-32"
       >
         <div className="container">
           <Reveal className="max-w-3xl">
@@ -241,7 +241,7 @@ export function InnerHubView({ locale }: { locale: Locale }) {
           heading={hub.faq.heading}
           items={hub.faq.items}
           jsonLd
-          className="scroll-mt-24"
+          className="scroll-mt-(--sticky-header-offset)"
         />
       </Reveal>
 

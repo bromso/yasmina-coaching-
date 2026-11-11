@@ -84,7 +84,7 @@ export function OfferingView({
             <Eyebrow>{booking.kindLines[spec.kind]}</Eyebrow>
             <h1
               id="offering-title"
-              className="mt-5 scroll-mt-24 hyphens-auto text-balance break-words text-3xl sm:text-5xl"
+              className="mt-5 scroll-mt-(--sticky-header-offset) hyphens-auto text-balance break-words text-3xl sm:text-5xl"
             >
               {copy.title}
             </h1>

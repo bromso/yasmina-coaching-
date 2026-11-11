@@ -34,7 +34,7 @@ export function YogaPractice({
       <section
         id={id}
         aria-labelledby={`${id}-title`}
-        className="container scroll-mt-24 py-20 lg:py-28"
+        className="container scroll-mt-(--sticky-header-offset) py-20 lg:py-28"
       >
         <Reveal className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:items-center">
           <div className="lg:col-span-7">

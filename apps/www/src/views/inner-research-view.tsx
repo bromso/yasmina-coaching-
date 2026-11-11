@@ -102,7 +102,7 @@ export function InnerResearchView({ locale }: { locale: Locale }) {
                 key={ref.n}
                 id={`ref-${ref.n}`}
                 value={ref.n}
-                className="flex scroll-mt-24 gap-3 break-words"
+                className="flex scroll-mt-(--sticky-header-offset) gap-3 break-words"
               >
                 <span className="w-6 shrink-0 font-display text-base">{ref.n}.</span>
                 <span className="min-w-0">

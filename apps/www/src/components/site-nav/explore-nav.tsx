@@ -150,9 +150,10 @@ export function ExploreNav({
         <m.nav
           aria-label={labels.nav}
           initial={false}
-          animate={{ borderRadius: open ? 28 : 18 }}
+          // Inline, so the layout animation can correct the corners while the pill scales: the
+          // closed bar's radius is the token `siteHeaderBar` draws with.
+          animate={{ borderRadius: open ? 28 : "var(--site-header-radius)" }}
           layout
-          style={{ paddingBlock: 12 }}
           className={cn(
             siteHeaderBar,
             open ? "max-h-[calc(100dvh-1.5rem)] overflow-y-auto" : "overflow-hidden"

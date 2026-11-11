@@ -24,7 +24,7 @@ export function WhySection({ id, heading, reasons, clip, still, clipLabels }: Wh
     <section
       id={id}
       aria-labelledby={`${id}-title`}
-      className="scroll-mt-24 container py-24 lg:py-32"
+      className="scroll-mt-(--sticky-header-offset) container py-24 lg:py-32"
     >
       <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
         <Reveal className="lg:col-span-5">

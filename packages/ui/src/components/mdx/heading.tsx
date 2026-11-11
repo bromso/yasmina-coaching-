@@ -27,14 +27,17 @@ function anchorLabel(children: ReactNode): string {
 
 /**
  * An MDX heading that keeps the `id` fumadocs sets on it and adds a visible-on-hover "#" anchor
- * linking to that same id. `scroll-mt-24` keeps the heading clear of the sticky site header when
- * the anchor (or a Toc entry) is followed.
+ * linking to that same id. Its scroll margin (`--sticky-header-offset`) keeps the heading clear of a
+ * stuck site header when the anchor (or a Toc entry) is followed; with no stuck header it is 0.
  */
 export function Heading({ as: Tag, id, children, className, ...props }: HeadingProps) {
   return (
     <Tag
       id={id}
-      className={cn("group relative scroll-mt-24 font-semibold tracking-tight", className)}
+      className={cn(
+        "group relative scroll-mt-(--sticky-header-offset) font-semibold tracking-tight",
+        className
+      )}
       {...props}
     >
       {children}

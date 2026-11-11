@@ -42,7 +42,7 @@ export function PriceCard({ service, prices, labels, locale }: PriceCardProps) {
       as="section"
       id="price"
       aria-labelledby="price-title"
-      className="scroll-mt-24 px-6 py-10 sm:px-10 lg:px-14 lg:py-14"
+      className="scroll-mt-(--sticky-header-offset) px-6 py-10 sm:px-10 lg:px-14 lg:py-14"
     >
       <h2 id="price-title" className="text-balance text-4xl sm:text-5xl">
         {text.title}

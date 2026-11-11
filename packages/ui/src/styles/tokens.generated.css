@@ -79,6 +79,7 @@
   --sun-soft: oklch(0.975 0.045 97);
   --layer-sidebar: 10;
   --layer-above-sidebar: calc(10 + 1);
+  --layer-header: 50;
   --ease-out-soft: cubic-bezier(0.2, 0.7, 0.2, 1);
   --radius: 0.875rem;
   --shadow-x: 0px;
@@ -98,6 +99,10 @@
   --site-header-inset: 0.625rem;
   --site-header-bar: 3.75rem;
   --site-header-height: calc(0.625rem + 3.75rem);
+  --site-header-gap: 1.625rem;
+  --site-header-offset: calc(calc(0.625rem + 3.75rem) + 1.625rem);
+  --site-header-radius: 1.125rem;
+  --site-header-max-width: 64rem;
   --spacing: 0.25rem;
   --font-sans: Inter, sans-serif;
   --font-serif: Merriweather, serif;

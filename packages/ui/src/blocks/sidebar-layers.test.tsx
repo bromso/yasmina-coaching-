@@ -36,3 +36,29 @@ describe("the fixed sidebar and what covers it share one stacking source", () =>
     ])
   })
 })
+
+describe("the header's offsets and layer come from the tokens", () => {
+  const globals = readFileSync(new URL("../styles/globals.css", import.meta.url), "utf8").replace(
+    /\/\*[\s\S]*?\*\//g,
+    ""
+  )
+  test("--site-header-offset is the header plus a gap: www's 96 px of scroll padding", () => {
+    expect(token("site-header-offset")).toBe("calc(calc(0.625rem + 3.75rem) + 1.625rem)")
+  })
+  test("only a page with a stuck header gets an offset, from the offset token", () => {
+    const rule = (selector: string) =>
+      globals.match(
+        new RegExp(`(?:^|\\})\\s*${selector.replace(/[[\]()]/g, "\\$&")}\\s*\\{([^}]*)\\}`)
+      )?.[1]
+    expect(rule("html")).toContain("--sticky-header-offset: 0px;")
+    const stuck = rule('html:has([data-slot="site-header"][data-sticky])')
+    expect(stuck).toContain("--sticky-header-offset: var(--site-header-offset);")
+    expect(stuck).toContain(
+      "scroll-padding-top: calc(var(--sticky-header-offset) + env(safe-area-inset-top, 0px));"
+    )
+    expect(globals.match(/scroll-padding-top/g)).toHaveLength(1)
+  })
+  test("the header stacks at --layer-header", () => {
+    expect(Number(token("layer-header"))).toBe(50)
+  })
+})

@@ -20,7 +20,7 @@ export function OffersSection({ id, heading, items, media }: OffersSectionProps)
     <section
       id={id}
       aria-labelledby={`${id}-title`}
-      className="scroll-mt-24 bg-linear-to-b from-background via-sun-soft to-background py-24 lg:py-32"
+      className="scroll-mt-(--sticky-header-offset) bg-linear-to-b from-background via-sun-soft to-background py-24 lg:py-32"
     >
       <div className="container">
         <Reveal className="max-w-3xl">

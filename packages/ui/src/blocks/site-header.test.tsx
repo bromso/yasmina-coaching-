@@ -104,7 +104,7 @@ describe("SiteHeader", () => {
     const classesOf = (html: string, re: RegExp) => (html.match(re)?.[1] ?? "").split(" ")
     test("the header is the shell: centred, padded off the edges, transparent", () => {
       const html = renderToStaticMarkup(<SiteHeader brand={<span>B</span>} links={links} />)
-      const header = classesOf(html, /<header data-slot="site-header" class="([^"]*)"/)
+      const header = classesOf(html, /<header data-slot="site-header"[^>]*class="([^"]*)"/)
       for (const c of ["flex", "justify-center", "px-2.5", "pt-(--site-header-inset)", "lg:px-4"]) {
         expect(header).toContain(c)
       }
@@ -120,11 +120,11 @@ describe("SiteHeader", () => {
     })
     test("siteHeaderBar is www's rounded, translucent, hairline-ringed pill", () => {
       for (const c of [
-        "rounded-[18px]",
+        "rounded-(--site-header-radius)",
         "bg-background/85",
         "shadow-[0_0_0_1px_var(--border)]",
         "backdrop-blur-xl",
-        "max-w-[1024px]",
+        "max-w-(--site-header-max-width)",
         "py-3",
       ]) {
         expect(siteHeaderBar.split(" ")).toContain(c)
@@ -137,10 +137,16 @@ describe("SiteHeader", () => {
     })
     test("sticky pins the shell below the safe-area inset, above the page", () => {
       const html = renderToStaticMarkup(<SiteHeader brand={<span>B</span>} links={[]} sticky />)
-      const header = classesOf(html, /<header data-slot="site-header" class="([^"]*)"/)
-      for (const c of ["sticky", "top-[env(safe-area-inset-top,0px)]", "z-50"]) {
+      const header = classesOf(html, /<header data-slot="site-header"[^>]*class="([^"]*)"/)
+      for (const c of ["sticky", "top-[env(safe-area-inset-top,0px)]", "z-(--layer-header)"]) {
         expect(header).toContain(c)
       }
+      // The page's scroll padding keys off this: in-page jumps stop below a stuck header only.
+      expect(html).toMatch(/<header data-slot="site-header" data-sticky=""/)
+    })
+    test("a header that scrolls away carries no sticky marker, so the page gets no offset", () => {
+      const html = renderToStaticMarkup(<SiteHeader brand={<span>B</span>} links={[]} />)
+      expect(html).not.toContain("data-sticky")
     })
   })
   describe("the nav slot: an app's own navigation", () => {

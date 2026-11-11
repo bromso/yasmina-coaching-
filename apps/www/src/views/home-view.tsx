@@ -67,10 +67,13 @@ export function HomeView({ locale }: { locale: Locale }) {
           heading={home.faq.heading}
           items={home.faq.items}
           jsonLd
-          className="scroll-mt-24"
+          className="scroll-mt-(--sticky-header-offset)"
         />
       </Reveal>
-      <div id="contact" className="scroll-mt-24 px-2.5 pb-2.5 lg:px-4 lg:pb-4">
+      <div
+        id="contact"
+        className="scroll-mt-(--sticky-header-offset) px-2.5 pb-2.5 lg:px-4 lg:pb-4"
+      >
         <Reveal className="relative overflow-hidden rounded-4xl bg-linear-to-b from-sun-soft via-sun to-sun px-6 py-24 lg:py-32">
           {/* On wide screens a small portrait leans into the band's right edge; the teaser keeps its centre. */}
           <Picture

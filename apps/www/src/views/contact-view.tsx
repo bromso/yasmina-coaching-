@@ -34,7 +34,7 @@ export function ContactView({ page, locale }: ContactViewProps) {
             <Eyebrow>{copy.hero.eyebrow}</Eyebrow>
             <h1
               id="contact-title"
-              className="mt-5 scroll-mt-24 hyphens-auto text-balance break-words text-4xl sm:text-5xl"
+              className="mt-5 scroll-mt-(--sticky-header-offset) hyphens-auto text-balance break-words text-4xl sm:text-5xl"
             >
               {copy.hero.title}
             </h1>

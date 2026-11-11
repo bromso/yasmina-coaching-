@@ -12,7 +12,7 @@ export function StepsSection({ id, heading, items }: StepsSectionProps) {
       <section
         id={id}
         aria-labelledby={`${id}-title`}
-        className="scroll-mt-24 container py-24 lg:py-32"
+        className="scroll-mt-(--sticky-header-offset) container py-24 lg:py-32"
       >
         <Reveal className="mx-auto max-w-2xl text-center">
           <Eyebrow>{heading.eyebrow}</Eyebrow>

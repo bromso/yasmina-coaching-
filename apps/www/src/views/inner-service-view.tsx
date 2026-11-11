@@ -181,7 +181,7 @@ export function InnerServiceView({ id, locale }: InnerServiceViewProps) {
           heading={{ title: labels.faq }}
           items={service.faq}
           jsonLd
-          className="scroll-mt-24"
+          className="scroll-mt-(--sticky-header-offset)"
         />
       </Reveal>
 

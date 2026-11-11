@@ -42,7 +42,10 @@ export function ManageView({ token, data, cancelledId, locale }: ManageViewProps
     <main id="main">
       <section aria-labelledby="manage-title" className="container max-w-3xl py-16 lg:py-24">
         <Eyebrow>{booking.manage.eyebrow}</Eyebrow>
-        <h1 id="manage-title" className="mt-5 scroll-mt-24 text-balance text-4xl sm:text-5xl">
+        <h1
+          id="manage-title"
+          className="mt-5 scroll-mt-(--sticky-header-offset) text-balance text-4xl sm:text-5xl"
+        >
           {booking.manage.title}
         </h1>
         <p className="mt-4 text-muted-foreground">

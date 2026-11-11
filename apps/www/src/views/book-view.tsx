@@ -40,7 +40,7 @@ export function BookView({ audience, locale }: BookViewProps) {
           <Eyebrow>{booking.catalog.eyebrow}</Eyebrow>
           <h1
             id="book-title"
-            className="mt-5 scroll-mt-24 text-balance text-4xl sm:text-5xl lg:text-6xl"
+            className="mt-5 scroll-mt-(--sticky-header-offset) text-balance text-4xl sm:text-5xl lg:text-6xl"
           >
             {booking.catalog.title}
           </h1>

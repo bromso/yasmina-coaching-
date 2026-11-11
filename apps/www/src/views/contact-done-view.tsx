@@ -38,7 +38,10 @@ export function ContactDoneView({ reference, answers, blogUrl, locale }: Contact
             className="mb-8"
           />
           <Eyebrow>{copy.done.eyebrow}</Eyebrow>
-          <h1 id="done-title" className="mt-5 scroll-mt-24 text-balance text-4xl sm:text-5xl">
+          <h1
+            id="done-title"
+            className="mt-5 scroll-mt-(--sticky-header-offset) text-balance text-4xl sm:text-5xl"
+          >
             {copy.done.title}
           </h1>
           <p className="mt-6 text-pretty text-lg text-muted-foreground">{copy.done.body}</p>

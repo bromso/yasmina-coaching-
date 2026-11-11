@@ -49,7 +49,7 @@ export function StepPanel({ n, active, heading, children, className }: StepPanel
         id={`step-${n}-heading`}
         ref={headingRef}
         tabIndex={-1}
-        className="scroll-mt-28 font-display text-2xl focus:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        className="scroll-mt-(--sticky-header-offset) font-display text-2xl focus:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
       >
         {heading}
       </h2>

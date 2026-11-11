@@ -16,11 +16,7 @@ type ExploreNavBarProps = {
  */
 export function ExploreNavBar({ brand, book, sections, labels }: ExploreNavBarProps) {
   return (
-    <nav
-      aria-label={labels.nav}
-      style={{ paddingBlock: 12, borderRadius: 18 }}
-      className={cn(siteHeaderBar, "overflow-hidden")}
-    >
+    <nav aria-label={labels.nav} className={cn(siteHeaderBar, "overflow-hidden")}>
       <div className="flex min-h-8 w-full items-center justify-between gap-3 px-4">
         <div className="min-w-0">
           <a
