@@ -81,11 +81,11 @@ test("the newest post opens with its title and links to its translation", async 
   await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible()
   await expect(page.locator("html")).toHaveAttribute("lang", "sv")
   // The post's own closing line and the call to action below it may both offer the intro call;
-  // every such link must open www's intro-call form.
+  // every such link must open www's contact page.
   const introCall = page.getByRole("link", { name: "Be om ett kostnadsfritt introsamtal" })
   await expect(introCall.first()).toBeVisible()
   for (const link of await introCall.all()) {
-    await expect(link).toHaveAttribute("href", `${URLS.www}/#contact`)
+    await expect(link).toHaveAttribute("href", `${URLS.www}/kontakt`)
   }
   await page.getByRole("link", { name: "Read in English" }).click()
   await expect(page).toHaveURL(`${URLS.blog}/en/leading-through-a-crisis`)

@@ -15,7 +15,7 @@ export type A11yPage = {
   /** Overrides `variantsFor`'s default. */
   variants?: Variant[]
   /** A page whose path is only known at run time (an id), resolved by the sweep. */
-  setup?: "adminUser" | "adminWorkspace" | "adminBooking"
+  setup?: "adminUser" | "adminWorkspace" | "adminBooking" | "adminLead"
 }
 
 const APPS: AppId[] = ["www", "app", "auth", "account", "docs", "help", "jobs", "blog"]
@@ -56,6 +56,14 @@ export const A11Y_PAGES: A11yPage[] = [
   { app: "www", path: "/book/inner_group", route: "/book/[offering]", auth: "none" },
   { app: "www", path: "/book/workshop", route: "/book/[offering]", auth: "none" },
   { app: "www", path: "/book/done?ref=BK-1&kind=request", auth: "none" },
+  // The contact form (also in English) and its done page with the explore step (the longest).
+  { app: "www", path: "/kontakt", auth: "none", variants: ["light", "dark", "en-light"] },
+  {
+    app: "www",
+    path: "/kontakt/tack?ref=LEAD-1&for=private&need=unsure&when=exploring",
+    route: "/kontakt/tack",
+    auth: "none",
+  },
   notFound("www"),
   // app (signed in, with a workspace and a note)
   { app: "app", path: "/", auth: "user" },
@@ -98,6 +106,8 @@ export const A11Y_PAGES: A11yPage[] = [
   { app: "auth", path: "/admin/bookings/[id]", auth: "superadmin", setup: "adminBooking" },
   { app: "auth", path: "/admin/bookings/availability", auth: "superadmin" },
   { app: "auth", path: "/admin/bookings/groups", auth: "superadmin" },
+  { app: "auth", path: "/admin/leads", auth: "superadmin" },
+  { app: "auth", path: "/admin/leads/[id]", auth: "superadmin", setup: "adminLead" },
   // account (signed in)
   { app: "account", path: "/", auth: "user" },
   { app: "account", path: "/personal-info", auth: "user" },
