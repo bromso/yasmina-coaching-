@@ -3,6 +3,12 @@
 # Turn on Advanced → Isolated Deployments: Dokploy then puts every service on the stack's own
 # network and connects Traefik to it, so the services reach each other by name (http://api:3007).
 # Builds run on the server: give it at least 8 GB RAM, or deploy a few services at a time.
+#
+# Routing and the staging lock live here as Traefik labels, not in Dokploy's Domains tab (which
+# cannot attach a password to a Compose service): every app answers only on https, behind HTTP
+# basic auth (BASIC_AUTH_USERS, one `user:bcrypt-hash` from `htpasswd -nbB`), with
+# `X-Robots-Tag: noindex`; http redirects to https. Keep the Domains tab empty, or the two sets
+# of routers compete for the same hosts.
 
 x-repo: &repo "https://github.com/bromso/yasmina-coaching-.git#${GIT_REF:-main}"
 
@@ -24,6 +30,24 @@ services:
       dockerfile: docker/next.Dockerfile
       args: { APP: www, PORT: 3000, SITE_DOMAIN: "${SITE_DOMAIN}", SITE_HOST_PREFIX: "${SITE_HOST_PREFIX:-}", COOKIE_DOMAIN: "${COOKIE_DOMAIN}" }
     expose: ["3000"]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.yasmina-www.rule=Host(`${SITE_HOST_PREFIX:-}www.${SITE_DOMAIN}`)
+      - traefik.http.routers.yasmina-www.entrypoints=websecure
+      - traefik.http.routers.yasmina-www.tls.certresolver=letsencrypt
+      - traefik.http.routers.yasmina-www.middlewares=yasmina-lock,yasmina-noindex
+      - traefik.http.routers.yasmina-www.service=yasmina-www
+      - traefik.http.routers.yasmina-www-http.rule=Host(`${SITE_HOST_PREFIX:-}www.${SITE_DOMAIN}`)
+      - traefik.http.routers.yasmina-www-http.entrypoints=web
+      - traefik.http.routers.yasmina-www-http.middlewares=yasmina-https
+      - traefik.http.routers.yasmina-www-http.service=yasmina-www
+      - traefik.http.services.yasmina-www.loadbalancer.server.port=3000
+      # The staging lock, shared by every router above and in the other services.
+      - "traefik.http.middlewares.yasmina-lock.basicauth.users=${BASIC_AUTH_USERS:?set BASIC_AUTH_USERS (htpasswd -nbB) so the site is never served unlocked}"
+      - traefik.http.middlewares.yasmina-lock.basicauth.realm=Yasmina staging
+      - traefik.http.middlewares.yasmina-noindex.headers.customresponseheaders.X-Robots-Tag=noindex, nofollow
+      - traefik.http.middlewares.yasmina-https.redirectscheme.scheme=https
+      - traefik.http.middlewares.yasmina-https.redirectscheme.permanent=true
     environment:
       API_URL: http://api:3007
       API_SERVICE_TOKEN: ${API_SERVICE_TOKEN}
@@ -37,6 +61,18 @@ services:
       dockerfile: docker/next.Dockerfile
       args: { APP: blog, PORT: 3009, SITE_DOMAIN: "${SITE_DOMAIN}", SITE_HOST_PREFIX: "${SITE_HOST_PREFIX:-}", COOKIE_DOMAIN: "${COOKIE_DOMAIN}" }
     expose: ["3009"]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.yasmina-blog.rule=Host(`${SITE_HOST_PREFIX:-}blog.${SITE_DOMAIN}`)
+      - traefik.http.routers.yasmina-blog.entrypoints=websecure
+      - traefik.http.routers.yasmina-blog.tls.certresolver=letsencrypt
+      - traefik.http.routers.yasmina-blog.middlewares=yasmina-lock,yasmina-noindex
+      - traefik.http.routers.yasmina-blog.service=yasmina-blog
+      - traefik.http.routers.yasmina-blog-http.rule=Host(`${SITE_HOST_PREFIX:-}blog.${SITE_DOMAIN}`)
+      - traefik.http.routers.yasmina-blog-http.entrypoints=web
+      - traefik.http.routers.yasmina-blog-http.middlewares=yasmina-https
+      - traefik.http.routers.yasmina-blog-http.service=yasmina-blog
+      - traefik.http.services.yasmina-blog.loadbalancer.server.port=3009
     environment:
       API_URL: http://api:3007
       API_SERVICE_TOKEN: ${API_SERVICE_TOKEN}
@@ -48,6 +84,18 @@ services:
       dockerfile: docker/next.Dockerfile
       args: { APP: auth, PORT: 3002, SITE_DOMAIN: "${SITE_DOMAIN}", SITE_HOST_PREFIX: "${SITE_HOST_PREFIX:-}" }
     expose: ["3002"]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.yasmina-auth.rule=Host(`${SITE_HOST_PREFIX:-}auth.${SITE_DOMAIN}`)
+      - traefik.http.routers.yasmina-auth.entrypoints=websecure
+      - traefik.http.routers.yasmina-auth.tls.certresolver=letsencrypt
+      - traefik.http.routers.yasmina-auth.middlewares=yasmina-lock,yasmina-noindex
+      - traefik.http.routers.yasmina-auth.service=yasmina-auth
+      - traefik.http.routers.yasmina-auth-http.rule=Host(`${SITE_HOST_PREFIX:-}auth.${SITE_DOMAIN}`)
+      - traefik.http.routers.yasmina-auth-http.entrypoints=web
+      - traefik.http.routers.yasmina-auth-http.middlewares=yasmina-https
+      - traefik.http.routers.yasmina-auth-http.service=yasmina-auth
+      - traefik.http.services.yasmina-auth.loadbalancer.server.port=3002
     environment: *auth-env
     depends_on: { api: { condition: service_healthy } }
 
@@ -58,6 +106,18 @@ services:
       dockerfile: docker/next.Dockerfile
       args: { APP: app, PORT: 3001, SITE_DOMAIN: "${SITE_DOMAIN}", SITE_HOST_PREFIX: "${SITE_HOST_PREFIX:-}" }
     expose: ["3001"]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.yasmina-app.rule=Host(`${SITE_HOST_PREFIX:-}app.${SITE_DOMAIN}`)
+      - traefik.http.routers.yasmina-app.entrypoints=websecure
+      - traefik.http.routers.yasmina-app.tls.certresolver=letsencrypt
+      - traefik.http.routers.yasmina-app.middlewares=yasmina-lock,yasmina-noindex
+      - traefik.http.routers.yasmina-app.service=yasmina-app
+      - traefik.http.routers.yasmina-app-http.rule=Host(`${SITE_HOST_PREFIX:-}app.${SITE_DOMAIN}`)
+      - traefik.http.routers.yasmina-app-http.entrypoints=web
+      - traefik.http.routers.yasmina-app-http.middlewares=yasmina-https
+      - traefik.http.routers.yasmina-app-http.service=yasmina-app
+      - traefik.http.services.yasmina-app.loadbalancer.server.port=3001
     environment: *auth-env
     depends_on: { api: { condition: service_healthy } }
 
@@ -68,6 +128,18 @@ services:
       dockerfile: docker/next.Dockerfile
       args: { APP: account, PORT: 3003, SITE_DOMAIN: "${SITE_DOMAIN}", SITE_HOST_PREFIX: "${SITE_HOST_PREFIX:-}" }
     expose: ["3003"]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.yasmina-account.rule=Host(`${SITE_HOST_PREFIX:-}account.${SITE_DOMAIN}`)
+      - traefik.http.routers.yasmina-account.entrypoints=websecure
+      - traefik.http.routers.yasmina-account.tls.certresolver=letsencrypt
+      - traefik.http.routers.yasmina-account.middlewares=yasmina-lock,yasmina-noindex
+      - traefik.http.routers.yasmina-account.service=yasmina-account
+      - traefik.http.routers.yasmina-account-http.rule=Host(`${SITE_HOST_PREFIX:-}account.${SITE_DOMAIN}`)
+      - traefik.http.routers.yasmina-account-http.entrypoints=web
+      - traefik.http.routers.yasmina-account-http.middlewares=yasmina-https
+      - traefik.http.routers.yasmina-account-http.service=yasmina-account
+      - traefik.http.services.yasmina-account.loadbalancer.server.port=3003
     environment: *auth-env
     depends_on: { api: { condition: service_healthy } }
 

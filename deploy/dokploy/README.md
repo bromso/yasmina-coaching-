@@ -26,3 +26,20 @@ keep the two-factor key, a new one locks out everyone with two-step verification
 `COOKIE_DOMAIN` is `.<domain>`: the sign-in cookie is shared with every host under that domain, so
 on a shared staging domain such as `undefined.guru`, never run anything untrusted on a sibling
 subdomain.
+
+## Staging lock (password)
+
+Every app is behind HTTP basic auth and sends `X-Robots-Tag: noindex`, routed by the Traefik
+labels in `docker-compose.yml` (Dokploy's Domains tab cannot add a password to a Compose service).
+
+1. Make the password line on your own machine (macOS has `htpasswd`):
+   `htpasswd -nbB yasmina 'a-long-password'`
+2. Dokploy → the service → **Environment**: set `BASIC_AUTH_USERS` to that line **in single
+   quotes**, e.g. `BASIC_AUTH_USERS='yasmina:$2y$05$…'` (the quotes keep the `$` signs literal).
+   Several people: separate lines with a comma.
+3. **Domains** tab: delete the domains there. The labels route the hosts themselves; both at once
+   compete for the same hosts.
+4. Redeploy. Without `BASIC_AUTH_USERS` the deploy stops with an error instead of going out open.
+
+To open the site to everyone later, remove the `yasmina-lock` (and, for production, `yasmina-noindex`)
+middleware from each router's `middlewares=` label.
