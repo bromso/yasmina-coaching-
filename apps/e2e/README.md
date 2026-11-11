@@ -2,7 +2,7 @@
 
 Browser end-to-end tests (Playwright) against **production builds** of `www`, `app`, `auth`,
 `account`, `blog`, `docs`, `help` and `jobs`, plus `apps/api` and `apps/ai`, all started by
-`playwright.config.ts` on their real `*.brand.localhost` hosts and ports. 420 tests across 41 spec
+`playwright.config.ts` on their real `*.brand.localhost` hosts and ports. 422 tests across 41 spec
 files, Chromium only, run serially (`workers: 1`) because every test shares one database and the
 api's in-memory rate limiters.
 

@@ -650,7 +650,7 @@ installs Chromium, builds `www`, `app`, `auth`, `account`, `blog`, `docs`, `help
 `COOKIE_DOMAIN=.brand.localhost`: `next build` runs in production mode, where the static apps'
 consent and locale cookies would otherwise be host-only, and `i18n.spec.ts` needs www's locale
 choice to reach `auth`), builds the bundle budgets for all eight (`bun scripts/bundle-budget.ts
---write-results …`, writing its measurement to `perf/.results` too), then runs the 420
+--write-results …`, writing its measurement to `perf/.results` too), then runs the 422
 Playwright tests in `apps/e2e/tests/` (41 spec files — including `perf-lighthouse.spec.ts` and
 `perf-vitals.spec.ts`, each writing its own measurements to `perf/.results` with
 `PERF_WRITE_RESULTS=1`; see **Performance**) against those production builds plus
