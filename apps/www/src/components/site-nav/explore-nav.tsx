@@ -194,7 +194,7 @@ export function ExploreNav({
                   "flex items-center justify-center border text-xs outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
                   open
                     ? "border-foreground/80 text-background"
-                    : "border-border text-foreground transition-colors hover:bg-muted"
+                    : "border-input text-foreground transition-colors hover:bg-muted"
                 )}
               >
                 {open ? (

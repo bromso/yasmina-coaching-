@@ -31,7 +31,7 @@ export function ExploreNavBar({ brand, book, sections, labels }: ExploreNavBarPr
           <button
             type="button"
             aria-expanded={false}
-            className="flex h-[30px] w-[84px] items-center justify-center rounded-full border border-border text-foreground transition-colors hover:bg-muted text-xs outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            className="flex h-[30px] w-[84px] items-center justify-center rounded-full border border-input text-foreground transition-colors hover:bg-muted text-xs outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
             <span>{labels.explore}</span>
           </button>
