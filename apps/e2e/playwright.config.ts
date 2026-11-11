@@ -53,7 +53,7 @@ export default defineConfig({
       env: { ...apiEnv },
       reuseExistingServer: !CI,
       timeout: 60_000,
-      stdout: "pipe",
+      stdout: "pipe" as const,
     },
     {
       command: "bun src/index.ts",
@@ -62,7 +62,7 @@ export default defineConfig({
       env: { ...aiEnv },
       reuseExistingServer: !CI,
       timeout: 60_000,
-      stdout: "pipe",
+      stdout: "pipe" as const,
     },
     next("www", 3000),
     next("app", 3001),
