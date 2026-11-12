@@ -12,14 +12,15 @@ describe("isDraft", () => {
 })
 
 describe("legalRobots", () => {
-  test("disallows everything while in draft", () => {
+  test("disallows everything while in draft, and advertises no sitemap", () => {
     const robots = legalRobots({ SITE_DOMAIN: "example.com" })
     expect(robots.rules).toEqual([{ userAgent: "*", disallow: ["/"] }])
-    expect(robots.sitemap).toBe("https://legal.example.com/sitemap.xml")
+    expect(robots).not.toHaveProperty("sitemap")
   })
 
-  test("allows everything once the draft is approved", () => {
+  test("allows everything once the draft is approved, with the sitemap", () => {
     const robots = legalRobots({ SITE_DOMAIN: "example.com", LEGAL_DRAFT: "false" })
     expect(robots.rules).toEqual([{ userAgent: "*", allow: "/" }])
+    expect(robots.sitemap).toBe("https://legal.example.com/sitemap.xml")
   })
 })

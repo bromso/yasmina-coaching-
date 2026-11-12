@@ -21,7 +21,8 @@ const withSerwist = withSerwistInit({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "standalone",
-  // @repo/api-contract is not a dependency of the legal app: @repo/telemetry imports it.
+  // @repo/api-contract is only a devDependency here (terms-version.test.ts reads TERMS_VERSION);
+  // the app's own code never imports it, but @repo/telemetry does, so Next must transpile it.
   transpilePackages: [
     "@repo/ui",
     "@repo/api-contract",
