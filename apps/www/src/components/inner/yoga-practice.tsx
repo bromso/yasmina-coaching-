@@ -1,5 +1,5 @@
-import { Eyebrow } from "@/components/eyebrow"
-import { Reveal } from "@/components/motion/reveal"
+import { Eyebrow } from "@repo/ui/components/eyebrow"
+import { Reveal } from "@repo/ui/components/motion/reveal"
 
 type YogaPracticeProps = {
   id: string
@@ -29,43 +29,48 @@ export function YogaPractice({
   note,
 }: YogaPracticeProps) {
   return (
-    <section
-      id={id}
-      aria-labelledby={`${id}-title`}
-      className="container scroll-mt-24 py-20 lg:py-28"
-    >
-      <Reveal className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:items-center">
-        <div className="lg:col-span-7">
-          {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
-          <h2
-            id={`${id}-title`}
-            className="mt-5 hyphens-auto text-balance break-words text-4xl sm:text-5xl"
-          >
-            {title}
-          </h2>
-          {description && (
-            <p className="mt-5 text-pretty text-lg text-muted-foreground">{description}</p>
-          )}
-          <p className="mt-6 text-pretty text-lg leading-relaxed">{body}</p>
-        </div>
-        <div className="relative isolate px-6 py-12 lg:col-span-5">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -inset-[10%] -z-10 bg-[radial-gradient(closest-side,var(--sun)_0%,var(--sun-soft)_55%,transparent_100%)] opacity-90 blur-3xl"
-          />
-          <ul className="flex flex-wrap justify-center gap-3">
-            {practices.map((practice) => (
-              <li
-                key={practice}
-                className="rounded-full border border-foreground/20 bg-background/70 px-5 py-2.5 font-display text-lg backdrop-blur"
-              >
-                {practice}
-              </li>
-            ))}
-          </ul>
-          <p className="mx-auto mt-8 max-w-xs text-center text-muted-foreground text-sm">{note}</p>
-        </div>
-      </Reveal>
-    </section>
+    // Full-bleed, so the glow below is clipped at the viewport's edges and never scrolls sideways.
+    <div className="overflow-x-clip">
+      <section
+        id={id}
+        aria-labelledby={`${id}-title`}
+        className="container scroll-mt-(--sticky-header-offset) py-20 lg:py-28"
+      >
+        <Reveal className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:items-center">
+          <div className="lg:col-span-7">
+            {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
+            <h2
+              id={`${id}-title`}
+              className="mt-5 hyphens-auto text-balance break-words text-4xl sm:text-5xl"
+            >
+              {title}
+            </h2>
+            {description && (
+              <p className="mt-5 text-pretty text-lg text-muted-foreground">{description}</p>
+            )}
+            <p className="mt-6 text-pretty text-lg leading-relaxed">{body}</p>
+          </div>
+          <div className="relative isolate px-6 py-12 lg:col-span-5">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -inset-[10%] -z-10 bg-[radial-gradient(closest-side,var(--sun)_0%,var(--sun-soft)_55%,transparent_100%)] opacity-90 blur-3xl"
+            />
+            <ul className="flex flex-wrap justify-center gap-3">
+              {practices.map((practice) => (
+                <li
+                  key={practice}
+                  className="rounded-full border border-foreground/20 bg-background/70 px-5 py-2.5 font-display text-lg backdrop-blur"
+                >
+                  {practice}
+                </li>
+              ))}
+            </ul>
+            <p className="mx-auto mt-8 max-w-xs text-center text-muted-foreground text-sm">
+              {note}
+            </p>
+          </div>
+        </Reveal>
+      </section>
+    </div>
   )
 }

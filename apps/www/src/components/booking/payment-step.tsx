@@ -368,7 +368,7 @@ export function PaymentStep({
             ref={cancelRef}
             type="button"
             variant="outline"
-            className="min-h-11 w-fit rounded-full px-5"
+            className="min-h-11 w-fit px-5"
             onClick={() => controller.current?.abort()}
           >
             {text.cancel}

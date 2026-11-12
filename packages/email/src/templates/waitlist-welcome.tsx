@@ -1,7 +1,7 @@
-import { Heading, Link, Text } from "@react-email/components"
+import { Text } from "@react-email/components"
 import { DEFAULT_LOCALE, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
-import { BRAND, Layout } from "./layout"
+import { BRAND, EmailHeading, EmailLink, Layout } from "./layout"
 
 export type WaitlistWelcomeProps = { siteUrl: string; brand?: string; locale?: Locale }
 
@@ -15,11 +15,11 @@ export function WaitlistWelcome({ siteUrl, brand, locale = DEFAULT_LOCALE }: Wai
       brand={brand}
       locale={locale}
     >
-      <Heading as="h1">{t("waitlistWelcome.heading")}</Heading>
+      <EmailHeading as="h1">{t("waitlistWelcome.heading")}</EmailHeading>
       <Text>{t("waitlistWelcome.body")}</Text>
       <Text>
         {t("waitlistWelcome.meantime")}
-        <Link href={siteUrl}>{siteUrl}</Link>
+        <EmailLink href={siteUrl}>{siteUrl}</EmailLink>
       </Text>
       <Text>{t("waitlistWelcome.footer")}</Text>
     </Layout>

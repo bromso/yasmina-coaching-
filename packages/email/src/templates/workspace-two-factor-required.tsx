@@ -1,7 +1,7 @@
-import { Button, Heading, Link, Text } from "@react-email/components"
+import { Button, Text } from "@react-email/components"
 import { DEFAULT_LOCALE, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
-import { button, greeting, Layout } from "./layout"
+import { button, EmailHeading, EmailLink, greeting, Layout } from "./layout"
 
 export type WorkspaceTwoFactorRequiredProps = {
   name?: string
@@ -30,7 +30,7 @@ export function WorkspaceTwoFactorRequired({
   const values = { workspace: workspaceName }
   return (
     <Layout preview={t("workspaceTwoFactorRequired.preview", values)} brand={brand} locale={locale}>
-      <Heading as="h1">{t("workspaceTwoFactorRequired.heading")}</Heading>
+      <EmailHeading as="h1">{t("workspaceTwoFactorRequired.heading")}</EmailHeading>
       <Text>{greeting(t, name)}</Text>
       <Text>{t("workspaceTwoFactorRequired.body", values)}</Text>
       <Text>{t("workspaceTwoFactorRequired.action")}</Text>
@@ -39,7 +39,7 @@ export function WorkspaceTwoFactorRequired({
       </Button>
       <Text>
         {t("layout.orLink")}
-        <Link href={link}>{link}</Link>
+        <EmailLink href={link}>{link}</EmailLink>
       </Text>
     </Layout>
   )

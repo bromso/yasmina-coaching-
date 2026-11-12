@@ -88,7 +88,7 @@ export function AdminLeadView({ lead }: { lead: AdminLead }) {
         </Link>
       </p>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Card>
+        <Card size="compact">
           <CardHeader>
             <CardTitle>Answers</CardTitle>
             <CardDescription>What the visitor sent from the contact form.</CardDescription>
@@ -112,7 +112,7 @@ export function AdminLeadView({ lead }: { lead: AdminLead }) {
             )}
           </CardContent>
         </Card>
-        <Card>
+        <Card size="compact">
           <CardHeader>
             <CardTitle>Follow-up</CardTitle>
             <CardDescription>

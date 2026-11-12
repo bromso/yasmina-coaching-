@@ -1,12 +1,23 @@
+import { navPill } from "@repo/ui/components/nav-pill"
 import { cn } from "@repo/ui/lib/utils"
 import type * as React from "react"
+import { Fragment } from "react"
 import { SiteHeaderMobile, type SiteHeaderMobileLabels } from "./site-header-mobile"
+import { SiteHeaderShell, siteHeaderBar } from "./site-header-shell"
 
 export type NavLink = { label: string; href: string; current?: boolean }
 
 type SiteHeaderProps = React.ComponentProps<"header"> & {
   brand: React.ReactNode
   links: NavLink[]
+  /**
+   * The app's own navigation, after the brand: the blog's Ledarskap inifrån and language links,
+   * for example. With it, the whole bar is one nav landmark named `navLabel` (brand, these, the
+   * controls and `end`), as on www; `links`, if any, become a list inside it. Below `sm` it takes
+   * a row of its own under the brand, like `controls`. Without it nothing changes: the bar is no
+   * landmark and `links` keep their own nav.
+   */
+  nav?: React.ReactNode
   /** Before the brand: a sidebar trigger, for example. */
   start?: React.ReactNode
   /**
@@ -25,69 +36,97 @@ type SiteHeaderProps = React.ComponentProps<"header"> & {
 }
 
 /**
- * The site-wide header: brand, cross-app nav (sheet below md), controls and the primary action.
- * Below `sm` the row keeps start, brand, `end` and the hamburger; `controls` take a second row.
+ * The site-wide header in www's look: a floating pill (`SiteHeaderShell` around a bar drawn with
+ * `siteHeaderBar`) holding the brand, cross-app nav (sheet below md), the app's own `nav`,
+ * controls and the primary action. Below `sm` the row keeps start, brand, `end` and the
+ * hamburger; `nav` and `controls` take rows of their own.
  */
 export function SiteHeader({
   brand,
   links,
+  nav,
   start,
   controls,
   end,
   sticky,
   navLabel = "Site",
   mobileLabels,
-  className,
   ...props
 }: SiteHeaderProps) {
+  const Bar = nav ? "nav" : "div"
+  const List = nav ? "ul" : "nav"
+  // Inside the bar's landmark the links are list items; as their own nav they need no list.
+  const Item = nav ? "li" : Fragment
   return (
-    <header
-      data-slot="site-header"
-      className={cn("border-b bg-background", sticky && "sticky top-0 z-50", className)}
-      {...props}
-    >
-      <div className="container flex min-h-14 flex-wrap items-center gap-x-4 gap-y-2 py-2.5 sm:h-14 sm:flex-nowrap sm:py-0">
+    <SiteHeaderShell sticky={sticky} {...props}>
+      <Bar
+        aria-label={nav ? navLabel : undefined}
+        data-slot="site-header-bar"
+        className={cn(
+          siteHeaderBar,
+          // From sm up one row of h-9 controls, exactly `--site-header-bar` tall, so the
+          // header is `--site-header-height`; below sm the rows wrap and it grows.
+          "flex min-h-(--site-header-bar) flex-wrap items-center gap-x-3 gap-y-2 px-4 sm:h-(--site-header-bar) sm:flex-nowrap"
+        )}
+      >
         {start}
         {/* Below sm the brand shrinks (its name truncates) so it shares row one with `end`; a long
             name such as "Yasmina Petersson" would otherwise push the menu onto a row of its own. */}
-        <div className="flex min-w-0 max-sm:flex-1 max-sm:basis-0">{brand}</div>
+        <div
+          data-slot="site-header-brand"
+          className="flex min-w-0 font-display text-xl leading-tight max-sm:flex-1 max-sm:basis-0"
+        >
+          {brand}
+        </div>
         {links.length > 0 && (
-          <nav aria-label={navLabel} className="hidden md:flex md:items-center md:gap-1">
-            {links.map((link) =>
-              link.current ? (
-                <span
-                  key={link.href}
-                  aria-current="page"
-                  className="rounded-md px-3 py-1.5 text-sm font-medium"
-                >
-                  {link.label}
-                </span>
-              ) : (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  className="rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground"
-                >
-                  {link.label}
-                </a>
-              )
-            )}
-          </nav>
+          <List
+            aria-label={nav ? undefined : navLabel}
+            className="hidden md:flex md:items-center md:gap-1"
+          >
+            {links.map((link) => (
+              <Item key={link.href}>
+                {link.current ? (
+                  <span aria-current="page" className={navPill({ current: true })}>
+                    {link.label}
+                  </span>
+                ) : (
+                  <a href={link.href} className={navPill()}>
+                    {link.label}
+                  </a>
+                )}
+              </Item>
+            ))}
+          </List>
+        )}
+        {nav && (
+          <div
+            data-slot="site-header-nav"
+            className="order-last flex basis-full flex-wrap items-center gap-1 sm:order-none sm:ml-auto sm:basis-auto sm:flex-nowrap sm:gap-2"
+          >
+            {nav}
+          </div>
         )}
         {controls && (
           <div
             data-slot="site-header-controls"
-            className="order-last flex basis-full flex-wrap items-center justify-end gap-2 sm:order-none sm:ml-auto sm:basis-auto sm:flex-nowrap"
+            className={cn(
+              "order-last flex basis-full flex-wrap items-center justify-end gap-2 sm:order-none sm:basis-auto sm:flex-nowrap",
+              // From sm up the first of nav and controls takes the free space; the rest follow it.
+              !nav && "sm:ml-auto"
+            )}
           >
             {controls}
           </div>
         )}
-        {/* With controls, -ml-2 turns the row's gap-4 into the gap-2 the controls had inside end. */}
-        <div className={cn("ml-auto flex items-center gap-2", controls && "sm:-ml-2")}>
-          {end}
-          <SiteHeaderMobile links={links} navLabel={navLabel} labels={mobileLabels} />
-        </div>
-      </div>
-    </header>
+        {/* With nav or controls, -ml-1 turns the bar's gap-3 into the gap-2 between controls.
+            Nothing to hold (no `end`, no links for the hamburger): no empty item, so no stray gap. */}
+        {(end || links.length > 0) && (
+          <div className={cn("ml-auto flex items-center gap-2", (nav || controls) && "sm:-ml-1")}>
+            {end}
+            <SiteHeaderMobile links={links} navLabel={navLabel} labels={mobileLabels} />
+          </div>
+        )}
+      </Bar>
+    </SiteHeaderShell>
   )
 }

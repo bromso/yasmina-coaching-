@@ -1,7 +1,7 @@
-import { Button, Heading, Link, Text } from "@react-email/components"
+import { Button, Text } from "@react-email/components"
 import { DEFAULT_LOCALE, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
-import { BRAND, button, Layout } from "./layout"
+import { BRAND, button, EmailHeading, EmailLink, Layout } from "./layout"
 
 export type MagicLinkProps = { link: string; brand?: string; locale?: Locale }
 
@@ -14,14 +14,14 @@ export function MagicLink({ link, brand, locale = DEFAULT_LOCALE }: MagicLinkPro
   const t = translatorFor(locale, "email")
   return (
     <Layout preview={t("magicLink.preview")} brand={brand} locale={locale}>
-      <Heading as="h1">{t("magicLink.heading", { brand: brand ?? BRAND })}</Heading>
+      <EmailHeading as="h1">{t("magicLink.heading", { brand: brand ?? BRAND })}</EmailHeading>
       <Text>{t("magicLink.body", { minutes: MINUTES })}</Text>
       <Button href={link} style={button}>
         {t("magicLink.button")}
       </Button>
       <Text>
         {t("layout.orLink")}
-        <Link href={link}>{link}</Link>
+        <EmailLink href={link}>{link}</EmailLink>
       </Text>
       <Text>{t("magicLink.footer")}</Text>
     </Layout>

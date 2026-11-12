@@ -1,3 +1,6 @@
+import { siteHeaderBar } from "@repo/ui/blocks/site-header-shell"
+import { ctaPill } from "@repo/ui/components/cta-pill"
+import { cn } from "@/lib/utils"
 import type { ExploreNavLink } from "./explore-nav"
 
 type ExploreNavBarProps = {
@@ -14,11 +17,7 @@ type ExploreNavBarProps = {
  */
 export function ExploreNavBar({ brand, book, sections, labels }: ExploreNavBarProps) {
   return (
-    <nav
-      aria-label={labels.nav}
-      style={{ paddingBlock: 12, borderRadius: 18 }}
-      className="w-full max-w-[1024px] overflow-hidden bg-background/85 shadow-[0_0_0_1px_var(--border)] backdrop-blur-xl"
-    >
+    <nav aria-label={labels.nav} className={cn(siteHeaderBar, "overflow-hidden")}>
       <div className="flex min-h-8 w-full items-center justify-between gap-3 px-4">
         <div className="min-w-0">
           <a
@@ -32,14 +31,11 @@ export function ExploreNavBar({ brand, book, sections, labels }: ExploreNavBarPr
           <button
             type="button"
             aria-expanded={false}
-            className="flex h-[30px] w-[84px] items-center justify-center rounded-full border border-border text-foreground transition-colors hover:bg-muted text-xs outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            className="flex h-[30px] w-[84px] items-center justify-center rounded-full border border-input text-foreground transition-colors hover:bg-muted text-xs outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
             <span>{labels.explore}</span>
           </button>
-          <a
-            href={book.href}
-            className="inline-flex h-[30px] items-center rounded-full bg-primary px-3.5 text-primary-foreground transition-colors hover:bg-primary/90 text-xs tracking-[0.035em] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-          >
+          <a href={book.href} className={ctaPill({ size: "sm" })}>
             <span>{book.label}</span>
           </a>
         </div>

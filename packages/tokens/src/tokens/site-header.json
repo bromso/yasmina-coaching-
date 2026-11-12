@@ -1,0 +1,39 @@
+{
+  "site-header": {
+    "inset": {
+      "$type": "dimension",
+      "$value": "0.625rem",
+      "$description": "The gap between the screen's top edge and the header's pill."
+    },
+    "bar": {
+      "$type": "dimension",
+      "$value": "3.75rem",
+      "$description": "SiteHeader's pill from sm up: 0.75rem padding around a 2.25rem row of controls."
+    },
+    "height": {
+      "$type": "dimension",
+      "$value": "calc({site-header.inset} + {site-header.bar})",
+      "$description": "The whole header from sm up: what a fixed sidebar below it starts after."
+    },
+    "gap": {
+      "$type": "dimension",
+      "$value": "1.625rem",
+      "$description": "The breathing room an in-page jump leaves below a stuck header."
+    },
+    "offset": {
+      "$type": "dimension",
+      "$value": "calc({site-header.height} + {site-header.gap})",
+      "$description": "Where an in-page jump stops below a stuck header: the page's scroll padding and www's section scroll margins (96 px)."
+    },
+    "radius": {
+      "$type": "dimension",
+      "$value": "1.125rem",
+      "$description": "The pill's corner radius."
+    },
+    "max-width": {
+      "$type": "dimension",
+      "$value": "64rem",
+      "$description": "The pill's widest: it centres inside the header from there."
+    }
+  }
+}

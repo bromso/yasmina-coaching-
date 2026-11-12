@@ -5,6 +5,7 @@ import { Button } from "@repo/ui/components/button"
 import { FieldError, FormMessage, fieldAria } from "@repo/ui/components/form-feedback"
 import { Input } from "@repo/ui/components/input"
 import { Label } from "@repo/ui/components/label"
+import { NativeSelect } from "@repo/ui/components/native-select"
 import { Textarea } from "@repo/ui/components/textarea"
 import { useSearchParams } from "next/navigation"
 import { Suspense, useActionState } from "react"
@@ -17,9 +18,6 @@ const TOPIC_LABELS: Record<SupportTopic, string> = {
   bug: "Something isn't working",
   other: "Something else",
 }
-
-const selectClass =
-  "border-input h-9 w-full rounded-md border bg-transparent px-3 text-base shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 md:text-sm"
 
 const initialState: ContactFormState = { ok: false }
 
@@ -91,12 +89,11 @@ export function ContactForm() {
 
       <div className="grid gap-2">
         <Label htmlFor="topic">Topic</Label>
-        <select
+        <NativeSelect
           id="topic"
           name="topic"
           required
           defaultValue={state.ok ? "" : (state.values?.topic ?? "")}
-          className={selectClass}
           {...fieldAria("topic", state)}
         >
           <option value="" disabled>
@@ -107,7 +104,7 @@ export function ContactForm() {
               {TOPIC_LABELS[topic]}
             </option>
           ))}
-        </select>
+        </NativeSelect>
         <FieldError name="topic" state={state} />
       </div>
 

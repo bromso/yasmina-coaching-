@@ -2,8 +2,8 @@
 
 Browser end-to-end tests (Playwright) against **production builds** of `www`, `app`, `auth`,
 `account`, `blog`, `docs`, `help` and `jobs`, plus `apps/api` and `apps/ai`, all started by
-`playwright.config.ts` on their real `*.brand.localhost` hosts and ports. 422 tests across 41 spec
-files, Chromium only, run serially (`workers: 1`) because every test shares one database and the
+`playwright.config.ts` on their real `*.brand.localhost` hosts and ports. 423 tests across 42 spec
+files (a 42nd, the opt-in visual baseline `visual.spec.ts`, runs only with `VISUAL=1`), Chromium only, run serially (`workers: 1`) because every test shares one database and the
 api's in-memory rate limiters.
 
 ## What it covers
@@ -348,3 +348,18 @@ with `bunx playwright show-report`.
   otherwise — retrying it away, loosening its assertion, or adding a sleep to make it pass hides the
   next real bug instead of fixing this one. Treat `retries: 1` in CI as a tool for triaging flakiness
   (a test that needs its retry shows up in the report), not a way to make a real failure disappear.
+
+## Visual baseline (opt-in)
+
+`tests/visual.spec.ts` screenshots www and blog pages (`visual/pages.ts`) in light and dark at 320
+and 1280 px (`maxDiffPixelRatio: 0.001`; the hero video, `<time>`, the booking calendar and the
+footer year are masked). Baselines are **not committed**: they are platform-specific and about 50 MB,
+so they live in the git-ignored `visual/.snapshots/` and you generate them locally, on unchanged
+code, before you change any styling. The default run and CI never include the spec (`chromium`
+ignores it). Build `www` and `blog` for production first (`COOKIE_DOMAIN=.brand.localhost
+NEXT_PUBLIC_BOOKING_PAYMENTS=mock`), then:
+
+    VISUAL=1 bunx playwright test --update-snapshots   # 1. write the baseline
+    VISUAL=1 bunx playwright test                      # 2. compare after your change
+
+It starts only api, www and blog. A missing baseline fails the compare run by design.

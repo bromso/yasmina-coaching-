@@ -1,6 +1,6 @@
-import { Eyebrow } from "@/components/eyebrow"
-import { Reveal, RevealItem } from "@/components/motion/reveal"
-import { Picture } from "@/components/picture"
+import { Eyebrow } from "@repo/ui/components/eyebrow"
+import { Reveal, RevealItem } from "@repo/ui/components/motion/reveal"
+import { Picture } from "@repo/ui/components/picture"
 import type { HomeContent } from "@/content/home"
 import { type MediaImage, type MediaKey, OFFER_MEDIA } from "@/content/media"
 
@@ -20,7 +20,7 @@ export function OffersSection({ id, heading, items, media }: OffersSectionProps)
     <section
       id={id}
       aria-labelledby={`${id}-title`}
-      className="scroll-mt-24 bg-linear-to-b from-background via-sun-soft to-background py-24 lg:py-32"
+      className="scroll-mt-(--sticky-header-offset) bg-linear-to-b from-background via-sun-soft to-background py-24 lg:py-32"
     >
       <div className="container">
         <Reveal className="max-w-3xl">

@@ -3,10 +3,11 @@ import type { BookingStatus } from "@repo/api-contract/booking-limits"
 import type { Locale } from "@repo/i18n/locales"
 import { Badge } from "@repo/ui/components/badge"
 import { Button } from "@repo/ui/components/button"
+import { Eyebrow } from "@repo/ui/components/eyebrow"
 import { Icon } from "@repo/ui/components/icon"
+import { SunPanel } from "@repo/ui/components/sun-panel"
 import { CancelForm } from "@/components/booking/cancel-form"
 import { LocaleProvider } from "@/components/booking/locale-provider"
-import { Eyebrow } from "@/components/eyebrow"
 import { type BookingContent, bookingFor } from "@/content/booking"
 import { formatRange } from "@/lib/booking-dates"
 
@@ -41,7 +42,10 @@ export function ManageView({ token, data, cancelledId, locale }: ManageViewProps
     <main id="main">
       <section aria-labelledby="manage-title" className="container max-w-3xl py-16 lg:py-24">
         <Eyebrow>{booking.manage.eyebrow}</Eyebrow>
-        <h1 id="manage-title" className="mt-5 scroll-mt-24 text-balance text-4xl sm:text-5xl">
+        <h1
+          id="manage-title"
+          className="mt-5 scroll-mt-(--sticky-header-offset) text-balance text-4xl sm:text-5xl"
+        >
           {booking.manage.title}
         </h1>
         <p className="mt-4 text-muted-foreground">
@@ -59,18 +63,18 @@ export function ManageView({ token, data, cancelledId, locale }: ManageViewProps
         )}
 
         {pkg && (
-          <div className="mt-10 grid gap-4 rounded-4xl bg-sun-soft p-6 sm:p-8">
+          <SunPanel className="mt-10 grid gap-4 p-6 sm:p-8">
             <h2 className="font-display text-2xl">{booking.offerings[pkg.offering].title}</h2>
             <p>{booking.manage.packageProgress(pkg.sessionsBooked, pkg.sessionsTotal)}</p>
             {pkg.sessionsBooked < pkg.sessionsTotal && (
-              <Button asChild className="min-h-11 w-fit rounded-full px-5">
+              <Button asChild className="min-h-11 w-fit px-5">
                 <a href={`/book/${pkg.offering}?package=${pkg.id}`}>
                   {booking.manage.bookAnother}
                   <Icon icon="lucide:arrow-right" aria-hidden="true" />
                 </a>
               </Button>
             )}
-          </div>
+          </SunPanel>
         )}
 
         <h2 className="mt-12 font-display text-2xl">{booking.manage.bookings}</h2>

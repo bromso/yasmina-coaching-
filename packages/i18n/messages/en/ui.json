@@ -57,10 +57,12 @@
     "body": "{workspace} requires two-step verification. Turn it on, or add a passkey, to continue.",
     "setup": "Set up two-step verification",
     "otherWorkspaces": "Or open another workspace:",
+    "switch": "Switch",
     "switchTo": "Switch to {workspace}",
     "createWorkspace": "Create another workspace",
-    "leaveHint": "No longer need this workspace?",
+    "leaveHint": "No longer need {workspace}?",
     "leave": "Leave {workspace}",
+    "leaveShort": "Leave",
     "leaving": "Leaving…"
   }
 }

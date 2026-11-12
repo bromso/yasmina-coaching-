@@ -1,0 +1,8 @@
+{
+  "radius": {
+    "DEFAULT": {
+      "$type": "dimension",
+      "$value": "0.875rem"
+    }
+  }
+}

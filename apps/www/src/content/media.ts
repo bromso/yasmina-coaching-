@@ -11,7 +11,7 @@ import type { InnerServiceId } from "@/content/inner-pricing"
  *
  * Each photo exists as JPEG and WebP at its full size and with its long side at 800 px
  * (`<name>-800.<ext>`, so a portrait is 597 × 800);
- * `src/components/picture.tsx` builds the `<picture>` from the name. Re-export from
+ * `Picture` (`@repo/ui/components/picture`) builds the `<picture>` from the name. Re-export from
  * `assets/originals/` when a crop changes.
  */
 

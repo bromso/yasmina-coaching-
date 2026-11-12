@@ -49,7 +49,7 @@ export function StepPanel({ n, active, heading, children, className }: StepPanel
         id={`step-${n}-heading`}
         ref={headingRef}
         tabIndex={-1}
-        className="scroll-mt-28 font-display text-2xl focus:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        className="scroll-mt-(--sticky-header-offset) font-display text-2xl focus:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
       >
         {heading}
       </h2>
@@ -71,12 +71,7 @@ export function StepNav({
   return (
     <div className="step-nav flex flex-wrap-reverse items-center justify-between gap-3 border-border border-t pt-5">
       {onBack ? (
-        <Button
-          type="button"
-          variant="ghost"
-          className="min-h-11 rounded-full px-4"
-          onClick={onBack}
-        >
+        <Button type="button" variant="ghost" className="min-h-11 px-4" onClick={onBack}>
           <Icon icon="lucide:arrow-left" aria-hidden="true" />
           {backLabel}
         </Button>
@@ -106,7 +101,7 @@ export function useMounted(when: boolean): boolean {
 }
 
 /** The primary button's look in every step. */
-export const primaryClass = "min-h-11 w-full rounded-full px-6 sm:w-fit"
+export const primaryClass = "min-h-11 w-full px-6 sm:w-fit"
 
 /** The server's answer with the browser's own checks laid over it, for `FieldError`. */
 export function withClientErrors(

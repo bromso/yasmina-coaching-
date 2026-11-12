@@ -1,12 +1,13 @@
 import { Faq } from "@repo/ui/blocks/faq"
+import { ArrowLink } from "@repo/ui/components/arrow-link"
 import { Button } from "@repo/ui/components/button"
+import { Eyebrow } from "@repo/ui/components/eyebrow"
 import { Icon } from "@repo/ui/components/icon"
-import { ArrowLink } from "@/components/arrow-link"
-import { Eyebrow } from "@/components/eyebrow"
+import { Reveal, RevealItem } from "@repo/ui/components/motion/reveal"
+import { Picture } from "@repo/ui/components/picture"
+import { SunPanel } from "@repo/ui/components/sun-panel"
 import { ServiceCard } from "@/components/inner/service-card"
 import { YogaPractice } from "@/components/inner/yoga-practice"
-import { Reveal, RevealItem } from "@/components/motion/reveal"
-import { Picture } from "@/components/picture"
 import { INNER_SERVICE_IDS, innerFor, innerServiceHref } from "@/content/inner"
 import { mediaFor } from "@/content/media"
 import type { Locale } from "@/lib/site-locale"
@@ -23,9 +24,10 @@ export function InnerHubView({ locale }: { locale: Locale }) {
   const media = mediaFor(locale)
   return (
     <main id="main">
-      <section
+      <SunPanel
+        as="section"
         aria-labelledby="hub-title"
-        className="mx-2.5 mt-2.5 overflow-hidden rounded-4xl bg-sun-soft lg:mx-4"
+        className="mx-2.5 mt-2.5 overflow-hidden lg:mx-4"
       >
         <div className="grid grid-cols-1 lg:min-h-[min(84vh,52rem)] lg:grid-cols-2">
           <div className="flex flex-col justify-center px-6 py-10 sm:px-10 lg:px-16 lg:py-16">
@@ -40,7 +42,7 @@ export function InnerHubView({ locale }: { locale: Locale }) {
               {hub.hero.description}
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3 motion-safe:animate-rise motion-safe:[animation-delay:270ms]">
-              <Button asChild size="lg" className="h-12 rounded-full px-6 text-base">
+              <Button asChild size="lg" className="h-12 px-6 text-base">
                 <a href={hub.hero.primary.href}>
                   {hub.hero.primary.label}
                   <Icon icon="lucide:arrow-down" aria-hidden="true" />
@@ -50,7 +52,7 @@ export function InnerHubView({ locale }: { locale: Locale }) {
                 asChild
                 size="lg"
                 variant="outline"
-                className="h-12 rounded-full bg-background/70 px-6 text-base backdrop-blur"
+                className="h-12 bg-background/70 px-6 text-base backdrop-blur"
               >
                 <a href={hub.hero.secondary.href}>{hub.hero.secondary.label}</a>
               </Button>
@@ -63,7 +65,7 @@ export function InnerHubView({ locale }: { locale: Locale }) {
             className="aspect-[4/3] w-full object-cover object-[62%_40%] sm:aspect-[16/10] lg:aspect-auto lg:h-full"
           />
         </div>
-      </section>
+      </SunPanel>
 
       <div className="container py-24 lg:py-32">
         <Reveal
@@ -107,7 +109,7 @@ export function InnerHubView({ locale }: { locale: Locale }) {
       <section
         id="services"
         aria-labelledby="services-title"
-        className="scroll-mt-24 bg-linear-to-b from-background via-sun-soft to-background py-24 lg:py-32"
+        className="scroll-mt-(--sticky-header-offset) bg-linear-to-b from-background via-sun-soft to-background py-24 lg:py-32"
       >
         <div className="container">
           <Reveal className="max-w-3xl">
@@ -155,45 +157,48 @@ export function InnerHubView({ locale }: { locale: Locale }) {
         note={hub.yoga.note}
       />
 
-      <section aria-labelledby="model-title" className="container py-24 lg:py-32">
-        <Reveal className="mx-auto max-w-2xl text-center">
-          <Eyebrow>{hub.model.heading.eyebrow}</Eyebrow>
-          <h2
-            id="model-title"
-            className="mt-5 hyphens-auto text-balance break-words text-4xl sm:text-5xl"
-          >
-            {hub.model.heading.title}
-          </h2>
-          <p className="mt-5 text-pretty text-lg text-muted-foreground">
-            {hub.model.heading.description}
-          </p>
-        </Reveal>
-        <div className="relative isolate mt-16 px-2 py-14 sm:px-10 lg:py-20">
-          {/* The sun glow behind the timeline; body's `overflow-x: clip` keeps it from scrolling sideways. */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -inset-x-[12%] -inset-y-[25%] -z-10 bg-[radial-gradient(closest-side,var(--sun)_0%,var(--sun-soft)_55%,transparent_100%)] opacity-90 blur-3xl"
-          />
-          <Reveal
-            as="ol"
-            stagger={110}
-            className="mx-auto grid max-w-6xl grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8"
-          >
-            {hub.model.steps.map((step, i) => (
-              <RevealItem key={step.title} as="li" index={i} className="flex flex-col">
-                <span
-                  aria-hidden="true"
-                  className="flex size-12 items-center justify-center rounded-full border border-foreground/20 bg-background/60 font-display text-lg"
-                >
-                  {i + 1}
-                </span>
-                <h3 className="mt-5 font-display text-2xl">{step.title}</h3>
-                <p className="mt-3 text-pretty text-muted-foreground">{step.description}</p>
-              </RevealItem>
-            ))}
+      {/* Full-bleed, so the timeline's glow is clipped at the viewport's edges. */}
+      <div className="overflow-x-clip">
+        <section aria-labelledby="model-title" className="container py-24 lg:py-32">
+          <Reveal className="mx-auto max-w-2xl text-center">
+            <Eyebrow>{hub.model.heading.eyebrow}</Eyebrow>
+            <h2
+              id="model-title"
+              className="mt-5 hyphens-auto text-balance break-words text-4xl sm:text-5xl"
+            >
+              {hub.model.heading.title}
+            </h2>
+            <p className="mt-5 text-pretty text-lg text-muted-foreground">
+              {hub.model.heading.description}
+            </p>
           </Reveal>
-        </div>
-      </section>
+          <div className="relative isolate mt-16 px-2 py-14 sm:px-10 lg:py-20">
+            {/* The sun glow behind the timeline; the wrapper's `overflow-x: clip` keeps it from scrolling sideways. */}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -inset-x-[12%] -inset-y-[25%] -z-10 bg-[radial-gradient(closest-side,var(--sun)_0%,var(--sun-soft)_55%,transparent_100%)] opacity-90 blur-3xl"
+            />
+            <Reveal
+              as="ol"
+              stagger={110}
+              className="mx-auto grid max-w-6xl grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8"
+            >
+              {hub.model.steps.map((step, i) => (
+                <RevealItem key={step.title} as="li" index={i} className="flex flex-col">
+                  <span
+                    aria-hidden="true"
+                    className="flex size-12 items-center justify-center rounded-full border border-foreground/20 bg-background/60 font-display text-lg"
+                  >
+                    {i + 1}
+                  </span>
+                  <h3 className="mt-5 font-display text-2xl">{step.title}</h3>
+                  <p className="mt-3 text-pretty text-muted-foreground">{step.description}</p>
+                </RevealItem>
+              ))}
+            </Reveal>
+          </div>
+        </section>
+      </div>
 
       <section aria-labelledby="certification-title" className="container pb-24 lg:pb-32">
         <Reveal className="grid grid-cols-1 gap-10 rounded-4xl border border-foreground/15 p-6 sm:p-10 lg:grid-cols-12 lg:p-14 dark:border-border/70">
@@ -236,7 +241,7 @@ export function InnerHubView({ locale }: { locale: Locale }) {
           heading={hub.faq.heading}
           items={hub.faq.items}
           jsonLd
-          className="scroll-mt-24"
+          className="scroll-mt-(--sticky-header-offset)"
         />
       </Reveal>
 
@@ -250,7 +255,7 @@ export function InnerHubView({ locale }: { locale: Locale }) {
               {hub.cta.title}
             </h2>
             <p className="mt-5 text-pretty text-lg text-foreground/80">{hub.cta.description}</p>
-            <Button asChild size="lg" className="mt-8 h-12 rounded-full px-6 text-base">
+            <Button asChild size="lg" className="mt-8 h-12 px-6 text-base">
               <a href={hub.cta.button.href}>
                 {hub.cta.button.label}
                 <Icon icon="lucide:arrow-right" aria-hidden="true" />

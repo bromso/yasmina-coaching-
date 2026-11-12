@@ -1,5 +1,6 @@
 "use client"
 
+import { cn } from "@repo/ui/lib/utils"
 import { useInView, useReducedMotion } from "motion/react"
 import {
   type CSSProperties,
@@ -12,15 +13,14 @@ import {
   useRef,
   useState,
 } from "react"
-import { cn } from "@/lib/utils"
 
 /**
  * What a revealed element is doing. `static` is the server's HTML and the only state without
  * JavaScript, under reduced motion, or for anything already on screen when the page hydrates:
  * plainly visible, no transition. `hidden` is the state an off-screen element is put in right
  * after hydration (before paint, so nothing blinks); `shown` is the one-shot rise once it
- * scrolls into view. The movement itself is CSS (`.reveal` in globals.css, `motion-safe` only),
- * so the bundle carries two hooks from motion and no animation runtime.
+ * scrolls into view. The movement itself is CSS (`.reveal` in @repo/ui's globals.css,
+ * `motion-safe` only), so the bundle carries two hooks from motion and no animation runtime.
  */
 export type RevealPhase = "static" | "hidden" | "shown"
 

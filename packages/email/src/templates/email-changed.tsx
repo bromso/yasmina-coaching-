@@ -1,7 +1,7 @@
-import { Button, Heading, Link, Text } from "@react-email/components"
+import { Button, Text } from "@react-email/components"
 import { DEFAULT_LOCALE, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
-import { button, greeting, Layout } from "./layout"
+import { button, EmailHeading, EmailLink, greeting, Layout } from "./layout"
 
 export type EmailChangedProps = {
   name?: string
@@ -30,7 +30,7 @@ export function EmailChanged({
   const t = translatorFor(locale, "email")
   return (
     <Layout preview={t("emailChanged.preview", { maskedEmail })} brand={brand} locale={locale}>
-      <Heading as="h1">{t("emailChanged.heading")}</Heading>
+      <EmailHeading as="h1">{t("emailChanged.heading")}</EmailHeading>
       <Text>{greeting(t, name)}</Text>
       <Text>{t("emailChanged.body", { maskedEmail })}</Text>
       <Text>{t("emailChanged.undoNotice")}</Text>
@@ -39,7 +39,7 @@ export function EmailChanged({
       </Button>
       <Text>
         {t("layout.orLink")}
-        <Link href={link}>{link}</Link>
+        <EmailLink href={link}>{link}</EmailLink>
       </Text>
       <Text>{t("emailChanged.footer")}</Text>
     </Layout>

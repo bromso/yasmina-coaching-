@@ -43,7 +43,7 @@ export function HomeView({ user }: { user: User }) {
           <Link
             key={card.href}
             href={card.href}
-            className="group focus-visible:ring-ring/50 rounded-xl outline-none focus-visible:ring-[3px]"
+            className="group focus-visible:ring-ring/50 rounded-4xl outline-none focus-visible:ring-[3px]"
           >
             <Card className="hover:bg-muted/50 h-full gap-4 transition-colors">
               <CardHeader className="gap-2">

@@ -45,12 +45,7 @@ export function CancelForm({ token, bookingId, label }: CancelFormProps) {
         </span>
       </label>
       <FieldError name="confirm" state={state} idPrefix={idPrefix} />
-      <Button
-        type="submit"
-        variant="outline"
-        disabled={pending}
-        className="min-h-11 w-fit rounded-full px-5"
-      >
+      <Button type="submit" variant="outline" disabled={pending} className="min-h-11 w-fit px-5">
         {pending ? cancel.cancelling : cancel.submit}
       </Button>
     </form>

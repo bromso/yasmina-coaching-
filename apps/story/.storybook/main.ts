@@ -11,7 +11,8 @@ const config: StorybookConfig = {
     "@storybook/addon-vitest",
   ],
   framework: "@storybook/react-vite",
-  staticDirs: ["../public"],
+  // www's photos and clips, served as www serves them, for the Picture and MediaClip stories.
+  staticDirs: ["../public", { from: "../../www/public/media", to: "/media" }],
   typescript: {
     // Use faster docgen (smaller bundle than react-docgen-typescript)
     reactDocgen: "react-docgen",

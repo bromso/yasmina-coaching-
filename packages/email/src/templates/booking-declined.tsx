@@ -1,7 +1,7 @@
-import { Heading, Text } from "@react-email/components"
+import { Text } from "@react-email/components"
 import { DEFAULT_LOCALE, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
-import { greeting, Layout } from "./layout"
+import { EmailHeading, greeting, Layout } from "./layout"
 
 export type BookingDeclinedProps = {
   reference: string
@@ -28,7 +28,7 @@ export function BookingDeclined({
   const t = translatorFor(locale, "email")
   return (
     <Layout preview={t("bookingDeclined.preview", { reference })} brand={brand} locale={locale}>
-      <Heading as="h1">{t("bookingDeclined.heading")}</Heading>
+      <EmailHeading as="h1">{t("bookingDeclined.heading")}</EmailHeading>
       <Text>{greeting(t, name)}</Text>
       <Text>{t("bookingDeclined.body", { offeringLabel })}</Text>
       {note ? <Text style={{ whiteSpace: "pre-wrap" }}>{note}</Text> : null}

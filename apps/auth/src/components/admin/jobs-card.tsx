@@ -22,7 +22,7 @@ export function JobsCard({
   dead: AdminJob[]
 }) {
   return (
-    <Card>
+    <Card size="compact">
       <CardHeader>
         <CardTitle>Background jobs</CardTitle>
         <CardDescription>

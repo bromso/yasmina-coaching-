@@ -29,16 +29,25 @@ export const Default: Story = {
       </Toggle>
     </ToggleGroup>
   ),
-  // The pressed item takes the accent colour (`data-[pressed]`; Base UI sets `data-pressed=""`).
+  // The pressed item is marked by the accent highlight drawn behind it (Base UI sets
+  // `data-pressed=""`). Its text keeps the foreground colour, so the check is the highlight.
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const pressed = canvas.getByRole("button", { name: "Align center" })
     const unpressed = canvas.getByRole("button", { name: "Align left" })
     await expect(pressed).toHaveAttribute("data-pressed")
     await expect(unpressed).not.toHaveAttribute("data-pressed")
-    await waitFor(() =>
-      expect(getComputedStyle(pressed).color).not.toBe(getComputedStyle(unpressed).color)
-    )
+    await waitFor(() => {
+      const highlight = canvasElement.querySelector<HTMLElement>('[data-slot="motion-highlight"]')
+      expect(highlight).not.toBeNull()
+      const box = highlight?.getBoundingClientRect()
+      const target = pressed.getBoundingClientRect()
+      expect(getComputedStyle(highlight as HTMLElement).backgroundColor).not.toBe(
+        "rgba(0, 0, 0, 0)"
+      )
+      expect(Math.abs((box?.left ?? 0) - target.left)).toBeLessThan(2)
+      expect(Math.abs((box?.width ?? 0) - target.width)).toBeLessThan(2)
+    })
   },
 }
 

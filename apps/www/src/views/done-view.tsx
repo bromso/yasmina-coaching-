@@ -1,7 +1,7 @@
 import type { Locale } from "@repo/i18n/locales"
 import { Button } from "@repo/ui/components/button"
+import { Eyebrow } from "@repo/ui/components/eyebrow"
 import { StepIndicator } from "@/components/booking/step-indicator"
-import { Eyebrow } from "@/components/eyebrow"
 import { bookingFor } from "@/content/booking"
 import { type BookingFlow, paysIn } from "@/lib/booking-flow"
 import type { DonePayment } from "@/lib/mock-payment"
@@ -39,7 +39,10 @@ export function DoneView({ reference, manageUrl, kind, paid, locale }: DoneViewP
             className="mb-8"
           />
           <Eyebrow>{booking.done.eyebrow}</Eyebrow>
-          <h1 id="done-title" className="mt-5 scroll-mt-24 text-balance text-4xl sm:text-5xl">
+          <h1
+            id="done-title"
+            className="mt-5 scroll-mt-(--sticky-header-offset) text-balance text-4xl sm:text-5xl"
+          >
             {copy.title}
           </h1>
           <p className="mt-6 text-pretty text-lg text-muted-foreground">{copy.body}</p>
@@ -71,7 +74,7 @@ export function DoneView({ reference, manageUrl, kind, paid, locale }: DoneViewP
           )}
           {manageUrl && (
             <div className="mt-8 grid gap-2">
-              <Button asChild size="lg" className="h-12 w-fit rounded-full px-6 text-base">
+              <Button asChild size="lg" className="h-12 w-fit px-6 text-base">
                 <a href={manageUrl}>{booking.done.manage}</a>
               </Button>
               <p className="text-muted-foreground text-sm">{booking.done.manageHint}</p>
@@ -91,11 +94,7 @@ export function DoneView({ reference, manageUrl, kind, paid, locale }: DoneViewP
               </li>
             ))}
           </ol>
-          <Button
-            asChild
-            variant="outline"
-            className="mt-12 min-h-11 rounded-full bg-background/70 px-6"
-          >
+          <Button asChild variant="outline" className="mt-12 min-h-11 bg-background/70 px-6">
             <a href="/">{booking.done.home}</a>
           </Button>
         </div>

@@ -81,7 +81,11 @@ with each other, for a string nobody outside your own machine ever sees. Leave i
 - **The OG renderer's look.** `ogImage` in `packages/ui/src/lib/og.tsx` draws the OG image's
   layout, type and colors; `BRAND_NAME` only supplies its default `brand` text.
 - **Design tokens.** `packages/tokens` — the color scale, spacing and type tokens behind every
-  component — is independent of the product name.
+  component — is independent of the product name. Retheming is a token edit: change the values in
+  `packages/tokens/src/tokens/*.json`, run `bun run tokens` to regenerate
+  `packages/ui/src/styles/tokens.generated.css` and `packages/email/src/tokens.generated.ts`
+  (committed; `scripts/tokens.test.ts` fails when they lag), and keep the contrast test green. No
+  app has a theme file or a colour of its own to change. See `docs/architecture/design-system.md`.
 - **`MAIL_FROM` in production.** `apps/api/src/env.ts`'s `DEV_MAIL_FROM` (`${BRAND_NAME} <no-reply@brand.localhost>`)
   is only the fallback outside production. With `MAIL_PROVIDER=smtp` or `resend`, `MAIL_FROM` is a
   required environment variable the api reads as-is — renaming `BRAND_NAME` does not touch it; set

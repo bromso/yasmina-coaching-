@@ -3,6 +3,7 @@
 import type { User } from "@repo/api-contract"
 import { Button } from "@repo/ui/components/button"
 import { FormMessage } from "@repo/ui/components/form-feedback"
+import { SunPanel } from "@repo/ui/components/sun-panel"
 import { useTranslations } from "next-intl"
 import { useActionState } from "react"
 import { resendVerification } from "@/app/(account)/personal-info/verification-actions"
@@ -14,10 +15,7 @@ export function VerifyEmailNotice({ user }: { user: Pick<User, "email" | "emailV
   const [state, action, pending] = useActionState(resendVerification, { ok: false } as FormState)
   if (user.emailVerified) return null
   return (
-    <form
-      action={action}
-      className="flex flex-col gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm dark:border-amber-700 dark:bg-amber-950"
-    >
+    <SunPanel as="form" action={action} className="flex flex-col gap-3 px-6 py-5 text-sm">
       <p>{t.rich("text", { email: user.email, strong: (chunks) => <strong>{chunks}</strong> })}</p>
       <FormMessage state={state} />
       <div>
@@ -25,6 +23,6 @@ export function VerifyEmailNotice({ user }: { user: Pick<User, "email" | "emailV
           {t(pending ? "sending" : "resend")}
         </Button>
       </div>
-    </form>
+    </SunPanel>
   )
 }

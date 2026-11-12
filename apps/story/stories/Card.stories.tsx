@@ -14,6 +14,7 @@ import { Label } from "@repo/ui/components/label"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, within } from "storybook/test"
 
+/** www's rounded-4xl corners; padding and density are unchanged. */
 const meta = {
   title: "Components/Surfaces/Card",
   component: Card,
@@ -115,4 +116,22 @@ export const HeaderOnly: Story = {
       </CardHeader>
     </Card>
   ),
+}
+
+/** For dense screens (admin stat tiles, tables, list rows): the same padding, a tighter radius. */
+export const Compact: Story = {
+  render: () => (
+    <Card size="compact" className="w-[350px] gap-1 py-4">
+      <CardHeader>
+        <CardDescription>Active sessions</CardDescription>
+        <CardTitle className="text-2xl tabular-nums">12</CardTitle>
+      </CardHeader>
+    </Card>
+  ),
+  play: async ({ canvasElement }) => {
+    const card = canvasElement.querySelector<HTMLElement>('[data-slot="card"]')
+    await expect(card).toHaveAttribute("data-size", "compact")
+    // rounded-2xl: twice the 0.875rem --radius, 28px.
+    await expect(getComputedStyle(card as HTMLElement).borderTopLeftRadius).toBe("28px")
+  },
 }

@@ -103,7 +103,7 @@ All copy lives in data files; the views and pages only arrange sections.
   `@repo/ui`, and the closing `#contact` section is a short teaser linking `/kontakt`.
 - Photos and the five clips live under `public/media/` (JPEG + WebP at full size and an `-800`
   width, MP4 without audio plus posters), described in `src/content/media.ts` (`MEDIA`, `CLIPS`,
-  `OFFERING_MEDIA`, alt texts in both languages: `mediaFor(locale)`, `clipsFor(locale)`). `<Picture>` (`src/components/picture.tsx`) renders them
+  `OFFERING_MEDIA`, alt texts in both languages: `mediaFor(locale)`, `clipsFor(locale)`). `<Picture>` (`@repo/ui/components/picture`) renders them
   with explicit sizes; `MediaClip` plays a clip once, only where motion is welcome, behind a
   pause/play button. The originals sit in `assets/originals/`, outside `public/`, and the service
   worker precaches only the offline page, icons and logo (`globPublicPatterns` in
@@ -183,16 +183,20 @@ the copy. Pages are dynamic per locale like the rest of www.
 
 ## Look
 
-`src/styles/globals.css` imports the shared design system and then the coaching theme,
-`@repo/ui/themes/coaching.css`, which overrides the colour tokens for www and the blog alike: a
-warm cream background, charcoal text and buttons, one blue (`--brand-blue`) and a yellow "sun"
-(`--sun`, `--sun-soft`) for the editorial sections, each with a dark-theme value. Every text pair
-clears WCAG 4.5:1 in both themes, pinned by `packages/ui`'s contrast test; keep it that way when
-retuning, and remember the blog changes with it. Headlines are set in `fontDisplay` (Fraunces, from
-`@repo/ui/lib/fonts`): the layout adds its CSS variable to `<body>`, the theme points
-`--display-family` at it, and an unlayered `h1, h2` rule applies it at weight 400 even where a
-shared block says `font-semibold`. www's own motion, breakpoints and high-contrast rules stay in
-its stylesheet. The other apps keep the shared palette and Inter.
+The coaching look is every app's look, not www's alone. Its values (a warm cream background,
+charcoal text and buttons, one blue `--brand-blue`, a yellow "sun" `--sun` / `--sun-soft` for the
+editorial sections, each with a dark value) live in `packages/tokens`, and `packages/ui`'s one
+stylesheet carries them. `src/styles/globals.css` is just `@import "@repo/ui/globals.css";`: www
+has no rules or colours of its own (`scripts/app-styles.test.ts` fails on both), and its
+breakpoints, motion and high-contrast rules are the shared stylesheet's. To retune a colour, edit
+the token and run `bun run tokens`; every text pair must stay at WCAG 4.5:1 in both themes
+(`packages/ui`'s contrast test), and every other app changes with it. Headlines are set in
+`fontDisplay` (Fraunces, `@repo/ui/lib/fonts`): the layout puts `fontVariables` on `<html>`, the
+`--typeface-display` token names it first (Georgia after it), and an unlayered `h1, h2` rule applies it at weight 400 even
+where a shared block says `font-semibold`. The look components (`Eyebrow`, `ArrowLink`,
+`DashedLine`, `Picture`, `SunPanel`, `Background`) and the motion (`Reveal`, `MediaClip`, off under
+`prefers-reduced-motion`) are `@repo/ui`'s; www's own `ExploreNav` draws its bar with
+`siteHeaderBar` inside `SiteHeaderShell`. See `docs/architecture/design-system.md`.
 
 ## Contact page
 
@@ -274,8 +278,8 @@ against the new lead or booking order and sends its mails in that language. See
 - **Content** — `src/content/`: the copy each view or page renders.
 - **App-only components** — `src/components/`. Anything shared by two apps belongs in
   `packages/ui` instead.
-- **Styles** — `src/styles/globals.css` starts with `@import "@repo/ui/globals.css";` and
-  `@import "@repo/ui/themes/coaching.css";`; fonts, theme,
+- **Styles** — `src/styles/globals.css` is `@import "@repo/ui/globals.css";` and
+  nothing else; fonts, theme,
   skip link and web vitals come from `@repo/ui` too.
 
 See the root [README](../../README.md) and [CLAUDE.md](../../CLAUDE.md) for the conventions shared by

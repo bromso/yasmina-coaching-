@@ -1,7 +1,7 @@
-import { Button, Heading, Link, Text } from "@react-email/components"
+import { Button, Text } from "@react-email/components"
 import { DEFAULT_LOCALE, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
-import { button, greeting, Layout } from "./layout"
+import { button, EmailHeading, EmailLink, greeting, Layout } from "./layout"
 
 export type VerifyEmailProps = { name?: string; link: string; brand?: string; locale?: Locale }
 
@@ -18,10 +18,10 @@ export function VerifyEmail({ name, link, brand, locale = DEFAULT_LOCALE }: Veri
         // before this template took a locale. Safe to merge into one message once English is
         // re-baselined and that constraint no longer applies.
       }
-      <Heading as="h1">
+      <EmailHeading as="h1">
         {t("verifyEmail.heading")}
         {name ? t("verifyEmail.headingNameSuffix", { name }) : ""}
-      </Heading>
+      </EmailHeading>
       <Text>{greeting(t, name)}</Text>
       <Text>{t("verifyEmail.body")}</Text>
       <Button href={link} style={button}>
@@ -29,7 +29,7 @@ export function VerifyEmail({ name, link, brand, locale = DEFAULT_LOCALE }: Veri
       </Button>
       <Text>
         {t("layout.orLink")}
-        <Link href={link}>{link}</Link>
+        <EmailLink href={link}>{link}</EmailLink>
       </Text>
       <Text>{t("verifyEmail.footer")}</Text>
     </Layout>

@@ -23,7 +23,7 @@ function Cell({ name, value }: { name: VitalKey; value: number | null }) {
 
 export function VitalsCard({ vitals }: { vitals: TelemetryVitals | null }) {
   return (
-    <Card>
+    <Card size="compact">
       <CardHeader>
         <CardTitle>Web vitals (7 d)</CardTitle>
         <CardDescription>p75 per app · samples of LCP, INP and CLS</CardDescription>

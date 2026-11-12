@@ -13,6 +13,7 @@ import { FieldError, FormMessage, fieldAria } from "@repo/ui/components/form-fee
 import { Icon } from "@repo/ui/components/icon"
 import { Input } from "@repo/ui/components/input"
 import { Label } from "@repo/ui/components/label"
+import { NativeSelect } from "@repo/ui/components/native-select"
 import { Textarea } from "@repo/ui/components/textarea"
 import { useActionState, useState } from "react"
 import { requestBooking } from "@/app/actions"
@@ -69,9 +70,6 @@ type Review = {
   venue: string
   contact: string[]
 }
-
-const selectClass =
-  "border-input h-11 w-full rounded-md border bg-transparent px-3 text-base shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 md:text-sm"
 
 /**
  * A request for a workshop, enterprise programme or keynote, in three steps: what and when
@@ -181,11 +179,11 @@ export function RequestForm({ offering, locations, minDate }: RequestFormProps) 
               </div>
               <div className="grid gap-2">
                 <Label htmlFor={`part_${n}`}>{text.partLabel(n)}</Label>
-                <select
+                <NativeSelect
                   id={`part_${n}`}
                   name={`part_${n}`}
                   defaultValue={value(state, `part_${n}`, "full_day")}
-                  className={selectClass}
+                  className="h-11"
                   {...fieldAria(`part_${n}`, shown)}
                 >
                   {BOOKING_DAY_PARTS.map((part) => (
@@ -193,7 +191,7 @@ export function RequestForm({ offering, locations, minDate }: RequestFormProps) 
                       {copy.dayPartLabels[part]}
                     </option>
                   ))}
-                </select>
+                </NativeSelect>
                 <FieldError name={`part_${n}`} state={shown} />
               </div>
             </div>
@@ -288,7 +286,7 @@ export function RequestForm({ offering, locations, minDate }: RequestFormProps) 
           <Button
             type="button"
             variant="ghost"
-            className="step-nav min-h-11 rounded-full px-4"
+            className="step-nav min-h-11 px-4"
             onClick={() => goTo(2)}
           >
             <Icon icon="lucide:arrow-left" aria-hidden="true" />

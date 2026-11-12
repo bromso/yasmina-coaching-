@@ -1,14 +1,14 @@
 import type { Locale } from "@repo/i18n/locales"
 import { Faq } from "@repo/ui/blocks/faq"
+import { ArrowLink } from "@repo/ui/components/arrow-link"
 import { Button } from "@repo/ui/components/button"
-import { ArrowLink } from "@/components/arrow-link"
+import { Eyebrow } from "@repo/ui/components/eyebrow"
+import { Reveal } from "@repo/ui/components/motion/reveal"
+import { Picture } from "@repo/ui/components/picture"
 import { CredentialsSection } from "@/components/credentials-section"
-import { Eyebrow } from "@/components/eyebrow"
 import { HeroSection } from "@/components/hero-section"
 import { ManifestoSection } from "@/components/manifesto-section"
-import { Reveal } from "@/components/motion/reveal"
 import { OffersSection } from "@/components/offers-section"
-import { Picture } from "@/components/picture"
 import { StatementSection } from "@/components/statement-section"
 import { StepsSection } from "@/components/steps-section"
 import { WhySection } from "@/components/why-section"
@@ -67,10 +67,13 @@ export function HomeView({ locale }: { locale: Locale }) {
           heading={home.faq.heading}
           items={home.faq.items}
           jsonLd
-          className="scroll-mt-24"
+          className="scroll-mt-(--sticky-header-offset)"
         />
       </Reveal>
-      <div id="contact" className="scroll-mt-24 px-2.5 pb-2.5 lg:px-4 lg:pb-4">
+      <div
+        id="contact"
+        className="scroll-mt-(--sticky-header-offset) px-2.5 pb-2.5 lg:px-4 lg:pb-4"
+      >
         <Reveal className="relative overflow-hidden rounded-4xl bg-linear-to-b from-sun-soft via-sun to-sun px-6 py-24 lg:py-32">
           {/* On wide screens a small portrait leans into the band's right edge; the teaser keeps its centre. */}
           <Picture
@@ -86,7 +89,7 @@ export function HomeView({ locale }: { locale: Locale }) {
               {home.contact.title}
             </h2>
             <p className="text-pretty text-lg text-muted-foreground">{home.contact.description}</p>
-            <Button asChild size="lg" className="h-12 rounded-full px-7 text-base">
+            <Button asChild size="lg" className="h-12 px-7 text-base">
               <a href={home.contact.link.href}>{home.contact.link.label}</a>
             </Button>
             <p className="text-muted-foreground text-sm">{home.contact.note}</p>

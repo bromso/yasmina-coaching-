@@ -1,7 +1,7 @@
-import { Heading, Text } from "@react-email/components"
+import { Text } from "@react-email/components"
 import { DEFAULT_LOCALE, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
-import { greeting, Layout } from "./layout"
+import { EmailHeading, greeting, Layout } from "./layout"
 
 export type EmailChangeRevertedProps = {
   name?: string
@@ -43,7 +43,7 @@ export function EmailChangeReverted({
   const t = translatorFor(locale, "email")
   return (
     <Layout preview={t("emailChangeReverted.preview")} brand={brand} locale={locale}>
-      <Heading as="h1">{t("emailChangeReverted.heading")}</Heading>
+      <EmailHeading as="h1">{t("emailChangeReverted.heading")}</EmailHeading>
       <Text>{greeting(t, name)}</Text>
       <Text>{t("emailChangeReverted.body")}</Text>
       {passkeysRemoved > 0 ? (

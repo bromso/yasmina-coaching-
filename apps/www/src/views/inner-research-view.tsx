@@ -1,8 +1,8 @@
+import { ArrowLink } from "@repo/ui/components/arrow-link"
+import { Eyebrow } from "@repo/ui/components/eyebrow"
 import { Icon } from "@repo/ui/components/icon"
-import { ArrowLink } from "@/components/arrow-link"
-import { Eyebrow } from "@/components/eyebrow"
-import { Reveal } from "@/components/motion/reveal"
-import { Picture } from "@/components/picture"
+import { Reveal } from "@repo/ui/components/motion/reveal"
+import { Picture } from "@repo/ui/components/picture"
 import { INNER_HREF, innerFor } from "@/content/inner"
 import { mediaFor } from "@/content/media"
 import type { Locale } from "@/lib/site-locale"
@@ -102,7 +102,7 @@ export function InnerResearchView({ locale }: { locale: Locale }) {
                 key={ref.n}
                 id={`ref-${ref.n}`}
                 value={ref.n}
-                className="flex scroll-mt-24 gap-3 break-words"
+                className="flex scroll-mt-(--sticky-header-offset) gap-3 break-words"
               >
                 <span className="w-6 shrink-0 font-display text-base">{ref.n}.</span>
                 <span className="min-w-0">

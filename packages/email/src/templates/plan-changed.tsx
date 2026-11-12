@@ -1,7 +1,7 @@
-import { Heading, Text } from "@react-email/components"
+import { Text } from "@react-email/components"
 import { DEFAULT_LOCALE, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
-import { greeting, Layout } from "./layout"
+import { EmailHeading, greeting, Layout } from "./layout"
 import { NotificationFooter, type NotificationLinks } from "./notification-footer"
 
 export type PlanChangedProps = NotificationLinks & {
@@ -37,7 +37,7 @@ export function PlanChanged({
   const values = { workspace: workspaceName, plan }
   return (
     <Layout preview={t("planChanged.preview", values)} brand={brand} locale={locale}>
-      <Heading as="h1">{t("planChanged.heading")}</Heading>
+      <EmailHeading as="h1">{t("planChanged.heading")}</EmailHeading>
       <Text>{greeting(t, name)}</Text>
       <Text>{t("planChanged.body", values)}</Text>
       <NotificationFooter t={t} inboxUrl={inboxUrl} unsubscribeUrl={unsubscribeUrl} />

@@ -1,5 +1,6 @@
 import { Button } from "@repo/ui/components/button"
 import { Icon } from "@repo/ui/components/icon"
+import { Input } from "@repo/ui/components/input"
 import { cn } from "@repo/ui/lib/utils"
 import { useTranslations } from "next-intl"
 import * as React from "react"
@@ -11,10 +12,10 @@ const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
     const [showPassword, setShowPassword] = React.useState(false)
     const t = useTranslations("auth.common")
     return (
-      <div className={cn("relative rounded-md", className)}>
-        <input
+      <div className={cn("relative", className)}>
+        <Input
           type={showPassword ? "text" : "password"}
-          className="border-input placeholder:text-muted-foreground focus-visible:ring-ring flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-1 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
+          className="pr-10"
           ref={ref}
           id={id}
           disabled={disabled}
@@ -25,7 +26,7 @@ const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
           size="icon"
           variant="ghost"
           disabled={disabled}
-          className="text-muted-foreground absolute top-1/2 right-1 h-6 w-6 -translate-y-1/2 rounded-md"
+          className="text-muted-foreground absolute top-1/2 right-1 h-6 w-6 -translate-y-1/2"
           aria-label={showPassword ? t("hidePassword") : t("showPassword")}
           aria-pressed={showPassword}
           aria-controls={id}

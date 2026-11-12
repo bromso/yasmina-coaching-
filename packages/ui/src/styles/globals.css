@@ -1,196 +1,15 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "./shiki.css";
+/* Every token value (`:root` and `.dark`), generated from packages/tokens: `bun run tokens`. */
+@import "./tokens.generated.css";
+/* `prose` for long-form text; resolved from this package, so it is a dependency of @repo/ui. */
+@plugin "@tailwindcss/typography";
 @source "../../../apps/**/*.{ts,tsx}";
 @source "../../../components/**/*.{ts,tsx}";
 @source "../**/*.{ts,tsx}";
 
 @custom-variant dark (&:is(.dark *));
-
-:root {
-  --background: oklch(0.9842 0.0034 247.8575);
-  --foreground: oklch(0.2795 0.0368 260.031);
-  --card: oklch(1.0 0 0);
-  --card-foreground: oklch(0.2795 0.0368 260.031);
-  --popover: oklch(1.0 0 0);
-  --popover-foreground: oklch(0.2795 0.0368 260.031);
-  --primary: oklch(0.53 0.2041 277.1173);
-  --primary-foreground: oklch(1.0 0 0);
-  --secondary: oklch(0.9276 0.0058 264.5313);
-  --secondary-foreground: oklch(0.3729 0.0306 259.7328);
-  --muted: oklch(0.967 0.0029 264.5419);
-  --muted-foreground: oklch(0.45 0.0234 264.3637);
-  --accent: oklch(0.9299 0.0334 272.7879);
-  --accent-foreground: oklch(0.3729 0.0306 259.7328);
-  --destructive: oklch(0.55 0.2078 25.3313);
-  --destructive-foreground: oklch(1.0 0 0);
-  --border: oklch(0.8717 0.0093 258.3382);
-  --input: oklch(0.8717 0.0093 258.3382);
-  --ring: oklch(0.53 0.2041 277.1173);
-  --chart-1: oklch(0.53 0.2041 277.1173);
-  --chart-2: oklch(0.5106 0.2301 276.9656);
-  --chart-3: oklch(0.4568 0.2146 277.0229);
-  --chart-4: oklch(0.3984 0.1773 277.3662);
-  --chart-5: oklch(0.3588 0.1354 278.6973);
-  --sidebar: oklch(0.967 0.0029 264.5419);
-  --sidebar-foreground: oklch(0.2795 0.0368 260.031);
-  --sidebar-primary: oklch(0.53 0.2041 277.1173);
-  --sidebar-primary-foreground: oklch(1.0 0 0);
-  --sidebar-accent: oklch(0.9299 0.0334 272.7879);
-  --sidebar-accent-foreground: oklch(0.3729 0.0306 259.7328);
-  --sidebar-border: oklch(0.8717 0.0093 258.3382);
-  --sidebar-ring: oklch(0.53 0.2041 277.1173);
-  --font-sans: Inter, sans-serif;
-  --font-serif: Merriweather, serif;
-  --font-mono: JetBrains Mono, monospace;
-  --radius: 0.5rem;
-  --shadow-x: 0px;
-  --shadow-y: 4px;
-  --shadow-blur: 8px;
-  --shadow-spread: -1px;
-  --shadow-opacity: 0.1;
-  --shadow-color: hsl(0 0% 0%);
-  --shadow-2xs: 0px 4px 8px -1px hsl(0 0% 0% / 0.05);
-  --shadow-xs: 0px 4px 8px -1px hsl(0 0% 0% / 0.05);
-  --shadow-sm: 0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 1px 2px -2px hsl(0 0% 0% / 0.1);
-  --shadow: 0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 1px 2px -2px hsl(0 0% 0% / 0.1);
-  --shadow-md: 0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 2px 4px -2px hsl(0 0% 0% / 0.1);
-  --shadow-lg: 0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 4px 6px -2px hsl(0 0% 0% / 0.1);
-  --shadow-xl: 0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 8px 10px -2px hsl(0 0% 0% / 0.1);
-  --shadow-2xl: 0px 4px 8px -1px hsl(0 0% 0% / 0.25);
-  --tracking-normal: 0em;
-  --spacing: 0.25rem;
-  --color-1: oklch(66.2% 0.225 25.9);
-  --color-2: oklch(60.4% 0.26 302);
-  --color-3: oklch(69.6% 0.165 251);
-  --color-4: oklch(80.2% 0.134 225);
-  --color-5: oklch(90.7% 0.231 133);
-  --kanban-board-circle-blue: oklch(0.6232 0.1879 259.80);
-  --kanban-board-circle-cyan: oklch(0.7146 0.1256 215.13);
-  --kanban-board-circle-gray: oklch(0.5513 0.0233 264.36);
-  --kanban-board-circle-green: oklch(0.7229 0.1921 149.58);
-  --kanban-board-circle-indigo: oklch(0.5860 0.2037 277.12);
-  --kanban-board-circle-pink: oklch(0.6559 0.2117 354.34);
-  --kanban-board-circle-purple: oklch(0.6267 0.2325 303.86);
-  --kanban-board-circle-red: oklch(0.6368 0.2078 25.33);
-  --kanban-board-circle-violet: oklch(0.6059 0.2187 292.72);
-  --kanban-board-circle-yellow: oklch(0.7959 0.1618 86.05);
-  --legend: oklch(1 0 0);
-  --legend-foreground: oklch(0.141 0.005 285.823);
-  --legend-muted: oklch(0.967 0.001 286.375);
-  --legend-muted-foreground: oklch(0.552 0.016 285.938);
-  --legend-track: oklch(0.92 0.004 286.32);
-  --chart-background: oklch(1 0 0);
-  --chart-foreground: oklch(0.145 0.004 285);
-  --chart-foreground-muted: oklch(0.55 0.014 260);
-  --chart-line-primary: var(--chart-1);
-  --chart-line-secondary: var(--chart-2);
-  --chart-crosshair: oklch(0.4 0.1828 274.34);
-  --chart-grid: oklch(0.9 0 0);
-  --chart-brush-border: var(--chart-grid);
-  --chart-tooltip-background: oklch(0.21 0.006 285 / 0.8);
-  --chart-tooltip-foreground: oklch(0.985 0 0);
-  --chart-tooltip-muted: oklch(0.65 0.01 260);
-  --chart-marker-background: oklch(0.97 0.005 260);
-  --chart-marker-border: oklch(0.85 0.01 260);
-  --chart-marker-foreground: oklch(0.3 0.01 260);
-  --chart-label: oklch(0.45 0.01 260);
-  --chart-scale-01: oklch(0.98 0.003 106);
-  --chart-scale-02: oklch(0.92 0.008 106);
-  --chart-scale-03: oklch(0.82 0.015 106);
-  --chart-scale-04: oklch(0.68 0.02 106);
-  --chart-scale-05: oklch(0.55 0.025 106);
-  --chart-scale-pattern-color: oklch(0.96 0.005 106);
-}
-
-.dark {
-  --background: oklch(0.2077 0.0398 265.7549);
-  --foreground: oklch(0.9288 0.0126 255.5078);
-  --card: oklch(0.2795 0.0368 260.031);
-  --card-foreground: oklch(0.9288 0.0126 255.5078);
-  --popover: oklch(0.2795 0.0368 260.031);
-  --popover-foreground: oklch(0.9288 0.0126 255.5078);
-  --primary: oklch(0.6801 0.1583 276.9349);
-  --primary-foreground: oklch(0.2077 0.0398 265.7549);
-  --secondary: oklch(0.3351 0.0331 260.912);
-  --secondary-foreground: oklch(0.8717 0.0093 258.3382);
-  --muted: oklch(0.2427 0.0381 259.9437);
-  --muted-foreground: oklch(0.75 0.0192 261.3246);
-  --accent: oklch(0.3729 0.0306 259.7328);
-  --accent-foreground: oklch(0.8717 0.0093 258.3382);
-  --destructive: oklch(0.69 0.2078 25.3313);
-  --destructive-foreground: oklch(0.2077 0.0398 265.7549);
-  --border: oklch(0.4461 0.0263 256.8018);
-  --input: oklch(0.4461 0.0263 256.8018);
-  --ring: oklch(0.6801 0.1583 276.9349);
-  --chart-1: oklch(0.6801 0.1583 276.9349);
-  --chart-2: oklch(0.5854 0.2041 277.1173);
-  --chart-3: oklch(0.5106 0.2301 276.9656);
-  --chart-4: oklch(0.4568 0.2146 277.0229);
-  --chart-5: oklch(0.3984 0.1773 277.3662);
-  --sidebar: oklch(0.2795 0.0368 260.031);
-  --sidebar-foreground: oklch(0.9288 0.0126 255.5078);
-  --sidebar-primary: oklch(0.6801 0.1583 276.9349);
-  --sidebar-primary-foreground: oklch(0.2077 0.0398 265.7549);
-  --sidebar-accent: oklch(0.3729 0.0306 259.7328);
-  --sidebar-accent-foreground: oklch(0.8717 0.0093 258.3382);
-  --sidebar-border: oklch(0.4461 0.0263 256.8018);
-  --sidebar-ring: oklch(0.6801 0.1583 276.9349);
-  --font-sans: Inter, sans-serif;
-  --font-serif: Merriweather, serif;
-  --font-mono: JetBrains Mono, monospace;
-  --radius: 0.5rem;
-  --shadow-x: 0px;
-  --shadow-y: 4px;
-  --shadow-blur: 8px;
-  --shadow-spread: -1px;
-  --shadow-opacity: 0.1;
-  --shadow-color: hsl(0 0% 0%);
-  --shadow-2xs: 0px 4px 8px -1px hsl(0 0% 0% / 0.05);
-  --shadow-xs: 0px 4px 8px -1px hsl(0 0% 0% / 0.05);
-  --shadow-sm: 0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 1px 2px -2px hsl(0 0% 0% / 0.1);
-  --shadow: 0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 1px 2px -2px hsl(0 0% 0% / 0.1);
-  --shadow-md: 0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 2px 4px -2px hsl(0 0% 0% / 0.1);
-  --shadow-lg: 0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 4px 6px -2px hsl(0 0% 0% / 0.1);
-  --shadow-xl: 0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 8px 10px -2px hsl(0 0% 0% / 0.1);
-  --shadow-2xl: 0px 4px 8px -1px hsl(0 0% 0% / 0.25);
-  --color-1: oklch(66.2% 0.225 25.9);
-  --color-2: oklch(60.4% 0.26 302);
-  --color-3: oklch(69.6% 0.165 251);
-  --color-4: oklch(80.2% 0.134 225);
-  --color-5: oklch(90.7% 0.231 133);
-  --kanban-board-circle-blue: oklch(0.7135 0.1435 254.61);
-  --kanban-board-circle-cyan: oklch(0.7973 0.1339 211.45);
-  --kanban-board-circle-gray: oklch(0.7137 0.0192 261.33);
-  --kanban-board-circle-green: oklch(0.8003 0.1823 151.70);
-  --kanban-board-circle-indigo: oklch(0.6797 0.1586 276.96);
-  --kanban-board-circle-pink: oklch(0.7253 0.1752 349.74);
-  --kanban-board-circle-purple: oklch(0.7218 0.1766 305.51);
-  --kanban-board-circle-red: oklch(0.7108 0.1660 22.21);
-  --kanban-board-circle-violet: oklch(0.7093 0.1589 293.52);
-  --kanban-board-circle-yellow: oklch(0.8601 0.1730 91.84);
-  --legend: oklch(0.21 0.006 285.885);
-  --legend-foreground: oklch(0.985 0 0);
-  --legend-muted: oklch(0.274 0.006 286.033);
-  --legend-muted-foreground: oklch(0.705 0.015 286.067);
-  --legend-track: oklch(0.274 0.006 286.033);
-  --chart-background: oklch(0.145 0 0);
-  --chart-foreground: oklch(0.45 0 0);
-  --chart-foreground-muted: oklch(0.65 0.01 260);
-  --chart-crosshair: oklch(0.45 0 0);
-  --chart-grid: oklch(0.25 0 0);
-  --chart-brush-border: var(--chart-grid);
-  --chart-marker-background: oklch(0.25 0.01 260);
-  --chart-marker-border: oklch(0.4 0.01 260);
-  --chart-marker-foreground: oklch(0.9 0 0);
-  --chart-label: oklch(0.75 0.01 260);
-  --chart-scale-01: oklch(0.28 0.03 270);
-  --chart-scale-02: oklch(0.38 0.04 270);
-  --chart-scale-03: oklch(0.48 0.05 270);
-  --chart-scale-04: oklch(0.58 0.06 270);
-  --chart-scale-05: oklch(0.68 0.07 270);
-  --chart-scale-pattern-color: oklch(0.145 0 0);
-}
 
 @theme inline {
   /* Custom breakpoint for xs (mobile-first, 480px+) */
@@ -229,9 +48,10 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-mono);
-  --font-serif: var(--font-serif);
+  /* The typeface tokens under Tailwind's names: `font-sans`, `font-display`, `font-mono`. */
+  --font-sans: var(--typeface-sans);
+  --font-display: var(--typeface-display);
+  --font-mono: var(--typeface-mono);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -399,7 +219,7 @@
     }
   }}
 
-/* Site-wide content width: used by SiteHeader/SiteFooter and page sections. Change here, not per app. */
+/* Site-wide content width: used by SiteFooter and page sections. Change here, not per app. */
 @utility container {
   margin-inline: auto;
   padding-inline: 1.5rem;
@@ -427,5 +247,271 @@
     --color-kanban-board-circle-red: var(--kanban-board-circle-red);
     --color-kanban-board-circle-violet: var(--kanban-board-circle-violet);
     --color-kanban-board-circle-yellow: var(--kanban-board-circle-yellow);
+  }
+}
+
+/* The coaching tokens as Tailwind utilities: `bg-sun`, `text-brand-blue`, `font-display`,
+   `rounded-4xl`, … */
+@theme inline {
+  --radius-xs: calc(var(--radius) - 4px);
+  --radius-2xl: calc(var(--radius) * 2);
+  --radius-3xl: calc(var(--radius) * 3);
+  --radius-4xl: calc(var(--radius) * 4);
+
+  --color-brand-blue: var(--brand-blue);
+  --color-brand-blue-foreground: var(--brand-blue-foreground);
+  --color-sun: var(--sun);
+  --color-sun-soft: var(--sun-soft);
+
+  --font-weight-display: var(--display-weight);
+  --font-weight-text: var(--text-weight);
+}
+
+/* Typography utilities: body text in the sans, `.font-display` in the serif. */
+@layer utilities {
+  body {
+    font-family: var(--typeface-sans);
+    font-weight: var(--text-weight);
+  }
+  .font-display {
+    font-family: var(--typeface-display);
+    font-weight: var(--display-weight);
+    font-variation-settings: "SOFT" 30;
+  }
+  .font-mono {
+    font-family: var(--typeface-mono), monospace;
+  }
+}
+
+/*
+ * Every h1 and h2 is set in the display serif at its own weight. Unlayered on
+ * purpose: the shared blocks put `font-semibold` on their headings, and a rule inside a layer
+ * could never override a Tailwind utility.
+ */
+h1,
+h2 {
+  font-family: var(--typeface-display);
+  font-weight: var(--display-weight);
+  font-variation-settings: "SOFT" 30;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+/* Breakpoints, and the motion every app shares. The accordion's open and close come from
+   tw-animate-css (`animate-accordion-down` / `-up`, 0.2s ease-out unless a duration is set). */
+@theme inline {
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1400px;
+
+  /* An entrance: the piece rises 16 px into place, staggered with `[animation-delay:…]`. */
+  --animate-rise: rise 0.6s var(--ease-out-soft) both;
+  /* A step's ring, once, when it becomes current. */
+  --animate-ring-pulse: ring-pulse 0.6s ease-out 1;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes ring-pulse {
+    from {
+      box-shadow: 0 0 0 0 color-mix(in oklch, var(--primary) 45%, transparent);
+    }
+    to {
+      box-shadow: 0 0 0 10px transparent;
+    }
+  }
+}
+
+@layer components {
+  button {
+    cursor: pointer;
+  }
+}
+
+/*
+ * Motion. Everything here is behind `prefers-reduced-motion: no-preference`: with motion
+ * reduced none of it applies, and the page is the server's HTML, still.
+ *
+ * `.reveal` / `.reveal-hidden` are a scroll reveal's two states (`Reveal`,
+ * `src/components/motion/reveal.tsx`): an element below the fold is put in `.reveal-hidden` right
+ * after hydration (no transition, so nothing blinks) and rises when `.reveal-hidden` is removed as
+ * it scrolls into view, after `--reveal-delay` (its place in a stagger). The buttons' press is the
+ * one global touch.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal {
+    transition:
+      opacity 0.55s var(--ease-out-soft),
+      transform 0.55s var(--ease-out-soft);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+  .reveal-hidden {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: none;
+  }
+  [data-slot="button"]:active:not(:disabled),
+  .arrow-link:active {
+    transform: scale(0.98);
+  }
+  html,
+  body {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Keeps in-page jumps and focused elements clear of a stuck header (`SiteHeaderShell sticky`
+   marks it `data-sticky`): `--sticky-header-offset` is the header's height plus a gap
+   (`--site-header-offset`, from the tokens) when one is stuck, and 0 when the header scrolls away.
+   The page's scroll padding and any element's `scroll-mt-(--sticky-header-offset)` read it. */
+html {
+  --sticky-header-offset: 0px;
+  scroll-padding-top: calc(var(--sticky-header-offset) + env(safe-area-inset-top, 0px));
+}
+html:has([data-slot="site-header"][data-sticky]) {
+  --sticky-header-offset: var(--site-header-offset);
+}
+/* Browsers without `:has()` (Firefox before 121, inside www's browserslist) can't tell whether a
+   header is stuck, so they keep the offset everywhere rather than hide anchors under it. */
+@supports not selector(:has(*)) {
+  html {
+    --sticky-header-offset: var(--site-header-offset);
+  }
+}
+body {
+  position: relative;
+  /* A safety net: a glow that spills past its section is clipped, never scrolled to sideways
+     (each glow's own section clips it already). Only on body, never on html: with the root left
+     `visible`, body's overflow belongs to the viewport, so a modal menu's scroll lock (overflow
+     hidden on body) still locks the window. Clipping html too makes body its own scroll box under
+     that lock, and a sticky header then sticks to body and jumps off-screen. */
+  overflow-x: clip;
+}
+
+/* `Picture` renders `<picture class="contents">` so its `<img>` is the grid or flex item. Browsers
+   do not hide `<source>` by default, so without this it becomes an item too, takes a grid cell and
+   pushes the photo onto the next row. */
+picture > source {
+  display: none;
+}
+
+/* Windows High Contrast Mode support */
+@media (forced-colors: active) {
+  /* Ensure borders remain visible */
+  .border,
+  [class*="border"] {
+    border-color: CanvasText !important;
+  }
+
+  /* Preserve focus indicators */
+  *:focus-visible {
+    outline: 3px solid Highlight !important;
+    outline-offset: 3px !important;
+  }
+
+  /* Ensure icons remain visible */
+  svg {
+    forced-color-adjust: auto;
+  }
+
+  /* Ensure cards and backgrounds have proper contrast */
+  .bg-card,
+  .bg-background,
+  .bg-muted {
+    background-color: Canvas !important;
+  }
+
+  /* Gradient sections: replace gradients with solid background and visible borders */
+  /* `to-` only at the start of a class or after a variant: `auto-rows-*` / `auto-cols-*` hold it
+     too. */
+  [class*="bg-linear-"],
+  [class*="from-"],
+  [class*="via-"],
+  [class^="to-"],
+  [class*=" to-"],
+  [class*=":to-"] {
+    background: Canvas !important;
+  }
+
+  /* Add visible borders to rounded gradient sections for structure */
+  [class*="rounded-4xl"],
+  [class*="rounded-t-4xl"],
+  [class*="rounded-b-4xl"],
+  [class*="rounded-t-2xl"],
+  [class*="rounded-b-2xl"] {
+    border: 2px solid CanvasText !important;
+  }
+
+  /* Interactive elements: ensure visibility */
+  a,
+  button,
+  [role="button"] {
+    border: 2px solid LinkText;
+    background: ButtonFace;
+    color: ButtonText;
+  }
+
+  a:hover,
+  button:hover,
+  [role="button"]:hover {
+    border-color: Highlight;
+    background: Highlight;
+    color: HighlightText;
+  }
+
+  /* Links with gradient backgrounds */
+  a[class*="bg-linear-"],
+  a[class*="from-"] {
+    background: ButtonFace !important;
+    border: 2px solid LinkText !important;
+  }
+}
+
+/* High contrast preference support (`more`: Media Queries 5; `high` never matched) */
+@media (prefers-contrast: more) {
+  /* Thicken the borders an element already has. Side by side, never `border-width` on every
+     `[class*="border"]`: preflight gives every element `border-style: solid`, so that would draw
+     all four sides of a `border-b`. */
+  .border {
+    border-width: 2px;
+  }
+  .border-x,
+  .border-l {
+    border-left-width: 2px;
+  }
+  .border-x,
+  .border-r {
+    border-right-width: 2px;
+  }
+  .border-y,
+  .border-t {
+    border-top-width: 2px;
+  }
+  .border-y,
+  .border-b {
+    border-bottom-width: 2px;
+  }
+
+  /* Ensure focus rings are prominent */
+  *:focus-visible {
+    outline-width: 3px;
+  }
+
+  /* Add borders to gradient sections for better structure visibility */
+  [class*="rounded-4xl"],
+  [class*="rounded-t-4xl"],
+  [class*="rounded-b-4xl"],
+  [class*="rounded-t-2xl"],
+  [class*="rounded-b-2xl"] {
+    border: 1px solid currentColor;
   }
 }

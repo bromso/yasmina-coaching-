@@ -1,0 +1,5 @@
+{
+  "color": {
+    "broken": { "$type": "color", "$value": "{color.missing}" }
+  }
+}

@@ -51,7 +51,7 @@ export function SiteHeaderMobile({
               <span
                 key={link.href}
                 aria-current="page"
-                className="rounded-md px-3 py-2 text-sm font-medium"
+                className="rounded-full px-4 py-2 text-sm font-medium"
               >
                 {link.label}
               </span>
@@ -59,7 +59,7 @@ export function SiteHeaderMobile({
               <a
                 key={link.href}
                 href={link.href}
-                className="rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+                className="rounded-full px-4 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               >
                 {link.label}
               </a>

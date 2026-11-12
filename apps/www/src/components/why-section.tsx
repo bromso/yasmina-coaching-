@@ -1,8 +1,8 @@
+import { Eyebrow } from "@repo/ui/components/eyebrow"
+import { MediaClip } from "@repo/ui/components/motion/media-clip"
+import { Reveal, RevealItem } from "@repo/ui/components/motion/reveal"
+import { Picture } from "@repo/ui/components/picture"
 import { PauseIcon, PlayIcon } from "@/components/clip-icons"
-import { Eyebrow } from "@/components/eyebrow"
-import { MediaClip } from "@/components/motion/media-clip"
-import { Reveal, RevealItem } from "@/components/motion/reveal"
-import { Picture } from "@/components/picture"
 import type { HomeContent } from "@/content/home"
 import type { MediaClip as Clip, MediaImage, MediaText } from "@/content/media"
 
@@ -24,7 +24,7 @@ export function WhySection({ id, heading, reasons, clip, still, clipLabels }: Wh
     <section
       id={id}
       aria-labelledby={`${id}-title`}
-      className="scroll-mt-24 container py-24 lg:py-32"
+      className="scroll-mt-(--sticky-header-offset) container py-24 lg:py-32"
     >
       <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
         <Reveal className="lg:col-span-5">
@@ -61,9 +61,9 @@ export function WhySection({ id, heading, reasons, clip, still, clipLabels }: Wh
                 index={i + 2}
                 className="grid gap-2 py-6 sm:grid-cols-[8rem_1fr] sm:gap-6"
               >
-                <dt className="font-medium text-muted-foreground text-xs uppercase tracking-[0.18em] sm:pt-1">
+                <Eyebrow as="dt" className="sm:pt-1">
                   {reason.title}
-                </dt>
+                </Eyebrow>
                 <dd className="text-pretty text-foreground leading-relaxed">
                   {reason.description}
                 </dd>

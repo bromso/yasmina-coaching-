@@ -16,7 +16,7 @@ type GlobalErrorProps = {
  */
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
   return (
-    <html lang="sv">
+    <html lang="sv" data-scroll-behavior="smooth">
       <body className="antialiased">
         <ErrorPage error={error} reset={reset} />
       </body>

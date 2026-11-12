@@ -180,12 +180,7 @@ export function GroupBooking({
             {events.status === "ready" && events.events.length === 0 && text.none}
           </p>
           {events.status === "error" && (
-            <Button
-              type="button"
-              variant="outline"
-              className="min-h-11 w-fit rounded-full"
-              onClick={load}
-            >
+            <Button type="button" variant="outline" className="min-h-11 w-fit" onClick={load}>
               {copy.retry}
             </Button>
           )}

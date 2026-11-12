@@ -1,5 +1,6 @@
 import { Icon } from "@repo/ui/components/icon"
-import { Picture } from "@/components/picture"
+import { Picture } from "@repo/ui/components/picture"
+import { SunPanel } from "@repo/ui/components/sun-panel"
 import type { MediaImage } from "@/content/media"
 
 type ServiceCardProps = {
@@ -18,7 +19,10 @@ type ServiceCardProps = {
  */
 export function ServiceCard({ href, title, lead, image, more }: ServiceCardProps) {
   return (
-    <article className="relative flex h-full flex-col gap-5 rounded-4xl bg-sun-soft p-5 transition-transform duration-300 ease-out has-[a:focus-visible]:ring-[3px] has-[a:focus-visible]:ring-ring/50 motion-safe:group-hover:-translate-y-1 sm:p-6">
+    <SunPanel
+      as="article"
+      className="relative flex h-full flex-col gap-5 p-5 transition-transform duration-300 ease-out has-[a:focus-visible]:ring-[3px] has-[a:focus-visible]:ring-ring/50 motion-safe:group-hover:-translate-y-1 sm:p-6"
+    >
       <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-background/60">
         <Picture
           image={image}
@@ -39,6 +43,6 @@ export function ServiceCard({ href, title, lead, image, more }: ServiceCardProps
         {more}
         <Icon icon="lucide:arrow-right" className="size-4" />
       </span>
-    </article>
+    </SunPanel>
   )
 }

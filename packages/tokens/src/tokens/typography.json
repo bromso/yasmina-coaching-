@@ -1,28 +1,60 @@
 {
-  "font": {
-    "family": {
-      "sans": {
-        "$value": "Inter, sans-serif",
-        "$type": "fontFamily",
-        "$description": "Default sans-serif font"
-      },
-      "serif": {
-        "$value": "Merriweather, serif",
-        "$type": "fontFamily",
-        "$description": "Serif font for headings"
-      },
-      "mono": {
-        "$value": "JetBrains Mono, monospace",
-        "$type": "fontFamily",
-        "$description": "Monospace font for code"
-      }
+  "typeface": {
+    "sans": {
+      "$type": "fontFamily",
+      "$value": "var(--font-inter, {typeface.system})",
+      "$description": "Body text: Inter as next/font loads it (`--font-inter`, with its metric-matched fallback), the system sans where nothing set that variable (Storybook)"
+    },
+    "display": {
+      "$type": "fontFamily",
+      "$value": "var(--font-fraunces, {typeface.serif}), {typeface.serif}",
+      "$description": "Headlines: Fraunces as next/font loads it (`--font-fraunces`), then the serif fallback, which stands alone where nothing set that variable (Storybook)"
+    },
+    "mono": {
+      "$type": "fontFamily",
+      "$value": "JetBrains Mono, monospace"
+    },
+    "system": {
+      "$type": "fontFamily",
+      "$value": "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+      "$description": "The system sans stack: mail's body text, and the sans's fallback on the web"
+    },
+    "serif": {
+      "$type": "fontFamily",
+      "$value": "Georgia, \"Times New Roman\", serif",
+      "$description": "The display serif's fallback: mail's headings, and the web's after Fraunces"
     }
   },
   "tracking": {
     "normal": {
-      "$value": "0em",
       "$type": "letterSpacing",
-      "$description": "Normal letter spacing"
+      "$value": "0em"
+    }
+  },
+  "display": {
+    "weight": {
+      "$type": "fontWeight",
+      "$value": "400"
+    }
+  },
+  "text": {
+    "weight": {
+      "$type": "fontWeight",
+      "$value": "400"
+    }
+  },
+  "email": {
+    "font": {
+      "display": {
+        "$type": "fontFamily",
+        "$value": "{typeface.serif}",
+        "$description": "Headings in mail: web fonts are unreliable in mail clients"
+      },
+      "body": {
+        "$type": "fontFamily",
+        "$value": "{typeface.system}",
+        "$description": "Body text in mail: the system sans stack"
+      }
     }
   }
 }

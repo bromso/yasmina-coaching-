@@ -6,6 +6,8 @@ import { resolvePath, storageStateFor, urlFor } from "../fixtures/a11y-session"
 // block or chart scrolling inside its own container is fine — it does not widen the document.
 // Every manifest entry: the admin detail pages resolve their id first, and the not-found pages
 // (answered 404) render each app's status page, which must reflow like any other.
+const UNCLIP = "html, body { overflow-x: visible !important; }"
+
 for (const entry of A11Y_PAGES) {
   test(`reflow: ${entry.app} ${entry.path}`, async ({ browser }) => {
     const storageState =
@@ -17,6 +19,10 @@ for (const entry of A11Y_PAGES) {
     const page = await context.newPage()
     await page.goto(urlFor(entry.app, await resolvePath(page, entry)))
     await page.waitForLoadState("networkidle")
+    // @repo/ui clips horizontal overflow on body (so a decorative glow never pans the
+    // page), which would also hide real overflow from scrollWidth. Lift the clip to measure: what
+    // overflows here would be cut off, unreachable, on the real page.
+    await page.addStyleTag({ content: UNCLIP })
     const overflow = await page.evaluate(() => {
       const doc = document.documentElement
       if (doc.scrollWidth <= doc.clientWidth) return null

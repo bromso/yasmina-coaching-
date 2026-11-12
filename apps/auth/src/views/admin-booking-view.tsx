@@ -27,7 +27,7 @@ export function AdminBookingView({ booking, now }: { booking: AdminBooking; now:
       <AdminNav current="/admin/bookings" />
       <BookingsSubnav current="/admin/bookings" />
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Card>
+        <Card size="compact">
           <CardHeader>
             <CardTitle>{offering.label}</CardTitle>
             <CardDescription>
@@ -108,7 +108,7 @@ export function AdminBookingView({ booking, now }: { booking: AdminBooking; now:
             )}
           </CardContent>
         </Card>
-        <Card>
+        <Card size="compact">
           <CardHeader>
             <CardTitle>Customer</CardTitle>
             <CardDescription>{booking.customer.email}</CardDescription>
@@ -157,7 +157,7 @@ export function AdminBookingView({ booking, now }: { booking: AdminBooking; now:
         </Card>
         {isPending && (
           <>
-            <Card>
+            <Card size="compact">
               <CardHeader>
                 <CardTitle>Confirm</CardTitle>
                 <CardDescription>
@@ -173,7 +173,7 @@ export function AdminBookingView({ booking, now }: { booking: AdminBooking; now:
                 />
               </CardContent>
             </Card>
-            <Card>
+            <Card size="compact">
               <CardHeader>
                 <CardTitle>Decline</CardTitle>
                 <CardDescription>
@@ -187,7 +187,7 @@ export function AdminBookingView({ booking, now }: { booking: AdminBooking; now:
           </>
         )}
         {isFutureConfirmed && (
-          <Card>
+          <Card size="compact">
             <CardHeader>
               <CardTitle>Cancel</CardTitle>
               <CardDescription>

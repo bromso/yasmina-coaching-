@@ -1,0 +1,19 @@
+{
+  "layer": {
+    "sidebar": {
+      "$type": "number",
+      "$value": "10",
+      "$description": "The fixed Sidebar's z-index (packages/ui's sidebar.tsx reads it)."
+    },
+    "above-sidebar": {
+      "$type": "number",
+      "$value": "calc({layer.sidebar} + 1)",
+      "$description": "What must cover the fixed sidebar when they meet (account's footer): always one above it."
+    },
+    "header": {
+      "$type": "number",
+      "$value": "50",
+      "$description": "The sticky site header's z-index: above the page, level with dialogs and sheets, which come later in the DOM."
+    }
+  }
+}

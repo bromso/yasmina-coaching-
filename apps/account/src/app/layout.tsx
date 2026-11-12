@@ -5,7 +5,7 @@ import { BrowserTelemetry } from "@repo/ui/components/browser-telemetry"
 import { SkipLink } from "@repo/ui/components/skip-link"
 import { Toaster } from "@repo/ui/components/sonner"
 import { WebVitals } from "@repo/ui/components/web-vitals"
-import { fontSans } from "@repo/ui/lib/fonts"
+import { fontVariables } from "@repo/ui/lib/fonts"
 import type { Metadata, Viewport } from "next"
 import { connection } from "next/server"
 import { NextIntlClientProvider } from "next-intl"
@@ -37,8 +37,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0A0A0A" },
+    { media: "(prefers-color-scheme: light)", color: "#fcfaf4" },
+    { media: "(prefers-color-scheme: dark)", color: "#121a1a" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -55,13 +55,18 @@ export default async function RootLayout({
   const locale = await getLocale()
   const t = await getTranslations("ui")
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html
+      className={fontVariables}
+      lang={locale}
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
       <head>
         {/* Preconnect to external resources for faster loading */}
         <link rel="preconnect" href="https://api.iconify.design" />
         <link rel="dns-prefetch" href="https://api.iconify.design" />
       </head>
-      <body className={`${fontSans.variable} group/body font-sans antialiased`}>
+      <body className="group/body font-sans antialiased">
         <SkipLink label={t("skipLink")} />
         <WebVitals />
         <BrowserTelemetry />

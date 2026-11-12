@@ -1,7 +1,7 @@
-import { Button, Heading, Link, Text } from "@react-email/components"
+import { Button, Text } from "@react-email/components"
 import { DEFAULT_LOCALE, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
-import { button, Layout } from "./layout"
+import { button, EmailHeading, EmailLink, Layout } from "./layout"
 
 /**
  * The internal mail to Yasmina about a new contact request from `/kontakt`. The answers arrive as
@@ -53,7 +53,7 @@ export function LeadNew({
   const t = translatorFor(locale, "email")
   return (
     <Layout preview={t("leadNew.preview", { name })} brand={brand} locale={locale}>
-      <Heading as="h1">{t("leadNew.heading")}</Heading>
+      <EmailHeading as="h1">{t("leadNew.heading")}</EmailHeading>
       <Text>{t("leadNew.reference", { reference })}</Text>
       <Text>{t("leadNew.audience", { audience })}</Text>
       <Text>{t("leadNew.need", { need })}</Text>
@@ -77,7 +77,7 @@ export function LeadNew({
       </Button>
       <Text>
         {t("layout.orLink")}
-        <Link href={adminUrl}>{adminUrl}</Link>
+        <EmailLink href={adminUrl}>{adminUrl}</EmailLink>
       </Text>
       <Text>{t("leadNew.footer", { email })}</Text>
     </Layout>

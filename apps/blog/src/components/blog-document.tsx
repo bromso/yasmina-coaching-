@@ -1,13 +1,13 @@
 import { translatorFor } from "@repo/i18n/translate"
 import { BRAND_NAME, footerGroups, relabelFooter, siteUrl } from "@repo/sites"
-import { SiteFooter } from "@repo/ui/blocks/site-footer"
+import { SiteFooter, SiteFooterLegal } from "@repo/ui/blocks/site-footer"
 import { Analytics } from "@repo/ui/components/analytics"
 import { Brand } from "@repo/ui/components/brand"
 import { BrowserTelemetry } from "@repo/ui/components/browser-telemetry"
 import { CookieConsent } from "@repo/ui/components/cookie-consent"
 import { SkipLink } from "@repo/ui/components/skip-link"
 import { WebVitals } from "@repo/ui/components/web-vitals"
-import { fontDisplay, fontSans } from "@repo/ui/lib/fonts"
+import { fontVariables } from "@repo/ui/lib/fonts"
 import type { Metadata, Viewport } from "next"
 import type { ReactElement, ReactNode } from "react"
 import { Providers } from "@/app/providers"
@@ -63,27 +63,26 @@ export function BlogDocument({
   const t = translatorFor(locale, "ui")
   const www = siteUrl("www")
   const legal = (
-    <p className="text-muted-foreground text-xs">
-      © {new Date().getFullYear()} {BRAND_NAME} ·{" "}
-      <a href={`${www}/terms`} className="underline underline-offset-4 hover:text-foreground">
-        {ui.legal.terms}
-      </a>{" "}
-      ·{" "}
-      <a href={`${www}/privacy`} className="underline underline-offset-4 hover:text-foreground">
-        {ui.legal.privacy}
-      </a>
-    </p>
+    <SiteFooterLegal
+      links={[
+        { label: ui.legal.terms, href: `${www}/terms` },
+        { label: ui.legal.privacy, href: `${www}/privacy` },
+      ]}
+    />
   )
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html
+      className={fontVariables}
+      lang={locale}
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
       <head>
         {/* The theme toggle's icon loads from Iconify */}
         <link rel="preconnect" href="https://api.iconify.design" />
         <link rel="dns-prefetch" href="https://api.iconify.design" />
       </head>
-      <body
-        className={`${fontSans.variable} ${fontDisplay.variable} group/body font-sans antialiased`}
-      >
+      <body className="group/body font-sans antialiased">
         <SkipLink label={t("skipLink")} />
         <WebVitals />
         <BrowserTelemetry />

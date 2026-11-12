@@ -1,12 +1,15 @@
+import { BRAND_NAME } from "@repo/sites/brand"
 import { cn } from "@repo/ui/lib/utils"
 import type * as React from "react"
+import { Fragment } from "react"
 
-export type FooterGroup = { title: string; links: { label: string; href: string }[] }
+export type FooterLink = { label: string; href: string }
+export type FooterGroup = { title: string; links: FooterLink[] }
 
 type SiteFooterProps = React.ComponentProps<"footer"> & {
   brand: React.ReactNode
   groups: FooterGroup[]
-  /** The bottom row: copyright, terms, privacy. */
+  /** The bottom row: copyright, terms, privacy — `SiteFooterLegal` draws it in www's look. */
   legal?: React.ReactNode
   /** The nav landmark's accessible name. */
   navLabel?: string
@@ -56,5 +59,40 @@ export function SiteFooter({
         </div>
       )}
     </footer>
+  )
+}
+
+type SiteFooterLegalProps = {
+  /** The links after the copyright (terms, privacy, …), in order. */
+  links: FooterLink[]
+  /** Who holds the copyright. */
+  owner?: React.ReactNode
+  /** Defaults to the current year (at render: build time in the static apps). */
+  year?: number
+}
+
+/**
+ * The legal row's line, www's look: `© <year> <owner> · <link> · <link>`, small and muted, each
+ * link underlined. Every app passes it as `SiteFooter`'s `legal`, with its own (translated) links,
+ * so the row is styled here once. A `<p>` holding "©": the visual spec masks it by that.
+ */
+export function SiteFooterLegal({
+  links,
+  owner = BRAND_NAME,
+  year = new Date().getFullYear(),
+}: SiteFooterLegalProps) {
+  return (
+    <p className="text-muted-foreground text-xs">
+      © {year} {owner}
+      {links.map((link) => (
+        <Fragment key={link.href}>
+          {" "}
+          ·{" "}
+          <a href={link.href} className="underline underline-offset-4 hover:text-foreground">
+            {link.label}
+          </a>
+        </Fragment>
+      ))}
+    </p>
   )
 }

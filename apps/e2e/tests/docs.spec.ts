@@ -52,11 +52,12 @@ test("the table of contents marks the section being read", async ({ page }) => {
   const workspaces = toc.locator('a[href="#workspaces"]')
   // Put the heading 100px below the top of the viewport: inside the reading band (below the
   // sticky header's 64px, above the top 30%).
-  await page
-    .locator("#workspaces")
-    .evaluate((heading) =>
-      window.scrollTo(0, heading.getBoundingClientRect().top + window.scrollY - 100)
-    )
+  await page.locator("#workspaces").evaluate((heading) =>
+    window.scrollTo({
+      top: heading.getBoundingClientRect().top + window.scrollY - 100,
+      behavior: "instant",
+    })
+  )
   await expect(workspaces).toHaveAttribute("aria-current", "location")
   await expect(toc.locator('[aria-current="location"]')).toHaveCount(1)
 })
@@ -78,7 +79,12 @@ test("the TOC highlight follows jumps: a hash link, then a scroll back past a he
   // (30% of the viewport).
   const below = await page.evaluate(() => {
     const previous = document.getElementById("two-step-verification") as HTMLElement
-    window.scrollTo(0, previous.getBoundingClientRect().top + window.scrollY - 20)
+    // Instant: the shared stylesheet makes scrolling smooth, and the measurement below needs
+    // the page to have arrived.
+    window.scrollTo({
+      top: previous.getBoundingClientRect().top + window.scrollY - 20,
+      behavior: "instant",
+    })
     const last = document.getElementById("environment") as HTMLElement
     return last.getBoundingClientRect().top - window.innerHeight * 0.3
   })

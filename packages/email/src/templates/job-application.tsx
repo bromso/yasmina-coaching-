@@ -1,7 +1,7 @@
-import { Button, Heading, Link, Text } from "@react-email/components"
+import { Button, Text } from "@react-email/components"
 import { DEFAULT_LOCALE, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
-import { button, Layout } from "./layout"
+import { button, EmailHeading, EmailLink, Layout } from "./layout"
 
 export type JobApplicationProps = {
   reference: string
@@ -38,7 +38,7 @@ export function JobApplication({
   const from = `${name} (${email})`
   return (
     <Layout preview={t("jobApplication.preview", { title, email })} brand={brand} locale={locale}>
-      <Heading as="h1">{t("jobApplication.heading")}</Heading>
+      <EmailHeading as="h1">{t("jobApplication.heading")}</EmailHeading>
       <Text>{t("jobApplication.reference", { reference })}</Text>
       <Text>{t("jobApplication.role", { title })}</Text>
       <Text>{t("jobApplication.from", { from })}</Text>
@@ -54,7 +54,7 @@ export function JobApplication({
       </Button>
       <Text>
         {t("layout.orLink")}
-        <Link href={adminUrl}>{adminUrl}</Link>
+        <EmailLink href={adminUrl}>{adminUrl}</EmailLink>
       </Text>
       <Text>{t("jobApplication.footer", { email })}</Text>
     </Layout>

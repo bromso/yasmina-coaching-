@@ -14,7 +14,7 @@ const truncate = (s: string, n = 80) => (s.length > n ? `${s.slice(0, n - 1)}…
 
 export function ErrorsCard({ errors }: { errors: TelemetryErrors | null }) {
   return (
-    <Card>
+    <Card size="compact">
       <CardHeader>
         <CardTitle>Errors (24 h)</CardTitle>
         {errors && (

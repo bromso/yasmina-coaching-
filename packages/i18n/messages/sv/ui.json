@@ -57,10 +57,12 @@
     "body": "{workspace} kräver tvåstegsverifiering. Slå på den, eller lägg till en passkey, för att fortsätta.",
     "setup": "Slå på tvåstegsverifiering",
     "otherWorkspaces": "Eller öppna en annan arbetsyta:",
+    "switch": "Byt",
     "switchTo": "Byt till {workspace}",
     "createWorkspace": "Skapa en ny arbetsyta",
-    "leaveHint": "Behöver du inte längre den här arbetsytan?",
+    "leaveHint": "Behöver du inte {workspace} längre?",
     "leave": "Lämna {workspace}",
+    "leaveShort": "Lämna",
     "leaving": "Lämnar…"
   }
 }

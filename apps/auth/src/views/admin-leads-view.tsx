@@ -8,7 +8,8 @@ import {
   type LeadStatus,
 } from "@repo/api-contract/leads"
 import { Badge } from "@repo/ui/components/badge"
-import { cn } from "@repo/ui/lib/utils"
+import { Card } from "@repo/ui/components/card"
+import { navPill } from "@repo/ui/components/nav-pill"
 import Link from "next/link"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { Pager } from "@/components/admin/pager"
@@ -50,10 +51,7 @@ export function AdminLeadsView({
             key={tab.value}
             href={statusHref(tab.value)}
             aria-current={tab.value === status ? "page" : undefined}
-            className={cn(
-              "rounded-md px-3 py-1.5 text-sm font-medium hover:bg-muted",
-              tab.value === status && "bg-muted"
-            )}
+            className={navPill({ current: tab.value === status })}
           >
             {tab.label} <span className="text-muted-foreground tabular-nums">({tab.count})</span>
           </Link>
@@ -64,7 +62,7 @@ export function AdminLeadsView({
       ) : (
         <ul className="flex flex-col gap-3">
           {items.map((lead) => (
-            <li key={lead.id} className="rounded-lg border p-4">
+            <Card as="li" key={lead.id} size="compact" className="gap-0 p-4">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <Link
@@ -92,7 +90,7 @@ export function AdminLeadsView({
                   · {LEAD_TIMELINE_LABELS[lead.timeline]} · {LEAD_AUDIENCE_LABELS[lead.audience]}
                 </span>
               </p>
-            </li>
+            </Card>
           ))}
         </ul>
       )}

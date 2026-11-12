@@ -5,7 +5,7 @@ import { createLogger } from "@repo/log"
 import { loadEnv } from "@repo/session"
 import { BRAND_NAME, footerGroups, relabelFooter, relabelNav, siteNav, siteUrl } from "@repo/sites"
 import { NotificationBell } from "@repo/ui/blocks/notification-bell"
-import { SiteFooter } from "@repo/ui/blocks/site-footer"
+import { SiteFooter, SiteFooterLegal } from "@repo/ui/blocks/site-footer"
 import { SiteHeader } from "@repo/ui/blocks/site-header"
 import { Analytics } from "@repo/ui/components/analytics"
 import { Brand } from "@repo/ui/components/brand"
@@ -19,7 +19,7 @@ import { ThemeToggle } from "@repo/ui/components/theme-toggle"
 import { UserMenu } from "@repo/ui/components/user-menu"
 import { WebVitals } from "@repo/ui/components/web-vitals"
 import { parseConsent } from "@repo/ui/lib/consent"
-import { fontSans } from "@repo/ui/lib/fonts"
+import { fontVariables } from "@repo/ui/lib/fonts"
 import type { Metadata, Viewport } from "next"
 import { headers } from "next/headers"
 import { connection } from "next/server"
@@ -58,8 +58,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0A0A0A" },
+    { media: "(prefers-color-scheme: light)", color: "#fcfaf4" },
+    { media: "(prefers-color-scheme: dark)", color: "#121a1a" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -67,22 +67,12 @@ export const viewport: Viewport = {
 }
 
 const legal = (labels: { terms: string; privacy: string }) => (
-  <p className="text-muted-foreground text-xs">
-    © {new Date().getFullYear()} {BRAND_NAME} ·{" "}
-    <a
-      href={`${siteUrl("www")}/terms`}
-      className="underline underline-offset-4 hover:text-foreground"
-    >
-      {labels.terms}
-    </a>{" "}
-    ·{" "}
-    <a
-      href={`${siteUrl("www")}/privacy`}
-      className="underline underline-offset-4 hover:text-foreground"
-    >
-      {labels.privacy}
-    </a>
-  </p>
+  <SiteFooterLegal
+    links={[
+      { label: labels.terms, href: `${siteUrl("www")}/terms` },
+      { label: labels.privacy, href: `${siteUrl("www")}/privacy` },
+    ]}
+  />
 )
 
 /** Each language named in itself, for the switcher. */
@@ -133,15 +123,18 @@ export default async function RootLayout({
   const note = me?.impersonation ? t("auth.layout.impersonating") : undefined
   const pending = list?.pendingInvitations.length ?? 0
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html
+      className={fontVariables}
+      lang={locale}
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
       <head>
         {/* Preconnect to external resources for faster loading */}
         <link rel="preconnect" href="https://api.iconify.design" />
         <link rel="dns-prefetch" href="https://api.iconify.design" />
       </head>
-      <body
-        className={`${fontSans.variable} group/body flex min-h-svh flex-col font-sans antialiased`}
-      >
+      <body className="group/body flex min-h-svh flex-col font-sans antialiased">
         <SkipLink label={t("ui.skipLink")} />
         <WebVitals consent={initialConsent} />
         <BrowserTelemetry />

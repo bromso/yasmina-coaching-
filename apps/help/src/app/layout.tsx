@@ -1,6 +1,6 @@
 import { LOCALE_NAMES, LOCALES } from "@repo/i18n/locales"
 import { BRAND_NAME, footerGroups, siteNav, siteUrl } from "@repo/sites"
-import { SiteFooter } from "@repo/ui/blocks/site-footer"
+import { SiteFooter, SiteFooterLegal } from "@repo/ui/blocks/site-footer"
 import { SiteHeader } from "@repo/ui/blocks/site-header"
 import { Analytics } from "@repo/ui/components/analytics"
 import { Brand } from "@repo/ui/components/brand"
@@ -13,7 +13,7 @@ import { Toaster } from "@repo/ui/components/sonner"
 import { StaticLocaleSwitcher } from "@repo/ui/components/static-locale-switcher"
 import { ThemeToggle } from "@repo/ui/components/theme-toggle"
 import { WebVitals } from "@repo/ui/components/web-vitals"
-import { fontSans } from "@repo/ui/lib/fonts"
+import { fontVariables } from "@repo/ui/lib/fonts"
 import type { Metadata, Viewport } from "next"
 import type { ReactElement, ReactNode } from "react"
 import { Providers } from "./providers"
@@ -38,8 +38,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0A0A0A" },
+    { media: "(prefers-color-scheme: light)", color: "#fcfaf4" },
+    { media: "(prefers-color-scheme: dark)", color: "#121a1a" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -57,22 +57,12 @@ const cookieDomain =
   (process.env.NODE_ENV === "production" ? undefined : ".brand.localhost")
 
 const legal = (
-  <p className="text-muted-foreground text-xs">
-    © {new Date().getFullYear()} {BRAND_NAME} ·{" "}
-    <a
-      href={`${siteUrl("www")}/terms`}
-      className="underline underline-offset-4 hover:text-foreground"
-    >
-      Terms
-    </a>{" "}
-    ·{" "}
-    <a
-      href={`${siteUrl("www")}/privacy`}
-      className="underline underline-offset-4 hover:text-foreground"
-    >
-      Privacy
-    </a>
-  </p>
+  <SiteFooterLegal
+    links={[
+      { label: "Terms", href: `${siteUrl("www")}/terms` },
+      { label: "Privacy", href: `${siteUrl("www")}/privacy` },
+    ]}
+  />
 )
 
 export default function RootLayout({
@@ -81,13 +71,18 @@ export default function RootLayout({
   children: ReactNode
 }>): ReactElement {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      className={fontVariables}
+      lang="en"
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
       <head>
         {/* Preconnect to external resources for faster loading */}
         <link rel="preconnect" href="https://api.iconify.design" />
         <link rel="dns-prefetch" href="https://api.iconify.design" />
       </head>
-      <body className={`${fontSans.variable} group/body font-sans antialiased`}>
+      <body className="group/body font-sans antialiased">
         <SkipLink />
         <WebVitals />
         <BrowserTelemetry />

@@ -1,7 +1,7 @@
-import { Heading, Text } from "@react-email/components"
+import { Text } from "@react-email/components"
 import { DEFAULT_LOCALE, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
-import { greeting, Layout } from "./layout"
+import { EmailHeading, greeting, Layout } from "./layout"
 
 /** `when` arrives pre-formatted from apps/api; this template never formats a date. */
 export type BookingCancelledProps = {
@@ -39,7 +39,7 @@ export function BookingCancelled({
       brand={brand}
       locale={locale}
     >
-      <Heading as="h1">{t("bookingCancelled.heading")}</Heading>
+      <EmailHeading as="h1">{t("bookingCancelled.heading")}</EmailHeading>
       <Text>{greeting(t, name)}</Text>
       <Text>
         {byCustomer

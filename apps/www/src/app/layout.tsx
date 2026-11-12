@@ -2,7 +2,8 @@ import { MEMBER_OFFERING_KEYS, OFFERING_KEYS, OFFERINGS } from "@repo/api-contra
 import { LOCALE_NAMES, LOCALES, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
 import { BRAND_NAME, footerGroups, relabelFooter, siteUrl } from "@repo/sites"
-import { SiteFooter } from "@repo/ui/blocks/site-footer"
+import { SiteFooter, SiteFooterLegal } from "@repo/ui/blocks/site-footer"
+import { SiteHeaderShell } from "@repo/ui/blocks/site-header-shell"
 import { Analytics } from "@repo/ui/components/analytics"
 import { Brand } from "@repo/ui/components/brand"
 import { BrowserTelemetry } from "@repo/ui/components/browser-telemetry"
@@ -13,7 +14,7 @@ import { StaticLocaleSwitcher } from "@repo/ui/components/static-locale-switcher
 import { ThemeProvider } from "@repo/ui/components/theme-provider"
 import { ThemeToggle } from "@repo/ui/components/theme-toggle"
 import { WebVitals } from "@repo/ui/components/web-vitals"
-import { fontDisplay, fontSans } from "@repo/ui/lib/fonts"
+import { fontVariables } from "@repo/ui/lib/fonts"
 import type { Metadata, Viewport } from "next"
 import type { ExploreNavOffering } from "@/components/site-nav/explore-nav"
 import { ExploreNavLoader } from "@/components/site-nav/explore-nav-loader"
@@ -110,40 +111,29 @@ export default async function RootLayout({
   const t = translatorFor(locale, "ui")
   const site = siteFor(locale)
   const legal = (
-    <p className="text-muted-foreground text-xs">
-      © {new Date().getFullYear()} {BRAND_NAME} ·{" "}
-      <a
-        href={`${siteUrl("www")}/terms`}
-        className="underline underline-offset-4 hover:text-foreground"
-      >
-        {site.legal.terms}
-      </a>{" "}
-      ·{" "}
-      <a
-        href={`${siteUrl("www")}/privacy`}
-        className="underline underline-offset-4 hover:text-foreground"
-      >
-        {site.legal.privacy}
-      </a>{" "}
-      ·{" "}
-      <a
-        href={`${siteUrl("www")}${CONTACT_HREF}`}
-        className="underline underline-offset-4 hover:text-foreground"
-      >
-        {site.legal.contact}
-      </a>
-    </p>
+    <SiteFooterLegal
+      links={[
+        { label: site.legal.terms, href: `${siteUrl("www")}/terms` },
+        { label: site.legal.privacy, href: `${siteUrl("www")}/privacy` },
+        { label: site.legal.contact, href: `${siteUrl("www")}${CONTACT_HREF}` },
+      ]}
+    />
   )
   return (
-    <html lang={locale} suppressHydrationWarning>
-      <body className={`${fontSans.variable} ${fontDisplay.variable} font-sans antialiased`}>
+    <html
+      className={fontVariables}
+      lang={locale}
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
+      <body className="font-sans antialiased">
         <SkipLink label={t("skipLink")} />
         <WebVitals />
         <BrowserTelemetry />
         <DevServiceWorkerReset />
         <Analytics />
         <ThemeProvider>
-          <header className="sticky top-0 z-50 flex justify-center px-2.5 pt-2.5 lg:px-4">
+          <SiteHeaderShell sticky>
             <ExploreNavLoader
               brand={{ label: BRAND_NAME, href: siteUrl("www") }}
               book={{ label: site.book, href: BOOK_HREF }}
@@ -168,7 +158,7 @@ export default async function RootLayout({
               }
               labels={{ nav: t("siteNav"), ...site.nav }}
             />
-          </header>
+          </SiteHeaderShell>
           {children}
           <SiteFooter
             brand={<Brand href={siteUrl("www")} />}

@@ -1,5 +1,5 @@
 import { BRAND_NAME } from "@repo/sites"
-import { SiteFooter } from "@repo/ui/blocks/site-footer"
+import { SiteFooter, SiteFooterLegal } from "@repo/ui/blocks/site-footer"
 import { Brand } from "@repo/ui/components/brand"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, within } from "storybook/test"
@@ -38,17 +38,14 @@ const meta = {
     brand: <Brand href="https://www.brand.com" />,
     groups,
     legal: (
-      <p className="flex flex-wrap gap-x-2">
-        <span>© 2026 {BRAND_NAME}</span>
-        <span aria-hidden="true">·</span>
-        <a href="https://www.brand.com/terms" className="hover:text-foreground">
-          Terms
-        </a>
-        <span aria-hidden="true">·</span>
-        <a href="https://www.brand.com/privacy" className="hover:text-foreground">
-          Privacy
-        </a>
-      </p>
+      <SiteFooterLegal
+        year={2026}
+        links={[
+          { label: "Terms", href: "https://www.brand.com/terms" },
+          { label: "Privacy", href: "https://www.brand.com/privacy" },
+          { label: "Contact", href: "https://www.brand.com/kontakt" },
+        ]}
+      />
     ),
   },
 } satisfies Meta<typeof SiteFooter>
@@ -66,7 +63,43 @@ export const Default: Story = {
       "href",
       "https://docs.brand.com"
     )
-    await expect(canvas.getByText(`© 2026 ${BRAND_NAME}`)).toBeVisible()
+    const legal = canvas.getByText(/^© 2026/)
+    await expect(legal).toBeVisible()
+    await expect(legal).toHaveTextContent(`© 2026 ${BRAND_NAME} · Terms · Privacy · Contact`)
+    await expect(within(legal).getByRole("link", { name: "Privacy" })).toHaveAttribute(
+      "href",
+      "https://www.brand.com/privacy"
+    )
+  },
+}
+
+/**
+ * WCAG 1.4.10 at 320 CSS px (`mobile1`): the brand, the link groups and the legal line stack and
+ * wrap inside the screen; nothing scrolls sideways and every link stays in the page.
+ */
+export const Narrow: Story = {
+  globals: { viewport: { value: "mobile1", isRotated: false } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const doc = canvasElement.ownerDocument.documentElement
+    await expect(doc.clientWidth).toBeLessThanOrEqual(320)
+    await expect(doc.scrollWidth).toBeLessThanOrEqual(doc.clientWidth)
+    await expect(canvas.getAllByRole("contentinfo")).toHaveLength(1)
+    const links = within(canvas.getByRole("contentinfo")).getAllByRole("link")
+    // The brand, six group links and three legal links.
+    await expect(links).toHaveLength(10)
+    for (const link of links) {
+      await expect(link).toBeVisible()
+      const rect = link.getBoundingClientRect()
+      await expect(rect.left).toBeGreaterThanOrEqual(0)
+      await expect(rect.right).toBeLessThanOrEqual(doc.clientWidth)
+    }
+    // The legal row sits below the link groups.
+    const nav = canvas.getByRole("navigation", { name: "Footer" })
+    const legal = canvas.getByText(/^© 2026/)
+    await expect(legal.getBoundingClientRect().top).toBeGreaterThanOrEqual(
+      nav.getBoundingClientRect().bottom
+    )
   },
 }
 

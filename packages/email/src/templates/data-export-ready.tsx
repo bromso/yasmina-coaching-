@@ -1,7 +1,7 @@
-import { Button, Heading, Link, Text } from "@react-email/components"
+import { Button, Text } from "@react-email/components"
 import { DEFAULT_LOCALE, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
-import { button, greeting, Layout } from "./layout"
+import { button, EmailHeading, EmailLink, greeting, Layout } from "./layout"
 
 export type DataExportReadyProps = {
   name?: string
@@ -23,7 +23,7 @@ export function DataExportReady({
   const t = translatorFor(locale, "email")
   return (
     <Layout preview={t("dataExportReady.preview")} brand={brand} locale={locale}>
-      <Heading as="h1">{t("dataExportReady.heading")}</Heading>
+      <EmailHeading as="h1">{t("dataExportReady.heading")}</EmailHeading>
       <Text>{greeting(t, name)}</Text>
       <Text>{t("dataExportReady.body")}</Text>
       <Button href={link} style={button}>
@@ -31,7 +31,7 @@ export function DataExportReady({
       </Button>
       <Text>
         {t("layout.orLink")}
-        <Link href={link}>{link}</Link>
+        <EmailLink href={link}>{link}</EmailLink>
       </Text>
       <Text>{t("dataExportReady.footer")}</Text>
     </Layout>

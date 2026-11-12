@@ -455,7 +455,6 @@
       "devDependencies": {
         "@next/bundle-analyzer": "catalog:",
         "@tailwindcss/postcss": "catalog:",
-        "@tailwindcss/typography": "catalog:",
         "@types/bun": "catalog:",
         "@types/node": "catalog:",
         "@types/react": "catalog:",
@@ -513,6 +512,7 @@
         "react-dom": "catalog:",
       },
       "devDependencies": {
+        "@repo/tokens": "workspace:*",
         "@repo/typescript-config": "workspace:*",
         "@types/bun": "catalog:",
         "@types/react": "catalog:",
@@ -625,6 +625,8 @@
       "name": "@repo/tokens",
       "version": "1.1.0",
       "devDependencies": {
+        "@repo/typescript-config": "workspace:*",
+        "@types/bun": "catalog:",
         "style-dictionary": "^5.8.0",
       },
     },
@@ -735,8 +737,10 @@
         "web-vitals": "catalog:",
       },
       "devDependencies": {
+        "@repo/tokens": "workspace:*",
         "@repo/typescript-config": "workspace:*",
         "@tailwindcss/postcss": "catalog:",
+        "@tailwindcss/typography": "catalog:",
         "@types/bun": "catalog:",
         "@types/d3-array": "^3.2.1",
         "@types/d3-geo": "^3.1.1",

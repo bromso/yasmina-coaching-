@@ -1,4 +1,7 @@
 import { BRAND_NAME } from "@repo/sites/brand"
+import { SiteHeader } from "@repo/ui/blocks/site-header"
+import { ctaPill } from "@repo/ui/components/cta-pill"
+import { navPill } from "@repo/ui/components/nav-pill"
 import { ThemeToggle } from "@repo/ui/components/theme-toggle"
 import type { BlogLocale, BlogUi } from "@/content/ui"
 import { LanguageLink } from "./language-link"
@@ -16,12 +19,15 @@ export type BlogHeaderProps = {
 }
 
 const focus = "outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+/** The nav's links: the shared pill at the h-9 controls' height, in the text's own colour. */
+const pill = navPill({ size: "md", className: "text-foreground" })
 
 /**
- * The blog's header, in www's style: a floating pill with the brand in the display serif linking
- * home to www, www's Ledarskap inifrån page, a link to this page in the other language, the theme
- * toggle and the booking button. Server-rendered and static. On a phone it wraps onto more rows
- * rather than scrolling sideways, and scrolls away with the page instead of covering it.
+ * The blog's header: the shared `SiteHeader` in www's look, with the blog's own content — the
+ * brand linking home to www, www's Ledarskap inifrån page and this page in the other language as
+ * its nav, with the theme toggle and the booking button. Server-rendered and static. Below `sm`
+ * that list wraps onto rows under the brand, and the header scrolls
+ * away with the page instead of covering it; from `sm` up it stays at the top.
  */
 export function BlogHeader({
   locale,
@@ -33,23 +39,20 @@ export function BlogHeader({
 }: BlogHeaderProps) {
   const other = locale === "sv" ? "en" : "sv"
   return (
-    <header className="relative z-50 flex justify-center px-2.5 pt-2.5 sm:sticky sm:top-[env(safe-area-inset-top,0px)] lg:px-4">
-      <nav
-        aria-label={labels.nav}
-        className="flex w-full max-w-[1024px] flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-[18px] bg-background/85 px-4 py-3 shadow-[0_0_0_1px_var(--border)] backdrop-blur-xl"
-      >
-        <a
-          href={wwwUrl}
-          className={`truncate rounded-md font-display text-xl leading-tight ${focus}`}
-        >
+    <SiteHeader
+      sticky
+      className="max-sm:relative"
+      navLabel={labels.nav}
+      brand={
+        <a href={wwwUrl} className={`truncate rounded-md ${focus}`}>
           {BRAND_NAME}
         </a>
+      }
+      links={[]}
+      nav={
         <ul className="flex flex-wrap items-center gap-1 text-sm sm:gap-2">
           <li>
-            <a
-              href={`${wwwUrl}/inifran`}
-              className={`inline-flex h-9 items-center rounded-full px-3 transition-colors hover:bg-muted ${focus}`}
-            >
+            <a href={`${wwwUrl}/inifran`} className={pill}>
               {ui.header.inner}
             </a>
           </li>
@@ -59,24 +62,24 @@ export function BlogHeader({
               locale={other}
               domain={cookieDomain}
               name={ui.header.language.name}
-              className={`inline-flex h-9 items-center rounded-full px-3 transition-colors hover:bg-muted ${focus}`}
+              className={pill}
             >
               {ui.header.language.label}
             </LanguageLink>
           </li>
+          {/* The toggle and "Boka" are list items too, not `controls` and `end`: at 320 px they
+              wrap under the links as they always have, and from sm up the one list keeps the
+              old spacing. */}
           <li>
-            <ThemeToggle label={labels.themeToggle} className="rounded-full" />
+            <ThemeToggle label={labels.themeToggle} />
           </li>
           <li>
-            <a
-              href={`${wwwUrl}/book`}
-              className={`inline-flex h-9 items-center rounded-full bg-primary px-4 text-primary-foreground tracking-[0.035em] transition-colors hover:bg-primary/90 ${focus}`}
-            >
+            <a href={`${wwwUrl}/book`} className={ctaPill()}>
               {ui.header.book}
             </a>
           </li>
         </ul>
-      </nav>
-    </header>
+      }
+    />
   )
 }

@@ -1,9 +1,10 @@
 import type { AdminApplication, AdminApplicationStatusFilter } from "@repo/api-contract"
 import { Badge } from "@repo/ui/components/badge"
 import { Button } from "@repo/ui/components/button"
+import { Card } from "@repo/ui/components/card"
 import { Input } from "@repo/ui/components/input"
 import { Label } from "@repo/ui/components/label"
-import { cn } from "@repo/ui/lib/utils"
+import { navPill } from "@repo/ui/components/nav-pill"
 import Link from "next/link"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { ApplicationStatusForm } from "@/components/admin/application-status-form"
@@ -49,10 +50,7 @@ export function AdminApplicationsView({
             key={tab.value}
             href={statusHref(tab.value, job)}
             aria-current={tab.value === status ? "page" : undefined}
-            className={cn(
-              "rounded-md px-3 py-1.5 text-sm font-medium hover:bg-muted",
-              tab.value === status && "bg-muted"
-            )}
+            className={navPill({ current: tab.value === status })}
           >
             {tab.label}
           </Link>
@@ -86,7 +84,7 @@ export function AdminApplicationsView({
       ) : (
         <ul className="flex flex-col gap-4">
           {items.map((a) => (
-            <li key={a.id} className="rounded-lg border p-4">
+            <Card as="li" key={a.id} size="compact" className="gap-0 p-4">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-xs text-muted-foreground">{a.reference}</span>
@@ -150,7 +148,7 @@ export function AdminApplicationsView({
                 </Button>
                 <DeleteApplicationForm id={a.id} />
               </div>
-            </li>
+            </Card>
           ))}
         </ul>
       )}

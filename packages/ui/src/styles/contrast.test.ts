@@ -1,86 +1,45 @@
 import { describe, expect, test } from "bun:test"
 import { readFileSync } from "node:fs"
+import { contrast, over, parseOklch, type Rgb } from "@repo/tokens/color"
 
 /*
  * Pins the WCAG contrast of the design tokens every app shares, in both themes, so a future token
  * tweak cannot quietly fall under 1.4.3 (text, 4.5:1) or 1.4.11 (the solid focus-ring colour,
- * 3:1). The colours are read from globals.css itself and converted OKLCH → sRGB (gamut-clipped, as
- * browsers render them) → relative luminance. The coaching theme (`themes/coaching.css`, www and
- * the blog) is checked the same way, its overrides layered over globals.css's tokens as the
- * cascade does, plus the pairs only it has (the sun panels, the blue call to action).
+ * 3:1). The colours are read from the generated theme (`tokens.generated.css`, built from
+ * packages/tokens) and converted OKLCH → sRGB (gamut-clipped, as browsers render them) → relative
+ * luminance by `@repo/tokens/color`, the same conversion the email hex constants use.
  */
 
-type Rgb = [number, number, number]
-
-const read = (path: string) => readFileSync(new URL(path, import.meta.url), "utf8")
-const base = read("./globals.css")
-const coaching = read("./themes/coaching.css")
+const generated = readFileSync(new URL("./tokens.generated.css", import.meta.url), "utf8")
 
 type Token = (name: string) => Rgb
 
-/** Every `--name: oklch(…)` token of one `selector { … }` block of `css`. */
-function tokensOf(css: string, selector: string): Record<string, Rgb> {
-  const start = css.indexOf(`${selector} {`)
+/** Every `--name: value;` declaration of the generated theme's `selector { … }` block. */
+function declarations(selector: string): Record<string, string> {
+  const start = generated.indexOf(`${selector} {`)
   if (start === -1) throw new Error(`no "${selector}" block`)
-  const body = css.slice(start, css.indexOf("\n}", start))
-  const tokens: Record<string, Rgb> = {}
-  for (const [, name, l, c, h] of body.matchAll(
-    /--([\w-]+):\s*oklch\(([\d.]+%?)\s+([\d.]+)\s+([\d.]+)\)/g
-  )) {
-    if (!name || !l || !c || !h) continue
-    const lightness = l.endsWith("%") ? Number.parseFloat(l) / 100 : Number(l)
-    tokens[name] = oklchToRgb(lightness, Number(c), Number(h))
-  }
-  return tokens
+  const body = generated.slice(start, generated.indexOf("\n}", start))
+  return Object.fromEntries(
+    [...body.matchAll(/--([\w-]+):\s*([^;]+);/g)].map(([, name, value]) => [name, value])
+  )
 }
 
-/** `selector`'s tokens from each sheet, a later sheet's winning as the cascade's would. */
-function block(selector: string, sheets: string[]): Token {
-  const tokens = Object.assign({}, ...sheets.map((css) => tokensOf(css, selector))) as Record<
-    string,
-    Rgb
-  >
+const root = declarations(":root")
+
+/**
+ * The theme's opaque `oklch()` tokens. `.dark` repeats only what differs, so a token it does not
+ * declare is read from `:root`, as in the browser. References between tokens are resolved at build
+ * time, per theme, so every value here is a plain colour.
+ */
+function block(selector: string): Token {
+  const own = selector === ":root" ? root : declarations(selector)
   return (name) => {
-    const rgb = tokens[name]
-    if (!rgb) throw new Error(`${selector} has no --${name} oklch() token`)
-    return rgb
+    const value = own[name] ?? root[name]
+    if (!value || !/^oklch\([\d.%\s]+\)$/.test(value)) {
+      throw new Error(`${selector} has no --${name} oklch() token`)
+    }
+    return parseOklch(value)
   }
-}
-
-function map3(rgb: Rgb, f: (v: number, i: 0 | 1 | 2) => number): Rgb {
-  return [f(rgb[0], 0), f(rgb[1], 1), f(rgb[2], 2)]
-}
-
-function oklchToRgb(l: number, c: number, h: number): Rgb {
-  const a = c * Math.cos((h * Math.PI) / 180)
-  const b = c * Math.sin((h * Math.PI) / 180)
-  const lc = (l + 0.3963377774 * a + 0.2158037573 * b) ** 3
-  const mc = (l - 0.1055613458 * a - 0.0638541728 * b) ** 3
-  const sc = (l - 0.0894841775 * a - 1.291485548 * b) ** 3
-  const linear = [
-    4.0767416621 * lc - 3.3077115913 * mc + 0.2309699292 * sc,
-    -1.2684380046 * lc + 2.6097574011 * mc - 0.3413193965 * sc,
-    -0.0041960863 * lc - 0.7034186147 * mc + 1.707614701 * sc,
-  ]
-  return map3(linear as Rgb, (v) => {
-    const x = Math.min(1, Math.max(0, v))
-    return x <= 0.0031308 ? 12.92 * x : 1.055 * x ** (1 / 2.4) - 0.055
-  })
-}
-
-function luminance(rgb: Rgb): number {
-  const [r, g, b] = map3(rgb, (v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b
-}
-
-function contrast(a: Rgb, b: Rgb): number {
-  const [x, y] = [luminance(a), luminance(b)]
-  return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05)
-}
-
-/** `fg` at `alpha` composited over `bg`, as `bg-primary/90` renders over its parent. */
-function over(fg: Rgb, alpha: number, bg: Rgb): Rgb {
-  return map3(fg, (v, i) => v * alpha + bg[i] * (1 - alpha))
 }
 
 const white: Rgb = [1, 1, 1]
@@ -131,7 +90,7 @@ function pairs(t: Token, dark: boolean): Pair[] {
     { name: "primary on card", fg: t("primary"), bg: t("card"), min: text },
     // Focus indicators (WCAG 1.4.11): the solid `--ring` colour at 3:1, which Button and Input
     // draw as their 1px `border-ring` on focus. Their 3px `ring-ring/50` halo is half-opacity and
-    // measures lower — 2.14:1 over the light background (up from 1.94:1) — so it is a known
+    // measures lower — 2.18:1 over the light background and 2.91:1 over the dark one — so it is a known
     // limitation, not guarded here; the solid border is the indicator that meets 3:1.
     { name: "ring on background", fg: t("ring"), bg: t("background"), min: ui },
     { name: "ring on card", fg: t("ring"), bg: t("card"), min: ui },
@@ -155,6 +114,12 @@ function pairs(t: Token, dark: boolean): Pair[] {
       name: "sidebar-foreground on sidebar",
       fg: t("sidebar-foreground"),
       bg: t("sidebar"),
+      min: text,
+    },
+    {
+      name: "sidebar-accent-foreground on sidebar-accent (the current sidebar item)",
+      fg: t("sidebar-accent-foreground"),
+      bg: t("sidebar-accent"),
       min: text,
     },
     {
@@ -194,10 +159,29 @@ function pairs(t: Token, dark: boolean): Pair[] {
   return list
 }
 
-/** The pairs only the coaching theme has: text on the sun panels, the blue call to action. */
+/** The coaching pairs: text on the sun panels, the blue call to action, focus on the panels. */
 function coachingPairs(t: Token): Pair[] {
   const text = 4.5
+  const ui = 3
   return [
+    // Form controls' boundaries (WCAG 1.4.11): Input, Textarea, Select, NativeSelect, Checkbox,
+    // RadioGroup, InputOTP, … draw it with `border-input`, on every surface a form sits on.
+    { name: "input on background", fg: t("input"), bg: t("background"), min: ui },
+    { name: "input on card", fg: t("input"), bg: t("card"), min: ui },
+    { name: "input on muted", fg: t("input"), bg: t("muted"), min: ui },
+    { name: "input on sun-soft", fg: t("input"), bg: t("sun-soft"), min: ui },
+    // Focus turns a control's `border-input` into `border-ring` (plus the halo): the two must not
+    // read as one colour. Not a WCAG minimum, a guard that the change stays visible.
+    {
+      name: "ring against input (focus changes the border)",
+      fg: t("ring"),
+      bg: t("input"),
+      min: 1.5,
+    },
+    // The solid focus border on the sun panels and muted surfaces (www's sections, the sidebar).
+    { name: "ring on sun", fg: t("ring"), bg: t("sun"), min: ui },
+    { name: "ring on sun-soft", fg: t("ring"), bg: t("sun-soft"), min: ui },
+    { name: "ring on muted", fg: t("ring"), bg: t("muted"), min: ui },
     { name: "foreground on sun", fg: t("foreground"), bg: t("sun"), min: text },
     { name: "foreground on sun-soft", fg: t("foreground"), bg: t("sun-soft"), min: text },
     {
@@ -215,29 +199,16 @@ function coachingPairs(t: Token): Pair[] {
   ]
 }
 
-for (const [sheet, sheets] of [
-  ["shared", [base]],
-  ["coaching", [base, coaching]],
+for (const [theme, selector] of [
+  ["light", ":root"],
+  ["dark", ".dark"],
 ] as const) {
-  for (const [theme, selector] of [
-    ["light", ":root"],
-    ["dark", ".dark"],
-  ] as const) {
-    describe(`${sheet} ${theme} theme token contrast`, () => {
-      const tokens = block(selector, [...sheets])
-      const list = pairs(tokens, theme === "dark")
-      if (sheet === "coaching") list.push(...coachingPairs(tokens))
-      for (const pair of list) {
-        test(`${pair.name} ≥ ${pair.min}:1`, () => {
-          expect(contrast(pair.fg, pair.bg)).toBeGreaterThanOrEqual(pair.min)
-        })
-      }
-    })
-  }
-}
-
-describe("contrast()", () => {
-  test("matches axe's figure for the old primary (#6366f1) behind white", () => {
-    expect(contrast(white, oklchToRgb(0.5854, 0.2041, 277.1173))).toBeCloseTo(4.47, 2)
+  describe(`${theme} theme token contrast`, () => {
+    const tokens = block(selector)
+    for (const pair of [...pairs(tokens, theme === "dark"), ...coachingPairs(tokens)]) {
+      test(`${pair.name} ≥ ${pair.min}:1`, () => {
+        expect(contrast(pair.fg, pair.bg)).toBeGreaterThanOrEqual(pair.min)
+      })
+    }
   })
-})
+}

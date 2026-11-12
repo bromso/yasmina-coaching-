@@ -1,6 +1,5 @@
+import { cn } from "@repo/ui/lib/utils"
 import type React from "react"
-
-import { cn } from "@/lib/utils"
 
 type BackgroundProps = {
   children: React.ReactNode

@@ -10,9 +10,11 @@ export function formatVital(name: VitalKey, value: number | null): string {
 export const ratingLabel = (rating: "good" | "needs-improvement" | "poor") =>
   rating === "good" ? "Good" : rating === "needs-improvement" ? "Needs improvement" : "Poor"
 
+/** The palette has no green or amber: a good value stays plain, a poor one takes the destructive
+ * colour, and the rating label beside every value carries the meaning either way. */
 export const ratingClass = (rating: "good" | "needs-improvement" | "poor") =>
   rating === "good"
-    ? "text-emerald-700 dark:text-emerald-400"
+    ? ""
     : rating === "needs-improvement"
-      ? "text-amber-700 dark:text-amber-400"
-      : "text-red-700 dark:text-red-400"
+      ? "font-medium"
+      : "text-destructive font-medium"

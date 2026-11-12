@@ -1,4 +1,4 @@
-import { cn } from "@repo/ui/lib/utils"
+import { navPill } from "@repo/ui/components/nav-pill"
 import Link from "next/link"
 
 const items = [
@@ -21,10 +21,7 @@ export function AdminNav({ current }: { current: (typeof items)[number]["href"] 
           key={item.href}
           href={item.href}
           aria-current={item.href === current ? "page" : undefined}
-          className={cn(
-            "rounded-md px-3 py-1.5 text-sm font-medium hover:bg-muted",
-            item.href === current && "bg-muted"
-          )}
+          className={navPill({ current: item.href === current })}
         >
           {item.label}
         </Link>

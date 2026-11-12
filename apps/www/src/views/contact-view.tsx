@@ -1,7 +1,8 @@
 import type { Locale } from "@repo/i18n/locales"
+import { Eyebrow } from "@repo/ui/components/eyebrow"
+import { Picture } from "@repo/ui/components/picture"
+import { SunPanel } from "@repo/ui/components/sun-panel"
 import { ContactForm } from "@/components/contact/contact-form"
-import { Eyebrow } from "@/components/eyebrow"
-import { Picture } from "@/components/picture"
 import { contactFor } from "@/content/contact"
 import { mediaFor } from "@/content/media"
 
@@ -22,18 +23,18 @@ export function ContactView({ page, locale }: ContactViewProps) {
       <section aria-labelledby="contact-title" className="container py-16 lg:py-24">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-16">
           <div>
-            <div className="mb-8 overflow-hidden rounded-4xl bg-sun-soft">
+            <SunPanel className="mb-8 overflow-hidden">
               <Picture
                 image={mediaFor(locale).portraitOffice}
                 small
                 priority
                 className="aspect-[4/5] w-full object-cover object-top lg:aspect-[3/4]"
               />
-            </div>
+            </SunPanel>
             <Eyebrow>{copy.hero.eyebrow}</Eyebrow>
             <h1
               id="contact-title"
-              className="mt-5 scroll-mt-24 hyphens-auto text-balance break-words text-4xl sm:text-5xl"
+              className="mt-5 scroll-mt-(--sticky-header-offset) hyphens-auto text-balance break-words text-4xl sm:text-5xl"
             >
               {copy.hero.title}
             </h1>
@@ -53,9 +54,9 @@ export function ContactView({ page, locale }: ContactViewProps) {
               {copy.hero.response}
             </p>
           </div>
-          <div className="min-w-0 rounded-4xl bg-sun-soft p-4 sm:p-8 lg:p-10">
+          <SunPanel className="min-w-0 p-4 sm:p-8 lg:p-10">
             <ContactForm locale={locale} page={page} />
-          </div>
+          </SunPanel>
         </div>
       </section>
     </main>

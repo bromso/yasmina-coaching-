@@ -1,16 +1,8 @@
 {
   "spacing": {
-    "base": {
-      "$value": "0.25rem",
+    "DEFAULT": {
       "$type": "dimension",
-      "$description": "Base spacing unit (4px)"
-    }
-  },
-  "radius": {
-    "default": {
-      "$value": "0.5rem",
-      "$type": "dimension",
-      "$description": "Default border radius"
+      "$value": "0.25rem"
     }
   }
 }

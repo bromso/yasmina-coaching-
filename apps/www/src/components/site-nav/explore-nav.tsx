@@ -1,11 +1,14 @@
 "use client"
 
+import { siteHeaderBar } from "@repo/ui/blocks/site-header-shell"
 import { Carousel, CarouselContent, CarouselItem, useCarousel } from "@repo/ui/components/carousel"
+import { ctaPill } from "@repo/ui/components/cta-pill"
 import { Icon } from "@repo/ui/components/icon"
 import { LazyMotion, MotionConfig, m } from "motion/react"
 import { usePathname } from "next/navigation"
 import { type ReactNode, useEffect, useId, useRef, useState } from "react"
 import { cn } from "@/lib/utils"
+import { CLOSED_RADIUS } from "./radius"
 
 export type ExploreNavLink = { label: string; href: string }
 
@@ -149,11 +152,12 @@ export function ExploreNav({
         <m.nav
           aria-label={labels.nav}
           initial={false}
-          animate={{ borderRadius: open ? 28 : 18 }}
+          // Inline numbers, so the layout animation can correct the corners while the pill scales
+          // (a `var()` here leaves them distorted once it closes).
+          animate={{ borderRadius: open ? 28 : CLOSED_RADIUS }}
           layout
-          style={{ paddingBlock: 12 }}
           className={cn(
-            "w-full max-w-[1024px] bg-background/85 shadow-[0_0_0_1px_var(--border)] backdrop-blur-xl",
+            siteHeaderBar,
             open ? "max-h-[calc(100dvh-1.5rem)] overflow-y-auto" : "overflow-hidden"
           )}
         >
@@ -190,7 +194,7 @@ export function ExploreNav({
                   "flex items-center justify-center border text-xs outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
                   open
                     ? "border-foreground/80 text-background"
-                    : "border-border text-foreground transition-colors hover:bg-muted"
+                    : "border-input text-foreground transition-colors hover:bg-muted"
                 )}
               >
                 {open ? (
@@ -210,7 +214,7 @@ export function ExploreNav({
                 <m.a
                   layoutId="explore-nav-book"
                   href={book.href}
-                  className="inline-flex h-[30px] items-center rounded-full bg-primary px-3.5 text-primary-foreground transition-colors hover:bg-primary/90 text-xs tracking-[0.035em] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                  className={ctaPill({ size: "sm" })}
                 >
                   <m.span layoutId="explore-nav-book-text">{book.label}</m.span>
                 </m.a>
@@ -306,7 +310,7 @@ export function ExploreNav({
                     layoutId="explore-nav-book"
                     href={book.href}
                     onClick={close}
-                    className="inline-flex h-11 shrink-0 items-center rounded-full bg-primary px-5 text-primary-foreground transition-colors hover:bg-primary/90 tracking-[0.035em] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                    className={ctaPill({ size: "lg", className: "shrink-0" })}
                   >
                     <m.span layoutId="explore-nav-book-text" className="text-lg">
                       {book.label}

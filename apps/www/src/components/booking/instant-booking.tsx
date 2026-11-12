@@ -314,7 +314,7 @@ export function InstantBooking({
               <Button
                 type="button"
                 variant="outline"
-                className="min-h-11 w-fit rounded-full"
+                className="min-h-11 w-fit"
                 onClick={() => {
                   requested.current.delete(key)
                   setMonths((m) => Object.fromEntries(Object.entries(m).filter(([k]) => k !== key)))
@@ -378,7 +378,7 @@ export function InstantBooking({
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="min-h-11 rounded-full"
+                    className="min-h-11"
                     onClick={() => toggleSlot(slot)}
                   >
                     <Icon icon="lucide:x" aria-hidden="true" />

@@ -102,9 +102,11 @@ The blog ships ten posts by Yasmina in Swedish, each with its English translatio
   date locale and the coaching classes; each card shows the post's cover through `PostCard`'s
   `media` slot, the featured one larger on sun-soft) and MDX components
   (`@repo/ui/components/mdx`), plus the blog's own `Cover` / `CoverImage` and `CallToAction`.
-- **Styles** — `src/styles/globals.css` imports `@repo/ui/globals.css`, then
-  `@repo/ui/themes/coaching.css`, the palette, sun tokens and display serif www uses too; the
-  layout adds `fontDisplay`. Fonts, theme, skip link and web vitals come from `@repo/ui`.
+- **Styles** — `src/styles/globals.css` is the one import of
+  `@repo/ui/globals.css`, which carries the palette, sun tokens and display serif every app
+  shares (the tokens live in `packages/tokens`, `bun run tokens`); the layouts put `fontVariables`
+  on `<html>`. Fonts, theme, skip link and web vitals come from `@repo/ui`. See
+  `docs/architecture/design-system.md`.
 
 See the root [README](../../README.md) and [CLAUDE.md](../../CLAUDE.md) for the conventions shared by
 all apps, and [`packages/content/README.md`](../../packages/content/README.md) for the pure

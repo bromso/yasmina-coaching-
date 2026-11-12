@@ -72,3 +72,4 @@ security/.results/
 
 # Trivy's vulnerability database cache (image.ts, --build/--image mode)
 security/.cache/
+apps/e2e/visual/.snapshots/

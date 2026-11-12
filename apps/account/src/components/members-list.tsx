@@ -7,10 +7,10 @@ import type { Locale } from "@repo/i18n/locales"
 import { Badge } from "@repo/ui/components/badge"
 import { Button } from "@repo/ui/components/button"
 import { FormMessage } from "@repo/ui/components/form-feedback"
+import { NativeSelect } from "@repo/ui/components/native-select"
 import { useTranslations } from "next-intl"
 import { useActionState } from "react"
 import { leave, removeMember, setRole } from "@/app/(account)/workspace/actions"
-import { NativeSelect } from "@/components/native-select"
 import type { FormState } from "@/lib/actions"
 
 export function MembersList({
@@ -89,6 +89,7 @@ export function MembersList({
                   </label>
                   {/* Keyed by the role, so a saved change re-mounts it with the new default. */}
                   <NativeSelect
+                    className="w-auto"
                     key={member.role}
                     id={roleId}
                     name="role"

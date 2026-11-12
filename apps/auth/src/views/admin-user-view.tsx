@@ -62,7 +62,7 @@ export function AdminUserView({ user, isSelf }: { user: AdminUserDetail; isSelf:
       </div>
       <AdminNav current="/admin/users" />
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Card>
+        <Card size="compact">
           <CardHeader>
             <CardTitle>Profile</CardTitle>
             <CardDescription>{user.email}</CardDescription>
@@ -97,7 +97,7 @@ export function AdminUserView({ user, isSelf }: { user: AdminUserDetail; isSelf:
             </dl>
           </CardContent>
         </Card>
-        <Card>
+        <Card size="compact">
           <CardHeader>
             <CardTitle>Sessions</CardTitle>
             <CardDescription>
@@ -115,7 +115,7 @@ export function AdminUserView({ user, isSelf }: { user: AdminUserDetail; isSelf:
             )}
           </CardContent>
         </Card>
-        <Card>
+        <Card size="compact">
           <CardHeader>
             <CardTitle>Workspaces</CardTitle>
           </CardHeader>
@@ -141,7 +141,7 @@ export function AdminUserView({ user, isSelf }: { user: AdminUserDetail; isSelf:
             )}
           </CardContent>
         </Card>
-        <Card>
+        <Card size="compact">
           <CardHeader>
             <CardTitle>Impersonate</CardTitle>
             <CardDescription>
@@ -152,7 +152,7 @@ export function AdminUserView({ user, isSelf }: { user: AdminUserDetail; isSelf:
             <ImpersonateForm userId={user.id} disabledReason={disabledReason} />
           </CardContent>
         </Card>
-        <Card>
+        <Card size="compact">
           <CardHeader>
             <CardTitle>Suspension</CardTitle>
             <CardDescription>
@@ -195,7 +195,7 @@ export function AdminUserView({ user, isSelf }: { user: AdminUserDetail; isSelf:
           </CardContent>
         </Card>
         {user.twoFactorEnabled && (
-          <Card>
+          <Card size="compact">
             <CardHeader>
               <CardTitle>Two-step verification</CardTitle>
               <CardDescription>
@@ -208,7 +208,7 @@ export function AdminUserView({ user, isSelf }: { user: AdminUserDetail; isSelf:
             </CardContent>
           </Card>
         )}
-        <Card>
+        <Card size="compact">
           <CardHeader>
             <CardTitle>Passkeys</CardTitle>
             <CardDescription>

@@ -6,6 +6,7 @@
   "private": true,
   "exports": {
     ".": "./src/index.tsx",
+    "./tokens": "./src/tokens.generated.ts",
     "./templates/*": "./src/templates/*.tsx"
   },
   "scripts": {
@@ -21,6 +22,7 @@
     "react-dom": "catalog:"
   },
   "devDependencies": {
+    "@repo/tokens": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/bun": "catalog:",
     "@types/react": "catalog:"

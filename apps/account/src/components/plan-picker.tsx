@@ -3,6 +3,7 @@
 import { INTERVALS, type Interval, PAID_PLANS, PLANS } from "@repo/api-contract/billing-plans"
 import type { Locale } from "@repo/i18n/locales"
 import { Button } from "@repo/ui/components/button"
+import { Card } from "@repo/ui/components/card"
 import { FieldError, FormMessage, fieldAria } from "@repo/ui/components/form-feedback"
 import { useTranslations } from "next-intl"
 import { useActionState } from "react"
@@ -15,8 +16,9 @@ type PaidPlan = (typeof PAID_PLANS)[number]
 const prefix = "plan-"
 const radio =
   "accent-primary focus-visible:ring-ring/50 mt-0.5 size-4 shrink-0 outline-none focus-visible:ring-[3px]"
+/** A radio's card: the compact Card's shape, a row with the radio first, marked when checked. */
 const option =
-  "has-[:checked]:border-primary has-[:checked]:bg-muted/50 flex cursor-pointer gap-3 rounded-md border p-4 text-sm"
+  "has-[:checked]:border-primary has-[:checked]:bg-muted/50 cursor-pointer flex-row gap-3 p-4 text-sm shadow-none"
 
 /** An action state owned by a parent, which then renders the form's message itself. */
 export type SharedForm = {
@@ -83,7 +85,7 @@ export function PlanPicker({
             const p = PLANS[key]
             const id = `${prefix}${key}`
             return (
-              <label key={key} htmlFor={id} className={option}>
+              <Card as="label" size="compact" key={key} htmlFor={id} className={option}>
                 <input
                   id={id}
                   type="radio"
@@ -107,7 +109,7 @@ export function PlanPicker({
                     )}
                   </span>
                 </span>
-              </label>
+              </Card>
             )
           })}
         </div>
@@ -124,7 +126,7 @@ export function PlanPicker({
           {INTERVALS.map((key) => {
             const id = `${prefix}interval-${key}`
             return (
-              <label key={key} htmlFor={id} className={option}>
+              <Card as="label" size="compact" key={key} htmlFor={id} className={option}>
                 <input
                   id={id}
                   type="radio"
@@ -135,7 +137,7 @@ export function PlanPicker({
                   className={radio}
                 />
                 {intervalLabel(key, tPlans)}
-              </label>
+              </Card>
             )
           })}
         </div>

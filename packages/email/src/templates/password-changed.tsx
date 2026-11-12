@@ -1,7 +1,7 @@
-import { Heading, Link, Text } from "@react-email/components"
+import { Text } from "@react-email/components"
 import { DEFAULT_LOCALE, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
-import { greeting, Layout } from "./layout"
+import { EmailHeading, EmailLink, greeting, Layout } from "./layout"
 
 export type PasswordChangedProps = {
   name?: string
@@ -51,7 +51,7 @@ export function PasswordChanged({
   const t = translatorFor(locale, "email")
   return (
     <Layout preview={t("passwordChanged.preview")} brand={brand} locale={locale}>
-      <Heading as="h1">{t("passwordChanged.heading")}</Heading>
+      <EmailHeading as="h1">{t("passwordChanged.heading")}</EmailHeading>
       <Text>{greeting(t, name)}</Text>
       {
         // `bodyBefore` stops right before the date value rather than being one
@@ -66,15 +66,15 @@ export function PasswordChanged({
       </Text>
       <Text>{t("passwordChanged.okNotice")}</Text>
       {
-        // Likewise `resetNotice.before` / `.between`: split around the two <Link>s only to keep
+        // Likewise `resetNotice.before` / `.between`: split around the two <EmailLink>s only to keep
         // the original JSX child structure (and hence the hydration-comment placement, or its
         // absence) byte-identical to today's English. Safe to merge once re-baselined.
       }
       <Text>
         {t("passwordChanged.resetNotice.before")}
-        <Link href={resetUrl}>{resetUrl}</Link>
+        <EmailLink href={resetUrl}>{resetUrl}</EmailLink>
         {t("passwordChanged.resetNotice.between")}
-        <Link href={accountUrl}>{accountUrl}</Link>.
+        <EmailLink href={accountUrl}>{accountUrl}</EmailLink>.
       </Text>
     </Layout>
   )

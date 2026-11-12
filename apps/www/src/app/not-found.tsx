@@ -1,8 +1,7 @@
 import { StatusPage } from "@repo/ui/blocks/status-page"
+import { Background } from "@repo/ui/components/background"
 import { Button } from "@repo/ui/components/button"
 import Link from "next/link"
-
-import { Background } from "@/components/background"
 import { STATUS } from "@/content/status"
 import { getLocale } from "@/lib/locale"
 

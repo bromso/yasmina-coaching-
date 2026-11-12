@@ -4,11 +4,12 @@ import {
   OFFERINGS,
 } from "@repo/api-contract/booking-limits"
 import type { Locale } from "@repo/i18n/locales"
+import { ArrowLink } from "@repo/ui/components/arrow-link"
+import { Eyebrow } from "@repo/ui/components/eyebrow"
 import { Icon } from "@repo/ui/components/icon"
-import { ArrowLink } from "@/components/arrow-link"
-import { Eyebrow } from "@/components/eyebrow"
-import { Reveal, RevealItem } from "@/components/motion/reveal"
-import { Picture } from "@/components/picture"
+import { Reveal, RevealItem } from "@repo/ui/components/motion/reveal"
+import { Picture } from "@repo/ui/components/picture"
+import { SunPanel } from "@repo/ui/components/sun-panel"
 import { bookingFor, priceLineFor } from "@/content/booking"
 import { mediaFor, OFFERING_MEDIA } from "@/content/media"
 import { cn } from "@/lib/utils"
@@ -39,7 +40,7 @@ export function BookView({ audience, locale }: BookViewProps) {
           <Eyebrow>{booking.catalog.eyebrow}</Eyebrow>
           <h1
             id="book-title"
-            className="mt-5 scroll-mt-24 text-balance text-4xl sm:text-5xl lg:text-6xl"
+            className="mt-5 scroll-mt-(--sticky-header-offset) text-balance text-4xl sm:text-5xl lg:text-6xl"
           >
             {booking.catalog.title}
           </h1>
@@ -49,9 +50,7 @@ export function BookView({ audience, locale }: BookViewProps) {
         </div>
 
         <nav aria-label={booking.catalog.audienceLegend} className="mt-10">
-          <p className="font-medium text-muted-foreground text-xs uppercase tracking-[0.18em]">
-            {booking.catalog.audienceLegend}
-          </p>
+          <Eyebrow as="p">{booking.catalog.audienceLegend}</Eyebrow>
           <ul className="mt-3 flex flex-wrap gap-2">
             {BOOKING_AUDIENCES.map((option) => {
               const active = option === audience
@@ -102,9 +101,10 @@ export function BookView({ audience, locale }: BookViewProps) {
                 const titleId = `offering-${key}-title`
                 return (
                   <RevealItem key={key} as="li" index={i} className="group">
-                    <article
+                    <SunPanel
+                      as="article"
                       aria-labelledby={titleId}
-                      className="flex h-full flex-col gap-5 rounded-4xl bg-sun-soft p-6 transition-transform duration-300 ease-out motion-safe:group-hover:-translate-y-1 sm:p-8"
+                      className="flex h-full flex-col gap-5 p-6 transition-transform duration-300 ease-out motion-safe:group-hover:-translate-y-1 sm:p-8"
                     >
                       <div className="relative aspect-[16/10] overflow-hidden rounded-3xl bg-background/60">
                         <Picture
@@ -155,7 +155,7 @@ export function BookView({ audience, locale }: BookViewProps) {
                           className="w-fit"
                         />
                       </div>
-                    </article>
+                    </SunPanel>
                   </RevealItem>
                 )
               })}

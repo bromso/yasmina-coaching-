@@ -1,5 +1,5 @@
-import { Button, Link, Text } from "@react-email/components"
-import { button, type Translator } from "./layout"
+import { Button, Text } from "@react-email/components"
+import { button, EmailLink, type Translator } from "./layout"
 
 /** What every optional notification mail links to besides its own content. */
 export type NotificationLinks = {
@@ -28,11 +28,11 @@ export function NotificationFooter({
       </Button>
       <Text>
         {t("layout.orLink")}
-        <Link href={inboxUrl}>{inboxUrl}</Link>
+        <EmailLink href={inboxUrl}>{inboxUrl}</EmailLink>
       </Text>
       <Text>
         {t("notificationEmail.why")}{" "}
-        <Link href={unsubscribeUrl}>{t("notificationEmail.turnOff")}</Link>
+        <EmailLink href={unsubscribeUrl}>{t("notificationEmail.turnOff")}</EmailLink>
       </Text>
     </>
   )

@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test"
 import { renderToStaticMarkup } from "react-dom/server"
 import { SiteHeader } from "./site-header"
+import { SiteHeaderShell, siteHeaderBar } from "./site-header-shell"
 
 const links = [
   { label: "App", href: "https://app.example.com" },
@@ -65,9 +66,11 @@ describe("SiteHeader", () => {
         expect(classes).toContain(c)
       }
     })
-    test("the header row wraps below sm and keeps its single h-14 row from sm up", () => {
-      const row = (html.match(/<div class="(container [^"]*)">/)?.[1] ?? "").split(" ")
-      for (const c of ["flex-wrap", "min-h-14", "sm:flex-nowrap", "sm:h-14"]) {
+    test("the bar's row wraps below sm and stays one row from sm up", () => {
+      const row = (
+        html.match(/<div data-slot="site-header-bar" class="([^"]*)">/)?.[1] ?? ""
+      ).split(" ")
+      for (const c of ["flex-wrap", "min-h-(--site-header-bar)", "sm:flex-nowrap"]) {
         expect(row).toContain(c)
       }
     })
@@ -94,6 +97,113 @@ describe("SiteHeader", () => {
       )
       expect(without).not.toContain("site-header-controls")
       expect(without).toContain(">end<")
+    })
+  })
+
+  describe("www's look: a floating pill inside the shell", () => {
+    const classesOf = (html: string, re: RegExp) => (html.match(re)?.[1] ?? "").split(" ")
+    test("the header is the shell: centred, padded off the edges, transparent", () => {
+      const html = renderToStaticMarkup(<SiteHeader brand={<span>B</span>} links={links} />)
+      const header = classesOf(html, /<header data-slot="site-header"[^>]*class="([^"]*)"/)
+      for (const c of ["flex", "justify-center", "px-2.5", "pt-(--site-header-inset)", "lg:px-4"]) {
+        expect(header).toContain(c)
+      }
+      expect(header).not.toContain("border-b")
+      expect(header).not.toContain("bg-background")
+      expect(header).not.toContain("sticky")
+    })
+    test("the bar is drawn with siteHeaderBar, from sm up exactly --site-header-bar tall", () => {
+      const html = renderToStaticMarkup(<SiteHeader brand={<span>B</span>} links={links} />)
+      const bar = classesOf(html, /<div data-slot="site-header-bar" class="([^"]*)"/)
+      for (const c of siteHeaderBar.split(" ")) expect(bar).toContain(c)
+      expect(bar).toContain("sm:h-(--site-header-bar)")
+    })
+    test("siteHeaderBar is www's rounded, translucent, hairline-ringed pill", () => {
+      for (const c of [
+        "rounded-(--site-header-radius)",
+        "bg-background/85",
+        "shadow-[0_0_0_1px_var(--border)]",
+        "backdrop-blur-xl",
+        "max-w-(--site-header-max-width)",
+        "py-3",
+      ]) {
+        expect(siteHeaderBar.split(" ")).toContain(c)
+      }
+    })
+    test("the brand is set in the display face", () => {
+      const html = renderToStaticMarkup(<SiteHeader brand={<span>B</span>} links={links} />)
+      const brand = classesOf(html, /<div data-slot="site-header-brand" class="([^"]*)">/)
+      for (const c of ["font-display", "text-xl", "leading-tight"]) expect(brand).toContain(c)
+    })
+    test("sticky pins the shell below the safe-area inset, above the page", () => {
+      const html = renderToStaticMarkup(<SiteHeader brand={<span>B</span>} links={[]} sticky />)
+      const header = classesOf(html, /<header data-slot="site-header"[^>]*class="([^"]*)"/)
+      for (const c of ["sticky", "top-[env(safe-area-inset-top,0px)]", "z-(--layer-header)"]) {
+        expect(header).toContain(c)
+      }
+      // The page's scroll padding keys off this: in-page jumps stop below a stuck header only.
+      expect(html).toMatch(/<header data-slot="site-header" data-sticky=""/)
+    })
+    test("a header that scrolls away carries no sticky marker, so the page gets no offset", () => {
+      const html = renderToStaticMarkup(<SiteHeader brand={<span>B</span>} links={[]} />)
+      expect(html).not.toContain("data-sticky")
+    })
+  })
+  describe("the nav slot: an app's own navigation", () => {
+    const html = renderToStaticMarkup(
+      <SiteHeader
+        brand={<a href="/">Brand</a>}
+        links={[]}
+        nav={<a href="/inner">Inner</a>}
+        controls={<button type="button">Theme</button>}
+        end={<a href="/book">Book</a>}
+        navLabel="Webbplats"
+      />
+    )
+    test("the bar becomes the one labelled nav landmark holding everything", () => {
+      expect(html.match(/<nav/g)).toHaveLength(1)
+      const nav = html.slice(html.indexOf('<nav aria-label="Webbplats"'), html.indexOf("</nav>"))
+      expect(nav).toContain('data-slot="site-header-bar"')
+      for (const text of [">Brand<", ">Inner<", ">Theme<", ">Book<"]) expect(nav).toContain(text)
+    })
+    test("the slot sits after the brand and before the controls", () => {
+      expect(html.indexOf(">Brand<")).toBeLessThan(html.indexOf(">Inner<"))
+      expect(html.indexOf(">Inner<")).toBeLessThan(html.indexOf(">Theme<"))
+    })
+    test("cross-app links next to it are a list in that landmark, not a second nav", () => {
+      const both = renderToStaticMarkup(
+        <SiteHeader brand={<span>B</span>} links={links} nav={<span>own</span>} />
+      )
+      expect(both.match(/<nav/g)).toHaveLength(1)
+      expect(both).toContain('href="https://app.example.com"')
+      expect(both).toContain(">own<")
+    })
+    test("with nothing for the end group, no empty item adds a stray gap", () => {
+      const own = renderToStaticMarkup(
+        <SiteHeader brand={<span>B</span>} links={[]} nav={<span>own</span>} />
+      )
+      expect(own).not.toContain('<div class="ml-auto')
+      expect(own).toContain(">own</span></div></nav>")
+    })
+    test("without it the bar is no landmark and the links keep their own nav", () => {
+      const without = renderToStaticMarkup(<SiteHeader brand={<span>B</span>} links={links} />)
+      expect(without).toMatch(/<div data-slot="site-header-bar"/)
+      expect(without.match(/<nav/g)).toHaveLength(1)
+    })
+  })
+  describe("SiteHeaderShell: the shell around a bar an app draws itself", () => {
+    test("renders the same header as SiteHeader, around its children", () => {
+      const shell = renderToStaticMarkup(
+        <SiteHeaderShell sticky>
+          <nav aria-label="Site" className={siteHeaderBar}>
+            own
+          </nav>
+        </SiteHeaderShell>
+      )
+      const header = renderToStaticMarkup(<SiteHeader brand={<span>B</span>} links={[]} sticky />)
+      const open = (html: string) => html.slice(0, html.indexOf(">") + 1)
+      expect(open(shell)).toBe(open(header))
+      expect(shell).toContain(">own</nav></header>")
     })
   })
 })
