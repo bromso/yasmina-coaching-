@@ -95,6 +95,11 @@ describe("LegalView", () => {
     expect(column).toContain("lg:top-(--sticky-header-offset)")
     expect(column).toContain("lg:col-start-2")
     expect(column).not.toMatch(/(^|\s)(hidden|sticky)(\s|$)/)
+    // The column scrolls (overflow clips), so its padding keeps room for a link's focus outline
+    // (up to 3px plus a 3px offset in forced colours); a matching negative margin keeps it in place.
+    expect(column).toContain("lg:overflow-y-auto")
+    expect(column).toContain("lg:-m-2")
+    expect(column).toContain("lg:p-2")
   })
 
   test("shows the draft notice only while in draft", () => {

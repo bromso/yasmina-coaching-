@@ -34,7 +34,8 @@ const bodyComponents = { ...mdxComponents, a: LegalLink, mark: Placeholder }
  * body at a reading width, then the change log itself — with a contents list of the body's
  * headings and the change log that marks the section being read (`TocActive`). One list, placed
  * by the grid: below `lg` inline between the header and the body; from `lg` a sticky right-hand
- * column, kept below the stuck header by `--sticky-header-offset`. The change log's heading takes
+ * column, kept below the stuck header by `--sticky-header-offset`, padded (and pulled back by as
+ * much) so its scroll box never clips a link's focus outline. The change log's heading takes
  * `ui.changeLogId`, an id the build gate keeps every body heading off.
  */
 export function LegalView({ doc, Body, toc, ui, draft }: LegalViewProps) {
@@ -55,7 +56,7 @@ export function LegalView({ doc, Body, toc, ui, draft }: LegalViewProps) {
             </time>
           </p>
         </header>
-        <div className="lg:sticky lg:top-(--sticky-header-offset) lg:col-start-2 lg:row-span-3 lg:row-start-1 lg:max-h-[calc(100dvh-var(--sticky-header-offset))] lg:self-start lg:overflow-y-auto">
+        <div className="lg:sticky lg:top-(--sticky-header-offset) lg:col-start-2 lg:row-span-3 lg:row-start-1 lg:-m-2 lg:max-h-[calc(100dvh-var(--sticky-header-offset))] lg:self-start lg:overflow-y-auto lg:p-2">
           <TocActive>
             <Toc items={contents} label={ui.contents} navLabel={ui.contents} />
           </TocActive>
