@@ -77,6 +77,30 @@ services:
       API_URL: http://api:3007
       API_SERVICE_TOKEN: ${API_SERVICE_TOKEN}
 
+  legal:
+    <<: *next
+    build:
+      context: *repo
+      dockerfile: docker/next.Dockerfile
+      # LEGAL_DRAFT: the pages stay drafts (notice, noindex) unless it is exactly `false`.
+      args: { APP: legal, PORT: 3010, SITE_DOMAIN: "${SITE_DOMAIN}", SITE_HOST_PREFIX: "${SITE_HOST_PREFIX:-}", COOKIE_DOMAIN: "${COOKIE_DOMAIN}", LEGAL_DRAFT: "${LEGAL_DRAFT:-}" }
+    expose: ["3010"]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.yasmina-legal.rule=Host(`${SITE_HOST_PREFIX:-}legal.${SITE_DOMAIN}`)
+      - traefik.http.routers.yasmina-legal.entrypoints=websecure
+      - traefik.http.routers.yasmina-legal.tls.certresolver=letsencrypt
+      - traefik.http.routers.yasmina-legal.middlewares=yasmina-lock,yasmina-noindex
+      - traefik.http.routers.yasmina-legal.service=yasmina-legal
+      - traefik.http.routers.yasmina-legal-http.rule=Host(`${SITE_HOST_PREFIX:-}legal.${SITE_DOMAIN}`)
+      - traefik.http.routers.yasmina-legal-http.entrypoints=web
+      - traefik.http.routers.yasmina-legal-http.middlewares=yasmina-https
+      - traefik.http.routers.yasmina-legal-http.service=yasmina-legal
+      - traefik.http.services.yasmina-legal.loadbalancer.server.port=3010
+    environment:
+      API_URL: http://api:3007
+      API_SERVICE_TOKEN: ${API_SERVICE_TOKEN}
+
   auth:
     <<: *next
     build:

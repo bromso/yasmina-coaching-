@@ -182,6 +182,7 @@ services:
           PORT: 3010,
           SITE_DOMAIN: "${SITE_DOMAIN:-brand.localhost}",
           COOKIE_DOMAIN: "${COOKIE_DOMAIN:-.brand.localhost}",
+          LEGAL_DRAFT: "${LEGAL_DRAFT:-}",
         },
       }
     ports: ["127.0.0.1:3010:3010"]
