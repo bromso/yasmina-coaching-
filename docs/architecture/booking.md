@@ -63,6 +63,23 @@ the customer's (`bookingConfirmed` or `bookingRequestReceived`, in `x-locale`'s 
 `BOOKING_EMAIL`) and Yasmina's (`bookingNew`, English, Reply-To the customer, linking
 `/admin/bookings/<id>`). `BOOKING_EMAIL` falls back to where support requests go.
 
+### Consent to the terms
+
+Every booking form on `/book` (instant, group and request) has a required checkbox, `terms`
+(posted as `on`), labelled "Jag har läst villkoren och integritetspolicyn" / "I have read the
+terms and the privacy policy", each part linking the legal app's page in the form's language
+(`legalUrl`, computed in the server view and passed down as strings). The www cores refuse an
+unticked box with their own message and never call the api; otherwise they send
+`termsAccepted: true`, which `BookingCreateSchema`, `BookingReserveSchema` and
+`BookingRequestSchema` require (`z.literal(true)`). The api never takes a version from the client:
+each handler stamps `terms_version = TERMS_VERSION` (`@repo/api-contract/legal`, the terms page's
+newest change date) and `terms_accepted_at = now` on every row it inserts (migration
+`0037_booking_terms`; rows from before stay null). When the terms page gets a new change-log
+entry, `TERMS_VERSION` must move with it: `apps/legal/src/lib/terms-version.test.ts` fails until
+it does. `bookingConfirmed` and `bookingRequestReceived` link the terms (`termsUrl`); a private
+client's confirmation (`withdrawal`, `audience === "private"`) adds the line on the 14-day right of
+withdrawal. Requests are organisation-only, so theirs never does.
+
 ### Manage links
 
 Every order gets a 256-bit token; its SHA-256 is stored on each booking (and the package). The
@@ -103,8 +120,9 @@ all-or-nothing) and `groupEvents.cancel`. Each decision writes an `audit_log` ro
 
 Bookings are address-keyed and outlive accounts, like job applications: `privacy.export` lists the
 rows whose `customer_email` is the account's verified address (an explicit column list, never the
-hashes or the admin's note); `users.purge` leaves them. There is no automatic retention job yet —
-see **Open** below.
+hashes or the admin's note; the terms version and acceptance time are included, as the
+customer's own record of what they agreed to); `users.purge` leaves them. There is no automatic
+retention job yet — see **Open** below.
 
 ## Open
 
