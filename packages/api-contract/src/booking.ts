@@ -10,6 +10,8 @@ import {
   BOOKING_CONFLICT_MESSAGE,
   BOOKING_DATE_PATTERN,
   BOOKING_DAY_PARTS,
+  BOOKING_EARLY_START_FIELD,
+  BOOKING_EARLY_START_MESSAGE,
   BOOKING_HORIZON_DAYS,
   BOOKING_LEAD_HOURS,
   BOOKING_LOCATIONS,
@@ -29,12 +31,14 @@ import {
   BOOKING_TIME_PATTERN,
   BOOKING_TIMEZONE,
   BOOKING_VENUE_MAX,
+  BOOKING_WITHDRAWAL_DAYS,
   type BookingAudience,
   type BookingDayPart,
   type BookingLocation,
   type BookingStatus,
   bookingReference,
   DEFAULT_AVAILABILITY_RULES,
+  earlyStartRequired,
   GROUP_EVENT_DESCRIPTION_MAX,
   GROUP_EVENT_MAX_CAPACITY,
   GROUP_EVENT_MAX_REPEATS,
@@ -51,6 +55,7 @@ import {
   type OfferingKey,
   type OfferingKind,
   REQUEST_OFFERING_KEYS,
+  startsWithinWithdrawal,
 } from "./booking-limits"
 
 // Like support.ts: this file imports only zod, ./auth and the Zod-free ./booking-limits, never the
@@ -76,6 +81,8 @@ export {
   BOOKING_CONFLICT_MESSAGE,
   BOOKING_DATE_PATTERN,
   BOOKING_DAY_PARTS,
+  BOOKING_EARLY_START_FIELD,
+  BOOKING_EARLY_START_MESSAGE,
   BOOKING_HORIZON_DAYS,
   BOOKING_LEAD_HOURS,
   BOOKING_LOCATIONS,
@@ -95,8 +102,10 @@ export {
   BOOKING_TIME_PATTERN,
   BOOKING_TIMEZONE,
   BOOKING_VENUE_MAX,
+  BOOKING_WITHDRAWAL_DAYS,
   bookingReference,
   DEFAULT_AVAILABILITY_RULES,
+  earlyStartRequired,
   GROUP_EVENT_DESCRIPTION_MAX,
   GROUP_EVENT_MAX_CAPACITY,
   GROUP_EVENT_MAX_REPEATS,
@@ -110,6 +119,7 @@ export {
   OFFERING_KINDS,
   OFFERINGS,
   REQUEST_OFFERING_KEYS,
+  startsWithinWithdrawal,
 }
 
 const Id = z.number().int().positive()
@@ -189,6 +199,13 @@ export type BookingSummary = z.infer<typeof BookingSummarySchema>
  */
 const TermsAccepted = z.literal(true)
 
+/**
+ * The visitor ticked "I want the service to start within the withdrawal period…" (lag (2005:59)
+ * 2 kap. 11 § 1). Optional: `apps/api` decides from the actual slots whether a booking needs it
+ * (`earlyStartRequired`), never from the client, and stamps the time itself.
+ */
+const EarlyStart = z.boolean().optional()
+
 export const BookingCreateSchema = z
   .object({
     offering: InstantOfferingKeySchema,
@@ -199,6 +216,7 @@ export const BookingCreateSchema = z
     location: BookingLocationSchema,
     notes: z.string().trim().max(BOOKING_NOTES_MAX).optional(),
     termsAccepted: TermsAccepted,
+    earlyStart: EarlyStart,
   })
   .superRefine((v, ctx) => {
     const offering = OFFERINGS[v.offering]
@@ -269,6 +287,7 @@ export const BookingReserveSchema = z.object({
   customer: BookingCustomerSchema,
   notes: z.string().trim().max(BOOKING_NOTES_MAX).optional(),
   termsAccepted: TermsAccepted,
+  earlyStart: EarlyStart,
 })
 export type BookingReserveInput = z.infer<typeof BookingReserveSchema>
 
@@ -329,12 +348,24 @@ export const BOOKING_CANCEL_ERRORS = {
   ...BOOKING_MANAGE_ERRORS,
   CONFLICT: { message: BOOKING_CANCEL_LATE_MESSAGE },
 } as const
+/**
+ * A private booking within the withdrawal period without `earlyStart`: a field error, its
+ * `data.field` the form field the message belongs to.
+ */
+const BOOKING_EARLY_START_ERROR = {
+  BAD_REQUEST: {
+    message: BOOKING_EARLY_START_MESSAGE,
+    data: z.object({ field: z.literal(BOOKING_EARLY_START_FIELD) }),
+  },
+} as const
 export const BOOKING_CREATE_ERRORS = {
   ...BOOKING_ERRORS,
+  ...BOOKING_EARLY_START_ERROR,
   CONFLICT: { message: BOOKING_SLOT_TAKEN_MESSAGE },
 } as const
 export const BOOKING_RESERVE_ERRORS = {
   ...BOOKING_ERRORS,
+  ...BOOKING_EARLY_START_ERROR,
   NOT_FOUND: { message: "Not found" },
   CONFLICT: { message: BOOKING_SEATS_FULL_MESSAGE },
 } as const

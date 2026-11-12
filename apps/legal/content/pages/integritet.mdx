@@ -21,7 +21,7 @@ Personuppgiftsansvarig är [ATT FYLLA: företagets namn], organisationsnummer [A
 
 När du bokar en tid, en plats på en gruppträff eller skickar en bokningsförfrågan sparar vi det du fyller i: namn, e-postadress, telefonnummer om du anger det, organisation om du bokar för en arbetsgivare, vad du bokar, tid eller önskade datum, plats, antal deltagare och lokal om du anger dem, och dina egna anteckningar. Väljer du att betala mot faktura sparar vi betalsättet och, för en organisation, organisationsnummer, fakturareferens och fakturaadress. Vi sparar också vilket språk du använde och ett hashvärde av din IP-adress, som vi använder för att begränsa missbruk. Hashvärdet är inte anonymt, eftersom det går att räkna ut vilken IP-adress det kommer från. [ATT FYLLA: om IP-adressen ska hashas med ett hemligt salt]
 
-Du kryssar i att du har läst villkoren och den här policyn innan du bokar. Vi sparar då vilken version av villkoren du godkände (datumet för villkorens senaste ändring) och när du godkände dem. Det gör vi för att kunna visa vilka villkor som gällde för just din bokning.
+Du kryssar i att du har läst villkoren och den här policyn innan du bokar. Vi sparar då vilken version av villkoren du godkände (datumet för villkorens senaste ändring) och när du godkände dem. Det gör vi för att kunna visa vilka villkor som gällde för just din bokning. Bokar du som privatperson en session inom 14 dagar kryssar du också i att tjänsten får börja inom ångerfristen. Då sparar vi när du gjorde det, så att vi kan visa att du bad om det.
 
 Du får en bekräftelse med en länk där du kan se och avboka din bokning. Länken är din nyckel, och vi sparar bara ett hashvärde av den. Yasmina får ett mejl om bokningen och kan skriva egna anteckningar om den.
 
@@ -29,7 +29,7 @@ Bokningen sparas med din e-postadress och kopplas aldrig till något konto, inte
 
 - **Syfte:** att ta emot och genomföra bokningen, skicka bekräftelser och fakturera.
 - **Rättslig grund:** [ATT FYLLA: rättslig grund för bokningar, förslag avtal enligt art. 6.1 b]
-- **Hur länge:** [ATT FYLLA: hur länge bokningar sparas, i dag raderas de inte automatiskt] Uppgifterna om vilka villkor du godkände sparas lika länge som bokningen.
+- **Hur länge:** [ATT FYLLA: hur länge bokningar sparas, i dag raderas de inte automatiskt] Uppgifterna om vilka villkor du godkände, och när du bad om att tjänsten skulle börja inom ångerfristen, sparas lika länge som bokningen.
 - **Bokföring:** [ATT FYLLA: om fakturor och bokföringsunderlag från bokningar sparas enligt bokföringslagen, var, av vem och hur länge]
 
 ### När du skickar en förfrågan via kontaktformuläret
@@ -82,7 +82,7 @@ Vi skickar bekräftelser, kvitton, inloggningslänkar och notiser med e-post. Va
 
 ### Dataexport och radering av kontot
 
-Under Data och integritet i ditt konto kan du begära en export av dina uppgifter. Exporten är en JSON-fil med kontot, dina arbetsytor och de förfrågningar och bokningar du gjort med kontots bekräftade e-postadress, inklusive vilken version av villkoren du godkände och när. Filen går att hämta i 7 dagar och raderas sedan. Du kan begära en ny export en gång per dygn.
+Under Data och integritet i ditt konto kan du begära en export av dina uppgifter. Exporten är en JSON-fil med kontot, dina arbetsytor och de förfrågningar och bokningar du gjort med kontots bekräftade e-postadress, inklusive vilken version av villkoren du godkände och när, och när du bad om att tjänsten skulle börja inom ångerfristen. Filen går att hämta i 7 dagar och raderas sedan. Du kan begära en ny export en gång per dygn.
 
 Där kan du också radera kontot. Kontot raderas 7 dagar efter att du bad om det, och fram till dess kan du ångra dig. Alla inloggningar avslutas direkt.
 

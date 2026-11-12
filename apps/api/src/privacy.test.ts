@@ -360,6 +360,7 @@ describe("account.export", () => {
         cancelledAt: null,
         termsVersion: TERMS_VERSION,
         termsAcceptedAt: expect.any(String),
+        earlyStartRequestedAt: null,
       },
     ])
     expect(text).not.toContain("token")

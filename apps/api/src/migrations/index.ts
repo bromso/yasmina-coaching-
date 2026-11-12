@@ -36,6 +36,7 @@ import booking from "./0034_booking"
 import groupEventOffering from "./0035_group_event_offering"
 import leads from "./0036_leads"
 import bookingTerms from "./0037_booking_terms"
+import bookingEarlyStart from "./0038_booking_early_start"
 
 /** Every migration, in order. A new file goes here too — nothing is picked up by accident. */
 export const migrations: readonly Migration[] = [
@@ -76,4 +77,5 @@ export const migrations: readonly Migration[] = [
   groupEventOffering,
   leads,
   bookingTerms,
+  bookingEarlyStart,
 ]

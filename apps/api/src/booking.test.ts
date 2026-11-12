@@ -84,6 +84,7 @@ describe("booking.book", () => {
   test("a session: stores it confirmed, mails the customer (in their language) and Yasmina", async () => {
     const result = await clientFor(app, undefined, "sv").booking.book({
       termsAccepted: true,
+      earlyStart: true,
       offering: "session",
       slots: ["2026-01-06T08:00:00.000Z"],
       audience: "private",
@@ -150,6 +151,7 @@ describe("booking.book", () => {
     const [error] = await safeCall(() =>
       anon().booking.book({
         termsAccepted: true,
+        earlyStart: true,
         offering: "session",
         slots: ["2026-01-06T08:00:00.000Z"],
         audience: "private",
@@ -170,6 +172,7 @@ describe("booking.book", () => {
       const [error] = await safeCall(() =>
         anon().booking.book({
           termsAccepted: true,
+          earlyStart: true,
           offering: "session",
           slots: [slot],
           audience: "private",
@@ -225,6 +228,7 @@ describe("booking.book", () => {
       expect(slot).toBeDefined()
       const result = await anon().booking.book({
         termsAccepted: true,
+        earlyStart: true,
         offering,
         slots: [slot as string],
         audience: "private",
@@ -246,6 +250,7 @@ describe("booking.book", () => {
     const [error] = await safeCall(() =>
       anon().booking.book({
         termsAccepted: true,
+        earlyStart: true,
         offering: "package_6",
         slots: ["2026-01-08T08:00:00.000Z", "2026-01-08T08:30:00.000Z"],
         audience: "private",
@@ -261,6 +266,7 @@ describe("booking.book", () => {
     const [wrongPlace] = await safeCall(() =>
       anon().booking.book({
         termsAccepted: true,
+        earlyStart: true,
         offering: "session",
         slots: ["2026-01-06T12:00:00.000Z"],
         audience: "private",
@@ -272,6 +278,7 @@ describe("booking.book", () => {
     const [tooMany] = await safeCall(() =>
       anon().booking.book({
         termsAccepted: true,
+        earlyStart: true,
         offering: "session",
         slots: ["2026-01-06T12:00:00.000Z", "2026-01-06T13:30:00.000Z"],
         audience: "private",
@@ -287,6 +294,7 @@ describe("booking.manage", () => {
   test("cancel: allowed until 24 h before, mails both sides; late or wrong token is refused", async () => {
     const result = await anon().booking.book({
       termsAccepted: true,
+      earlyStart: true,
       offering: "session",
       slots: ["2026-01-09T10:00:00.000Z"],
       audience: "private",
@@ -402,6 +410,7 @@ describe("booking.request and the admin decision", () => {
     const [overlap] = await safeCall(() =>
       anon().booking.book({
         termsAccepted: true,
+        earlyStart: true,
         offering: "session",
         slots: ["2026-02-10T09:00:00.000Z"],
         audience: "private",
@@ -435,6 +444,7 @@ describe("booking.request and the admin decision", () => {
 
     const booked = await anon().booking.book({
       termsAccepted: true,
+      earlyStart: true,
       offering: "session",
       slots: ["2026-01-13T08:00:00.000Z"],
       audience: "private",
@@ -536,6 +546,7 @@ describe("group events", () => {
 
     const first = await anon().booking.reserve({
       termsAccepted: true,
+      earlyStart: true,
       eventIds: ids,
       audience: "private",
       customer,
@@ -552,6 +563,7 @@ describe("group events", () => {
     const bob = { name: "Bob", email: "bob@example.com" }
     const bobSeat = await anon().booking.reserve({
       termsAccepted: true,
+      earlyStart: true,
       eventIds: [ids[0] as number],
       audience: "private",
       customer: bob,
@@ -562,6 +574,7 @@ describe("group events", () => {
     const [full] = await safeCall(() =>
       anon().booking.reserve({
         termsAccepted: true,
+        earlyStart: true,
         eventIds: [ids[0] as number],
         audience: "private",
         customer: { name: "Cy", email: "cy@example.com" },
@@ -637,6 +650,7 @@ describe("group events per offering", () => {
 
     const seat = await anon().booking.reserve({
       termsAccepted: true,
+      earlyStart: true,
       eventIds: inner.ids,
       audience: "private",
       customer,
@@ -667,6 +681,7 @@ describe("group events per offering", () => {
     const [error] = await safeCall(() =>
       anon().booking.reserve({
         termsAccepted: true,
+        earlyStart: true,
         eventIds: [plain.ids[0] as number, inner.ids[0] as number],
         audience: "private",
         customer: { name: "Mixed", email: "mixed@example.com" },
@@ -724,7 +739,7 @@ describe("the terms", () => {
     const result = await clientFor(app, undefined, "sv").booking.book({
       termsAccepted: true,
       offering: "session",
-      slots: ["2026-03-10T09:00:00.000Z"],
+      slots: ["2026-03-24T09:00:00.000Z"],
       audience: "private",
       customer: { ...customer, email: "terms-book@example.com" },
       location: "video",
@@ -762,7 +777,7 @@ describe("the terms", () => {
     const root = await admin()
     const { ids } = await root.admin.bookings.groupEvents.create({
       title: "Terms evening",
-      startsAt: "2026-03-12T16:00:00.000Z",
+      startsAt: "2026-03-26T16:00:00.000Z",
       durationMinutes: 120,
       capacity: 5,
       location: "varberg",
@@ -840,6 +855,143 @@ describe("the terms", () => {
     }
     await app.drain()
     expect(app.mailer.sent.length).toBe(before)
+  })
+})
+
+describe("a start within the withdrawal period", () => {
+  // Monday 2 March, 09:00 in Stockholm: the period's last day is Monday 16 March.
+  const BOOKED = new Date("2026-03-02T08:00:00.000Z")
+  const EARLY_EN = "You asked for the session to take place within the withdrawal period."
+  const WITHDRAWAL_EN = "As a private client you have a 14-day right of withdrawal."
+  const book = (
+    email: string,
+    slot: string,
+    extra: { audience?: "private" | "organisation"; earlyStart?: boolean } = {},
+    locale?: "sv" | "en"
+  ) =>
+    clientFor(app, undefined, locale).booking.book({
+      termsAccepted: true,
+      offering: "session",
+      slots: [slot],
+      audience: extra.audience ?? "private",
+      customer: {
+        ...customer,
+        email,
+        organisation: extra.audience === "organisation" ? "SKR" : undefined,
+      },
+      location: "video",
+      ...(extra.earlyStart === undefined ? {} : { earlyStart: extra.earlyStart }),
+    })
+
+  test("a private booking inside the period without the consent is a field error; nothing is stored", async () => {
+    clock = BOOKED
+    const before = app.mailer.sent.length
+    for (const earlyStart of [undefined, false]) {
+      const [error] = await safeCall(() =>
+        // Monday 16 March 10:00 in Stockholm, the 14th day.
+        book("early-refused@example.com", "2026-03-16T09:00:00.000Z", { earlyStart })
+      )
+      expect(error?.code).toBe("BAD_REQUEST")
+      expect(error?.data).toEqual({ field: "earlyStart" })
+      expect(error?.message).toBe(
+        "Confirm that the session may take place within the withdrawal period, or choose a later time."
+      )
+    }
+    const [swedish] = await safeCall(() =>
+      book("early-refused@example.com", "2026-03-16T09:00:00.000Z", {}, "sv")
+    )
+    expect(swedish?.message).toBe(
+      "Bekräfta att sessionen får äga rum inom ångerfristen, eller välj en tid längre fram."
+    )
+    await app.drain()
+    expect(app.mailer.sent.length).toBe(before)
+    // The slot is still free: nothing was written.
+    const day = await anon().booking.availability({
+      offering: "session",
+      from: "2026-03-16",
+      to: "2026-03-16",
+    })
+    expect(day.days[0]?.slots.map((s) => s.startsAt)).toContain("2026-03-16T09:00:00.000Z")
+  })
+
+  test("with the consent it books, stamps the time and the mail says the right ends after the session", async () => {
+    clock = BOOKED
+    const result = await book(
+      "early-given@example.com",
+      "2026-03-16T13:00:00.000Z",
+      { earlyStart: true },
+      "sv"
+    )
+    const row = await app.db.booking.find(idOf(result.reference))
+    expect(row?.early_start_requested_at).toBe("2026-03-02T08:00:00.000Z")
+    await app.drain()
+    const [mail] = app.mailer.sent.filter((m) => m.to === "early-given@example.com")
+    expect(mail?.text).toContain(
+      "Du har bett att sessionen äger rum inom ångerfristen. Ångerrätten upphör när sessionen har genomförts."
+    )
+    expect(mail?.text).not.toContain("Som privatperson har du 14 dagars ångerrätt.")
+  })
+
+  test("15 days away needs no consent and stores none, even when it was ticked", async () => {
+    clock = BOOKED
+    // Tuesday 17 March in Stockholm, the 15th day.
+    const plain = await book("early-later@example.com", "2026-03-17T09:00:00.000Z")
+    expect((await app.db.booking.find(idOf(plain.reference)))?.early_start_requested_at).toBeNull()
+    const ticked = await book("early-later-ticked@example.com", "2026-03-17T13:00:00.000Z", {
+      earlyStart: true,
+    })
+    expect((await app.db.booking.find(idOf(ticked.reference)))?.early_start_requested_at).toBeNull()
+    const [mail] = await mailsTo(
+      app,
+      "early-later-ticked@example.com",
+      bookingConfirmedSubject(ticked.reference)
+    )
+    expect(mail?.text).toContain(WITHDRAWAL_EN)
+    expect(mail?.text).not.toContain(EARLY_EN)
+  })
+
+  test("an organisation never needs it", async () => {
+    clock = BOOKED
+    const result = await book("early-org@example.com", "2026-03-03T09:00:00.000Z", {
+      audience: "organisation",
+    })
+    expect((await app.db.booking.find(idOf(result.reference)))?.early_start_requested_at).toBeNull()
+  })
+
+  test("seats at a group event inside the period need it too, judged by the event's own date", async () => {
+    clock = BOOKED
+    const root = await admin()
+    const { ids } = await root.admin.bookings.groupEvents.create({
+      title: "Early evening",
+      startsAt: "2026-03-05T16:00:00.000Z",
+      durationMinutes: 120,
+      capacity: 5,
+      location: "varberg",
+    })
+    const reserve = (email: string, earlyStart?: boolean) =>
+      anon().booking.reserve({
+        termsAccepted: true,
+        eventIds: ids,
+        audience: "private",
+        customer: { ...customer, email },
+        ...(earlyStart === undefined ? {} : { earlyStart }),
+      })
+    const [error] = await safeCall(() => reserve("early-seat-refused@example.com"))
+    expect(error?.code).toBe("BAD_REQUEST")
+    expect(error?.data).toEqual({ field: "earlyStart" })
+    const seats = (await anon().booking.groupEvents({})).events.find((e) => e.id === ids[0])
+    expect(seats?.seatsLeft).toBe(5)
+
+    const seat = await reserve("early-seat@example.com", true)
+    const row = await app.db.booking.find(idOf(seat.reference))
+    expect(row?.early_start_requested_at).toBe("2026-03-02T08:00:00.000Z")
+    const [mail] = await mailsTo(
+      app,
+      "early-seat@example.com",
+      bookingConfirmedSubject(seat.reference)
+    )
+    expect(mail?.text).toContain(EARLY_EN)
+    expect(mail?.text).not.toContain(WITHDRAWAL_EN)
   })
 })
 

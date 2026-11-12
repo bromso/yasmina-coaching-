@@ -192,6 +192,7 @@
     "memberBooking": "När du är igång bokar du dina samtal här: ",
     "terms": "Villkoren för bokningen: ",
     "withdrawal": "Som privatperson har du 14 dagars ångerrätt. Villkoren beskriver hur den fungerar när en session redan har ägt rum.",
+    "earlyStart": "Du har bett att sessionen äger rum inom ångerfristen. Ångerrätten upphör när sessionen har genomförts.",
     "footer": "Du kan avboka online via den länken fram till {hours} timmar före ett tillfälle. Svara på det här mejlet om du vill boka om."
   },
   "bookingRequestReceived": {

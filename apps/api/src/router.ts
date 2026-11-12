@@ -15,7 +15,9 @@ import {
   type BillingStatus,
   BOOKING_AVAILABILITY_MAX_DAYS,
   BOOKING_CANCEL_CUTOFF_HOURS,
+  BOOKING_EARLY_START_FIELD,
   BOOKING_TIMEZONE,
+  type BookingAudience,
   type BookingSlot,
   bookingReference,
   contract,
@@ -24,6 +26,7 @@ import {
   EMAIL_CHANGE_CODE_REASON,
   EmailSchema,
   EXPORT_REQUEST_INTERVAL_MS,
+  earlyStartRequired,
   entitlementsFor,
   INVITE_DOMAIN_INVALID_REASON,
   INVITE_DOMAIN_LIMIT_REASON,
@@ -993,6 +996,22 @@ const toAdminApplication = (row: AdminApplicationRow): AdminApplication => ({
       ? { id: row.status_changed_by, email: row.status_changed_by_email }
       : null,
 })
+
+/**
+ * A booking's consent to start within the withdrawal period (lag (2005:59) 2 kap. 11 § 1), judged
+ * from the sessions' actual start times with `earlyStartRequired`, never from anything the client
+ * says about them: `"missing"` when a private client books a session inside the period without
+ * `earlyStart`; the time to stamp (`now`) when it was needed and given; `null` when it was not
+ * needed, ticked or not.
+ */
+function earlyStartAt(
+  input: { audience: BookingAudience; earlyStart?: boolean },
+  startsAts: readonly string[],
+  now: Date
+): string | null | "missing" {
+  if (!earlyStartRequired(input.audience, startsAts, now)) return null
+  return input.earlyStart === true ? now.toISOString() : "missing"
+}
 
 /** One page of rows (fetched as `limit + 1`) → items and the keyset cursor. */
 /**
@@ -4406,10 +4425,13 @@ export const router = api.router({
           endsAt: endOf(startsAt, offering.durationMinutes),
         }))
         for (const slot of slots) {
-          if (!isOfferedSlot(slot, engine)) return null
+          if (!isOfferedSlot(slot, engine)) return "taken" as const
           // The next slot of the same order must not collide with this one either.
           engine.busy.push(slot)
         }
+        // Judged from the slots just checked, never from the client: see `earlyStartAt`.
+        const earlyStart = earlyStartAt(input, sorted, now)
+        if (earlyStart === "missing") return "earlyStart" as const
         const pkg =
           offering.sessions > 1
             ? await tx.booking.packages.create({
@@ -4446,6 +4468,7 @@ export const router = api.router({
             createdAt,
             termsVersion: TERMS_VERSION,
             termsAcceptedAt: createdAt,
+            earlyStartRequestedAt: earlyStart,
           })
           ids.push(id)
         }
@@ -4473,7 +4496,7 @@ export const router = api.router({
               : undefined,
             cancelCutoffHours: BOOKING_CANCEL_CUTOFF_HOURS,
             memberBookingUrl: memberBookingUrlFor(context.wwwUrl, input.offering),
-            ...termsMailProps(input.audience, locale),
+            ...termsMailProps(input.audience, locale, earlyStart !== null),
           },
           { tx, locale, replyTo: context.bookingEmail }
         )
@@ -4496,7 +4519,15 @@ export const router = api.router({
         )
         return { ids, pkg, reference, manageUrl }
       })
-      if (!result) throw errors.CONFLICT({ message: apiMessage(context, "bookingSlotTaken") })
+      if (result === "taken") {
+        throw errors.CONFLICT({ message: apiMessage(context, "bookingSlotTaken") })
+      }
+      if (result === "earlyStart") {
+        throw errors.BAD_REQUEST({
+          message: apiMessage(context, "bookingEarlyStart"),
+          data: { field: BOOKING_EARLY_START_FIELD },
+        })
+      }
       const rows = await context.db.booking.byToken(hash)
       return {
         reference: result.reference,
@@ -4534,6 +4565,12 @@ export const router = api.router({
         }
         // One reservation, one offering: events of different offerings are never booked together.
         if (new Set(events.map((e) => e.offering)).size > 1) return "missing" as const
+        const earlyStart = earlyStartAt(
+          input,
+          events.map((e) => e.starts_at),
+          now
+        )
+        if (earlyStart === "missing") return "earlyStart" as const
         const ids: number[] = []
         for (const event of events) {
           const { id } = await tx.booking.create({
@@ -4560,6 +4597,7 @@ export const router = api.router({
             createdAt,
             termsVersion: TERMS_VERSION,
             termsAcceptedAt: createdAt,
+            earlyStartRequestedAt: earlyStart,
           })
           ids.push(id)
         }
@@ -4582,7 +4620,7 @@ export const router = api.router({
               ? rest.map((e) => `${e.title}: ${formatWhen(e.starts_at, e.ends_at, locale)}`)
               : undefined,
             cancelCutoffHours: BOOKING_CANCEL_CUTOFF_HOURS,
-            ...termsMailProps(input.audience, locale),
+            ...termsMailProps(input.audience, locale, earlyStart !== null),
           },
           { tx, locale, replyTo: context.bookingEmail }
         )
@@ -4607,6 +4645,12 @@ export const router = api.router({
         return { reference, manageUrl }
       })
       if (outcome === "missing") throw errors.NOT_FOUND()
+      if (outcome === "earlyStart") {
+        throw errors.BAD_REQUEST({
+          message: apiMessage(context, "bookingEarlyStart"),
+          data: { field: BOOKING_EARLY_START_FIELD },
+        })
+      }
       if (outcome === "full")
         throw errors.CONFLICT({ message: apiMessage(context, "bookingSeatsFull") })
       const rows = await context.db.booking.byToken(hash)
@@ -4648,6 +4692,8 @@ export const router = api.router({
           createdAt: now.toISOString(),
           termsVersion: TERMS_VERSION,
           termsAcceptedAt: now.toISOString(),
+          // A request is always an organisation's: no right of withdrawal to start within.
+          earlyStartRequestedAt: null,
         })
         const reference = bookingReference(id)
         const manageUrl = manageUrlFor(context.wwwUrl, token)
@@ -5594,7 +5640,7 @@ export const router = api.router({
               manageUrl: manageUrlFor(context.wwwUrl, token),
               name: row.customer_name,
               cancelCutoffHours: BOOKING_CANCEL_CUTOFF_HOURS,
-              ...termsMailProps(row.audience, locale),
+              ...termsMailProps(row.audience, locale, row.early_start_requested_at !== null),
             },
             { tx, locale, replyTo: context.bookingEmail }
           )

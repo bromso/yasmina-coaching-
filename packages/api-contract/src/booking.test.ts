@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test"
 import {
   AdminGroupEventCreateSchema,
+  BOOKING_WITHDRAWAL_DAYS,
   BookingCreateSchema,
   BookingGroupEventsSchema,
   BookingRequestSchema,
@@ -9,6 +10,7 @@ import {
   MEMBER_OFFERING_KEYS,
   OFFERINGS,
 } from "./booking"
+import { earlyStartRequired, startsWithinWithdrawal } from "./booking-limits"
 import { TERMS_VERSION } from "./legal"
 
 describe("Ledarskap inifrån offerings", () => {
@@ -102,5 +104,67 @@ describe("consent to the terms", () => {
 
   test("TERMS_VERSION is a calendar date", () => {
     expect(TERMS_VERSION).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+  })
+})
+
+describe("a start within the withdrawal period", () => {
+  // 12:00 in Stockholm on 12 November; the period's last day is 26 November.
+  const now = new Date("2026-11-12T11:00:00.000Z")
+
+  test("the period is 14 days", () => {
+    expect(BOOKING_WITHDRAWAL_DAYS).toBe(14)
+  })
+
+  test("counts calendar days in Europe/Stockholm, the 14th day included", () => {
+    expect(startsWithinWithdrawal("2026-11-13T09:00:00.000Z", now)).toBe(true)
+    // 23:30 on the 26th in Stockholm is still the 14th day, though it is the 26th in UTC too.
+    expect(startsWithinWithdrawal("2026-11-26T22:30:00.000Z", now)).toBe(true)
+    // 00:30 on the 27th in Stockholm is the 15th day, though it is still the 26th in UTC.
+    expect(startsWithinWithdrawal("2026-11-26T23:30:00.000Z", now)).toBe(false)
+    expect(startsWithinWithdrawal("2026-12-10T09:00:00.000Z", now)).toBe(false)
+  })
+
+  test("a start before today is not within the period", () => {
+    expect(startsWithinWithdrawal("2026-11-11T09:00:00.000Z", now)).toBe(false)
+  })
+
+  test("only a private booking with a start within the period needs the consent", () => {
+    const soon = "2026-11-20T09:00:00.000Z"
+    const later = "2026-12-01T09:00:00.000Z"
+    expect(earlyStartRequired("private", [later, soon], now)).toBe(true)
+    expect(earlyStartRequired("private", [later], now)).toBe(false)
+    expect(earlyStartRequired("organisation", [soon], now)).toBe(false)
+    expect(earlyStartRequired("private", [], now)).toBe(false)
+  })
+
+  test("create and reserve take an optional earlyStart boolean; request has none", () => {
+    const customer = { name: "Ada Lovelace", email: "ada@example.com" }
+    const create = {
+      offering: "session",
+      slots: ["2026-11-20T09:00:00.000Z"],
+      audience: "private",
+      customer,
+      location: "video",
+      termsAccepted: true,
+    }
+    const reserve = { eventIds: [3], audience: "private", customer, termsAccepted: true }
+    for (const [schema, input] of [
+      [BookingCreateSchema, create],
+      [BookingReserveSchema, reserve],
+    ] as const) {
+      expect(schema.parse(input)).not.toHaveProperty("earlyStart")
+      expect(schema.parse({ ...input, earlyStart: true }).earlyStart).toBe(true)
+      expect(schema.safeParse({ ...input, earlyStart: "on" }).success).toBe(false)
+    }
+    const request = BookingRequestSchema.parse({
+      offering: "keynote",
+      customer: { ...customer, organisation: "SKR" },
+      location: "on_site",
+      preferredDates: [{ date: "2026-12-01", part: "morning" }],
+      message: "Opening keynote at our conference.",
+      termsAccepted: true,
+      earlyStart: true,
+    })
+    expect(request).not.toHaveProperty("earlyStart")
   })
 })

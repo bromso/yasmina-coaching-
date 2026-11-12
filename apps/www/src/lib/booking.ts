@@ -8,7 +8,10 @@ import {
   BookingReserveSchema,
 } from "@repo/api-contract"
 import {
+  BOOKING_EARLY_START_FIELD,
   BOOKING_NOTES_MAX,
+  earlyStartRequired,
+  GROUP_OFFERING_KEYS,
   OFFERING_KEYS,
   type OfferingKey,
 } from "@repo/api-contract/booking-limits"
@@ -48,7 +51,8 @@ export type BookingFormState = FormState & { code?: string }
 export type BookingOutcome = { ok: true; redirectTo: string } | (BookingFormState & { ok: false })
 
 export type BookApi = Pick<ApiClient["booking"], "book">
-export type ReserveApi = Pick<ApiClient["booking"], "reserve">
+/** `groupEvents` dates the ticked events, so a missing `earlyStart` is refused before the write. */
+export type ReserveApi = Pick<ApiClient["booking"], "reserve" | "groupEvents">
 export type RequestApi = Pick<ApiClient["booking"], "request">
 export type CancelApi = Pick<ApiClient["booking"]["manage"], "cancel">
 
@@ -210,6 +214,48 @@ function termsRefusal(fd: FormData, locale: Locale = SITE_LOCALE): Record<string
   return str(fd, "terms") === "on" ? {} : { terms: BOOKING_FORMS[locale].check.terms }
 }
 
+/**
+ * The box for a start within the withdrawal period (`name="earlyStart"`, `value="on"`, see
+ * `EarlyStartField`): a refusal naming it when a private client's session falls inside the period
+ * (`earlyStartRequired`, from the actual start times) and it was not ticked, else nothing. The api
+ * judges it again from its own slots and refuses the same way.
+ */
+function earlyStartRefusal(
+  fd: FormData,
+  audience: string,
+  startsAts: readonly string[],
+  now: Date,
+  locale: Locale = SITE_LOCALE
+): Record<string, string> {
+  if (str(fd, "earlyStart") === "on" || !earlyStartRequired(audience, startsAts, now)) return {}
+  return { earlyStart: BOOKING_FORMS[locale].check.earlyStart }
+}
+
+/** `true` when the box was ticked, else left out of the api input. */
+const earlyStartOf = (fd: FormData) => (str(fd, "earlyStart") === "on" ? true : undefined)
+
+/**
+ * When the ticked group events start, from `booking.groupEvents` (the form posts only their ids):
+ * an id the list does not hold is left out. `null` when the list cannot be read; the api then
+ * judges the consent on its own.
+ */
+async function groupEventStarts(
+  api: ReserveApi,
+  offering: string,
+  ids: readonly string[]
+): Promise<string[] | null> {
+  const key = (GROUP_OFFERING_KEYS as readonly string[]).includes(offering)
+    ? (offering as OfferingKey)
+    : "group"
+  try {
+    const { events } = await api.groupEvents({ offering: key })
+    return events.filter((event) => ids.includes(String(event.id))).map((event) => event.startsAt)
+  } catch (error) {
+    logger.warn("booking.groupEvents failed", { error })
+    return null
+  }
+}
+
 /** The customer block every write shares, from the flat form fields. */
 function customerOf(fd: FormData) {
   return {
@@ -227,6 +273,12 @@ function failure(
   locale: Locale = SITE_LOCALE
 ): BookingOutcome {
   if (error instanceof ORPCError && error.defined) {
+    // The api's own judgement of the withdrawal-period box: a field error, like the core's.
+    const data = error.data as { field?: unknown } | undefined
+    if (error.code === "BAD_REQUEST" && data?.field === BOOKING_EARLY_START_FIELD) {
+      const message = BOOKING_FORMS[locale].check.earlyStart
+      return { ok: false, fieldErrors: { earlyStart: message }, values }
+    }
     if (error.code !== "TOO_MANY_REQUESTS" && error.code !== "CONFLICT") {
       logger.warn(`${what} refused`, { code: error.code })
     }
@@ -242,7 +294,7 @@ function failure(
  * only: the contract has no field for it yet, so the api decides what a repeat booking means.
  */
 export async function bookCore(
-  deps: { api: BookApi; locale?: Locale },
+  deps: { api: BookApi; locale?: Locale; now?: () => Date },
   fd: FormData
 ): Promise<BookingOutcome> {
   const slots = strs(fd, "slots")
@@ -258,6 +310,7 @@ export async function bookCore(
     slots: slots.join(","),
     packageId: str(fd, "packageId"),
     terms: str(fd, "terms"),
+    earlyStart: str(fd, "earlyStart"),
   }
   const payment = paymentOf(
     fd,
@@ -274,14 +327,18 @@ export async function bookCore(
     location: values.location,
     notes: notesWithBilling(values.notes, payment.ok ? payment.block : undefined),
     termsAccepted: true,
+    earlyStart: earlyStartOf(fd),
   })
   const terms = termsRefusal(fd, deps.locale)
+  const now = deps.now ? deps.now() : new Date()
+  const early = earlyStartRefusal(fd, values.audience, slots, now, deps.locale)
   const all = { ...values, ...payment.values }
-  if (!parsed.success || !payment.ok || terms.terms) {
+  if (!parsed.success || !payment.ok || terms.terms || early.earlyStart) {
     const fieldErrors = {
       ...(payment.ok ? {} : payment.fieldErrors),
       ...(parsed.success ? {} : bookingFieldErrors(parsed.error.issues)),
       ...terms,
+      ...early,
     }
     return { ok: false, fieldErrors, values: all }
   }
@@ -311,7 +368,7 @@ export async function bookCore(
  * cosmetic and acceptable. A real provider must price the events server-side instead.
  */
 export async function reserveSeatsCore(
-  deps: { api: ReserveApi; locale?: Locale },
+  deps: { api: ReserveApi; locale?: Locale; now?: () => Date },
   fd: FormData
 ): Promise<BookingOutcome> {
   const eventIds = strs(fd, "eventIds")
@@ -324,6 +381,7 @@ export async function reserveSeatsCore(
     notes: str(fd, "notes"),
     eventIds: eventIds.join(","),
     terms: str(fd, "terms"),
+    earlyStart: str(fd, "earlyStart"),
   }
   const payment = paymentOf(fd, str(fd, "offering"), values.audience, deps.locale)
   const parsed = BookingReserveSchema.safeParse({
@@ -332,14 +390,23 @@ export async function reserveSeatsCore(
     customer: customerOf(fd),
     notes: notesWithBilling(values.notes, payment.ok ? payment.block : undefined),
     termsAccepted: true,
+    earlyStart: earlyStartOf(fd),
   })
   const terms = termsRefusal(fd, deps.locale)
+  // The events' dates are read only when they could matter: a private client, the box unticked.
+  const starts =
+    values.audience === "private" && values.earlyStart !== "on" && eventIds.length > 0
+      ? await groupEventStarts(deps.api, str(fd, "offering"), eventIds)
+      : null
+  const now = deps.now ? deps.now() : new Date()
+  const early = earlyStartRefusal(fd, values.audience, starts ?? [], now, deps.locale)
   const all = { ...values, ...payment.values }
-  if (!parsed.success || !payment.ok || terms.terms) {
+  if (!parsed.success || !payment.ok || terms.terms || early.earlyStart) {
     const fieldErrors = {
       ...(payment.ok ? {} : payment.fieldErrors),
       ...(parsed.success ? {} : bookingFieldErrors(parsed.error.issues)),
       ...terms,
+      ...early,
     }
     return { ok: false, fieldErrors, values: all }
   }

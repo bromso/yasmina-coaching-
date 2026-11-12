@@ -246,6 +246,55 @@ export const BOOKING_SEATS_FULL_MESSAGE = "That session is fully booked."
 export const BOOKING_CANCEL_LATE_MESSAGE = `Sessions can be cancelled online until ${BOOKING_CANCEL_CUTOFF_HOURS} hours before they start. Reply to your confirmation email instead.`
 /** `admin.bookings.confirm`'s refusal when the chosen time collides with another booking. */
 export const BOOKING_CONFLICT_MESSAGE = "That time overlaps another booking."
+/**
+ * `booking.book` / `booking.reserve`'s refusal of a private booking starting within the withdrawal
+ * period without the `earlyStart` consent; its `data.field` names the form field.
+ */
+export const BOOKING_EARLY_START_MESSAGE =
+  "Confirm that the session may take place within the withdrawal period, or choose a later time."
+export const BOOKING_EARLY_START_FIELD = "earlyStart"
+
+/**
+ * A private client's right of withdrawal, in days (lag (2005:59) 2 kap. 12 §): counted in calendar
+ * days in `BOOKING_TIMEZONE` from the day of booking, the last day included.
+ */
+export const BOOKING_WITHDRAWAL_DAYS = 14
+
+const stockholmDay = new Intl.DateTimeFormat("en-CA", {
+  timeZone: BOOKING_TIMEZONE,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+})
+const dayAfter = (day: string, delta: number) => {
+  const d = new Date(`${day}T12:00:00Z`)
+  d.setUTCDate(d.getUTCDate() + delta)
+  return d.toISOString().slice(0, 10)
+}
+
+/**
+ * Whether a session starting at `startsAt` (ISO) falls within the withdrawal period of a booking
+ * made at `now`: its calendar day in the booking zone is today or one of the next
+ * `BOOKING_WITHDRAWAL_DAYS` days.
+ */
+export function startsWithinWithdrawal(startsAt: string, now: Date): boolean {
+  const day = stockholmDay.format(new Date(startsAt))
+  const today = stockholmDay.format(now)
+  return day >= today && day <= dayAfter(today, BOOKING_WITHDRAWAL_DAYS)
+}
+
+/**
+ * Whether a booking needs the consent to start within the withdrawal period (lag (2005:59)
+ * 2 kap. 11 § 1): a private client with at least one session inside it. Organisations have no
+ * right of withdrawal, so they never do.
+ */
+export function earlyStartRequired(
+  audience: string,
+  startsAts: readonly string[],
+  now: Date
+): boolean {
+  return audience === "private" && startsAts.some((at) => startsWithinWithdrawal(at, now))
+}
 
 /** The reference a booking is known by, in mail and on the admin pages: `BK-<id>`. */
 export const bookingReference = (id: number) => `BK-${id}`

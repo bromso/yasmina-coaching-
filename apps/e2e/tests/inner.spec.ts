@@ -38,6 +38,8 @@ test("from the hub to a booked start call", async ({ page }) => {
   await page.getByLabel("Namn", { exact: true }).fill("Ada Lovelace")
   await page.getByLabel("E-post", { exact: true }).fill(email)
   await page.getByRole("checkbox", { name: /jag har läst villkoren/i }).check()
+  // The first free day is inside the 14-day withdrawal period: the private client consents.
+  await page.getByRole("checkbox", { name: /tjänsten börjar inom ångerfristen/i }).check()
   await page.getByRole("button", { name: /fortsätt till betalning/i }).click()
 
   // Payment: the start call has a fixed price, so all four methods are offered. Pay with the

@@ -23,6 +23,11 @@ export type BookingConfirmedProps = {
   termsUrl: string
   /** A private client's booking: adds the line on the 14-day right of withdrawal. */
   withdrawal: boolean
+  /**
+   * The client asked for the session to start within the withdrawal period: the line saying the
+   * right ends once the session has taken place, in place of the generic one.
+   */
+  earlyStart?: boolean
   brand?: string
   locale?: Locale
 }
@@ -43,6 +48,7 @@ export function BookingConfirmed({
   memberBookingUrl,
   termsUrl,
   withdrawal,
+  earlyStart = false,
   brand,
   locale = DEFAULT_LOCALE,
 }: BookingConfirmedProps) {
@@ -82,7 +88,11 @@ export function BookingConfirmed({
         {t("bookingConfirmed.terms")}
         <EmailLink href={termsUrl}>{termsUrl}</EmailLink>
       </Text>
-      {withdrawal ? <Text>{t("bookingConfirmed.withdrawal")}</Text> : null}
+      {earlyStart ? (
+        <Text>{t("bookingConfirmed.earlyStart")}</Text>
+      ) : withdrawal ? (
+        <Text>{t("bookingConfirmed.withdrawal")}</Text>
+      ) : null}
     </Layout>
   )
 }

@@ -18,6 +18,7 @@ const { DoneView } = await import("./done-view")
 const { LocaleProvider } = await import("@/components/booking/locale-provider")
 const { PaymentError, PaymentStep } = await import("@/components/booking/payment-step")
 const { stepWithError, withClientErrors } = await import("@/components/booking/step-panel")
+const { EarlyStartField, TermsField } = await import("@/components/booking/details-fields")
 type PaymentStepProps = import("@/components/booking/payment-step").PaymentStepProps
 
 const LOCALES = ["sv", "en"] as const
@@ -170,6 +171,102 @@ describe("OfferingView", () => {
       })
     }
   }
+})
+
+describe("the box for a start within the withdrawal period", () => {
+  const minDate = "2026-11-08"
+  const box = /<input type="checkbox" required=""[^>]* name="earlyStart" value="on"/
+
+  // Nothing is picked in the server's render (nor without JavaScript), so a private client's
+  // instant or group journey shows the box: any offered session could fall inside the period.
+  for (const locale of LOCALES) {
+    for (const offering of ["session", "group", "inner_start_coaching"] as const) {
+      test(`${offering} (${locale}): a private client sees the box and its label`, () => {
+        const html = render(
+          <OfferingView offering={offering} audience="private" locale={locale} minDate={minDate} />
+        )
+        expect(html).toMatch(box)
+        expect(html).toContain(BOOKING[locale].form.earlyStart)
+      })
+    }
+    test(`session (${locale}): an organisation never sees it`, () => {
+      const html = render(
+        <OfferingView
+          offering="session"
+          audience="organisation"
+          locale={locale}
+          minDate={minDate}
+        />
+      )
+      expect(html).not.toContain('name="earlyStart"')
+    })
+    test(`workshop (${locale}): a request never shows it`, () => {
+      const html = render(
+        <OfferingView
+          offering="workshop"
+          audience="organisation"
+          locale={locale}
+          minDate={minDate}
+        />
+      )
+      expect(html).not.toContain('name="earlyStart"')
+    })
+  }
+})
+
+describe("the consent boxes after a refusal", () => {
+  const links = {
+    terms: "https://legal.example.com/villkor",
+    privacy: "https://legal.example.com/p",
+  }
+  const refused = (values: Record<string, string>) => ({
+    ok: false as const,
+    fieldErrors: { terms: "Terms message", earlyStart: "Early-start message" },
+    values,
+  })
+  const boxes = (state: ReturnType<typeof refused>) =>
+    render(
+      <LocaleProvider locale="sv">
+        <TermsField state={state} links={links} />
+        <EarlyStartField state={state} />
+      </LocaleProvider>
+    )
+  const input = (html: string, name: string) =>
+    new RegExp(`<input[^>]* name="${name}"[^>]*>`).exec(html)?.[0] ?? ""
+
+  test("each refused box is invalid and described by its own message", () => {
+    const html = boxes(refused({ terms: "", earlyStart: "" }))
+    for (const [name, message] of [
+      ["terms", "Terms message"],
+      ["earlyStart", "Early-start message"],
+    ] as const) {
+      const tag = input(html, name)
+      expect(tag).toContain('aria-invalid="true"')
+      expect(tag).toContain(`aria-describedby="${name}-error"`)
+      expect(tag).not.toContain('checked=""')
+      expect(html).toContain(
+        `<p id="${name}-error" class="text-destructive text-sm">${message}</p>`
+      )
+    }
+  })
+
+  test("a box ticked before the refusal stays ticked", () => {
+    const html = boxes(refused({ terms: "on", earlyStart: "on" }))
+    for (const name of ["terms", "earlyStart"]) {
+      expect(input(html, name)).toContain('checked=""')
+      expect(input(html, name)).toContain('aria-invalid="true"')
+    }
+  })
+
+  test("the terms box's name is the sentence alone: the new-tab note describes each link", () => {
+    const html = boxes(refused({}))
+    const label = /<label[^>]*>[\s\S]*?<\/label>/.exec(html)?.[0] ?? ""
+    expect(label).toContain(BOOKING.sv.form.terms.terms)
+    expect(label).not.toContain(BOOKING.sv.form.terms.newTab)
+    expect(count(label, /aria-describedby="terms-new-tab"/g)).toBe(2)
+    expect(count(html, /\(öppnas i en ny flik\)/g)).toBe(1)
+    expect(html).toContain('<span id="terms-new-tab" hidden="">(öppnas i en ny flik)</span>')
+  })
 })
 
 describe("the booking journeys' steps", () => {

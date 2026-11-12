@@ -45,6 +45,8 @@ export type BookingFormCopy = {
     method: string
     /** The terms box left unticked. */
     terms: string
+    /** The box for a start within the withdrawal period, shown and left unticked. */
+    earlyStart: string
   }
   payment: {
     summary: {
@@ -139,6 +141,11 @@ export type BookingFormCopy = {
     /** Read after each link's name: both open in a new tab, so the booking is not lost. */
     newTab: string
   }
+  /**
+   * A private client's consent to a session within the 14-day withdrawal period (lag (2005:59)
+   * 2 kap. 11 § 1): shown only when a picked session falls inside it, see `EarlyStartField`.
+   */
+  earlyStart: string
   timezoneNote: string
   /**
    * The calendar's own words (react-day-picker defaults to US English): the month buttons' names
@@ -238,6 +245,8 @@ const sv: BookingFormCopy = {
     date: "Välj minst ett datum, från och med i morgon.",
     method: "Välj hur du vill betala.",
     terms: "Du behöver godkänna villkoren för att boka.",
+    earlyStart:
+      "Bekräfta att sessionen får äga rum inom ångerfristen, eller välj en tid längre fram.",
   },
   payment: {
     summary: {
@@ -344,6 +353,8 @@ const sv: BookingFormCopy = {
     privacy: "integritetspolicyn",
     newTab: "(öppnas i en ny flik)",
   },
+  earlyStart:
+    "Jag vill att tjänsten börjar inom ångerfristen och förstår att ångerrätten upphör när sessionen har genomförts.",
   timezoneNote: "Tiderna visas i svensk tid (Europe/Stockholm).",
   calendar: { previous: "Föregående månad", next: "Nästa månad", today: "I dag", selected: "Vald" },
   noScriptLink: { label: "Be om ett introsamtal", href: contactFrom("/book") },
@@ -445,6 +456,8 @@ const en: BookingFormCopy = {
     date: "Pick at least one date, from tomorrow onwards.",
     method: "Choose how you want to pay.",
     terms: "You need to accept the terms to book.",
+    earlyStart:
+      "Confirm that the session may take place within the withdrawal period, or choose a later time.",
   },
   payment: {
     summary: {
@@ -551,6 +564,8 @@ const en: BookingFormCopy = {
     privacy: "privacy policy",
     newTab: "(opens in a new tab)",
   },
+  earlyStart:
+    "I want the service to start within the withdrawal period, and I understand the right of withdrawal ends once the session has taken place.",
   timezoneNote: "Times are shown in Swedish time (Europe/Stockholm).",
   calendar: {
     previous: "Previous month",

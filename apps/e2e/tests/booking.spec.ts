@@ -138,6 +138,15 @@ test("a visitor books a coaching session from the calendar and gets the confirma
   await page.getByRole("button", { name: /fortsätt till betalning/i }).click()
   await expect(page.getByText("Du behöver godkänna villkoren för att boka.")).toBeVisible()
   await page.getByRole("checkbox", { name: /jag har läst villkoren/i }).check()
+  // The first free day is inside the 14-day withdrawal period, so a private client must also ask
+  // for the session to take place within it: unticked, refused with its own message.
+  await page.getByRole("button", { name: /fortsätt till betalning/i }).click()
+  await expect(
+    page.getByText(
+      "Bekräfta att sessionen får äga rum inom ångerfristen, eller välj en tid längre fram."
+    )
+  ).toBeVisible()
+  await page.getByRole("checkbox", { name: /tjänsten börjar inom ångerfristen/i }).check()
   await expectAccessible(page, {
     label: "www /book/session details",
     route: "www:/book/[offering]",

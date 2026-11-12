@@ -59,6 +59,9 @@ const orgInvoice = {
 const SV_BILLING =
   "[Betalning]\nBetalsätt: Faktura\nOrganisationsnummer: 212000-1355\nFakturareferens: Ref 4711\nFakturan skickas till: faktura@varberg.se"
 
+/** `booking.groupEvents` with nothing listed: the core cannot date the ticked events. */
+const noEvents = async () => ({ events: [] })
+
 const conflict = (message: string) => new ORPCError("CONFLICT", { defined: true, message })
 const limited = new ORPCError("TOO_MANY_REQUESTS", {
   defined: true,
@@ -372,6 +375,7 @@ describe("reserveSeatsCore", () => {
     const out = await reserveSeatsCore(
       {
         api: {
+          groupEvents: noEvents,
           reserve: async (input) => {
             sent = input
             return created
@@ -387,6 +391,7 @@ describe("reserveSeatsCore", () => {
   test("the payment method rides along in the notes and to the done page", async () => {
     let sent: Record<string, unknown> = {}
     const api = {
+      groupEvents: noEvents,
       reserve: async (input: Record<string, unknown>) => {
         sent = input
         return created
@@ -422,7 +427,7 @@ describe("reserveSeatsCore", () => {
 
   test("no event ticked is an eventIds error", async () => {
     const out = await reserveSeatsCore(
-      { api: { reserve: async () => created } },
+      { api: { groupEvents: noEvents, reserve: async () => created } },
       form({ ...customer, audience: "private" })
     )
     expect(out).toMatchObject({ ok: false, fieldErrors: { eventIds: expect.any(String) } })
@@ -433,6 +438,7 @@ describe("reserveSeatsCore", () => {
     const out = await reserveSeatsCore(
       {
         api: {
+          groupEvents: noEvents,
           reserve: async () => {
             calls++
             return created
@@ -449,6 +455,7 @@ describe("reserveSeatsCore", () => {
     const out = await reserveSeatsCore(
       {
         api: {
+          groupEvents: noEvents,
           reserve: async () => {
             throw conflict("That session is fully booked.")
           },
@@ -899,6 +906,7 @@ describe("the terms", () => {
           {
             locale,
             api: {
+              groupEvents: noEvents,
               reserve: async (input) => {
                 onCall(input)
                 return created
@@ -972,5 +980,209 @@ describe("the terms", () => {
   test("the message is the page's own, in both languages", () => {
     expect(BOOKING_FORMS.sv.check.terms).toBe("Du behöver godkänna villkoren för att boka.")
     expect(BOOKING_FORMS.en.check.terms).toBe("You need to accept the terms to book.")
+  })
+})
+
+describe("a start within the withdrawal period", () => {
+  // 12:00 in Stockholm on Thursday 12 November; the period's last day is 26 November.
+  const now = () => new Date("2026-11-12T11:00:00.000Z")
+  const SOON = "2026-11-26T09:00:00.000Z"
+  const LATER = "2026-11-27T09:00:00.000Z"
+  const groupEvent = (id: number, startsAt: string): GroupEvent => ({
+    id,
+    reference: `GE-${id}`,
+    title: "Group",
+    description: null,
+    offering: "group",
+    startsAt,
+    endsAt: startsAt,
+    location: "varberg",
+    capacity: 8,
+    seatsLeft: 3,
+    seriesKey: null,
+  })
+  type Run = (
+    locale: Locale,
+    fd: FormData,
+    onCall: (input: unknown) => void
+  ) => Promise<BookingOutcome>
+  const book: Run = (locale, fd, onCall) =>
+    bookCore(
+      {
+        locale,
+        now,
+        api: {
+          book: async (input) => {
+            onCall(input)
+            return created
+          },
+        },
+      },
+      fd
+    )
+  const reserve =
+    (startsAt: string): Run =>
+    (locale, fd, onCall) =>
+      reserveSeatsCore(
+        {
+          locale,
+          now,
+          api: {
+            groupEvents: async () => ({ events: [groupEvent(3, startsAt), groupEvent(4, LATER)] }),
+            reserve: async (input) => {
+              onCall(input)
+              return created
+            },
+          },
+        },
+        fd
+      )
+  const cases = [
+    {
+      name: "bookCore",
+      // The slot is in the form: the same api for every date.
+      run: (_slot: string) => book,
+      fields: (slot: string, audience: string) => ({
+        offering: "session",
+        audience,
+        location: "video",
+        slots: [slot],
+        notes: "First time",
+        ...(audience === "organisation" ? orgInvoice : { paymentMethod: "invoice" }),
+      }),
+    },
+    {
+      name: "reserveSeatsCore",
+      run: reserve,
+      fields: (_startsAt: string, audience: string) => ({
+        audience,
+        eventIds: ["3", "4"],
+        notes: "First time",
+        ...(audience === "organisation" ? orgInvoice : {}),
+      }),
+    },
+  ]
+
+  for (const { name, run, fields } of cases) {
+    for (const locale of ["sv", "en"] as const) {
+      test(`${name} (${locale}): a private booking inside the period needs the box; nothing is sent`, async () => {
+        let calls = 0
+        const out = await run(SOON)(
+          locale,
+          form({ ...customer, ...fields(SOON, "private") }),
+          () => calls++
+        )
+        expect(calls).toBe(0)
+        expect(out).toMatchObject({
+          ok: false,
+          fieldErrors: { earlyStart: BOOKING_FORMS[locale].check.earlyStart },
+        })
+        if (out.ok) throw new Error("unreachable")
+        expect(Object.keys(out.fieldErrors ?? {})).toEqual(["earlyStart"])
+        expect(out.values).toMatchObject({
+          name: "Ada Lovelace",
+          email: "ada@example.com",
+          notes: "First time",
+          terms: "on",
+          earlyStart: "",
+        })
+      })
+
+      test(`${name} (${locale}): with the box ticked it books and sends earlyStart`, async () => {
+        let sent: unknown
+        const out = await run(SOON)(
+          locale,
+          form({ ...customer, ...fields(SOON, "private"), earlyStart: "on" }),
+          (input) => {
+            sent = input
+          }
+        )
+        expect(out.ok).toBe(true)
+        expect(sent).toMatchObject({ earlyStart: true, termsAccepted: true })
+      })
+
+      test(`${name} (${locale}): 15 days away needs no box`, async () => {
+        let sent: unknown
+        const out = await run(LATER)(
+          locale,
+          form({ ...customer, ...fields(LATER, "private") }),
+          (input) => {
+            sent = input
+          }
+        )
+        expect(out.ok).toBe(true)
+        expect((sent as { earlyStart?: boolean }).earlyStart).toBeUndefined()
+      })
+
+      test(`${name} (${locale}): an organisation never needs it`, async () => {
+        const out = await run(SOON)(
+          locale,
+          form({ ...customer, ...fields(SOON, "organisation") }),
+          () => {}
+        )
+        expect(out.ok).toBe(true)
+      })
+    }
+  }
+
+  test("an unticked box is refused alongside the other answers' errors", async () => {
+    const out = await book(
+      "sv",
+      form({ ...customer, ...cases[0]?.fields(SOON, "private"), name: "A", terms: "" }),
+      () => {}
+    )
+    expect(out).toMatchObject({
+      ok: false,
+      fieldErrors: {
+        name: expect.any(String),
+        terms: BOOKING_FORMS.sv.check.terms,
+        earlyStart: BOOKING_FORMS.sv.check.earlyStart,
+      },
+    })
+  })
+
+  test("when the events cannot be listed, the api decides, and its field error is shown", async () => {
+    let calls = 0
+    const out = await reserveSeatsCore(
+      {
+        locale: "en",
+        now,
+        api: {
+          groupEvents: async () => {
+            throw new Error("down")
+          },
+          reserve: async () => {
+            calls++
+            throw new ORPCError("BAD_REQUEST", {
+              defined: true,
+              message: "Confirm that the session may take place within the withdrawal period.",
+              data: { field: "earlyStart" },
+            })
+          },
+        },
+      },
+      form({ ...customer, audience: "private", eventIds: ["3"] })
+    )
+    expect(calls).toBe(1)
+    expect(out).toMatchObject({
+      ok: false,
+      fieldErrors: { earlyStart: BOOKING_FORMS.en.check.earlyStart },
+      values: { name: "Ada Lovelace", eventIds: "3" },
+    })
+  })
+
+  test("the label and the message are the brief's, in both languages", () => {
+    expect(BOOKING_FORMS.sv.earlyStart).toBe(
+      "Jag vill att tjänsten börjar inom ångerfristen och förstår att ångerrätten upphör när sessionen har genomförts."
+    )
+    expect(BOOKING_FORMS.en.earlyStart).toBe(
+      "I want the service to start within the withdrawal period, and I understand the right of withdrawal ends once the session has taken place."
+    )
+    expect(BOOKING_FORMS.sv.check.earlyStart).toBe(
+      "Bekräfta att sessionen får äga rum inom ångerfristen, eller välj en tid längre fram."
+    )
+    expect(BOOKING_FORMS.en.check.earlyStart).toBe(
+      "Confirm that the session may take place within the withdrawal period, or choose a later time."
+    )
   })
 })

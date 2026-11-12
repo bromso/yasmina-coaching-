@@ -80,6 +80,36 @@ it does. `bookingConfirmed` and `bookingRequestReceived` link the terms (`termsU
 client's confirmation (`withdrawal`, `audience === "private"`) adds the line on the 14-day right of
 withdrawal. Requests are organisation-only, so theirs never does.
 
+### A start within the withdrawal period
+
+A private client keeps a 14-day right of withdrawal and loses it once a session has been performed
+only if they expressly asked for the service to start within that period (lag (2005:59) 2 kap.
+11 § 1 and 15 §). `startsWithinWithdrawal(startsAt, now)` in `@repo/api-contract/booking-limits`
+(Zod-free) decides it with the engine's calendar rules: the session's day in `Europe/Stockholm` is
+today or one of the next `BOOKING_WITHDRAWAL_DAYS` (14) days, the 14th included, so a session on
+the 15th day needs nothing. `earlyStartRequired(audience, startsAts, now)` is that test for any
+session of a `private` booking; an organisation never needs it, and a request (organisation-only)
+never asks.
+
+- **The box.** `EarlyStartField` (`name="earlyStart"`, `value="on"`, required, error linked with
+  `fieldAria`) sits under the terms box in the instant and group journeys, shown when a picked slot
+  (or a ticked event, read on leaving step 1) falls inside the period. Before anything is picked
+  (the server's render, or no JavaScript) it shows for every private client, since an offered slot
+  always could; a refusal naming it shows it too.
+- **The www cores** refuse a missing box with `check.earlyStart` before calling the api, keeping
+  every other answer: `bookCore` from the posted slots, `reserveSeatsCore` from the ticked events'
+  dates as `booking.groupEvents` lists them (when that list cannot be read, the api decides).
+- **The api** judges it again inside the transaction, after the slots or events are checked and
+  before any row is written: `BookingCreateSchema` and `BookingReserveSchema` take an optional
+  `earlyStart: boolean`, and a private booking inside the period without it is `BAD_REQUEST` with
+  `data: { field: "earlyStart" }` and the translated `bookingEarlyStart`, which the cores show as a
+  field error. When the consent was needed and given, every row of the order stamps
+  `early_start_requested_at = now` (migration `0038_booking_early_start`, TEXT like
+  `terms_accepted_at`); otherwise it stays null, ticked or not.
+- **The mail.** `bookingConfirmed` takes `earlyStart` (from `termsMailProps(audience, locale,
+  earlyStart)`, and from the row when an admin confirms): the line saying the right ends once the
+  session has taken place replaces the generic withdrawal line.
+
 ### Manage links
 
 Every order gets a 256-bit token; its SHA-256 is stored on each booking (and the package). The
@@ -120,8 +150,8 @@ all-or-nothing) and `groupEvents.cancel`. Each decision writes an `audit_log` ro
 
 Bookings are address-keyed and outlive accounts, like job applications: `privacy.export` lists the
 rows whose `customer_email` is the account's verified address (an explicit column list, never the
-hashes or the admin's note; the terms version and acceptance time are included, as the
-customer's own record of what they agreed to); `users.purge` leaves them. There is no automatic
+hashes or the admin's note; the terms version and acceptance time, and `earlyStartRequestedAt`,
+are included, as the customer's own record of what they agreed to); `users.purge` leaves them. There is no automatic
 retention job yet — see **Open** below.
 
 ## Open

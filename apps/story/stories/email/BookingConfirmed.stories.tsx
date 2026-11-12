@@ -58,6 +58,27 @@ export const PrivateClient: Story = {
   },
 }
 
+/**
+ * A private client who asked for the session to take place within the withdrawal period: the line
+ * saying the right ends once it has, in place of the generic one.
+ */
+export const StartWithinWithdrawalPeriod: Story = {
+  args: {
+    render: () => emails.bookingConfirmed({ ...props, withdrawal: true, earlyStart: true }),
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await waitFor(() =>
+      expect(canvas.getByTestId("text")).toHaveTextContent(
+        "You asked for the session to take place within the withdrawal period. The right of withdrawal ends once the session has taken place."
+      )
+    )
+    await expect(canvas.getByTestId("text")).not.toHaveTextContent(
+      "As a private client you have a 14-day right of withdrawal."
+    )
+  },
+}
+
 export const WithFurtherSessions: Story = {
   args: {
     render: () =>

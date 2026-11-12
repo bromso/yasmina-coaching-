@@ -226,10 +226,15 @@ export type TermsLinks = { terms: string; privacy: string }
 const legalLinkClass =
   "font-medium underline underline-offset-4 hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
 
+/** The id of the "(opens in a new tab)" note both terms links are described by. */
+const NEW_TAB_ID = "terms-new-tab"
+
 /**
  * "I have read the terms and the privacy policy": a native, required checkbox (`terms`, posted as
  * `on`), so it works without JavaScript; the server refuses the booking without it either way.
- * Both links open in a new tab, so reading them never loses the booking in progress.
+ * Both links open in a new tab, so reading them never loses the booking in progress. That note is
+ * each link's description (`aria-describedby`), kept outside the label, so the checkbox's own name
+ * stays the sentence alone.
  */
 export function TermsField({ state, links }: { state: FormState; links: TermsLinks }) {
   const { terms } = useBookingCopy()
@@ -247,18 +252,59 @@ export function TermsField({ state, links }: { state: FormState; links: TermsLin
         />
         <span>
           {terms.before}
-          <a href={links.terms} target="_blank" rel="noopener" className={legalLinkClass}>
+          <a
+            href={links.terms}
+            target="_blank"
+            rel="noopener"
+            aria-describedby={NEW_TAB_ID}
+            className={legalLinkClass}
+          >
             {terms.terms}
-            <span className="sr-only"> {terms.newTab}</span>
           </a>
           {terms.between}
-          <a href={links.privacy} target="_blank" rel="noopener" className={legalLinkClass}>
+          <a
+            href={links.privacy}
+            target="_blank"
+            rel="noopener"
+            aria-describedby={NEW_TAB_ID}
+            className={legalLinkClass}
+          >
             {terms.privacy}
-            <span className="sr-only"> {terms.newTab}</span>
           </a>
         </span>
       </label>
+      {/* Hidden, yet still read as a description: `aria-describedby` follows hidden elements. */}
+      <span id={NEW_TAB_ID} hidden>
+        {terms.newTab}
+      </span>
       <FieldError name="terms" state={state} />
+    </div>
+  )
+}
+
+/**
+ * "I want the service to start within the withdrawal period…": a private client's express consent
+ * (lag (2005:59) 2 kap. 11 § 1), a native, required checkbox (`earlyStart`, posted as `on`). The
+ * parent renders it only when a chosen session falls within the 14-day period, or, before any is
+ * chosen, whenever one could; the server judges it again from the actual start times.
+ */
+export function EarlyStartField({ state }: { state: FormState }) {
+  const { earlyStart } = useBookingCopy()
+  return (
+    <div className="grid gap-1">
+      <label className={cn(choiceClass, "items-start")}>
+        <input
+          type="checkbox"
+          name="earlyStart"
+          value="on"
+          required
+          defaultChecked={value(state, "earlyStart") === "on"}
+          className={cn(choiceInputClass, "mt-0.5")}
+          {...fieldAria("earlyStart", state)}
+        />
+        <span>{earlyStart}</span>
+      </label>
+      <FieldError name="earlyStart" state={state} />
     </div>
   )
 }

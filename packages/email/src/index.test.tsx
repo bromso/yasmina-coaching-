@@ -551,6 +551,29 @@ describe("bookingConfirmed", () => {
     )
   })
 
+  test("a consent to start within the withdrawal period replaces the generic line", async () => {
+    const sv = await emails.bookingConfirmed({ ...props, withdrawal: true, earlyStart: true }, "sv")
+    for (const part of [sv.html, sv.text]) {
+      expect(part).toContain(
+        "Du har bett att sessionen äger rum inom ångerfristen. Ångerrätten upphör när sessionen har genomförts."
+      )
+      expect(part).not.toContain("Som privatperson har du 14 dagars ångerrätt.")
+    }
+    const en = await emails.bookingConfirmed({ ...props, withdrawal: true, earlyStart: true })
+    for (const part of [en.html, en.text]) {
+      expect(part).toContain(
+        "You asked for the session to take place within the withdrawal period. The right of withdrawal ends once the session has taken place."
+      )
+      expect(part).not.toContain("As a private client you have a 14-day right of withdrawal.")
+    }
+    // Without the consent, only the generic line.
+    const plain = await emails.bookingConfirmed({ ...props, withdrawal: true, earlyStart: false })
+    expect(plain.text).toContain("As a private client you have a 14-day right of withdrawal.")
+    for (const part of [plain.html, plain.text]) {
+      expect(part).not.toContain("You asked for the session to take place")
+    }
+  })
+
   test("leaves the right of withdrawal out for an organisation", async () => {
     const sv = await emails.bookingConfirmed({ ...props, withdrawal: false }, "sv")
     expect(sv.text).toContain(`Villkoren för bokningen: ${props.termsUrl}`)

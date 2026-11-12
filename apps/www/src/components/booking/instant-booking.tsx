@@ -4,6 +4,7 @@ import {
   BOOKING_HORIZON_DAYS,
   type BookingAudience,
   type BookingLocation,
+  earlyStartRequired,
   type OfferingKey,
 } from "@repo/api-contract/booking-limits"
 import { Button } from "@repo/ui/components/button"
@@ -15,6 +16,7 @@ import { book } from "@/app/actions"
 import {
   AudienceField,
   CustomerFields,
+  EarlyStartField,
   LocationField,
   NotesField,
   TermsField,
@@ -26,6 +28,7 @@ import { useBookingCopy, useLocale } from "@/components/booking/locale-provider"
 import { StepIndicator } from "@/components/booking/step-indicator"
 import {
   checkDetails,
+  checkEarlyStart,
   checkTerms,
   fieldText,
   PAYMENT_FIELDS,
@@ -93,7 +96,17 @@ const gridDate = (day: string) => {
 /** Each step's fields, so a refusal from the server reopens the step that holds the field. */
 const STEP_FIELDS = [
   ["slots"],
-  ["audience", "name", "email", "organisation", "phone", "location", "notes", "terms"],
+  [
+    "audience",
+    "name",
+    "email",
+    "organisation",
+    "phone",
+    "location",
+    "notes",
+    "terms",
+    "earlyStart",
+  ],
   PAYMENT_FIELDS,
 ]
 
@@ -221,10 +234,24 @@ export function InstantBooking({
               ? text.noSlotsThisDay
               : ""
 
-  /** The details step's own checks, the terms box included. */
+  // A private client's session inside the withdrawal period needs their consent. Before any time is
+  // picked (the server's render, or no JavaScript) one always could be, so the box shows then.
+  // A refusal naming the box (the api judges by its own clock) shows it whatever this one says.
+  const needsEarlyStart =
+    (audience === "private" &&
+      (picked.length === 0 ||
+        earlyStartRequired(
+          audience,
+          picked.map((slot) => slot.startsAt),
+          new Date()
+        ))) ||
+    Boolean(!shown.ok && shown.fieldErrors?.earlyStart)
+
+  /** The details step's own checks, the terms and withdrawal-period boxes included. */
   const detailsErrors = () => ({
     ...checkDetails(formRef.current, copy.check),
     ...checkTerms(formRef.current, copy.check),
+    ...checkEarlyStart(formRef.current, copy.check),
   })
   const toPayment = () => {
     if (fail(detailsErrors())) return
@@ -445,6 +472,7 @@ export function InstantBooking({
         <LocationField locations={locations} state={shown} />
         <NotesField state={shown} />
         <TermsField state={shown} links={legalLinks} />
+        {needsEarlyStart && <EarlyStartField state={shown} />}
         <p className="text-muted-foreground text-xs">{text.legal}</p>
         <StepNav backLabel={copy.stepper.back} onBack={() => goTo(1)}>
           {pays ? (

@@ -1,7 +1,11 @@
 "use client"
 
 import type { GroupEvent } from "@repo/api-contract"
-import type { BookingAudience, OfferingKey } from "@repo/api-contract/booking-limits"
+import {
+  type BookingAudience,
+  earlyStartRequired,
+  type OfferingKey,
+} from "@repo/api-contract/booking-limits"
 import { Button } from "@repo/ui/components/button"
 import { FormMessage } from "@repo/ui/components/form-feedback"
 import { Icon } from "@repo/ui/components/icon"
@@ -12,6 +16,7 @@ import {
   CustomerFields,
   choiceClass,
   choiceInputClass,
+  EarlyStartField,
   Fieldset,
   NotesField,
   TermsField,
@@ -23,6 +28,7 @@ import { useBookingCopy, useLocale } from "@/components/booking/locale-provider"
 import { StepIndicator } from "@/components/booking/step-indicator"
 import {
   checkDetails,
+  checkEarlyStart,
   checkTerms,
   fieldText,
   PAYMENT_FIELDS,
@@ -60,7 +66,7 @@ const initialState: BookingFormState = { ok: false }
 /** Each step's fields, so a refusal from the server reopens the step that holds the field. */
 const STEP_FIELDS = [
   ["eventIds"],
-  ["audience", "name", "email", "organisation", "phone", "notes", "terms"],
+  ["audience", "name", "email", "organisation", "phone", "notes", "terms", "earlyStart"],
   PAYMENT_FIELDS,
 ]
 
@@ -93,6 +99,9 @@ export function GroupBooking({
     email: "",
   })
   const steps = copy.steps.group
+  // When the ticked events start, read on leaving step 1; `null` until then (the server's render,
+  // or no JavaScript), when a session within the withdrawal period is always possible.
+  const [tickedStarts, setTickedStarts] = useState<string[] | null>(null)
 
   // Each load is numbered: only the latest one may set the list, so a retry never races an
   // earlier, slower answer.
@@ -126,12 +135,24 @@ export function GroupBooking({
   const ticked = () =>
     formRef.current ? new FormData(formRef.current).getAll("eventIds").map((id) => String(id)) : []
   const toDetails = () => {
-    if (!fail(ticked().length === 0 ? { eventIds: copy.check.eventIds } : {})) goTo(2)
+    const ids = ticked()
+    if (fail(ids.length === 0 ? { eventIds: copy.check.eventIds } : {})) return
+    const listed = events.status === "ready" ? events.events : []
+    setTickedStarts(
+      listed.filter((event) => ids.includes(String(event.id))).map((event) => event.startsAt)
+    )
+    goTo(2)
   }
+  // A refusal naming the box (the api judges by its own clock) shows it whatever this one says.
+  const needsEarlyStart =
+    (audience === "private" &&
+      (tickedStarts === null || earlyStartRequired(audience, tickedStarts, new Date()))) ||
+    Boolean(!shown.ok && shown.fieldErrors?.earlyStart)
   const toPayment = () => {
     const errors = {
       ...checkDetails(formRef.current, copy.check),
       ...checkTerms(formRef.current, copy.check),
+      ...checkEarlyStart(formRef.current, copy.check),
     }
     if (fail(errors)) return
     const ids = new Set(ticked())
@@ -256,6 +277,7 @@ export function GroupBooking({
         />
         <NotesField state={shown} />
         <TermsField state={shown} links={legalLinks} />
+        {needsEarlyStart && <EarlyStartField state={shown} />}
         <p className="text-muted-foreground text-xs">{copy.instant.legal}</p>
         <StepNav backLabel={copy.stepper.back} onBack={() => goTo(1)}>
           <Button type="button" size="lg" className={primaryClass} onClick={toPayment}>
