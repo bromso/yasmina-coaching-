@@ -1,9 +1,9 @@
 # @repo/e2e
 
 Browser end-to-end tests (Playwright) against **production builds** of `www`, `app`, `auth`,
-`account`, `blog`, `docs`, `help` and `jobs`, plus `apps/api` and `apps/ai`, all started by
-`playwright.config.ts` on their real `*.brand.localhost` hosts and ports. 423 tests across 42 spec
-files (a 42nd, the opt-in visual baseline `visual.spec.ts`, runs only with `VISUAL=1`), Chromium only, run serially (`workers: 1`) because every test shares one database and the
+`account`, `blog`, `legal`, `docs`, `help` and `jobs`, plus `apps/api` and `apps/ai`, all started
+by `playwright.config.ts` on their real `*.brand.localhost` hosts and ports. 466 tests across 43
+spec files (a 44th, the opt-in visual baseline `visual.spec.ts`, runs only with `VISUAL=1`), Chromium only, run serially (`workers: 1`) because every test shares one database and the
 api's in-memory rate limiters.
 
 ## What it covers
@@ -151,7 +151,8 @@ they stop at one app's boundary:
   photo stays, in the card and the header. The api runs with `STORAGE_PROVIDER=local` and `STORAGE_DIR` under
   `.tmp/storage`, so uploads are reset with everything else.
 - `www.spec.ts` — the home page shows the header, footer and the four coaching formats; its contact
-  section leads to `/kontakt`; `/terms` and `/privacy` render.
+  section leads to `/kontakt`; `/privacy` and `/terms` answer a `308` to the legal app's page in
+  the reader's language (Swedish without a `locale` cookie, English with `locale=en`).
 - `contact.spec.ts` — a visitor goes through `/kontakt`'s three steps (each refusing to move on
   without its answer, the consent box required), lands on `/kontakt/tack` with the reference and the
   next step its answers lead to (the inifrån start call), gets the Swedish confirmation mail with
@@ -166,6 +167,14 @@ they stop at one app's boundary:
   Swedish 404 with the blog's chrome; the newest post opens with its title and the call to action
   linking to www's contact page, and its language link opens the English twin; with JavaScript disabled, the index
   still shows its hero and the header's site nav.
+- `legal.spec.ts` — each of the legal app's four pages, in both languages, shows its h1, the draft
+  notice and `<meta name="robots">` with `noindex`, and its header's language link opens the
+  translation; both indexes are drafts too and `robots.txt` disallows `/`; a browser following www's
+  `/privacy` and `/terms` lands on the Swedish page without a cookie and on the English one with
+  `locale=en` on `.brand.localhost`; the cookie banner's privacy link on www opens the legal
+  privacy page; every link in the footer's legal line on `www`, `blog`, `auth` and a signed-in
+  `account` page answers 200, three of them on the legal app. The booking consent box and the
+  terms link in the confirmation mail are `booking.spec.ts`'s session journey.
 - `docs.spec.ts` — the landing page shows the intro and the sidebar; a sidebar link opens its page
   with breadcrumbs, and a table-of-contents link jumps to its heading (a URL hash); scrolled to a
   heading, the table of contents marks that section's link `aria-current="location"`, and the mark
@@ -197,10 +206,10 @@ they stop at one app's boundary:
   superadmin then finds the application on `auth/admin/applications` (the list defaults to status
   "all", so no query string is needed), downloads the CV (a real PDF, checked by its `%PDF-`
   header) and sets its status to "reviewing".
-- `chrome.spec.ts` — `www`, `app`, `auth`, `account`, `docs` and `blog` each answer `/api/health`
-  and carry a `content-security-policy` header with `default-src 'self'` and without
-  `'unsafe-eval'`; the home pages of `www`, `app`, `auth`, `docs` and `blog` have the site nav and
-  the skip link (`account` redirects an anonymous visit to `auth`).
+- `chrome.spec.ts` — `www`, `app`, `auth`, `account`, `docs`, `blog` and `legal` each answer
+  `/api/health` and carry a `content-security-policy` header with `default-src 'self'` and without
+  `'unsafe-eval'`; the home pages of `www`, `app`, `auth`, `docs`, `blog` and `legal` have the site
+  nav and the skip link (`account` redirects an anonymous visit to `auth`).
 - `pwa.spec.ts` — each app's service worker registers on its own origin; on `app`, after a full and a
   `next/link` navigation, nothing in Cache Storage contains the user's name or email, signed in or
   after sign-out; offline, an uncached page shows
@@ -214,7 +223,7 @@ they stop at one app's boundary:
   covering a violation on its pages; a handful of journey states that only render mid-flow
   (the two-step QR step, the open user menu, the cookie banner, …) are checked the same way from
   inside the journey spec that reaches them. `scripts/a11y.test.ts` (`bun test scripts`) fails when
-  a `page.tsx` in one of the eight Next apps is in neither the manifest nor its `EXCLUDED` list.
+  a `page.tsx` in one of the nine Next apps is in neither the manifest nor its `EXCLUDED` list.
 - `a11y-keyboard.spec.ts` — four journeys driven by the keyboard alone (Tab, Shift+Tab, Enter,
   Space, Escape, arrow keys): signing in, applying for a role, sending the contact form, renaming a
   workspace and operating the account menu; each asserts every control is reachable in order, a
@@ -249,7 +258,7 @@ they stop at one app's boundary:
 ## Run
 
 ```bash
-bun --filter @repo/e2e e2e              # build the eight Next apps, then run every journey
+bun --filter @repo/e2e e2e              # build the nine Next apps, then run every journey
 cd apps/e2e && bunx playwright test tests/www.spec.ts   # one journey, on existing builds
 cd apps/e2e && bunx playwright test --ui                # the Playwright UI runner
 cd apps/e2e && bunx playwright test tests/a11y-pages.spec.ts -g "axe: help "   # one app's a11y sweep

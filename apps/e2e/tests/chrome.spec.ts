@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test"
 import { URLS } from "../e2e.env"
 import { expectAccessible } from "../fixtures/a11y"
 
-const apps = ["www", "app", "auth", "account", "docs", "blog"] as const
+const apps = ["www", "app", "auth", "account", "docs", "blog", "legal"] as const
 
 for (const app of apps) {
   test(`${app}: health, CSP without unsafe-eval`, async ({ request }) => {
@@ -17,13 +17,21 @@ for (const app of apps) {
   })
 }
 
-// www and the blog's root default to Swedish (www's English only once picked, the blog's under
-// /en); the other apps render their chrome in English for an anonymous visitor.
+// www, the blog's and the legal app's roots default to Swedish (www's English only once picked,
+// the blog's and legal's under /en); the other apps render their chrome in English for an
+// anonymous visitor.
 const english = { nav: "Site", skip: "Skip to content" }
 const swedish = { nav: "Webbplats", skip: "Hoppa till innehållet" }
-const chrome = { www: swedish, app: english, auth: english, docs: english, blog: swedish } as const
+const chrome = {
+  www: swedish,
+  app: english,
+  auth: english,
+  docs: english,
+  blog: swedish,
+  legal: swedish,
+} as const
 
-for (const app of ["www", "app", "auth", "docs", "blog"] as const) {
+for (const app of ["www", "app", "auth", "docs", "blog", "legal"] as const) {
   test(`${app}: site nav and skip link`, async ({ page }) => {
     await page.goto(URLS[app])
     await expect(page.getByRole("navigation", { name: chrome[app].nav })).toBeVisible()

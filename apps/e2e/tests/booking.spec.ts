@@ -174,6 +174,8 @@ test("a visitor books a coaching session from the calendar and gets the confirma
   const confirmed = await latestMail(email, /bokning är bekräftad/i, { after: started })
   // Swedish times are written "kl. 09.00"; the slot button shows "09:00".
   expect(confirmed.text).toContain(time.replace(":", "."))
+  // It links the terms the visitor accepted, on the legal app, in the booking's language.
+  expect(confirmed.text).toContain(`Villkoren för bokningen: ${URLS.legal}/villkor`)
   const manageUrl = linkIn(confirmed, /\/book\/manage\//)
   await page.goto(manageUrl)
   await expect(page.getByText(/bekräftad/i).first()).toBeVisible()
