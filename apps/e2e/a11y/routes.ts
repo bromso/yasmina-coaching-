@@ -204,16 +204,6 @@ export const EXCLUDED: Array<{ app: AppId; route: string; reason: string }> = [
   },
   {
     app: "www",
-    route: "/privacy",
-    reason: "redirect only, to the legal app's privacy page (checked there); www.spec follows it",
-  },
-  {
-    app: "www",
-    route: "/terms",
-    reason: "redirect only, to the legal app's terms page (checked there); www.spec follows it",
-  },
-  {
-    app: "www",
     route: "/book/manage/[token]",
     reason: "renders only behind a real manage token from a booking; checked in booking.spec",
   },

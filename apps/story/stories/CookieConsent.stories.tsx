@@ -1,3 +1,4 @@
+import { legalPath } from "@repo/sites/legal"
 import { CookieConsent } from "@repo/ui/components/cookie-consent"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, userEvent, waitFor, within } from "storybook/test"
@@ -8,7 +9,7 @@ const meta = {
   parameters: { layout: "fullscreen" },
   tags: ["autodocs"],
   args: {
-    privacyHref: "/privacy",
+    privacyHref: `https://legal.brand.com${legalPath("privacy", "en")}`,
   },
 } satisfies Meta<typeof CookieConsent>
 

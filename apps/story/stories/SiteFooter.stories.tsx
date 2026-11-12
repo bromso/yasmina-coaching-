@@ -1,8 +1,12 @@
 import { BRAND_NAME } from "@repo/sites"
+import { legalPath } from "@repo/sites/legal"
 import { SiteFooter, SiteFooterLegal } from "@repo/ui/blocks/site-footer"
 import { Brand } from "@repo/ui/components/brand"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, within } from "storybook/test"
+
+/** The legal app's production origin; the paths come from `legalPath`, as an app's `legalUrl` does. */
+const LEGAL = "https://legal.brand.com"
 
 /** Shaped like `footerGroups()` from `@repo/sites`, with literal hrefs. */
 const groups = [
@@ -41,9 +45,9 @@ const meta = {
       <SiteFooterLegal
         year={2026}
         links={[
-          { label: "Privacy", href: "https://legal.brand.com/en/privacy" },
-          { label: "Terms", href: "https://legal.brand.com/en/terms" },
-          { label: "Accessibility", href: "https://legal.brand.com/en/accessibility" },
+          { label: "Privacy", href: `${LEGAL}${legalPath("privacy", "en")}` },
+          { label: "Terms", href: `${LEGAL}${legalPath("terms", "en")}` },
+          { label: "Accessibility", href: `${LEGAL}${legalPath("accessibility", "en")}` },
           { label: "Contact", href: "https://www.brand.com/kontakt" },
         ]}
       />
@@ -71,7 +75,7 @@ export const Default: Story = {
     )
     await expect(within(legal).getByRole("link", { name: "Privacy" })).toHaveAttribute(
       "href",
-      "https://legal.brand.com/en/privacy"
+      `${LEGAL}${legalPath("privacy", "en")}`
     )
   },
 }
