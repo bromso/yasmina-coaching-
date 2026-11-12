@@ -257,6 +257,12 @@ export const BOOKING_CONFLICT_MESSAGE = "That time overlaps another booking."
 export const BOOKING_EARLY_START_MESSAGE =
   "Confirm that the session may take place within the withdrawal period, or choose a later time."
 export const BOOKING_EARLY_START_FIELD = "earlyStart"
+/**
+ * `booking.book`'s refusal of a further programme session whose manage token names the package
+ * but the package has no room for every posted slot; its `data.field` names the slots field.
+ */
+export const BOOKING_PACKAGE_FULL_MESSAGE = "The package has no room for that many sessions."
+export const BOOKING_PACKAGE_FULL_FIELD = "slots"
 
 /**
  * A private client's right of withdrawal, in days (lag (2005:59) 2 kap. 12 §): counted in calendar

@@ -47,6 +47,10 @@ export type BookingFormCopy = {
     terms: string
     /** The box for a start within the withdrawal period, shown and left unticked. */
     earlyStart: string
+    /** A further programme session: the package has no room for every picked time. */
+    packageFull: string
+    /** A further programme session whose manage link could not be checked just now. */
+    manageUnavailable: string
   }
   payment: {
     summary: {
@@ -247,6 +251,9 @@ const sv: BookingFormCopy = {
     terms: "Du behöver godkänna villkoren för att boka.",
     earlyStart:
       "Bekräfta att tillfället får äga rum inom ångerfristen, eller välj en tid längre fram.",
+    packageFull: "Paketet har inte plats för så många tillfällen.",
+    manageUnavailable:
+      "Vi kunde inte kontrollera ditt paket just nu. Försök igen från länken i din bokningsbekräftelse.",
   },
   payment: {
     summary: {
@@ -458,6 +465,9 @@ const en: BookingFormCopy = {
     terms: "You need to accept the terms to book.",
     earlyStart:
       "Confirm that the session may take place within the withdrawal period, or choose a later time.",
+    packageFull: "The package has no room for that many sessions.",
+    manageUnavailable:
+      "We couldn't check your package just now. Please try again from the link in your booking confirmation.",
   },
   payment: {
     summary: {

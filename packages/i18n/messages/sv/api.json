@@ -103,6 +103,7 @@
   "bookingSlotTaken": "Den tiden är inte längre ledig. Välj en annan tid.",
   "bookingSeatsFull": "Det tillfället är fullbokat.",
   "bookingEarlyStart": "Bekräfta att tillfället får äga rum inom ångerfristen, eller välj en tid längre fram.",
+  "bookingPackageFull": "Paketet har inte plats för så många tillfällen.",
   "bookingCancelLate": "Sessioner kan avbokas online fram till {hours} timmar innan de börjar. Svara på din bokningsbekräftelse i stället.",
   "bookingNotFound": "Vi hittade inte den bokningslänken.",
   "leadsRate": "För många förfrågningar, försök igen senare."

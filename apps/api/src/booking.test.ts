@@ -1115,37 +1115,82 @@ describe("a start within the withdrawal period", () => {
     expect(await app.db.booking.packages.sessionsBooked(owned?.package_id as number)).toBe(1)
   })
 
-  test("a programme's package takes no more sessions than it covers", async () => {
+  test("a package with too little room refuses the extension, writes nothing and makes no package", async () => {
     clock = BOOKED
-    const slots = [
-      "2026-04-14T07:00:00.000Z",
-      "2026-04-15T07:00:00.000Z",
-      "2026-04-16T07:00:00.000Z",
-      "2026-04-17T07:00:00.000Z",
-      "2026-04-20T07:00:00.000Z",
-      "2026-04-21T07:00:00.000Z",
-    ]
-    const full = await anon().booking.book({
+    // Five of six sessions placed: one left.
+    const five = await anon().booking.book({
       termsAccepted: true,
       offering: "package_6",
-      slots,
+      slots: [
+        "2026-04-14T07:00:00.000Z",
+        "2026-04-15T07:00:00.000Z",
+        "2026-04-16T07:00:00.000Z",
+        "2026-04-17T07:00:00.000Z",
+        "2026-04-20T07:00:00.000Z",
+      ],
       audience: "private",
       customer: { ...customer, email: "early-full@example.com" },
       location: "video",
     })
-    // A seventh session is a new purchase: inside the period it needs the box.
-    const [error] = await safeCall(() =>
-      anon().booking.book({
-        termsAccepted: true,
-        offering: "package_6",
-        slots: ["2026-03-11T13:00:00.000Z"],
-        audience: "private",
-        customer: { ...customer, email: "early-full@example.com" },
-        location: "video",
-        manageToken: tokenOf(full.manageUrl),
-      })
+    const manageToken = tokenOf(five.manageUrl)
+    const packageId = (await app.db.booking.find(five.bookings[0]?.id as number))
+      ?.package_id as number
+    const packages = async () =>
+      Number(
+        ((await app.db.sql`SELECT COUNT(*) AS n FROM booking_packages`) as Array<{ n: number }>)[0]
+          ?.n
+      )
+    await app.drain()
+    const before = { packages: await packages(), mails: app.mailer.sent.length }
+    const extend = (slots: string[], locale?: "sv" | "en") =>
+      safeCall(() =>
+        clientFor(app, undefined, locale).booking.book({
+          termsAccepted: true,
+          offering: "package_6",
+          slots,
+          audience: "private",
+          customer: { ...customer, email: "early-full@example.com" },
+          location: "video",
+          earlyStart: true,
+          manageToken,
+        })
+      )
+    const two = ["2026-04-21T07:00:00.000Z", "2026-04-22T07:00:00.000Z"]
+    const [error] = await extend(two)
+    expect(error?.code).toBe("BAD_REQUEST")
+    expect(error?.data).toEqual({ field: "slots" })
+    expect(error?.message).toBe("The package has no room for that many sessions.")
+    const [swedish] = await extend(two, "sv")
+    expect(swedish?.message).toBe("Paketet har inte plats för så många tillfällen.")
+    await app.drain()
+    expect(app.mailer.sent.length).toBe(before.mails)
+    expect(await packages()).toBe(before.packages)
+    expect(await app.db.booking.packages.sessionsBooked(packageId)).toBe(5)
+    const free = await anon().booking.availability({
+      offering: "package_6",
+      from: "2026-04-21",
+      to: "2026-04-22",
+    })
+    expect(free.days.flatMap((d) => d.slots.map((x) => x.startsAt))).toEqual(
+      expect.arrayContaining(two)
     )
-    expect(error?.data).toEqual({ field: "earlyStart" })
+
+    // Two orders racing for the last session: the calendar lock lets one through, the other
+    // finds the package full.
+    const outcomes = await Promise.all([
+      extend(["2026-04-21T07:00:00.000Z"]),
+      extend(["2026-04-22T07:00:00.000Z"]),
+    ])
+    const refused = outcomes.filter(([e]) => e)
+    expect(outcomes.filter(([, ok]) => ok)).toHaveLength(1)
+    expect(refused.map(([e]) => e?.data)).toEqual([{ field: "slots" }])
+    expect(await app.db.booking.packages.sessionsBooked(packageId)).toBe(6)
+    expect(await packages()).toBe(before.packages)
+
+    // Full: even one more session is refused the same way, never sold as a new package.
+    const [full] = await extend(["2026-04-23T07:00:00.000Z"])
+    expect(full?.data).toEqual({ field: "slots" })
+    expect(await packages()).toBe(before.packages)
   })
 
   test("an organisation never needs it", async () => {

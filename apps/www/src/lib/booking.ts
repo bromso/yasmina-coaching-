@@ -11,6 +11,7 @@ import {
 import {
   BOOKING_EARLY_START_FIELD,
   BOOKING_NOTES_MAX,
+  BOOKING_PACKAGE_FULL_FIELD,
   earlyStartRequired,
   GROUP_OFFERING_KEYS,
   OFFERING_KEYS,
@@ -284,6 +285,11 @@ function failure(
       const message = BOOKING_FORMS[locale].check.earlyStart
       return { ok: false, fieldErrors: { earlyStart: message }, values }
     }
+    // The api's judgement that the token's package has no room for every slot.
+    if (error.code === "BAD_REQUEST" && data?.field === BOOKING_PACKAGE_FULL_FIELD) {
+      const message = BOOKING_FORMS[locale].check.packageFull
+      return { ok: false, fieldErrors: { slots: message }, values }
+    }
     if (error.code !== "TOO_MANY_REQUESTS" && error.code !== "CONFLICT") {
       logger.warn(`${what} refused`, { code: error.code })
     }
@@ -294,24 +300,27 @@ function failure(
 }
 
 /**
- * The manage token of a "Book another" link (`?manage=<token>`), when `booking.manage.get` says it
- * is a package of `offering` with a session left; `undefined` for a token of the wrong shape, one
- * the api does not know, another offering's package, a full one, or any failure. Only then does a
- * booking skip the payment step and the early-start pre-check; the api checks the token again.
+ * What a "Book another" link's manage token (`?manage=<token>`) is worth for `slots` sessions of
+ * `offering`, by `booking.manage.get`: `verified` for a package of this offering with room for
+ * every slot, `full` for one without, `none` for no token, one of the wrong shape, one the api
+ * does not know or another offering's package, and `unavailable` when the api could not answer
+ * (a failure, a rate limit, or no lookup at all). Only `verified` lets a booking skip the payment
+ * step and the early-start pre-check; the api checks the token again.
  */
 export async function packageExtension(
   api: ManageApi | undefined,
   offering: string,
-  token: string | undefined
-): Promise<string | undefined> {
-  if (!api || !token || !BookingManageSchema.safeParse({ token }).success) return undefined
+  token: string | undefined,
+  slots: number
+): Promise<"verified" | "full" | "none" | "unavailable"> {
+  if (!token || !BookingManageSchema.safeParse({ token }).success) return "none"
+  if (!api) return "unavailable"
   try {
     const { package: pkg } = await api.get({ token })
-    return pkg && pkg.offering === offering && pkg.sessionsBooked < pkg.sessionsTotal
-      ? token
-      : undefined
-  } catch {
-    return undefined
+    if (!pkg || pkg.offering !== offering) return "none"
+    return pkg.sessionsBooked + slots <= pkg.sessionsTotal ? "verified" : "full"
+  } catch (error) {
+    return error instanceof ORPCError && error.code === "NOT_FOUND" ? "none" : "unavailable"
   }
 }
 
@@ -319,7 +328,7 @@ export async function packageExtension(
  * An instant booking (a session or a programme's first sessions). `slots` arrives as one hidden
  * input per picked ISO start. `manageToken` (the page's verified `?manage=`) marks a further
  * session of a programme already bought; it counts only once `packageExtension` verifies it
- * again here, and the api checks it a third time.
+ * again here, for every picked slot, and the api checks it a third time.
  */
 export async function bookCore(
   deps: { api: BookApi; locale?: Locale; now?: () => Date },
@@ -339,12 +348,20 @@ export async function bookCore(
     terms: str(fd, "terms"),
     earlyStart: str(fd, "earlyStart"),
   }
-  const manageToken = await packageExtension(
-    deps.api.manage,
-    values.offering,
-    optional(str(fd, "manageToken"))
-  )
-  const payment = paymentOf(fd, values.offering, values.audience, deps.locale, !!manageToken)
+  const posted = optional(str(fd, "manageToken"))
+  const extension = await packageExtension(deps.api.manage, values.offering, posted, slots.length)
+  // The member flow has no payment step to show an error on: say so above the form instead.
+  if (extension === "unavailable") {
+    return {
+      ok: false,
+      message: BOOKING_FORMS[deps.locale ?? SITE_LOCALE].check.manageUnavailable,
+      values,
+    }
+  }
+  // `full` is still the holder's package: the member flow, refused on the slots below.
+  const extending = extension === "verified" || extension === "full"
+  const manageToken = extension === "verified" ? posted : undefined
+  const payment = paymentOf(fd, values.offering, values.audience, deps.locale, extending)
   const parsed = BookingCreateSchema.safeParse({
     offering: values.offering,
     slots,
@@ -360,20 +377,25 @@ export async function bookCore(
   const now = deps.now ? deps.now() : new Date()
   // A further session of a programme already bought opens no new right, so it needs no box. The
   // api checks the token again and otherwise refuses the box like any new order.
-  const early = manageToken ? {} : earlyStartRefusal(fd, values.audience, slots, now, deps.locale)
+  const early = extending ? {} : earlyStartRefusal(fd, values.audience, slots, now, deps.locale)
+  const room: Record<string, string> =
+    extension === "full"
+      ? { slots: BOOKING_FORMS[deps.locale ?? SITE_LOCALE].check.packageFull }
+      : {}
   const all = { ...values, ...payment.values }
-  if (!parsed.success || !payment.ok || terms.terms || early.earlyStart) {
+  if (!parsed.success || !payment.ok || terms.terms || early.earlyStart || room.slots) {
     const fieldErrors = {
       ...(payment.ok ? {} : payment.fieldErrors),
       ...(parsed.success ? {} : bookingFieldErrors(parsed.error.issues)),
       ...terms,
       ...early,
+      ...room,
     }
     return { ok: false, fieldErrors, values: all }
   }
   try {
     const { reference, manageUrl } = await deps.api.book(parsed.data)
-    const flow = flowFor(parsed.data.offering, !!manageToken)
+    const flow = flowFor(parsed.data.offering, extending)
     return {
       ok: true,
       redirectTo: doneUrl(

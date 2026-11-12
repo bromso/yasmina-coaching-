@@ -368,9 +368,11 @@ describe("bookCore and payment", () => {
   })
 
   test("a forged or unknown manage token gets the normal flow: payment and all", async () => {
-    for (const manage of [unknown, holder, undefined]) {
-      // `holder` with a token of the wrong shape, `unknown` with the right one, or no lookup.
-      const token = manage === holder ? "short" : TOKEN
+    for (const [manage, token] of [
+      [unknown, TOKEN],
+      [holder, "short"],
+      [holder, "u".repeat(43)],
+    ] as const) {
       const out = await bookCore(
         { api: { ...api, manage } },
         fields("package_6", { manageToken: token })
@@ -380,6 +382,81 @@ describe("bookCore and payment", () => {
         fieldErrors: { paymentMethod: BOOKING_FORMS.sv.check.method },
       })
     }
+  })
+
+  test("more times than the package has room for are refused before the api is called", async () => {
+    let calls = 0
+    const counting = {
+      book: async () => {
+        calls++
+        return created
+      },
+      manage: holder,
+    }
+    // Two sessions of six booked: four left, so five is too many.
+    const slots = [1, 2, 3, 4, 5].map((d) => `2026-03-0${d + 2}T09:00:00.000Z`)
+    const out = await bookCore(
+      { api: counting },
+      form({
+        ...customer,
+        offering: "package_6",
+        audience: "private",
+        location: "video",
+        slots,
+        manageToken: TOKEN,
+      })
+    )
+    expect(calls).toBe(0)
+    expect(out).toMatchObject({
+      ok: false,
+      fieldErrors: { slots: BOOKING_FORMS.sv.check.packageFull },
+    })
+    // No invisible payment error rides along: the member flow has no payment step.
+    if (!out.ok) expect(out.fieldErrors).not.toHaveProperty("paymentMethod")
+  })
+
+  test("the api's own refusal of a full package is shown on the slots", async () => {
+    const out = await bookCore(
+      {
+        locale: "en",
+        api: {
+          book: async () => {
+            throw new ORPCError("BAD_REQUEST", {
+              defined: true,
+              message: "The package has no room for that many sessions.",
+              data: { field: "slots" },
+            })
+          },
+          manage: holder,
+        },
+      },
+      fields("package_6", { manageToken: TOKEN })
+    )
+    expect(out).toMatchObject({
+      ok: false,
+      fieldErrors: { slots: BOOKING_FORMS.en.check.packageFull },
+    })
+  })
+
+  test("a token that cannot be checked just now is a visible form error, not a hidden field", async () => {
+    let calls = 0
+    for (const manage of [down, limitedManage, undefined]) {
+      const out = await bookCore(
+        {
+          api: {
+            book: async () => {
+              calls++
+              return created
+            },
+            manage,
+          },
+        },
+        fields("package_6", { manageToken: TOKEN })
+      )
+      expect(out).toMatchObject({ ok: false, message: BOOKING_FORMS.sv.check.manageUnavailable })
+      if (!out.ok) expect(out.fieldErrors).toBeUndefined()
+    }
+    expect(calls).toBe(0)
   })
 })
 
@@ -401,27 +478,38 @@ const unknown = {
   },
 }
 
+const down = {
+  get: async () => {
+    throw new Error("network")
+  },
+}
+const limitedManage = {
+  get: async () => {
+    throw new ORPCError("TOO_MANY_REQUESTS", { defined: true, message: "x" })
+  },
+}
+
 describe("packageExtension", () => {
-  test("the token, only when it names a package of this offering with sessions left", async () => {
-    expect(await packageExtension(holder, "package_6", TOKEN)).toBe(TOKEN)
-    expect(await packageExtension(holder, "package_10", TOKEN)).toBeUndefined()
-    expect(await packageExtension(holder, "session", TOKEN)).toBeUndefined()
-    expect(await packageExtension(unknown, "package_6", TOKEN)).toBeUndefined()
-    expect(await packageExtension(holder, "package_6", "short")).toBeUndefined()
-    expect(await packageExtension(holder, "package_6", undefined)).toBeUndefined()
+  test("verified only for a package of this offering with room for every slot", async () => {
+    expect(await packageExtension(holder, "package_6", TOKEN, 1)).toBe("verified")
+    expect(await packageExtension(holder, "package_6", TOKEN, 4)).toBe("verified")
+    expect(await packageExtension(holder, "package_6", TOKEN, 5)).toBe("full")
+    expect(await packageExtension(holder, "package_10", TOKEN, 1)).toBe("none")
+    expect(await packageExtension(holder, "session", TOKEN, 1)).toBe("none")
+    expect(await packageExtension(unknown, "package_6", TOKEN, 1)).toBe("none")
+    expect(await packageExtension(holder, "package_6", "short", 1)).toBe("none")
+    expect(await packageExtension(holder, "package_6", undefined, 1)).toBe("none")
     const full = {
       get: async () => ({
         ...(await holder.get({ token: TOKEN })),
         package: { offering: "package_6" as const, sessionsTotal: 6, sessionsBooked: 6 },
       }),
     }
-    expect(await packageExtension(full, "package_6", TOKEN)).toBeUndefined()
-    const down = {
-      get: async () => {
-        throw new Error("network")
-      },
-    }
-    expect(await packageExtension(down, "package_6", TOKEN)).toBeUndefined()
+    expect(await packageExtension(full, "package_6", TOKEN, 1)).toBe("full")
+    // The api could not answer: neither verified nor a stranger's token.
+    expect(await packageExtension(down, "package_6", TOKEN, 1)).toBe("unavailable")
+    expect(await packageExtension(limitedManage, "package_6", TOKEN, 1)).toBe("unavailable")
+    expect(await packageExtension(undefined, "package_6", TOKEN, 1)).toBe("unavailable")
   })
 })
 

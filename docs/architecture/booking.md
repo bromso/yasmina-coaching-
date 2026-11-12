@@ -109,12 +109,18 @@ proved by its manage token, never by an id or an address (package ids are sequen
   Only then does it show the extension journey: one slot, no payment step, no early-start box, and
   the token in a hidden `manageToken` field. A forged, unknown or spent token, or any failure,
   gets the normal journey.
-- **The action.** `bookCore` verifies the posted token the same way before skipping the payment
-  step and the early-start pre-check, and sends it as `manageToken` (`BookingCreateSchema`).
+- **The action.** `bookCore` verifies the posted token the same way, for every picked slot,
+  before skipping the payment step and the early-start pre-check, and sends it as `manageToken`
+  (`BookingCreateSchema`). A package without room for every slot is refused on the slots field
+  (`check.packageFull`) before the api is called. When the token cannot be checked (the lookup
+  fails or is rate-limited) the form says so above it (`check.manageUnavailable`: try again from
+  the manage link) rather than falling back to a journey whose payment step was never shown.
 - **The api.** Inside the transaction, under the calendar lock, `extendedPackage` looks the package
   up by `tokenHash(manageToken)` and requires the same offering and room for every slot. The new
   rows take the package's id and its `manage_token_hash`, so they appear on the original manage
-  page, and the response and mail carry that page's URL. A missing or unmatched token is a new
+  page, and the response and mail carry that page's URL. A token whose package has no room for
+  every slot is refused (`BAD_REQUEST`, `data: { field: "slots" }`, the translated
+  `bookingPackageFull`), writing nothing: the holder is never sold a new package instead. A missing or unmatched token is a new
   purchase in every respect: payment, the early-start rule, the withdrawal line and a new package
   under a fresh token. Its answer is the same as any new booking's, so nothing tells whether a
   package exists.

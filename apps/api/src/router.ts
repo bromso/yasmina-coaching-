@@ -16,6 +16,7 @@ import {
   BOOKING_AVAILABILITY_MAX_DAYS,
   BOOKING_CANCEL_CUTOFF_HOURS,
   BOOKING_EARLY_START_FIELD,
+  BOOKING_PACKAGE_FULL_FIELD,
   BOOKING_TIMEZONE,
   type BookingAudience,
   type BookingSlot,
@@ -1019,9 +1020,11 @@ function earlyStartAt(
 /**
  * The package a booking adds sessions to: the one whose manage token the order carries
  * (`manageToken`, from the "Book another" link on its manage page), which proves it is the
- * holder's, when it is of the same offering and has room for every slot. `null` otherwise, and the
- * order is then a new purchase, answered exactly as one. Called under the calendar lock, so two
- * orders cannot both take the last session.
+ * holder's, when it is of the same offering. `"full"` when that package has no room for every
+ * slot: the holder is refused (`bookingPackageFull`), never sold a new package instead. `null`
+ * for no token, or one that names no package of this offering: the order is then a new purchase,
+ * answered exactly as one. Called under the calendar lock, so two orders cannot both take the
+ * last session.
  */
 async function extendedPackage(
   tx: Pick<Context["db"], "booking">,
@@ -1032,7 +1035,7 @@ async function extendedPackage(
   const pkg = await tx.booking.packages.byToken(tokenHash(input.manageToken))
   if (!pkg || pkg.offering !== input.offering) return null
   const booked = await tx.booking.packages.sessionsBooked(pkg.id)
-  return booked + sessions <= pkg.sessions_total ? pkg : null
+  return booked + sessions <= pkg.sessions_total ? pkg : ("full" as const)
 }
 
 /** One page of rows (fetched as `limit + 1`) → items and the keyset cursor. */
@@ -4453,7 +4456,9 @@ export const router = api.router({
         }
         // A further session of a programme already bought is part of that purchase, and so opens
         // no new right of withdrawal; a token that names no such package is ignored.
-        const extending = await extendedPackage(tx, input, slots.length)
+        const extended = await extendedPackage(tx, input, slots.length)
+        if (extended === "full") return "packageFull" as const
+        const extending = extended
         // Its sessions join the package's own manage page; a new order gets the fresh token.
         const rowsHash = extending ? extending.manage_token_hash : hash
         // Judged from the slots just checked, never from the client: see `earlyStartAt`.
@@ -4565,6 +4570,12 @@ export const router = api.router({
         throw errors.BAD_REQUEST({
           message: apiMessage(context, "bookingEarlyStart"),
           data: { field: BOOKING_EARLY_START_FIELD },
+        })
+      }
+      if (result === "packageFull") {
+        throw errors.BAD_REQUEST({
+          message: apiMessage(context, "bookingPackageFull"),
+          data: { field: BOOKING_PACKAGE_FULL_FIELD },
         })
       }
       const rows = await context.db.booking.byToken(result.rowsHash)

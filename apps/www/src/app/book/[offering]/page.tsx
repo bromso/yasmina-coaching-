@@ -73,5 +73,7 @@ export default async function Page({ params, searchParams }: PageProps) {
 async function verifiedToken(offering: OfferingKey, token: string, locale: string) {
   const h = await headers()
   const client = await anonymousApi(requestInfo(h).ip, locale, h.get(REQUEST_ID_HEADER))
-  return packageExtension(client.booking.manage, offering, token)
+  // One session at least must be left; the form then lets the visitor place one.
+  const extension = await packageExtension(client.booking.manage, offering, token, 1)
+  return extension === "verified" ? token : undefined
 }
