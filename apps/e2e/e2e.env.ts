@@ -12,6 +12,7 @@ export const URLS = {
   help: "http://help.brand.localhost:3005",
   jobs: "http://jobs.brand.localhost:3006",
   blog: "http://blog.brand.localhost:3009",
+  legal: "http://legal.brand.localhost:3010",
   api: "http://api.brand.localhost:3007",
   ai: "http://ai.brand.localhost:3008",
 } as const

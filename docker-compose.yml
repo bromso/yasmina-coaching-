@@ -171,6 +171,26 @@ services:
       API_URL: http://api:3007
       API_SERVICE_TOKEN: ${API_SERVICE_TOKEN:-}
 
+  legal:
+    <<: *next-app
+    build:
+      {
+        context: .,
+        dockerfile: docker/next.Dockerfile,
+        args: {
+          APP: legal,
+          PORT: 3010,
+          SITE_DOMAIN: "${SITE_DOMAIN:-brand.localhost}",
+          COOKIE_DOMAIN: "${COOKIE_DOMAIN:-.brand.localhost}",
+        },
+      }
+    ports: ["127.0.0.1:3010:3010"]
+    # Telemetry only: this app's /api/telemetry route forwards errors/vitals to the api when both
+    # are set; it drops them otherwise.
+    environment:
+      API_URL: http://api:3007
+      API_SERVICE_TOKEN: ${API_SERVICE_TOKEN:-}
+
   api:
     # Fails closed: without API_SERVICE_TOKEN the container exits at startup.
     restart: on-failure:3

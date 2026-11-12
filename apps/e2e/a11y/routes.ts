@@ -1,8 +1,8 @@
 // Every page the accessibility sweep visits (tests/a11y-pages.spec.ts), as plain data: the planner
 // test scripts/a11y.test.ts imports it before `bun install`, so no Playwright import here. A new
-// page.tsx in one of the eight Next apps fails that test until it is listed here or in EXCLUDED.
+// page.tsx in one of the nine Next apps fails that test until it is listed here or in EXCLUDED.
 
-export type AppId = "www" | "app" | "auth" | "account" | "docs" | "help" | "jobs" | "blog"
+export type AppId = "www" | "app" | "auth" | "account" | "docs" | "help" | "jobs" | "blog" | "legal"
 export type Variant = "light" | "dark" | "sv-light" | "sv-dark" | "en-light" | "en-dark"
 
 export type A11yPage = {
@@ -18,7 +18,7 @@ export type A11yPage = {
   setup?: "adminUser" | "adminWorkspace" | "adminBooking" | "adminLead"
 }
 
-const APPS: AppId[] = ["www", "app", "auth", "account", "docs", "help", "jobs", "blog"]
+const APPS: AppId[] = ["www", "app", "auth", "account", "docs", "help", "jobs", "blog", "legal"]
 const TRANSLATED: AppId[] = ["auth", "app", "account"]
 
 const notFound = (app: AppId, auth: A11yPage["auth"] = "none"): A11yPage => ({
@@ -174,6 +174,10 @@ export const A11Y_PAGES: A11yPage[] = [
   { app: "blog", path: "/authors/yasmina", route: "/authors/[author]", auth: "none" },
   { app: "blog", path: "/en/authors/yasmina", route: "/en/authors/[author]", auth: "none" },
   notFound("blog"),
+  // legal (Swedish at the root, English under /en)
+  { app: "legal", path: "/", auth: "none" },
+  { app: "legal", path: "/en", auth: "none" },
+  notFound("legal"),
 ]
 
 export const EXCLUDED: Array<{ app: AppId; route: string; reason: string }> = [
@@ -219,7 +223,7 @@ export function variantsFor(page: A11yPage): Variant[] {
 
 const routeKey = (page: A11yPage) => page.route ?? page.path.split("?")[0] ?? page.path
 
-// `apps/<app>/src/app/<…>/page.tsx` → the app and its route pattern; null outside the eight apps.
+// `apps/<app>/src/app/<…>/page.tsx` → the app and its route pattern; null outside the nine apps.
 export function routeOf(file: string): { app: AppId; route: string } | null {
   const match = file.match(/^apps\/([^/]+)\/src\/app\/(.*?)\/?page\.tsx$/)
   if (!match) return null

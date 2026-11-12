@@ -137,6 +137,7 @@ describe("workspaces", () => {
       "@repo/app",
       "@repo/www",
       "@repo/blog",
+      "@repo/legal",
       "@repo/docs",
       "@repo/help",
       "@repo/jobs",
@@ -159,6 +160,7 @@ describe("workspaces", () => {
       "@repo/account",
       "@repo/www",
       "@repo/blog",
+      "@repo/legal",
       "@repo/docs",
       "@repo/help",
       "@repo/jobs",
@@ -190,6 +192,7 @@ describe("workspaces", () => {
       "@repo/account",
       "@repo/www",
       "@repo/blog",
+      "@repo/legal",
       "@repo/docs",
       "@repo/help",
       "@repo/jobs",
@@ -242,6 +245,7 @@ describe("e2e", () => {
     expect(plan(["apps/api/src/router.ts"], ctx).e2e).toBe(true)
     expect(plan(["apps/e2e/tests/auth.spec.ts"], ctx).e2e).toBe(true)
     expect(plan(["apps/blog/src/lib/blog.ts"], ctx).e2e).toBe(true)
+    expect(plan(["apps/legal/src/views/index-view.tsx"], ctx).e2e).toBe(true)
     expect(plan(["apps/docs/src/app/[[...slug]]/page.tsx"], ctx).e2e).toBe(true)
     expect(plan(["apps/help/src/app/page.tsx"], ctx).e2e).toBe(true)
     expect(plan(["apps/jobs/src/app/page.tsx"], ctx).e2e).toBe(true)
@@ -462,6 +466,7 @@ test("filtersIn reads the root scripts' --filter lists", () => {
     "@repo/account",
     "@repo/www",
     "@repo/blog",
+    "@repo/legal",
     "@repo/docs",
     "@repo/help",
     "@repo/jobs",

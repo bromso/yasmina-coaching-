@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "e2e": "COOKIE_DOMAIN=.brand.localhost NEXT_PUBLIC_BOOKING_PAYMENTS=mock bun run --filter @repo/www --filter @repo/app --filter @repo/auth --filter @repo/account --filter @repo/blog --filter @repo/docs --filter @repo/help --filter @repo/jobs build && playwright test",
+    "e2e": "COOKIE_DOMAIN=.brand.localhost NEXT_PUBLIC_BOOKING_PAYMENTS=mock bun run --filter @repo/www --filter @repo/app --filter @repo/auth --filter @repo/account --filter @repo/blog --filter @repo/legal --filter @repo/docs --filter @repo/help --filter @repo/jobs build && playwright test",
     "test:ci": "playwright test",
     "typecheck": "tsc --noEmit"
   },

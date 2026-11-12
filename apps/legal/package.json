@@ -1,0 +1,66 @@
+{
+  "name": "@repo/legal",
+  "version": "0.1.0",
+  "description": "Legal \u2014 privacy, terms, accessibility and company pages on their own subdomain",
+  "keywords": [
+    "boilerplate",
+    "next.js"
+  ],
+  "author": "Jonas Br\u00f6ms",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3010 --hostname ${DEV_HOSTNAME:-legal.brand.localhost}",
+    "build": "next build --webpack",
+    "analyze": "ANALYZE=true next build --webpack",
+    "start": "next start --port 3010",
+    "typecheck": "tsc --noEmit",
+    "check": "biome check .",
+    "check:fix": "biome check --write .",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "format": "biome format .",
+    "format:fix": "biome format --write .",
+    "validate": "bun format && bun lint && bun check && bun run build",
+    "postinstall": "fumadocs-mdx",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@iconify/react": "catalog:",
+    "@repo/content": "workspace:*",
+    "@repo/i18n": "workspace:*",
+    "@repo/sites": "workspace:*",
+    "@repo/telemetry": "workspace:*",
+    "@repo/ui": "workspace:*",
+    "@serwist/next": "catalog:",
+    "class-variance-authority": "catalog:",
+    "clsx": "catalog:",
+    "fumadocs-core": "catalog:",
+    "fumadocs-mdx": "catalog:",
+    "motion": "catalog:",
+    "next": "catalog:",
+    "next-themes": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "tailwind-merge": "catalog:",
+    "web-vitals": "catalog:",
+    "zod": "catalog:"
+  },
+  "browserslist": [
+    "Chrome >= 109",
+    "Firefox >= 115",
+    "Safari >= 16.4",
+    "Edge >= 109",
+    "not dead"
+  ],
+  "devDependencies": {
+    "@next/bundle-analyzer": "catalog:",
+    "@tailwindcss/postcss": "catalog:",
+    "@types/bun": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "postcss": "catalog:",
+    "serwist": "catalog:",
+    "sharp": "catalog:"
+  }
+}

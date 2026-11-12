@@ -21,6 +21,7 @@ services:
       - /app/apps/help/node_modules
       - /app/apps/jobs/node_modules
       - /app/apps/blog/node_modules
+      - /app/apps/legal/node_modules
       - /app/apps/api/node_modules
       - /app/apps/ai/node_modules
       - /app/apps/story/node_modules
@@ -50,8 +51,9 @@ services:
       - /app/apps/help/.next
       - /app/apps/jobs/.next
       - /app/apps/blog/.next
+      - /app/apps/legal/.next
     ports:
-      - "3000-3009:3000-3009"
+      - "3000-3010:3000-3010"
       - "6006:6006"
     environment:
       - NODE_ENV=development

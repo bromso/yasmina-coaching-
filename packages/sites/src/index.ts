@@ -16,6 +16,7 @@ export const SITES = {
   help: { label: "Help", port: 3005 },
   jobs: { label: "Jobs", port: 3006 },
   blog: { label: "Blog", port: 3009 },
+  legal: { label: "Legal", port: 3010 },
 } as const
 
 export type SiteId = keyof typeof SITES

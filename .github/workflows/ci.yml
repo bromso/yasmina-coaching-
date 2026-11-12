@@ -329,7 +329,7 @@ jobs:
 
       - name: Resolve *.brand.localhost to loopback
         run: |
-          for h in www app auth account docs help jobs blog api ai; do
+          for h in www app auth account docs help jobs blog legal api ai; do
             line="127.0.0.1 $h.brand.localhost"
             if ! grep -qxF "$line" /etc/hosts; then
               echo "$line" | sudo tee -a /etc/hosts
@@ -353,7 +353,7 @@ jobs:
           # The journeys pay with the mock wallets and Swish (apps/www/src/lib/mock-payment.ts),
           # which a production build leaves off unless asked.
           NEXT_PUBLIC_BOOKING_PAYMENTS: mock
-        run: bun run --filter @repo/www --filter @repo/app --filter @repo/auth --filter @repo/account --filter @repo/blog --filter @repo/docs --filter @repo/help --filter @repo/jobs build
+        run: bun run --filter @repo/www --filter @repo/app --filter @repo/auth --filter @repo/account --filter @repo/blog --filter @repo/legal --filter @repo/docs --filter @repo/help --filter @repo/jobs build
 
       # Every perf measurement this job takes is also written to perf/.results and uploaded, so
       # budgets can be re-seeded from the runner's own numbers (download, then `bun run perf:update`).
@@ -361,7 +361,7 @@ jobs:
       # lose this job's own e2e signal (the journeys below) over something that job already caught.
       - name: Bundle budgets
         continue-on-error: true
-        run: bun scripts/bundle-budget.ts --write-results www app auth account blog docs help jobs
+        run: bun scripts/bundle-budget.ts --write-results www app auth account blog legal docs help jobs
 
       - name: Run the journeys
         env:

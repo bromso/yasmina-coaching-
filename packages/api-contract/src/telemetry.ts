@@ -10,7 +10,7 @@ import {
 /** Re-exported so every existing `@repo/api-contract` import keeps working unchanged. */
 export { ERROR_KINDS, rateVital, TELEMETRY_LIMITS, VITAL_NAMES, VITAL_THRESHOLDS }
 
-/** Where an event came from: the eight Next apps and the two Bun services. */
+/** Where an event came from: the nine Next apps and the two Bun services. */
 export const TELEMETRY_APPS = [
   "www",
   "app",
@@ -20,6 +20,7 @@ export const TELEMETRY_APPS = [
   "help",
   "jobs",
   "blog",
+  "legal",
   "api",
   "ai",
 ] as const

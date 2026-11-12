@@ -1,0 +1,2 @@
+/* The whole look — tokens, fonts, base rules, motion — is @repo/ui's; an app adds nothing here. */
+@import "@repo/ui/globals.css";

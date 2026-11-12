@@ -76,6 +76,7 @@ const E2E_TARGETS = [
   "@repo/auth",
   "@repo/account",
   "@repo/blog",
+  "@repo/legal",
   "@repo/docs",
   "@repo/help",
   "@repo/jobs",

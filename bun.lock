@@ -365,6 +365,42 @@
         "sharp": "catalog:",
       },
     },
+    "apps/legal": {
+      "name": "@repo/legal",
+      "version": "0.1.0",
+      "dependencies": {
+        "@iconify/react": "catalog:",
+        "@repo/content": "workspace:*",
+        "@repo/i18n": "workspace:*",
+        "@repo/sites": "workspace:*",
+        "@repo/telemetry": "workspace:*",
+        "@repo/ui": "workspace:*",
+        "@serwist/next": "catalog:",
+        "class-variance-authority": "catalog:",
+        "clsx": "catalog:",
+        "fumadocs-core": "catalog:",
+        "fumadocs-mdx": "catalog:",
+        "motion": "catalog:",
+        "next": "catalog:",
+        "next-themes": "catalog:",
+        "react": "catalog:",
+        "react-dom": "catalog:",
+        "tailwind-merge": "catalog:",
+        "web-vitals": "catalog:",
+        "zod": "catalog:",
+      },
+      "devDependencies": {
+        "@next/bundle-analyzer": "catalog:",
+        "@tailwindcss/postcss": "catalog:",
+        "@types/bun": "catalog:",
+        "@types/node": "catalog:",
+        "@types/react": "catalog:",
+        "@types/react-dom": "catalog:",
+        "postcss": "catalog:",
+        "serwist": "catalog:",
+        "sharp": "catalog:",
+      },
+    },
     "apps/load": {
       "name": "@repo/load",
       "version": "0.1.0",
@@ -1654,6 +1690,8 @@
     "@repo/i18n-guard": ["@repo/i18n-guard@workspace:packages/i18n-guard"],
 
     "@repo/jobs": ["@repo/jobs@workspace:apps/jobs"],
+
+    "@repo/legal": ["@repo/legal@workspace:apps/legal"],
 
     "@repo/load": ["@repo/load@workspace:apps/load"],
 

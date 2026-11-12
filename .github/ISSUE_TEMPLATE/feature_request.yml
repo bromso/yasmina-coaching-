@@ -22,6 +22,7 @@ body:
         - apps/help (help)
         - apps/jobs (jobs)
         - apps/blog (blog)
+        - apps/legal (legal pages)
         - apps/api (API service)
         - apps/ai (AI service)
         - apps/story (Storybook)
