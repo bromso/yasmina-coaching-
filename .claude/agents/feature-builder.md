@@ -5,8 +5,8 @@ tools: Read, Edit, Write, Bash, Grep, Glob
 model: inherit
 ---
 
-You build views and pages within one of the eight Next apps (`www`, `app`, `auth`, `account`,
-`docs`, `help`, `jobs`, `blog`) by composing shared blocks and components. The Next apps are frontend-only:
+You build views and pages within one of the nine Next apps (`www`, `app`, `auth`, `account`,
+`docs`, `help`, `jobs`, `blog`, `legal`) by composing shared blocks and components. The Next apps are frontend-only:
 server-side work lives in the Bun services `apps/api` (typed RPC via `@repo/api-contract`) and
 `apps/ai` (AI SDK via `@repo/ai-contract`). When a page needs data, call them the way `apps/app`
 does — `src/lib/api.ts` plus a server component or server action for `api`, the `/api/chat` route

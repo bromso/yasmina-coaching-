@@ -112,7 +112,7 @@ a request (organisation-only) never asks.
   `terms_accepted_at`); otherwise it stays null, ticked or not.
 - **The mail.** `bookingConfirmed` takes `earlyStart` (from `termsMailProps(audience, locale,
   earlyStart)`, and from the row when an admin confirms): the line saying the right ends once the
-  session has taken place replaces the generic withdrawal line.
+  service has been fully performed replaces the generic withdrawal line.
 
 ### Manage links
 

@@ -9,7 +9,7 @@ the per-procedure api p95 budget **Load** above reads. All four live in one file
 headroom maths in `perf/budgets.ts`; it changes only through a reviewed diff — nothing in CI
 writes it. `scripts/bundle-budget.ts` reads a Next build's own manifests (no browser, no Next
 runtime) to compute each route's first-load JS in gzip KB and checks it against `bundles`,
-run in `verify` on whatever the plan built and again in the `e2e` job on all eight apps; a route
+run in `verify` on whatever the plan built and again in the `e2e` job on all nine apps; a route
 over budget, or with none, fails naming the measured size, the budget and the largest chunks.
 `apps/e2e/tests/perf-lighthouse.spec.ts` and `perf-vitals.spec.ts` (`e2e` job only, six and eight
 pages respectively — the Lighthouse set plus `app:/notes` and `account:/security` signed in) each

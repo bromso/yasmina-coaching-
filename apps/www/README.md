@@ -2,10 +2,11 @@
 
 Marketing site — Next.js 16 on www.brand.localhost:3000 in development, `www.brand.com` in production.
 
-Yasmina Petersson's leadership-coaching site: one landing page, `/terms` and `/privacy` templates,
-the `/kontakt` contact page backed by `apps/api`'s lead pipeline, the cookie consent banner, OG images,
-`sitemap.ts`, `robots.ts` and a `not-found` page, in Swedish and English. Every page renders per
-request (ƒ): it reads the visitor's language from the `locale` cookie.
+Yasmina Petersson's leadership-coaching site: one landing page, the `/kontakt` contact page backed
+by `apps/api`'s lead pipeline, the booking journey, the cookie consent banner, OG images,
+`sitemap.ts`, `robots.ts` and a `not-found` page, in Swedish and English; `/terms` and `/privacy`
+redirect to the legal app (`apps/legal`). Every page renders per request (ƒ): it reads the
+visitor's language from the `locale` cookie.
 
 ## Language
 
@@ -50,11 +51,12 @@ www is **bilingual**: Swedish by default, English when the visitor picks it.
   `error.tsx` (a client component) reads `<html lang>`; `global-error.tsx` stays Swedish.
 - **Dates** on the booking pages format with `sv-SE` or `en-GB`, 24-hour, in `Europe/Stockholm`
   (`src/lib/booking-dates.ts`; every formatter takes the locale).
-- **Legal pages.** `/terms` and `/privacy` follow the page's language like every other page:
-  Swedish by default, English through the cookie (`TERMS` / `PRIVACY`, `termsFor` / `privacyFor`;
-  `LEGAL_CHROME` in `src/content/legal-notice.ts` for the notice, "Senast uppdaterad" /
-  "Innehåll" and the date's locale, passed to `@repo/ui`'s `LegalPage` as props). Both are still
-  templates for counsel (see **Content**). The web
+- **Legal pages** live in `apps/legal`, not here. `/privacy` and `/terms` are route handlers
+  (`src/app/{privacy,terms}/route.ts` over `src/lib/legal-redirect.ts`) answering a `308` to the
+  legal app's page in the language the `locale` cookie names, the same rule as every page here:
+  `/integritet` and `/villkor` by default, `/en/privacy` and `/en/terms` with `locale=en`. Every
+  link to legal text (the footer's legal line, the cookie banner, the contact and booking consent
+  lines) is `legalUrl(page, locale)` from `@repo/sites/legal`. The web
   manifest and the OG image stay Swedish (one file each, fetched without the visitor's cookie).
   Zod's own field messages on the forms (an invalid email, a too-short message) come from the
   contract in English, as before.
@@ -79,8 +81,8 @@ bun --filter @repo/www analyze   # bundle report in .next/analyze/
 | `/inifran` | the Ledarskap inifrån hub (see **Ledarskap inifrån**) |
 | `/inifran/[service]` | one of `coachning`, `mentorskap`, `livsstil`, `grupp` |
 | `/inifran/forskning` | the research behind the track |
-| `/terms` | http://www.brand.localhost:3000/terms |
-| `/privacy` | http://www.brand.localhost:3000/privacy |
+| `/terms` | a `308` to the legal app's terms page, in the reader's language |
+| `/privacy` | a `308` to the legal app's privacy page, in the reader's language |
 
 Every app also serves `/offline` (the PWA fallback page) and `/api/health` (used by the Docker
 health check).
@@ -108,14 +110,8 @@ All copy lives in data files; the views and pages only arrange sections.
   pause/play button. The originals sit in `assets/originals/`, outside `public/`, and the service
   worker precaches only the offline page, icons and logo (`globPublicPatterns` in
   `next.config.ts`), never the media.
-- `src/content/terms.ts`, `src/content/privacy.ts` — the legal templates in Swedish and English
-  (`TERMS`, `PRIVACY`: one `LegalDoc` per language, the same section ids and paragraph counts,
-  checked by `privacy.test.ts`; the Swedish written with the terms Swedish policies use —
-  personuppgiftsansvarig, rättslig grund, berättigat intresse, samtycke, lagringstid, de
-  registrerades rättigheter, IMY — not word for word). Replace `[Company]`, `[Jurisdiction]`,
-  `[Contact email]` and the privacy policy's `[legal basis …]` in both languages, update
-  `updatedAt`, and have counsel review them. Each page shows the notice in
-  `src/content/legal-notice.ts` (`LEGAL_CHROME`) until you remove it.
+- The legal text (privacy, terms, accessibility, company) is not here: it is MDX in
+  `apps/legal/content/pages/` (see `apps/legal/README.md` and `docs/architecture/legal.md`).
 
 ## Booking
 

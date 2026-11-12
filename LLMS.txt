@@ -14,6 +14,8 @@ APPS (dev URL -> prod subdomain):
   apps/jobs:3006     - Jobs shell              jobs.brand.localhost
   apps/api:3007      - Bun API: /rpc, /openapi, Bun.sql (SQLite default)
   apps/ai:3008       - Bun AI service: POST /chat (useChat stream), /rpc summarize
+  apps/blog:3009     - Blog (MDX, sv + en)     blog.brand.localhost
+  apps/legal:3010    - Legal pages (sv + en)   legal.brand.localhost
   apps/story:6006    - Storybook for packages/ui (dev only)
 
 PACKAGES:

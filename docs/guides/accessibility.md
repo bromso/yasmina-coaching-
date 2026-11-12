@@ -17,7 +17,7 @@ of the fixes it already found are in CLAUDE.md's **Accessibility** entry and the
 | Keyboard-only journeys | `apps/e2e/tests/a11y-keyboard.spec.ts` | Four journeys driven by Tab/Shift+Tab/Enter/Space/Escape/arrows alone |
 | Reflow at 320 px | `apps/e2e/tests/a11y-reflow.spec.ts` | Every manifest entry (light only) at a 320 × 640 viewport |
 | Reduced motion | `apps/e2e/tests/a11y-motion.spec.ts` | `www /`, a blog post, a docs page, with `reducedMotion: "reduce"` |
-| Route coverage | `scripts/a11y.test.ts` (`bun test scripts`) | Every `page.tsx` in the eight Next apps is in the manifest or `EXCLUDED` with a reason |
+| Route coverage | `scripts/a11y.test.ts` (`bun test scripts`) | Every `page.tsx` in the nine Next apps is in the manifest or `EXCLUDED` with a reason |
 | Pure logic | `scripts/a11y.test.ts` | `applyAllowlist`, `routeMatches`, `formatViolations` — unit-tested without a browser |
 
 ### The axe sweep
@@ -40,7 +40,7 @@ whose real path is only known at run time (an admin user or workspace detail pag
 `setup` tag instead of a path; the spec resolves it by following the first link from the matching
 list page.
 
-`scripts/a11y.test.ts` enumerates every `apps/*/src/app/**/page.tsx` of the eight Next apps,
+`scripts/a11y.test.ts` enumerates every `apps/*/src/app/**/page.tsx` of the nine Next apps,
 turns each into its route pattern (route groups dropped, `[id]` / `[...slug]` / `[[...slug]]`
 kept), and fails when one is covered by neither the manifest nor `EXCLUDED`. **Adding a page**
 means adding a page to `A11Y_PAGES` (or, if it only redirects, has no content of its own, or is
@@ -49,7 +49,7 @@ checked as a state elsewhere, a reasoned entry in `EXCLUDED`) — the test fails
 take. Forgetting it is `bun test scripts` failing with something like:
 
 ```
-every page.tsx of the eight Next apps is covered or excluded with a reason
+every page.tsx of the nine Next apps is covered or excluded with a reason
 ```
 
 naming the uncovered route in the diff.

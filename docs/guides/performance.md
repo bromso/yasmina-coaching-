@@ -13,8 +13,8 @@ procedure, its measured value and its budget.
 
 | Kind | Checks | Measured by | Runs in |
 |---|---|---|---|
-| Bundles | First-load JS per route (gzip KB): the chunks a first visit downloads | `scripts/bundle-budget.ts` | `verify` (after the build step, for the apps the PR's plan built) and the `e2e` job (after it builds all eight apps) |
-| Lighthouse | Lab performance score, LCP, TBT, CLS — mobile emulation, simulated throttling, median of 3 runs | `apps/e2e/tests/perf-lighthouse.spec.ts` | `e2e` job only (needs the eight apps built and started) |
+| Bundles | First-load JS per route (gzip KB): the chunks a first visit downloads | `scripts/bundle-budget.ts` | `verify` (after the build step, for the apps the PR's plan built) and the `e2e` job (after it builds all nine apps) |
+| Lighthouse | Lab performance score, LCP, TBT, CLS — mobile emulation, simulated throttling, median of 3 runs | `apps/e2e/tests/perf-lighthouse.spec.ts` | `e2e` job only (needs the nine apps built and started) |
 | Web Vitals | In-browser LCP and CLS — `web-vitals` injected into a real page load, median of 3 loads | `apps/e2e/tests/perf-vitals.spec.ts` | `e2e` job only |
 | Api | Per-procedure p95 latency (ms) | `apps/load`'s smoke (`bun --filter @repo/load smoke`) | `e2e` job, right after the Playwright journeys, against the same running api |
 
@@ -31,7 +31,7 @@ build.
 
 Bundle budgets are deterministic — the same build produces the same gzip sizes on any machine — so
 they run in `verify` on whatever the PR's plan already built, catching a regression before the
-slower `e2e` job even starts. Lighthouse and Web Vitals only run in `e2e`: they need all eight Next
+slower `e2e` job even starts. Lighthouse and Web Vitals only run in `e2e`: they need all nine Next
 apps built and started as production servers, same as the rest of the Playwright journeys. The api
 budget reuses `apps/load`'s existing smoke, which already runs in `e2e` right after the journeys —
 D just gave it a per-procedure threshold instead of one blanket number.
@@ -77,7 +77,7 @@ disk — never typed in by hand, never guessed:
 
 1. Measure. Either:
    - **Locally**: `bun run perf:measure` runs everything it can — bundle budgets read whatever
-     apps are already built under `apps/*/.next`; the Lighthouse/Vitals specs need all eight Next
+     apps are already built under `apps/*/.next`; the Lighthouse/Vitals specs need all nine Next
      apps built (it tells you which are missing and the exact build command); the api smoke always
      runs, since it starts its own throwaway stack. Each step writes its measurement to
      `perf/.results/*.json`, skipping (not failing) a step whose prerequisite build is missing.

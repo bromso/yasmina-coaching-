@@ -116,7 +116,7 @@ to send anything. Sending one later needs its own unsubscribe path and an update
 `LEAD_RETENTION_MONTHS` = 12: `delete_after` is twelve calendar months after `created_at`, and the
 nightly `leads.prune` schedule (`10 4 * * *`; see **Jobs**) deletes every row past it in one
 statement (idempotent; a lead has no file to clean up). Someone who asks to be forgotten sooner is
-deleted by hand: `admin.leads.delete` (below). The `/privacy` page says both.
+deleted by hand: `admin.leads.delete` (below). The legal app's privacy page (`apps/legal`) says both.
 
 ## Admin (`apps/auth`)
 
@@ -147,8 +147,8 @@ region. English like the rest of `/admin`.
 
 `lead_submitted` (`ANALYTICS_EVENTS`, `client: false`) is recorded by `submitLead` inside the
 transaction with the three fixed answers as props (`audience`, `need`, `timeline`) and no user or
-workspace id — never an address, a name or anything typed. The `/privacy` template's **Analytics**
-section names it.
+workspace id — never an address, a name or anything typed. The legal app's privacy page
+(`apps/legal`) describes it under its account events.
 
 ## Tests
 

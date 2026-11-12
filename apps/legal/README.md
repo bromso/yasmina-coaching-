@@ -60,11 +60,15 @@ renders the 404 as a whole document, in Swedish with an English line linking to 
   `@repo/ui`'s `Placeholder`. A production build does not fail on them.
 - **Draft mode** — `LEGAL_DRAFT` (build time; on unless set to `false`, `src/lib/draft.ts`). While
   on, every page shows `DraftNotice`, every page sends `noindex, nofollow` and `robots.txt`
-  disallows `/`.
+  disallows `/`. Images take it as a build arg (`docker/next.Dockerfile`'s `LEGAL_DRAFT`, passed by
+  both Compose files and the GHCR workflow), so leaving draft mode is a rebuild. Turn it off only
+  once a lawyer has approved the text and `bun run placeholders` lists none.
 - **`src/content/ui.ts`** — the app's own words in both languages; `src/content/legal-meta.ts`
   holds its name and description with no imports, for the manifest.
 - **Styles** — `src/styles/globals.css` is the one import of `@repo/ui/globals.css`. See
   `docs/architecture/design-system.md`.
 
-See the root [README](../../README.md) and [CLAUDE.md](../../CLAUDE.md) for the conventions shared by
-all apps, and [`packages/content/README.md`](../../packages/content/README.md) for `createLegal`.
+See [`docs/architecture/legal.md`](../../docs/architecture/legal.md) for how the app fits the rest
+of the site (links, redirects, the terms version, checks, staging), the root
+[README](../../README.md) and [CLAUDE.md](../../CLAUDE.md) for the conventions shared by all apps,
+and [`packages/content/README.md`](../../packages/content/README.md) for `createLegal`.

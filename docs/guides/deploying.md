@@ -8,7 +8,7 @@ what to set up once it is live. It uses `acme.com` as the example domain; substi
 ## Topology
 
 Every app gets its own subdomain behind one TLS-terminating reverse proxy (Caddy, Traefik, nginx, a
-cloud load balancer). The browser only ever talks to the eight Next apps: they call `api` and `ai`
+cloud load balancer). The browser only ever talks to the nine Next apps: they call `api` and `ai`
 server to server with a bearer token, so neither service is ever called from browser code.
 
 ```mermaid
@@ -22,9 +22,10 @@ flowchart LR
   proxy --> help[help.acme.com]
   proxy --> jobs[jobs.acme.com]
   proxy --> blog[blog.acme.com]
+  proxy --> legal[legal.acme.com]
   stripe([Stripe]) -. webhook .-> proxy
   proxy -. /billing/webhook .-> api
-  www & app & auth & account & docs & help & jobs & blog --> api[api :3007]
+  www & app & auth & account & docs & help & jobs & blog & legal --> api[api :3007]
   app --> ai[ai :3008]
   api --> pg[(Postgres)]
   ai --> anthropic([Anthropic])
@@ -68,11 +69,11 @@ wiring; it isn't a production file (no proxy, empty `COOKIE_DOMAIN`, Mailpit for
 ## Before building
 
 **Rename first.** If you haven't renamed the brand yet, do it before building: the static apps
-(`www`, `docs`, `help`, `jobs`, `blog`) bake `BRAND_NAME` into their images at `next build`, so renaming
+(`www`, `docs`, `help`, `jobs`, `blog`, `legal`) bake `BRAND_NAME` into their images at `next build`, so renaming
 after you've already built and published means rebuilding every one of them anyway. See
 [renaming-the-brand.md](renaming-the-brand.md).
 
-**DNS.** Point `www`, `app`, `auth`, `account`, `docs`, `help`, `jobs` and `blog` (plus `api` if
+**DNS.** Point `www`, `app`, `auth`, `account`, `docs`, `help`, `jobs`, `blog` and `legal` (plus `api` if
 you use Stripe) at the proxy, one record each or a single wildcard `*.acme.com`. Nothing in the
 starter serves the bare apex `acme.com`; redirect it wherever you like (usually `www`).
 
@@ -123,7 +124,7 @@ Then pick the providers, all read by `api` only:
 
 ## Build and publish
 
-The images bake the domain in. The static apps (`www`, `docs`, `help`, `jobs`, `blog`) write their
+The images bake the domain in. The static apps (`www`, `docs`, `help`, `jobs`, `blog`, `legal`) write their
 cross-app links and the consent cookie's domain into the HTML at `next build`; `app`, `auth` and
 `account` read `SITE_DOMAIN` per request from the `ENV` the same build arg sets. An image built
 without `SITE_DOMAIN` links to `brand.localhost`, and a new domain means a rebuild, not a new runtime
@@ -131,7 +132,7 @@ variable.
 
 ### With GitHub Actions
 
-`.github/workflows/docker-build.yml.disabled` builds all ten images and pushes them to GHCR on every
+`.github/workflows/docker-build.yml.disabled` builds all eleven images and pushes them to GHCR on every
 push to `main` (`ghcr.io/<owner>/<repo>/<app>:<branch | sha | latest>`).
 
 1. **Settings → Secrets and variables → Actions → Variables**, add the repository variables:
@@ -143,10 +144,13 @@ push to `main` (`ghcr.io/<owner>/<repo>/<app>:<branch | sha | latest>`).
    - `CONTENT_REPO_URL` — optional, `docs` only, e.g.
      `https://github.com/acme/starter/blob/main/apps/docs/content/docs`: the "Edit on GitHub" link's
      base (see **By hand** below). Unset, no link appears.
+   - `LEGAL_DRAFT` — optional, `legal` only: `false` publishes the legal pages (no draft notice,
+     no `noindex`, robots allowed). Unset or anything else keeps them drafts, as they must stay
+     until a lawyer has approved the text (see `docs/architecture/legal.md`).
 2. Rename the workflow to `.github/workflows/docker-build.yml` and push to `main`.
 
 Every variable is passed to every matrix row as a build arg; the Bun services ignore them, and
-only `docs` reads `CONTENT_REPO_URL`.
+only `docs` reads `CONTENT_REPO_URL`, only `legal` `LEGAL_DRAFT`.
 
 ### By hand
 
@@ -165,9 +169,13 @@ it puts "Edit on GitHub" at the foot of every page, the page's file path appende
 for no link. `docker-compose.yml`'s `docs` service reads it from `${CONTENT_REPO_URL:-}` the same
 way it reads `SITE_DOMAIN` and `COOKIE_DOMAIN`.
 
+`LEGAL_DRAFT` is `legal`-only, also baked in at build: `--build-arg LEGAL_DRAFT=false` builds the
+published legal pages; without it they stay drafts. `docker-compose.yml`'s `legal` service reads
+it from `${LEGAL_DRAFT:-}`.
+
 `APP` is the folder under `apps/`; `PORT` is the app's dev port (`www` 3000 through `jobs` 3006,
-`api` 3007, `ai` 3008, `blog` 3009), which the container listens on. Use `docker/next.Dockerfile`
-for the eight Next apps and `docker/bun-service.Dockerfile` for `api` and `ai`.
+`api` 3007, `ai` 3008, `blog` 3009, `legal` 3010), which the container listens on. Use
+`docker/next.Dockerfile` for the nine Next apps and `docker/bun-service.Dockerfile` for `api` and `ai`.
 
 To check an image before shipping it, run a static app and look for its links:
 
@@ -253,13 +261,14 @@ vars are required at boot — for `www`'s contact and booking server actions (`l
 server action (`support.create`), for `jobs`'s `/<slug>/apply` form server action (`jobs.apply`).
 `SITE_DOMAIN` and `COOKIE_DOMAIN` were baked in at build.
 
-### `docs`, `blog`
+### `docs`, `blog`, `legal`
 
 Nothing is required at runtime. `API_URL` and `API_SERVICE_TOKEN` are optional: with both, the
 app's `/api/telemetry` route forwards browser errors and web vitals to the api; without them it
 drops them (and logs that it did). `docs` alone also takes `CONTENT_REPO_URL`, baked in at build
 (see **Build and publish** above) — unset, "Edit on GitHub" just doesn't appear; there is nothing
-to set for it at runtime.
+to set for it at runtime. `legal`'s `LEGAL_DRAFT` is the same: a build arg, never a runtime
+variable.
 
 ### Health checks
 
@@ -331,7 +340,7 @@ Postgres) reaches them all. Each replica publishes its own presence, and clients
 5. **Telemetry.** Errors and vitals land in the api's tables and on `/admin` by default; to forward
    errors to Sentry too, see [sentry.md](sentry.md).
 6. **Smoke test.**
-   - `curl https://<app>.acme.com/api/health` for each of the eight apps answers
+   - `curl https://<app>.acme.com/api/health` for each of the nine Next apps answers
      `{"status":"healthy",…}`.
    - Sign up a second account, verify it, create a workspace and add a note on
      `https://app.acme.com/notes`.
