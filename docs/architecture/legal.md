@@ -30,17 +30,23 @@ inline above the body below `lg`) and ends with its change log.
 
 ## Content and the build gate
 
-Pages are `apps/legal/content/pages/<slug>.mdx` (`locale: sv`) and `en-<slug>.mdx` (`locale: en`,
-`translationOf`). The frontmatter (`legalFrontmatterSchema` in `@repo/content`, imported by
+Pages are `apps/legal/content/pages/<slug>.mdx` (`locale: sv`) and `en-<slug>.mdx` (`locale: en`);
+the two languages of a page share its `page` key. The frontmatter (`legalFrontmatterSchema` in `@repo/content`, imported by
 relative path from `source.config.ts`) holds `title`, `description`, `locale`, `page` (a key of
-`LEGAL_PAGES`), `translationOf?` and `changes: { date, summary }[]`, newest first, at least one
+`LEGAL_PAGES`) and `changes: { date, summary }[]`, newest first, at least one
 entry. "Last updated" is always the newest entry; there is no separate field to drift.
 
 `createLegal` (`packages/content/src/legal.ts`) validates every page when `src/lib/legal.ts`
 loads, so `next build` fails on any of these, all reported at once in one `ContentError`: bad
 frontmatter, an unknown `page`, changes out of order, a duplicate page in one language, a page
 missing in either language, a translation whose newest change date differs from its source's, a
-malformed placeholder, or a body `# h1`.
+malformed placeholder, a body `# h1`, a body heading whose id is the change log's (`andringslogg` /
+`change-log`, `changeLogId` in `src/content/ui.ts`), or a broken link. A root-relative link must
+name a page or a language's index (`/`, `/en`), and a `#fragment` a heading of that page (the ids
+fumadocs renders, from `page.data.toc`) or its change log. A `www:/…` link must name one of www's
+`PUBLIC_ROUTES`, read from `apps/www/src/lib/routes.ts` at build; `scripts/legal-links.test.ts`
+repeats that check on every CI change, since a www-only change does not rebuild legal. Any other
+relative link is refused; external links, `mailto:` and `tel:` are left alone.
 
 ## Placeholders
 
@@ -100,9 +106,11 @@ until it does.
 
 ## Checks
 
-- `apps/legal`'s own tests (`bun test` there, in `bun run test:services`): the gate, draft mode,
-  placeholders through MDX, the sitemap, the views, the two languages' parity and the terms
-  version.
+- `apps/legal`'s own tests (`bun test` there, in `bun run test:services`): the gate (the real
+  pages' links and www links included), draft mode, placeholders through MDX, the sitemap, the
+  views, the two languages' parity and the terms version.
+- `scripts/legal-links.test.ts` (`bun test scripts`, every CI change): no app hand-writes a legal
+  path, and every `www:/…` link in the legal pages names one of www's `PUBLIC_ROUTES`.
 - `perf/budgets.json` `bundles.legal`: `/`, `/[slug]`, `/en` and `/en/[slug]`, measured with
   `bun scripts/bundle-budget.ts --write-results legal` and written by `bun run perf:update` (see
   **Performance**).

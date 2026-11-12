@@ -1,11 +1,16 @@
 import { describe, expect, test } from "bun:test"
+import { readFileSync } from "node:fs"
 import { join } from "node:path"
 import { ContentError } from "@repo/content/posts"
 import { allInputs, legalInput } from "./fixtures"
-import { assembleLegal, fileSlug, slugOf, toLegalInput } from "./legal-core"
+import { assembleLegal, fileSlug, slugOf, toLegalInput, wwwRoutesFrom } from "./legal-core"
 import { readLegalInput, readLegalInputs } from "./read-pages"
 
 const PAGES_DIR = join(import.meta.dir, "../../content/pages")
+/** www's own route list, as the build gate reads it (`lib/legal.ts`). */
+const WWW_ROUTES = wwwRoutesFrom(
+  readFileSync(join(import.meta.dir, "../../../www/src/lib/routes.ts"), "utf8")
+)
 
 function problemsOf(run: () => unknown): string[] {
   try {
@@ -30,15 +35,26 @@ describe("slugOf / fileSlug", () => {
 })
 
 describe("toLegalInput", () => {
-  test("reads the slug from the file name and the placeholders from the body only", () => {
-    const raw = `---\ntitle: "[TO FILL: not in the body]"\n---\nText [TO FILL: x].\n`
-    const input = toLegalInput("en-privacy.mdx", { title: "T" }, raw)
+  test("reads the slug from the file name, and the placeholders and links from the body only", () => {
+    const raw = `---\ntitle: "[TO FILL: not in the body](/x)"\n---\nText [TO FILL: x]. See [the terms](/en/terms#a).\n`
+    const input = toLegalInput("en-privacy.mdx", { title: "T" }, raw, ["who-we-are"])
     expect(input).toEqual({
       file: "apps/legal/content/pages/en-privacy.mdx",
       slug: "privacy",
       frontmatter: { title: "T" },
-      text: "Text [TO FILL: x].\n",
+      text: "Text [TO FILL: x]. See [the terms](/en/terms#a).\n",
+      anchors: ["who-we-are"],
+      links: ["/en/terms#a"],
     })
+  })
+})
+
+describe("wwwRoutesFrom", () => {
+  test("lists the strings of www's PUBLIC_ROUTES, and refuses a file without them", () => {
+    const source = `/** x */\nexport const PUBLIC_ROUTES = [\n  "/",\n  "/book",\n] as const\n`
+    expect(wwwRoutesFrom(source)).toEqual(["/", "/book"])
+    expect(() => wwwRoutesFrom("export const ROUTES = []")).toThrow("no PUBLIC_ROUTES")
+    expect(WWW_ROUTES).toContain("/kontakt")
   })
 })
 
@@ -71,11 +87,69 @@ describe("assembleLegal", () => {
   })
 })
 
+describe("the change log's id and the links", () => {
+  const withText = (slug: string, text: string, anchors: string[] = []) =>
+    allInputs().map((input) =>
+      input.slug === slug
+        ? toLegalInput(input.file.split("/").pop() as string, input.frontmatter, text, anchors)
+        : input
+    )
+
+  test("a body heading that takes the change log's id fails", () => {
+    expect(problemsOf(() => assembleLegal(withText("terms", "Text", ["change-log"]), []))).toEqual([
+      'apps/legal/content/pages/en-terms.mdx: heading id "change-log" is the change log\'s — rename the heading',
+    ])
+    expect(
+      problemsOf(() => assembleLegal(withText("villkor", "Text", ["andringslogg"]), []))
+    ).toHaveLength(1)
+  })
+
+  test("a broken link fails, in either language, and a www link must name a www page", () => {
+    const inputs = withText(
+      "villkor",
+      "Se [policyn](/integritet#nowhere), [företaget](/foretget) och [boka](www:/boka).",
+      []
+    )
+    expect(problemsOf(() => assembleLegal(inputs, [], WWW_ROUTES))).toEqual([
+      'apps/legal/content/pages/villkor.mdx: link "/integritet#nowhere" names no heading on that page',
+      'apps/legal/content/pages/villkor.mdx: broken link "/foretget"',
+      'apps/legal/content/pages/villkor.mdx: link "www:/boka" is not a page on the marketing site',
+    ])
+  })
+
+  test("a link to another page's change log, or a www page, passes", () => {
+    const inputs = withText(
+      "terms",
+      "See [the changes](/en/privacy#change-log) and [book](www:/book).",
+      []
+    )
+    expect(() => assembleLegal(inputs, [], WWW_ROUTES)).not.toThrow()
+  })
+})
+
 describe("the real content", () => {
   // The same gate `next build` runs (lib/legal.ts), over the files themselves, so a bad page is
-  // caught by `bun test` too. Frontmatter is read with Bun's YAML parser, as fumadocs reads it.
-  test("passes the build gate", () => {
-    expect(assembleLegal(readLegalInputs(PAGES_DIR), []).docs()).toHaveLength(8)
+  // caught by `bun test` too. Frontmatter is read with Bun's YAML parser, as fumadocs reads it,
+  // and the heading ids are slugged by fumadocs' own heading plugin.
+  test("passes the build gate, its links and www links included", () => {
+    const inputs = readLegalInputs(PAGES_DIR)
+    expect(assembleLegal(inputs, [], WWW_ROUTES).docs()).toHaveLength(8)
+    // The gate saw every link, so a page with none would be checked vacuously.
+    expect(inputs.flatMap((input) => input.links ?? []).length).toBeGreaterThan(10)
+    expect(inputs.find((input) => input.slug === "villkor")?.anchors).toContain(
+      "ångerrätt-för-privatpersoner"
+    )
+  })
+
+  test("a deliberately broken link in a real page fails the gate", () => {
+    const inputs = readLegalInputs(PAGES_DIR).map((input) =>
+      input.slug === "integritet"
+        ? { ...input, links: [...(input.links ?? []), "/en/privcy"] }
+        : input
+    )
+    expect(problemsOf(() => assembleLegal(inputs, [], WWW_ROUTES))).toEqual([
+      'apps/legal/content/pages/integritet.mdx: broken link "/en/privcy"',
+    ])
   })
 })
 

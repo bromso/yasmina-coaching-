@@ -3,7 +3,7 @@ import { join } from "node:path"
 import { headingProblems } from "@repo/content/checks"
 import type { Legal, LegalDoc } from "@repo/content/legal"
 import { type LegalFrontmatter, legalFrontmatterSchema } from "@repo/content/schema"
-import { assembleLegal, fileSlug, toLegalInput } from "./legal-core"
+import { assembleLegal, fileSlug, toLegalInput, wwwRoutesFrom } from "./legal-core"
 import { source } from "./source"
 
 /** A page as fumadocs loaded it. */
@@ -24,6 +24,14 @@ function frontmatterOf(page: Page): LegalFrontmatter {
   ) as unknown as LegalFrontmatter
 }
 
+/** www's routes file, from the app (the working directory); the Docker build copies the repo. */
+const WWW_ROUTES = join("..", "www", "src", "lib", "routes.ts")
+
+/** A page's heading ids as fumadocs rendered them: `#vem-vi-ar` → `vem-vi-ar`. */
+function anchorsOf(page: Page): string[] {
+  return page.data.toc.map((item) => item.url.replace(/^#/, ""))
+}
+
 function load(): Legal {
   const pages = source.getPages()
   const files = pages.map((page) => ({
@@ -32,8 +40,11 @@ function load(): Legal {
     raw: readFileSync(join(process.cwd(), PAGES_DIR, page.path), "utf8"),
   }))
   return assembleLegal(
-    files.map(({ page, raw }) => toLegalInput(page.path, frontmatterOf(page), raw)),
-    files.flatMap(({ page, raw }) => headingProblems(`apps/legal/content/pages/${page.path}`, raw))
+    files.map(({ page, raw }) =>
+      toLegalInput(page.path, frontmatterOf(page), raw, anchorsOf(page))
+    ),
+    files.flatMap(({ page, raw }) => headingProblems(`apps/legal/content/pages/${page.path}`, raw)),
+    wwwRoutesFrom(readFileSync(join(process.cwd(), WWW_ROUTES), "utf8"))
   )
 }
 
@@ -41,7 +52,8 @@ function load(): Legal {
  * Every legal page, in both languages, validated once per process when this module loads. Every
  * page imports it, so a bad page — frontmatter, an unknown or missing page, a slug that does not
  * match `LEGAL_PAGES`, a change log out of order or out of step with its translation, a malformed
- * placeholder or a body `# h1` — fails `next build`.
+ * placeholder, a body `# h1`, a heading that takes the change log's id, or a link to a page, a
+ * heading or a www page that does not exist — fails `next build`.
  */
 export const legal: Legal = load()
 

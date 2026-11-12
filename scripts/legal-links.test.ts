@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test"
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
 // A relative import of a dependency-free file, so this still runs before `bun install`.
+import { PUBLIC_ROUTES } from "../apps/www/src/lib/routes"
 import { LEGAL_PAGES } from "../packages/sites/src/legal"
 
 // The privacy policy, the terms, the accessibility statement and the company page live on the
@@ -120,5 +121,23 @@ describe("links to the legal pages", () => {
       expect(sources).toContain(entry.file)
       expect(matches(read(entry.file)).length).toBeGreaterThan(0)
     }
+  })
+})
+
+// The legal app's build gate checks its `www:/…` links against www's `PUBLIC_ROUTES`, but CI runs
+// that gate only when the legal app is affected; a www change that drops a route would not be.
+// This file runs on every change, so the same check lives here too.
+describe("the legal pages' links to the marketing site", () => {
+  test("every www:/ link names one of www's public routes", () => {
+    const routes = new Set<string>(PUBLIC_ROUTES)
+    const pages = [...new Bun.Glob("apps/legal/content/pages/*.mdx").scanSync({ cwd: ROOT })]
+    const links = pages.flatMap((file) =>
+      [...read(file).matchAll(/\]\(www:([^)\s]*)\)/g)].map((m) => ({ file, path: m[1] ?? "" }))
+    )
+    expect(links.length).toBeGreaterThan(0)
+    const broken = links
+      .filter(({ path }) => !routes.has(path.split(/[?#]/)[0] ?? path))
+      .map(({ file, path }) => `${file}: www:${path}`)
+    expect(broken).toEqual([])
   })
 })

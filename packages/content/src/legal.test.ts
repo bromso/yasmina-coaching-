@@ -144,3 +144,96 @@ describe("createLegal", () => {
     expect(legal.doc("privacy", "sv").placeholders).toEqual(["[ATT FYLLA: org.nr]"])
   })
 })
+
+describe("the change log's id", () => {
+  const ids = { sv: "andringslogg", en: "change-log" } as const
+
+  test("a body heading that would take it fails, in its own language only", () => {
+    const inputs = valid().map((input) =>
+      input.slug === "terms" ? { ...input, anchors: ["about", "change-log"] } : input
+    )
+    let problems: string[] = []
+    try {
+      createLegal(inputs, PAGES, { rootLocale: "sv", changeLogIds: ids })
+    } catch (error) {
+      problems = (error as ContentError).problems
+    }
+    expect(problems).toEqual([
+      'content/en/terms.mdx: heading id "change-log" is the change log\'s — rename the heading',
+    ])
+    // The Swedish id in an English page is just a heading.
+    const english = valid().map((input) =>
+      input.slug === "terms" ? { ...input, anchors: ["andringslogg"] } : input
+    )
+    expect(() => createLegal(english, PAGES, { rootLocale: "sv", changeLogIds: ids })).not.toThrow()
+  })
+})
+
+describe("links between the pages", () => {
+  const ids = { sv: "andringslogg", en: "change-log" } as const
+  const WWW = ["/", "/book", "/kontakt"]
+
+  function linkProblems(links: string[], anchors: string[] = []): string[] {
+    const inputs = valid().map((input) =>
+      input.slug === "villkor" ? { ...input, links } : { ...input, anchors }
+    )
+    try {
+      createLegal(inputs, PAGES, { rootLocale: "sv", changeLogIds: ids, wwwPaths: WWW })
+    } catch (error) {
+      expect(error).toBeInstanceOf(ContentError)
+      return (error as ContentError).problems
+    }
+    return []
+  }
+
+  test("a link to a page, an index, an anchor or a www route passes", () => {
+    expect(
+      linkProblems(
+        [
+          "/integritet",
+          "/en/privacy",
+          "/",
+          "/en",
+          "/integritet#cookies",
+          "/integritet#andringslogg",
+          "/en/privacy#change-log",
+          "#andringslogg",
+          "www:/kontakt",
+          "www:/book?for=private",
+          "https://www.arn.se",
+          "mailto:hej@example.com",
+        ],
+        ["cookies"]
+      )
+    ).toEqual([])
+  })
+
+  test("a broken link fails the gate, each one named", () => {
+    expect(
+      linkProblems([
+        "/en/privcy",
+        "/integritet#nowhere",
+        "#nowhere",
+        "/en#x",
+        "www:/boka",
+        "www:kontakt",
+        "integritet",
+      ])
+    ).toEqual([
+      'content/sv/villkor.mdx: broken link "/en/privcy"',
+      'content/sv/villkor.mdx: link "/integritet#nowhere" names no heading on that page',
+      'content/sv/villkor.mdx: link "#nowhere" names no heading on that page',
+      'content/sv/villkor.mdx: link "/en#x" names no heading on that page',
+      'content/sv/villkor.mdx: link "www:/boka" is not a page on the marketing site',
+      'content/sv/villkor.mdx: link "www:kontakt" needs a path starting with "/"',
+      'content/sv/villkor.mdx: link "integritet" must be root-relative (start with "/")',
+    ])
+  })
+
+  test("without wwwPaths, a www link is only checked for its shape", () => {
+    const inputs = valid().map((input) =>
+      input.slug === "villkor" ? { ...input, links: ["www:/anything"] } : input
+    )
+    expect(() => createLegal(inputs, PAGES, { rootLocale: "sv" })).not.toThrow()
+  })
+})

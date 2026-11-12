@@ -65,8 +65,10 @@ describe("LegalView", () => {
     expect(html).toMatch(
       /Senast uppdaterad[^<]*<time dateTime="2026-11-12"[^>]*>12 nov. 2026<\/time>/
     )
-    expect(html).toContain('<h2 id="changes"')
-    expect(html).toContain(">Ändringar</h2>")
+    // Its own id, which no body heading can take (the build gate refuses one that would).
+    expect(html).toContain('<section aria-labelledby="andringslogg"')
+    expect(html).toContain('<h2 id="andringslogg"')
+    expect(html).toContain(">Ändringslogg</h2>")
     expect(html).toContain("Första utkastet.")
   })
 
@@ -78,7 +80,7 @@ describe("LegalView", () => {
     const toc = html.slice(html.indexOf('<div data-slot="toc-active"'), html.indexOf("</nav>"))
     expect(toc).toContain('<nav data-slot="toc" aria-label="Innehåll"')
     const hrefs = [...toc.matchAll(/<a href="([^"]+)"/g)].map((match) => match[1])
-    expect(hrefs).toEqual(["#vem-vi-ar", "#kakor", "#dina-rattigheter", "#changes"])
+    expect(hrefs).toEqual(["#vem-vi-ar", "#kakor", "#dina-rattigheter", "#andringslogg"])
     // The h3 nests under its h2.
     expect(toc).toMatch(/Vem vi är<\/a><ul class="[^"]*pl-4/)
     // Nothing in it animates (prefers-reduced-motion).
@@ -109,7 +111,8 @@ describe("LegalView", () => {
     const html = render(legal.doc("privacy", "en"))
     expect(html).toContain("Draft – under legal review")
     expect(html).toMatch(/Last updated[^<]*<time dateTime="2026-11-12"[^>]*>12 Nov 2026<\/time>/)
-    expect(html).toContain(">Changes</h2>")
+    expect(html).toContain('<h2 id="change-log"')
+    expect(html).toContain(">Change log</h2>")
     expect(html).not.toContain("Senast uppdaterad")
   })
 })

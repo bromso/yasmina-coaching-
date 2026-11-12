@@ -22,9 +22,6 @@ export type LegalViewProps = {
   draft: boolean
 }
 
-/** The change log's heading id: the contents list's last entry links to it. */
-const CHANGES_ID = "changes"
-
 /**
  * The MDX components of a page's body: the shared ones, plus `mark` — what the placeholder
  * plugin (`lib/remark-placeholders.ts`) turns every `[ATT FYLLA: …]` into — as `Placeholder`, and
@@ -37,10 +34,11 @@ const bodyComponents = { ...mdxComponents, a: LegalLink, mark: Placeholder }
  * body at a reading width, then the change log itself — with a contents list of the body's
  * headings and the change log that marks the section being read (`TocActive`). One list, placed
  * by the grid: below `lg` inline between the header and the body; from `lg` a sticky right-hand
- * column, kept below the stuck header by `--sticky-header-offset`.
+ * column, kept below the stuck header by `--sticky-header-offset`. The change log's heading takes
+ * `ui.changeLogId`, an id the build gate keeps every body heading off.
  */
 export function LegalView({ doc, Body, toc, ui, draft }: LegalViewProps) {
-  const contents = [...toc, { title: ui.changes, url: `#${CHANGES_ID}`, depth: 2 }]
+  const contents = [...toc, { title: ui.changes, url: `#${ui.changeLogId}`, depth: 2 }]
   return (
     <main id="main" className="container flex max-w-5xl flex-col gap-10 py-12 md:py-16">
       {draft && <DraftNotice>{ui.draft}</DraftNotice>}
@@ -67,7 +65,7 @@ export function LegalView({ doc, Body, toc, ui, draft }: LegalViewProps) {
           <Body components={bodyComponents} />
         </div>
         <ChangeLog
-          id={CHANGES_ID}
+          id={ui.changeLogId}
           changes={doc.changes}
           dateLocale={ui.dateLocale}
           labels={{ heading: ui.changes }}

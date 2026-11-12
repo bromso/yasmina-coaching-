@@ -14,6 +14,21 @@ export interface LegalInput {
   frontmatter: unknown
   /** Plain text of the body (placeholder scan). */
   text: string
+  /** The ids of the body's headings, as the renderer slugs them, without `#`. */
+  anchors?: string[]
+  /** Every link target in the body (`extractLinks`). */
+  links?: string[]
+}
+
+export interface LegalOptions {
+  rootLocale: PostLocale
+  /**
+   * The id each language's change log heading carries. It is a link target too, and no body
+   * heading may take it, so the contents list and `aria-labelledby` never point at two elements.
+   */
+  changeLogIds?: Record<PostLocale, string>
+  /** The marketing site's pages a `www:/…` link may name; without it only the shape is checked. */
+  wwwPaths?: readonly string[]
 }
 
 export type LegalDoc = Omit<LegalFrontmatter, "changes"> & {
@@ -67,12 +82,13 @@ export function findPlaceholders(
 export function createLegal(
   inputs: LegalInput[],
   pages: LegalPageMap,
-  options: { rootLocale: PostLocale }
+  options: LegalOptions
 ): Legal {
   const problems: string[] = []
   const docs = new Map<string, LegalDoc>()
   const placeholderList: { file: string; text: string }[] = []
   const filesByKey = new Map<string, string>()
+  const built: { input: LegalInput; key: string; locale: PostLocale }[] = []
   const key = (page: string, locale: PostLocale) => `${page}\u0000${locale}`
 
   for (const input of inputs) {
@@ -85,6 +101,13 @@ export function createLegal(
     }
     const { changes, ...rest } = parsed.data
     const { page, locale } = rest
+
+    const changeLogId = options.changeLogIds?.[locale]
+    if (changeLogId && input.anchors?.includes(changeLogId)) {
+      problems.push(
+        `${input.file}: heading id "${changeLogId}" is the change log's — rename the heading`
+      )
+    }
 
     // Placeholders are checked wherever the frontmatter is sound, whatever else is wrong.
     const found = findPlaceholders(input.text)
@@ -128,6 +151,7 @@ export function createLegal(
       continue
     }
     filesByKey.set(key(page, locale), input.file)
+    built.push({ input, key: key(page, locale), locale })
 
     docs.set(key(page, locale), {
       ...rest,
@@ -158,6 +182,8 @@ export function createLegal(
     }
   }
 
+  problems.push(...linkProblems(built, docs, options))
+
   if (problems.length > 0) throw new ContentError(problems)
 
   const ordered: LegalDoc[] = []
@@ -184,5 +210,86 @@ export function createLegal(
       return found
     },
     placeholders: () => [...placeholderList],
+  }
+}
+
+/** A link to another app of the site, `<app>:<path>`; only `www:` is checked here. */
+const WWW_LINK = /^www:(.*)$/
+const IGNORED_SCHEME = /^(mailto|tel):/i
+const OTHER_SCHEME = /^[a-z][a-z0-9+.-]*:/i
+
+/** `/a/?x#y` → `/a`: the query and fragment dropped, one trailing slash stripped (not from `/`). */
+function bare(path: string): string {
+  const head = path.split(/[?#]/)[0] ?? path
+  return head.length > 1 && head.endsWith("/") ? head.slice(0, -1) : head
+}
+
+/**
+ * Links that would not land, in every built page. A root-relative link must name a page or a
+ * language's index, and a fragment a heading on that page (or its change log); a `www:/…` link a
+ * page in `wwwPaths`. External links, `mailto:` and `tel:` are left alone, and any other relative
+ * link is refused: it cannot be resolved without knowing the page's own path.
+ */
+function linkProblems(
+  built: { input: LegalInput; key: string; locale: PostLocale }[],
+  docs: Map<string, LegalDoc>,
+  options: LegalOptions
+): string[] {
+  const targets = new Map<string, Set<string>>()
+  for (const locale of POST_LOCALES) {
+    targets.set(localePrefix(locale, options.rootLocale) || "/", new Set())
+  }
+  const anchorsOf = (entry: (typeof built)[number]) => {
+    const own = new Set(entry.input.anchors ?? [])
+    const changeLogId = options.changeLogIds?.[entry.locale]
+    if (changeLogId) own.add(changeLogId)
+    return own
+  }
+  for (const entry of built) {
+    const doc = docs.get(entry.key)
+    if (doc) targets.set(doc.url, anchorsOf(entry))
+  }
+  const www = options.wwwPaths ? new Set(options.wwwPaths) : null
+
+  const problems: string[] = []
+  for (const entry of built) {
+    const { file } = entry.input
+    for (const href of entry.input.links ?? []) {
+      if (IGNORED_SCHEME.test(href)) continue
+      const site = WWW_LINK.exec(href)
+      if (site) {
+        const path = site[1] ?? ""
+        if (!path.startsWith("/") || path.startsWith("//")) {
+          problems.push(`${file}: link "${href}" needs a path starting with "/"`)
+        } else if (www && !www.has(bare(path))) {
+          problems.push(`${file}: link "${href}" is not a page on the marketing site`)
+        }
+        continue
+      }
+      if (href.startsWith("#") || (href.startsWith("/") && !href.startsWith("//"))) {
+        const anchors = href.startsWith("#") ? anchorsOf(entry) : targets.get(bare(href))
+        if (!anchors) {
+          problems.push(`${file}: broken link "${href}"`)
+          continue
+        }
+        const fragment = href.split("#")[1]
+        if (fragment !== undefined && !anchors.has(decodeFragment(fragment))) {
+          problems.push(`${file}: link "${href}" names no heading on that page`)
+        }
+        continue
+      }
+      if (href.startsWith("//") || OTHER_SCHEME.test(href)) continue
+      problems.push(`${file}: link "${href}" must be root-relative (start with "/")`)
+    }
+  }
+  return problems
+}
+
+/** A fragment as written (`#%C3%A4ndringar`) compared as the id it names (`ändringar`). */
+function decodeFragment(fragment: string): string {
+  try {
+    return decodeURIComponent(fragment)
+  } catch {
+    return fragment
   }
 }

@@ -41,6 +41,11 @@ export type LegalUi = {
   contents: string
   /** The change log's heading. */
   changes: string
+  /**
+   * The change log heading's id: the contents list links to it and the section is named by it.
+   * `lib/legal.ts` refuses a body heading that would take it.
+   */
+  changeLogId: string
   /** The notice on every page while the pages await legal review (`isDraft`). */
   draft: string
   /** The header's language link, written in the *other* language, and its accessible name. */
@@ -60,7 +65,8 @@ export const UI: Record<LegalLocale, LegalUi> = {
     pages: "Sidor",
     updated: "Senast uppdaterad",
     contents: "Innehåll",
-    changes: "Ändringar",
+    changes: "Ändringslogg",
+    changeLogId: "andringslogg",
     draft: "Utkast – granskas juridiskt",
     header: { language: { label: "In English", name: "Read in English" } },
     legal: { privacy: "Integritet", terms: "Villkor", accessibility: "Tillgänglighet" },
@@ -78,7 +84,8 @@ export const UI: Record<LegalLocale, LegalUi> = {
     pages: "Pages",
     updated: "Last updated",
     contents: "Contents",
-    changes: "Changes",
+    changes: "Change log",
+    changeLogId: "change-log",
     draft: "Draft – under legal review",
     header: { language: { label: "På svenska", name: "Läs på svenska" } },
     legal: { privacy: "Privacy", terms: "Terms", accessibility: "Accessibility" },
