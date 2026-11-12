@@ -7,6 +7,7 @@ import { mdxComponents } from "@repo/ui/components/mdx"
 import { Placeholder } from "@repo/ui/components/placeholder"
 import { formatPostDate, toISODate } from "@repo/ui/lib/post-date"
 import type { ComponentType } from "react"
+import { LegalLink } from "@/components/legal-link"
 import type { LegalUi } from "@/content/ui"
 
 export type LegalViewProps = {
@@ -26,9 +27,10 @@ const CHANGES_ID = "changes"
 
 /**
  * The MDX components of a page's body: the shared ones, plus `mark` — what the placeholder
- * plugin (`lib/remark-placeholders.ts`) turns every `[ATT FYLLA: …]` into — as `Placeholder`.
+ * plugin (`lib/remark-placeholders.ts`) turns every `[ATT FYLLA: …]` into — as `Placeholder`, and
+ * `a` as `LegalLink`, so a `www:/inifran` link points at the marketing site's absolute URL.
  */
-const bodyComponents = { ...mdxComponents, mark: Placeholder }
+const bodyComponents = { ...mdxComponents, a: LegalLink, mark: Placeholder }
 
 /**
  * One legal page: the draft notice while in review, the title, description and last update, the

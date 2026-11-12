@@ -44,6 +44,21 @@ function render(doc: LegalDoc, props: Partial<LegalViewProps> = {}): string {
 describe("LegalView", () => {
   const sv = legal.doc("privacy", "sv")
 
+  test("a www:/ link in the body points at the marketing site's absolute URL", () => {
+    function LinkBody({ components = {} }: { components?: typeof mdxComponents }) {
+      const A = (components.a ?? "a") as ComponentType<{ href: string; children: ReactNode }>
+      return (
+        <p>
+          <A href="www:/inifran">Priser</A> <A href="/integritet">Integritet</A>
+        </p>
+      )
+    }
+    const html = render(sv, { Body: LinkBody })
+    expect(html).toContain('href="http://www.brand.localhost:3000/inifran"')
+    expect(html).toContain('href="/integritet"')
+    expect(html).not.toContain('href="www:')
+  })
+
   test("the title as the page's h1, its last update and its change log", () => {
     const html = render(sv)
     expect(html).toContain(">privacy (sv)</h1>")
