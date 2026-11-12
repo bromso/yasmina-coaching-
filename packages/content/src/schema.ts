@@ -25,7 +25,7 @@ const coverSchema = z.strictObject({
  * permissive for frontmatter. Accept only a `Date` or a non-empty string that parses to a valid
  * date.
  */
-const dateSchema = z
+export const dateSchema = z
   .union([z.date(), z.string().min(1)])
   .transform((value) => new Date(value))
   .refine((date) => !Number.isNaN(date.getTime()), { message: "Invalid date" })
@@ -105,3 +105,23 @@ const jobFrontmatterShape = {
 export const jobFrontmatterSchema = z.strictObject(jobFrontmatterShape)
 
 export type JobFrontmatter = z.infer<typeof jobFrontmatterSchema>
+
+const legalChangeSchema = z.strictObject({
+  date: dateSchema,
+  summary: z.string().min(1),
+})
+
+/**
+ * Strict: an unknown key refuses the document. Used to validate a legal page (terms, privacy, …)
+ * before it is trusted. `page` is the page's id across languages; `changes` is its change log,
+ * newest first.
+ */
+export const legalFrontmatterSchema = z.strictObject({
+  title: z.string().min(1),
+  description: z.string().min(1),
+  locale: z.enum(POST_LOCALES),
+  page: z.string().min(1),
+  changes: z.array(legalChangeSchema).min(1),
+})
+
+export type LegalFrontmatter = z.infer<typeof legalFrontmatterSchema>
