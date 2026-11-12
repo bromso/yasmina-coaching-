@@ -12,7 +12,7 @@ browser can import it through `@repo/api-contract/booking-limits`). Each offerin
 
 | Kind | Offerings | How it is booked |
 |---|---|---|
-| `instant` | `session`, `package_6`, `package_10`, `inner_start_coaching`, `inner_start_mentoring`, `inner_start_lifestyle`, `inner_session`, `inner_mentoring_session` | Pick free slots on the calendar; confirmed at once. A package books one or more sessions now; the rest are placed later from the manage link. |
+| `instant` | `session`, `package_6`, `package_10`, `inner_start_coaching`, `inner_start_mentoring`, `inner_start_lifestyle`, `inner_session`, `inner_mentoring_session` | Pick free slots on the calendar; confirmed at once. A package books one or more sessions now; the rest are placed later from the manage link (`?package=<id>`, sent as `packageId`: see *A purchase already made* below). |
 | `group` | `group`, `inner_group` | Reserve seats at a `group_events` row Yasmina scheduled, one date or several of a weekly series. |
 | `request` | `workshop`, `enterprise`, `keynote` | Propose up to three dates (morning / afternoon / full day), attendees, venue and a message; Yasmina confirms a time from `/admin/bookings`. Every request kind is B2B: an organisation is required. |
 
@@ -77,7 +77,7 @@ newest change date) and `terms_accepted_at = now` on every row it inserts (migra
 `0037_booking_terms`; rows from before stay null). When the terms page gets a new change-log
 entry, `TERMS_VERSION` must move with it: `apps/legal/src/lib/terms-version.test.ts` fails until
 it does. `bookingConfirmed` and `bookingRequestReceived` link the terms (`termsUrl`); a private
-client's confirmation (`withdrawal`, `audience === "private"`) adds the line on the 14-day right of
+client's confirmation of a new purchase (`withdrawal`) adds the line on the 14-day right of
 withdrawal. Requests are organisation-only, so theirs never does.
 
 ### A start within the withdrawal period
@@ -91,9 +91,20 @@ and the www pages use) plus `BOOKING_WITHDRAWAL_DAYS` (14), moved on past a Satu
 public holiday or midsommar-, jul- or nyårsafton to the next working day (lag (1930:173) om
 beräkning av lagstadgad tid; the table is `swedishHolidays(year)` in `swedish-calendar.ts`, Easter by
 the Gregorian computus). `startsWithinWithdrawal(startsAt, now)` is true when a session's
-Stockholm day is from today through that last day, and `earlyStartRequired(audience, startsAts,
-now)` asks it of a `private` booking's first session. An organisation never needs the consent, and
-a request (organisation-only) never asks.
+Stockholm day is from today through that last day, and `earlyStartRequired(offering, audience,
+startsAts, now)` asks it of a `private` booking's first session. An organisation never needs the
+consent, and a request (organisation-only) never asks.
+
+**A purchase already made.** The right of withdrawal attaches to the contract, not to each session,
+so a booking that consumes an existing purchase gets neither the box nor the withdrawal line in its
+mail: a member's session (`MEMBER_OFFERING_KEYS`; `opensNewContract(offering)` is false, and
+`earlyStartRequired` says no), and a further session of a programme (`packageId`). The api honours
+`packageId` only for a package of the same offering and address with room for every slot
+(`extendedPackage`, under the calendar lock): the sessions are then booked onto that package rather
+than a new one. Any other id is ignored and the order is judged as a new purchase, so a forged id
+cannot skip the box. The www core and the instant form skip the box when `packageId` is set; when
+the api disagrees, its refusal shows the box as usual. The terms say so under *Ångerrätt*, with a
+placeholder for the lawyer.
 
 - **The box.** `EarlyStartField` (`name="earlyStart"`, `value="on"`, required, error linked with
   `fieldAria`) sits under the terms box in the instant and group journeys, shown when a picked slot
@@ -111,8 +122,10 @@ a request (organisation-only) never asks.
   `early_start_requested_at = now` (migration `0038_booking_early_start`, TEXT like
   `terms_accepted_at`); otherwise it stays null, ticked or not.
 - **The mail.** `bookingConfirmed` takes `earlyStart` (from `termsMailProps(audience, locale,
-  earlyStart)`, and from the row when an admin confirms): the line saying the right ends once the
-  service has been fully performed replaces the generic withdrawal line.
+  earlyStart, newContract)`, and from the row when an admin confirms): the line saying the right
+  ends once the service has been fully performed replaces the generic withdrawal line. Both lines
+  need `withdrawal` (a private client's new purchase): a booking that opens no right never says it
+  ends.
 
 ### Manage links
 

@@ -54,6 +54,7 @@ import {
   type Offering,
   type OfferingKey,
   type OfferingKind,
+  opensNewContract,
   REQUEST_OFFERING_KEYS,
   startsWithinWithdrawal,
   withdrawalLastDay,
@@ -120,6 +121,7 @@ export {
   OFFERING_KEYS,
   OFFERING_KINDS,
   OFFERINGS,
+  opensNewContract,
   REQUEST_OFFERING_KEYS,
   startsWithinWithdrawal,
   withdrawalLastDay,
@@ -221,6 +223,13 @@ export const BookingCreateSchema = z
     notes: z.string().trim().max(BOOKING_NOTES_MAX).optional(),
     termsAccepted: TermsAccepted,
     earlyStart: EarlyStart,
+    /**
+     * A further session of a programme already bought (`?package=<id>` from the manage page).
+     * `apps/api` honours it only for a package of the same offering and address with sessions
+     * left: the session is then part of that purchase, with no new right of withdrawal and no
+     * early-start consent. Any other id is ignored, and the order is judged as a new purchase.
+     */
+    packageId: Id.optional(),
   })
   .superRefine((v, ctx) => {
     const offering = OFFERINGS[v.offering]

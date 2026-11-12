@@ -6,6 +6,7 @@ import {
   type BookingLocation,
   earlyStartRequired,
   type OfferingKey,
+  opensNewContract,
 } from "@repo/api-contract/booking-limits"
 import { Button } from "@repo/ui/components/button"
 import { Calendar } from "@repo/ui/components/calendar"
@@ -234,13 +235,18 @@ export function InstantBooking({
               ? text.noSlotsThisDay
               : ""
 
-  // A private client's session inside the withdrawal period needs their consent. Before any time is
-  // picked (the server's render, or no JavaScript) one always could be, so the box shows then.
+  // A private client's new purchase with a session inside the withdrawal period needs their
+  // consent; a member's session or a programme's further session never does: it is part of a
+  // purchase already made. Before any time is picked (the server's render, or no JavaScript) one
+  // always could be, so the box shows then.
   // A refusal naming the box (the api judges by its own clock) shows it whatever this one says.
   const needsEarlyStart =
     (audience === "private" &&
+      !packageId &&
+      opensNewContract(offering) &&
       (picked.length === 0 ||
         earlyStartRequired(
+          offering,
           audience,
           picked.map((slot) => slot.startsAt),
           new Date()

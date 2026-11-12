@@ -146,7 +146,8 @@ export function GroupBooking({
   // A refusal naming the box (the api judges by its own clock) shows it whatever this one says.
   const needsEarlyStart =
     (audience === "private" &&
-      (tickedStarts === null || earlyStartRequired(audience, tickedStarts, new Date()))) ||
+      (tickedStarts === null ||
+        earlyStartRequired(offering, audience, tickedStarts, new Date()))) ||
     Boolean(!shown.ok && shown.fieldErrors?.earlyStart)
   const toPayment = () => {
     const errors = {

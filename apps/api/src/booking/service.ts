@@ -152,13 +152,20 @@ export function offeringLabel(key: OfferingKey, locale: Locale): string {
 
 /**
  * The terms a customer's booking mail links, in their language. `withdrawal` adds the line on the
- * 14-day right of withdrawal, which only a private client has (an organisation does not); a request
- * is always an organisation's, so its mail takes `termsUrl` alone. `earlyStart` (the booking
- * stamped `early_start_requested_at`) replaces that line with the one saying the right ends once
- * the session has taken place.
+ * 14-day right of withdrawal, which only a private client's new purchase (`newContract`) has: an
+ * organisation has no such right, and a member's session (`opensNewContract`) or a further session
+ * of a programme already bought is part of a purchase already made, so it opens no new one. A request is always an organisation's, so its mail takes
+ * `termsUrl` alone. `earlyStart` (the booking stamped `early_start_requested_at`) replaces that
+ * line with the one saying the right ends once the session has taken place.
  */
-export function termsMailProps(audience: BookingAudience, locale: Locale, earlyStart = false) {
-  return { termsUrl: termsUrlFor(locale), withdrawal: audience === "private", earlyStart }
+export function termsMailProps(
+  audience: BookingAudience,
+  locale: Locale,
+  earlyStart: boolean,
+  newContract: boolean
+) {
+  const withdrawal = audience === "private" && newContract
+  return { termsUrl: termsUrlFor(locale), withdrawal, earlyStart }
 }
 
 /** The terms page on the legal app, in the customer's language. */

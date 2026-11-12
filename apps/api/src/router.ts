@@ -41,7 +41,9 @@ import {
   NOTIFICATION_UNREAD_CAP,
   normalizeInviteDomains,
   OFFERINGS,
+  type OfferingKey,
   OWNER_TWO_FACTOR_REASON,
+  opensNewContract,
   type Passkey,
   type PlanKey,
   REAUTH_WINDOW_MS,
@@ -1006,11 +1008,30 @@ const toAdminApplication = (row: AdminApplicationRow): AdminApplication => ({
  */
 function earlyStartAt(
   input: { audience: BookingAudience; earlyStart?: boolean },
+  offering: OfferingKey,
   startsAts: readonly string[],
   now: Date
 ): string | null | "missing" {
-  if (!earlyStartRequired(input.audience, startsAts, now)) return null
+  if (!earlyStartRequired(offering, input.audience, startsAts, now)) return null
   return input.earlyStart === true ? now.toISOString() : "missing"
+}
+
+/**
+ * The package a booking adds sessions to (`packageId`), when it is this customer's: the same
+ * offering, the same address, and room for every slot. `null` otherwise, and the order is then a
+ * new purchase. Called under the calendar lock, so two orders cannot both take the last session.
+ */
+async function extendedPackage(
+  tx: Pick<Context["db"], "booking">,
+  input: { offering: OfferingKey; packageId?: number; customer: { email: string } },
+  sessions: number
+) {
+  if (input.packageId === undefined) return null
+  const pkg = await tx.booking.packages.find(input.packageId)
+  if (!pkg || pkg.offering !== input.offering) return null
+  if (pkg.customer_email.toLowerCase() !== input.customer.email.toLowerCase()) return null
+  const booked = await tx.booking.packages.sessionsBooked(pkg.id)
+  return booked + sessions <= pkg.sessions_total ? pkg : null
 }
 
 /** One page of rows (fetched as `limit + 1`) → items and the keyset cursor. */
@@ -4429,11 +4450,15 @@ export const router = api.router({
           // The next slot of the same order must not collide with this one either.
           engine.busy.push(slot)
         }
+        // A further session of a programme already bought is part of that purchase, and so opens
+        // no new right of withdrawal; any package that is not this customer's is ignored.
+        const extending = await extendedPackage(tx, input, slots.length)
         // Judged from the slots just checked, never from the client: see `earlyStartAt`.
-        const earlyStart = earlyStartAt(input, sorted, now)
+        const earlyStart = extending ? null : earlyStartAt(input, input.offering, sorted, now)
         if (earlyStart === "missing") return "earlyStart" as const
         const pkg =
-          offering.sessions > 1
+          extending ??
+          (offering.sessions > 1
             ? await tx.booking.packages.create({
                 offering: input.offering,
                 customerEmail: input.customer.email,
@@ -4441,7 +4466,7 @@ export const router = api.router({
                 manageTokenHash: hash,
                 createdAt,
               })
-            : null
+            : null)
         const ids: number[] = []
         for (const slot of slots) {
           const { id } = await tx.booking.create({
@@ -4496,7 +4521,12 @@ export const router = api.router({
               : undefined,
             cancelCutoffHours: BOOKING_CANCEL_CUTOFF_HOURS,
             memberBookingUrl: memberBookingUrlFor(context.wwwUrl, input.offering),
-            ...termsMailProps(input.audience, locale, earlyStart !== null),
+            ...termsMailProps(
+              input.audience,
+              locale,
+              earlyStart !== null,
+              !extending && opensNewContract(input.offering)
+            ),
           },
           { tx, locale, replyTo: context.bookingEmail }
         )
@@ -4567,6 +4597,7 @@ export const router = api.router({
         if (new Set(events.map((e) => e.offering)).size > 1) return "missing" as const
         const earlyStart = earlyStartAt(
           input,
+          (events[0] as GroupEventWithSeats).offering,
           events.map((e) => e.starts_at),
           now
         )
@@ -4620,7 +4651,12 @@ export const router = api.router({
               ? rest.map((e) => `${e.title}: ${formatWhen(e.starts_at, e.ends_at, locale)}`)
               : undefined,
             cancelCutoffHours: BOOKING_CANCEL_CUTOFF_HOURS,
-            ...termsMailProps(input.audience, locale, earlyStart !== null),
+            ...termsMailProps(
+              input.audience,
+              locale,
+              earlyStart !== null,
+              opensNewContract(firstEvent.offering)
+            ),
           },
           { tx, locale, replyTo: context.bookingEmail }
         )
@@ -5640,7 +5676,12 @@ export const router = api.router({
               manageUrl: manageUrlFor(context.wwwUrl, token),
               name: row.customer_name,
               cancelCutoffHours: BOOKING_CANCEL_CUTOFF_HOURS,
-              ...termsMailProps(row.audience, locale, row.early_start_requested_at !== null),
+              ...termsMailProps(
+                row.audience,
+                locale,
+                row.early_start_requested_at !== null,
+                opensNewContract(row.offering)
+              ),
             },
             { tx, locale, replyTo: context.bookingEmail }
           )

@@ -306,16 +306,26 @@ export function startsWithinWithdrawal(startsAt: string, now: Date): boolean {
 }
 
 /**
+ * Whether booking `offering` is a new purchase, and so a new contract with its own right of
+ * withdrawal. A member's session (`MEMBER_OFFERING_KEYS`) is not: it is part of the membership the
+ * start call already bought, and the right attaches to that contract, not to each session.
+ */
+export function opensNewContract(offering: string): boolean {
+  return !(MEMBER_OFFERING_KEYS as readonly string[]).includes(offering)
+}
+
+/**
  * Whether a booking needs the consent to start within the withdrawal period (lag (2005:59)
- * 2 kap. 11 § 1): a private client whose first session falls inside it. Organisations have no
- * right of withdrawal, so they never do.
+ * 2 kap. 11 § 1): a private client's new purchase (`opensNewContract`) whose first session falls
+ * inside it. Organisations have no right of withdrawal, so they never do.
  */
 export function earlyStartRequired(
+  offering: string,
   audience: string,
   startsAts: readonly string[],
   now: Date
 ): boolean {
-  if (audience !== "private" || startsAts.length === 0) return false
+  if (audience !== "private" || startsAts.length === 0 || !opensNewContract(offering)) return false
   const first = [...startsAts].sort((a, b) => Date.parse(a) - Date.parse(b))[0] as string
   return startsWithinWithdrawal(first, now)
 }

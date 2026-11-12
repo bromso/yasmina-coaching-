@@ -216,9 +216,9 @@ function termsRefusal(fd: FormData, locale: Locale = SITE_LOCALE): Record<string
 
 /**
  * The box for a start within the withdrawal period (`name="earlyStart"`, `value="on"`, see
- * `EarlyStartField`): a refusal naming it when a private client's session falls inside the period
- * (`earlyStartRequired`, from the actual start times) and it was not ticked, else nothing. The api
- * judges it again from its own slots and refuses the same way.
+ * `EarlyStartField`): a refusal naming it when a private client's new purchase has a session
+ * inside the period (`earlyStartRequired`, from the offering and the actual start times) and it
+ * was not ticked, else nothing. The api judges it again from its own slots and refuses the same way.
  */
 function earlyStartRefusal(
   fd: FormData,
@@ -227,7 +227,8 @@ function earlyStartRefusal(
   now: Date,
   locale: Locale = SITE_LOCALE
 ): Record<string, string> {
-  if (str(fd, "earlyStart") === "on" || !earlyStartRequired(audience, startsAts, now)) return {}
+  const required = earlyStartRequired(str(fd, "offering"), audience, startsAts, now)
+  if (str(fd, "earlyStart") === "on" || !required) return {}
   return { earlyStart: BOOKING_FORMS[locale].check.earlyStart }
 }
 
@@ -290,8 +291,8 @@ function failure(
 
 /**
  * An instant booking (a session or a programme's first sessions). `slots` arrives as one hidden
- * input per picked ISO start. `packageId` (from `?package=` on the page) is carried in `values`
- * only: the contract has no field for it yet, so the api decides what a repeat booking means.
+ * input per picked ISO start. `packageId` (from `?package=` on the page) marks a further session
+ * of a programme already bought; the api decides whether the package is this customer's.
  */
 export async function bookCore(
   deps: { api: BookApi; locale?: Locale; now?: () => Date },
@@ -319,6 +320,7 @@ export async function bookCore(
     deps.locale,
     values.packageId || undefined
   )
+  const packageId = /^[1-9]\d{0,11}$/.test(values.packageId) ? Number(values.packageId) : undefined
   const parsed = BookingCreateSchema.safeParse({
     offering: values.offering,
     slots,
@@ -328,10 +330,13 @@ export async function bookCore(
     notes: notesWithBilling(values.notes, payment.ok ? payment.block : undefined),
     termsAccepted: true,
     earlyStart: earlyStartOf(fd),
+    packageId,
   })
   const terms = termsRefusal(fd, deps.locale)
   const now = deps.now ? deps.now() : new Date()
-  const early = earlyStartRefusal(fd, values.audience, slots, now, deps.locale)
+  // A further session of a programme already bought opens no new right, so it needs no box. The
+  // api checks the package is this customer's and otherwise refuses the box like any new order.
+  const early = packageId ? {} : earlyStartRefusal(fd, values.audience, slots, now, deps.locale)
   const all = { ...values, ...payment.values }
   if (!parsed.success || !payment.ok || terms.terms || early.earlyStart) {
     const fieldErrors = {

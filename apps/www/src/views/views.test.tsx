@@ -200,6 +200,26 @@ describe("the box for a start within the withdrawal period", () => {
       )
       expect(html).not.toContain('name="earlyStart"')
     })
+    for (const offering of ["inner_session", "inner_mentoring_session"] as const) {
+      test(`${offering} (${locale}): a member's session never shows it`, () => {
+        const html = render(
+          <OfferingView offering={offering} audience="private" locale={locale} minDate={minDate} />
+        )
+        expect(html).not.toContain('name="earlyStart"')
+      })
+    }
+    test(`package_6 (${locale}): a further session of a programme never shows it`, () => {
+      const html = render(
+        <OfferingView
+          offering="package_6"
+          packageId="12"
+          audience="private"
+          locale={locale}
+          minDate={minDate}
+        />
+      )
+      expect(html).not.toContain('name="earlyStart"')
+    })
     test(`workshop (${locale}): a request never shows it`, () => {
       const html = render(
         <OfferingView

@@ -1125,6 +1125,47 @@ describe("a start within the withdrawal period", () => {
     }
   }
 
+  test("a member's session inside the period needs no box: it opens no new contract", async () => {
+    let sent: unknown
+    const out = await book(
+      "sv",
+      form({
+        ...customer,
+        offering: "inner_session",
+        audience: "private",
+        location: "video",
+        slots: [SOON],
+      }),
+      (input) => {
+        sent = input
+      }
+    )
+    expect(out.ok).toBe(true)
+    expect((sent as { earlyStart?: boolean }).earlyStart).toBeUndefined()
+  })
+
+  test("a further session of a programme is sent with its package and needs no box", async () => {
+    let sent: unknown
+    const out = await book(
+      "sv",
+      form({
+        ...customer,
+        offering: "package_6",
+        audience: "private",
+        location: "video",
+        slots: [SOON],
+        packageId: "12",
+      }),
+      (input) => {
+        sent = input
+      }
+    )
+    // The api checks the package is this customer's; if not, it refuses the box like any order.
+    expect(out.ok).toBe(true)
+    expect(sent).toMatchObject({ packageId: 12 })
+    expect((sent as { earlyStart?: boolean }).earlyStart).toBeUndefined()
+  })
+
   test("a group form with other errors is refused without reading the events", async () => {
     let reads = 0
     const out = await reserveSeatsCore(
@@ -1199,7 +1240,7 @@ describe("a start within the withdrawal period", () => {
       "I want the service to start within the withdrawal period, and I understand the right of withdrawal ends once the service has been fully performed."
     )
     expect(BOOKING_FORMS.sv.check.earlyStart).toBe(
-      "Bekräfta att sessionen får äga rum inom ångerfristen, eller välj en tid längre fram."
+      "Bekräfta att tillfället får äga rum inom ångerfristen, eller välj en tid längre fram."
     )
     expect(BOOKING_FORMS.en.check.earlyStart).toBe(
       "Confirm that the session may take place within the withdrawal period, or choose a later time."

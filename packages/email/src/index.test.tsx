@@ -539,7 +539,7 @@ describe("bookingConfirmed", () => {
     for (const part of [sv.html, sv.text]) {
       expect(part).toContain(termsUrl)
       expect(part).toContain(
-        "Som privatperson har du 14 dagars ångerrätt. Villkoren beskriver hur den fungerar när en session redan har ägt rum."
+        "Som privatperson har du 14 dagars ångerrätt. Villkoren beskriver hur den fungerar när ett tillfälle redan har hållits."
       )
     }
     expect(sv.html).toContain(`href="${termsUrl}"`)
@@ -581,6 +581,17 @@ describe("bookingConfirmed", () => {
     const en = await emails.bookingConfirmed(props)
     expect(en.text).toContain(`The terms for your booking: ${props.termsUrl}`)
     for (const part of [en.html, en.text]) expect(part).not.toContain("right of withdrawal")
+  })
+
+  test("a booking that opens no right never says the right ends, even when stamped", async () => {
+    // A member's session (no new contract) or an organisation's booking: `withdrawal` is false.
+    const sv = await emails.bookingConfirmed(
+      { ...props, withdrawal: false, earlyStart: true },
+      "sv"
+    )
+    for (const part of [sv.html, sv.text]) expect(part).not.toContain("ångerfrist")
+    const en = await emails.bookingConfirmed({ ...props, withdrawal: false, earlyStart: true })
+    for (const part of [en.html, en.text]) expect(part).not.toContain("withdrawal")
   })
 })
 

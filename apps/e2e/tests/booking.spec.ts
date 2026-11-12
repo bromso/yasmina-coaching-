@@ -149,7 +149,7 @@ test("a visitor books a coaching session from the calendar and gets the confirma
     await page.getByRole("button", { name: /fortsätt till betalning/i }).click()
     await expect(
       page.getByText(
-        "Bekräfta att sessionen får äga rum inom ångerfristen, eller välj en tid längre fram."
+        "Bekräfta att tillfället får äga rum inom ångerfristen, eller välj en tid längre fram."
       )
     ).toBeVisible()
     await earlyStartBox.check()

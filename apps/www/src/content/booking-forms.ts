@@ -246,7 +246,7 @@ const sv: BookingFormCopy = {
     method: "Välj hur du vill betala.",
     terms: "Du behöver godkänna villkoren för att boka.",
     earlyStart:
-      "Bekräfta att sessionen får äga rum inom ångerfristen, eller välj en tid längre fram.",
+      "Bekräfta att tillfället får äga rum inom ångerfristen, eller välj en tid längre fram.",
   },
   payment: {
     summary: {

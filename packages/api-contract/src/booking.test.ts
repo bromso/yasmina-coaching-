@@ -12,6 +12,7 @@ import {
 } from "./booking"
 import {
   earlyStartRequired,
+  opensNewContract,
   startsWithinWithdrawal,
   withdrawalLastDay,
   zonedDay,
@@ -174,10 +175,38 @@ describe("a start within the withdrawal period", () => {
   test("only a private booking whose first session is within the period needs the consent", () => {
     const soon = "2026-11-20T09:00:00.000Z"
     const later = "2026-12-01T09:00:00.000Z"
-    expect(earlyStartRequired("private", [later, soon], now)).toBe(true)
-    expect(earlyStartRequired("private", [later], now)).toBe(false)
-    expect(earlyStartRequired("organisation", [soon], now)).toBe(false)
-    expect(earlyStartRequired("private", [], now)).toBe(false)
+    expect(earlyStartRequired("session", "private", [later, soon], now)).toBe(true)
+    expect(earlyStartRequired("session", "private", [later], now)).toBe(false)
+    expect(earlyStartRequired("session", "organisation", [soon], now)).toBe(false)
+    expect(earlyStartRequired("session", "private", [], now)).toBe(false)
+  })
+
+  test("a member's session consumes the membership's contract: no new right, no consent", () => {
+    const soon = "2026-11-20T09:00:00.000Z"
+    for (const key of MEMBER_OFFERING_KEYS) {
+      expect(opensNewContract(key)).toBe(false)
+      expect(earlyStartRequired(key, "private", [soon], now)).toBe(false)
+    }
+    // The start call that begins a membership, and a programme's first order, are new purchases.
+    expect(opensNewContract("inner_start_coaching")).toBe(true)
+    expect(opensNewContract("package_6")).toBe(true)
+    expect(earlyStartRequired("package_6", "private", [soon], now)).toBe(true)
+  })
+
+  test("create takes an optional packageId: a further session of a programme already bought", () => {
+    const create = {
+      offering: "package_6",
+      slots: ["2026-11-20T09:00:00.000Z"],
+      audience: "private",
+      customer: { name: "Ada Lovelace", email: "ada@example.com" },
+      location: "video",
+      termsAccepted: true,
+    }
+    expect(BookingCreateSchema.parse(create)).not.toHaveProperty("packageId")
+    expect(BookingCreateSchema.parse({ ...create, packageId: 7 }).packageId).toBe(7)
+    for (const packageId of [0, -1, 1.5, "7"]) {
+      expect(BookingCreateSchema.safeParse({ ...create, packageId }).success).toBe(false)
+    }
   })
 
   test("zonedDay is the Stockholm calendar day of an instant", () => {
