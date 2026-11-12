@@ -7,6 +7,12 @@ import {
   MdxLi,
   MdxOl,
   MdxParagraph,
+  MdxTable,
+  MdxTbody,
+  MdxTd,
+  MdxTh,
+  MdxThead,
+  MdxTr,
   MdxUl,
   Step,
   Steps,
@@ -166,5 +172,50 @@ export const Image: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     await expect(canvas.getByAltText("Placeholder")).toBeInTheDocument()
+  },
+}
+
+/** A markdown table: its own scroll box (the page never scrolls sideways), column headers. */
+export const Table: Story = {
+  render: () => (
+    <div className="w-48">
+      <MdxTable>
+        <MdxThead>
+          <MdxTr>
+            <MdxTh>Name</MdxTh>
+            <MdxTh>What it does</MdxTh>
+            <MdxTh>How long</MdxTh>
+          </MdxTr>
+        </MdxThead>
+        <MdxTbody>
+          <MdxTr>
+            <MdxTd>
+              <MdxCode>two_factor</MdxCode>
+            </MdxTd>
+            <MdxTd>Keeps your sign-in while you type the code from your app.</MdxTd>
+            <MdxTd>5 minutes</MdxTd>
+          </MdxTr>
+          <MdxTr>
+            <MdxTd>
+              <MdxCode>consent</MdxCode>
+            </MdxTd>
+            <MdxTd>Remembers your cookie choice.</MdxTd>
+            <MdxTd>180 days</MdxTd>
+          </MdxTr>
+        </MdxTbody>
+      </MdxTable>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const headers = canvas.getAllByRole("columnheader")
+    await expect(headers).toHaveLength(3)
+    for (const header of headers) await expect(header).toHaveAttribute("scope", "col")
+    const box = canvasElement.querySelector<HTMLElement>('[data-slot="mdx-table"]')
+    await expect(box).not.toBeNull()
+    await expect(getComputedStyle(box as HTMLElement).overflowX).toBe("auto")
+    await expect(box).toHaveAttribute("tabindex", "0")
+    // The narrow box scrolls the table rather than squeezing the code names apart.
+    await expect((box as HTMLElement).scrollWidth).toBeGreaterThan((box as HTMLElement).clientWidth)
   },
 }

@@ -21,11 +21,15 @@ Swedish is served at the root, English under `/en`. The page slugs are `LEGAL_PA
 
 | Route | What |
 |---|---|
-| `/`, `/en` | The index: the four pages in that language |
+| `/`, `/en` | The index: the four pages in that language, as cards in the blog's look (`PageCard`) |
 | `/integritet`, `/en/privacy` | Privacy and cookies |
 | `/villkor`, `/en/terms` | Terms and booking rules |
 | `/tillganglighet`, `/en/accessibility` | Accessibility statement |
 | `/foretaget`, `/en/company` | Company and contact details |
+
+Each page's contents list (its h2/h3 headings, then the change log) marks the section being read
+(`TocActive`): inline above the body below `lg`, a sticky right-hand column below the header from
+`lg`.
 
 Every app also serves `/offline.html` (the PWA fallback page, a static file in `public/`) and
 `/api/health` (used by the Docker health check).

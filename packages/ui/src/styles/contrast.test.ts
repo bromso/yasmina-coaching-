@@ -60,6 +60,8 @@ function pairs(t: Token, dark: boolean): Pair[] {
     },
     { name: "muted-foreground on card", fg: t("muted-foreground"), bg: t("card"), min: text },
     { name: "muted-foreground on muted", fg: t("muted-foreground"), bg: t("muted"), min: text },
+    // The MDX table's header row (`components/mdx/table.tsx`).
+    { name: "foreground on muted", fg: t("foreground"), bg: t("muted"), min: text },
     // Default Button, avatar fallback (initials), Cta block.
     {
       name: "primary-foreground on primary",

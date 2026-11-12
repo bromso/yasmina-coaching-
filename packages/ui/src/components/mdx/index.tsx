@@ -10,6 +10,7 @@ import { MdxImage } from "./mdx-image"
 import { MdxLi, MdxOl, MdxParagraph, MdxUl } from "./prose"
 import { SchemaTable } from "./schema-table"
 import { Step, Steps } from "./steps"
+import { MdxTable, MdxTbody, MdxTd, MdxTh, MdxThead, MdxTr } from "./table"
 import { Tab, Tabs } from "./tabs"
 
 export { Callout, type CalloutProps, type CalloutType } from "./callout"
@@ -29,6 +30,7 @@ export {
   schemaRows,
 } from "./schema-table"
 export { Step, Steps } from "./steps"
+export { MdxTable, MdxTbody, MdxTd, MdxTh, MdxThead, MdxTr } from "./table"
 export { Tab, type TabProps, Tabs, type TabsProps, TabsStacked } from "./tabs"
 
 function heading(as: "h2" | "h3" | "h4") {
@@ -44,7 +46,7 @@ function heading(as: "h2" | "h3" | "h4") {
 /**
  * The component map fumadocs' MDX renderer spreads over its compiled output: heading levels get
  * anchors, `pre` becomes a copyable code block, `code` outside it an inline span, `p` / `ul` /
- * `ol` / `li` get their prose styling, `img` gets required dimensions and lazy loading, links are
+ * `ol` / `li` get their prose styling, tables get their own scroll box and token styling, `img` gets required dimensions and lazy loading, links are
  * underlined and external-aware, and `Callout` / `Tabs` / `Steps` / `Cards` / `Card` — and, for
  * API reference pages, `Endpoint` / `SchemaTable` — are available to author directly in MDX
  * bodies. Typed `ComponentType<any>` to match fumadocs' own `MDXComponents` shape — each entry is
@@ -66,6 +68,12 @@ export const mdxComponents: Record<string, ComponentType<any>> = {
   li: MdxLi,
   img: MdxImage,
   a: MdxLink,
+  table: MdxTable,
+  thead: MdxThead,
+  tbody: MdxTbody,
+  tr: MdxTr,
+  th: MdxTh,
+  td: MdxTd,
   Callout,
   Tabs,
   Tab,

@@ -46,6 +46,34 @@ export type PostCardProps = {
   mediaClassName?: string
 }
 
+/** Every card's look, `PostCard`'s and `PageCard`'s: the hover border, and `relative` so the
+ * title's stretched link covers the whole card. */
+const cardClassName = "relative transition-colors hover:border-foreground/20"
+
+/** The title: a heading holding the stretched link. The anchor's `after:inset-0` positions
+ * relative to the `relative` Card (the anchor itself stays static), so the whole card is
+ * clickable while staying valid HTML — no nested <a>. Anything else linked in a card escapes
+ * above this overlay with `relative z-10`. */
+function CardTitleLink({
+  as: Title,
+  href,
+  className,
+  children,
+}: {
+  as: "h2" | "h3"
+  href: string
+  className?: string
+  children: ReactNode
+}) {
+  return (
+    <Title data-slot="card-title" className={cn("font-semibold text-xl leading-none", className)}>
+      <a href={href} className="after:absolute after:inset-0 hover:underline">
+        {children}
+      </a>
+    </Title>
+  )
+}
+
 /** A list-page teaser: title (linked), description, tags, author and reading time. */
 export function PostCard({
   href,
@@ -56,7 +84,7 @@ export function PostCard({
   author,
   tags,
   featured,
-  headingAs: Title = "h2",
+  headingAs = "h2",
   featuredLabel = "Featured",
   readingTime,
   dateLocale,
@@ -72,11 +100,7 @@ export function PostCard({
     <Card
       data-slot="post-card"
       data-featured={featured ? "" : undefined}
-      className={cn(
-        "relative transition-colors hover:border-foreground/20",
-        featured && "border-primary/40 bg-primary/5",
-        className
-      )}
+      className={cn(cardClassName, featured && "border-primary/40 bg-primary/5", className)}
     >
       {media && (
         <div
@@ -88,18 +112,9 @@ export function PostCard({
       )}
       <CardHeader>
         {featured && <Badge className="mb-2 w-fit">{featuredLabel}</Badge>}
-        <Title
-          data-slot="card-title"
-          className={cn("font-semibold text-xl leading-none", titleClassName)}
-        >
-          {/* The stretched link: `after:inset-0` positions relative to the `relative` Card
-              above (the anchor itself stays static), so the whole card is clickable while
-              staying valid HTML — no nested <a>. Tags below carry their own links and escape
-              above this overlay with `relative z-10`. */}
-          <a href={href} className="after:absolute after:inset-0 hover:underline">
-            {title}
-          </a>
-        </Title>
+        <CardTitleLink as={headingAs} href={href} className={titleClassName}>
+          {title}
+        </CardTitleLink>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       {tags.length > 0 && (
@@ -134,6 +149,58 @@ export function PostCard({
         <time dateTime={toISODate(date)}>{formatPostDate(date, dateLocale)}</time>
         <span aria-hidden="true">·</span>
         <span>{readingTime ?? `${readingMinutes} min read`}</span>
+      </CardFooter>
+    </Card>
+  )
+}
+
+export type PageCardProps = {
+  href: string
+  title: string
+  description: string
+  /** The page's last update. */
+  date: Date
+  /** The words before the date, already worded ("Last updated"). */
+  dateLabel: string
+  /** The title's heading level: `h2` in a list (the default), `h3` under a section's own `h2`. */
+  headingAs?: "h2" | "h3"
+  /** The date's `Intl` locale. Defaults to en-US. */
+  dateLocale?: string
+  /** Merged onto the card. */
+  className?: string
+  /** Merged onto the title. */
+  titleClassName?: string
+}
+
+/**
+ * `PostCard`'s look for a page that is not a post — a title (linked, the whole card clickable),
+ * its description and a labelled date ("Last updated <date>"), with no author, tags or reading
+ * time. A sibling rather than a `PostCard` with optional fields, so the blog's cards keep their
+ * required props and their markup (pinned in `post-card.test.tsx`).
+ */
+export function PageCard({
+  href,
+  title,
+  description,
+  date,
+  dateLabel,
+  headingAs = "h2",
+  dateLocale,
+  className,
+  titleClassName,
+}: PageCardProps) {
+  return (
+    <Card data-slot="page-card" className={cn(cardClassName, className)}>
+      <CardHeader>
+        <CardTitleLink as={headingAs} href={href} className={titleClassName}>
+          {title}
+        </CardTitleLink>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardFooter className="text-sm text-muted-foreground">
+        <p>
+          {dateLabel} <time dateTime={toISODate(date)}>{formatPostDate(date, dateLocale)}</time>
+        </p>
       </CardFooter>
     </Card>
   )

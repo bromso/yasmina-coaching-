@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test"
 import { createLegal, type LegalDoc } from "@repo/content/legal"
-import { LEGAL_PAGES } from "@repo/sites/legal"
+import { LEGAL_PAGES, type LegalPageId, legalPath } from "@repo/sites/legal"
 import type { mdxComponents } from "@repo/ui/components/mdx"
 import type { ComponentType, ReactNode } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
@@ -10,6 +10,7 @@ import { IndexView } from "./index-view"
 import { LegalView, type LegalViewProps } from "./legal-view"
 
 const legal = createLegal(allInputs(), LEGAL_PAGES, { rootLocale: "sv" })
+const pages = Object.keys(LEGAL_PAGES) as LegalPageId[]
 
 /** The compiled MDX as fumadocs hands it over: its `mark` (the placeholder plugin's output) and
  * `p` come from the components it is given. */
@@ -28,7 +29,11 @@ function render(doc: LegalDoc, props: Partial<LegalViewProps> = {}): string {
     <LegalView
       doc={doc}
       Body={Body}
-      toc={[{ title: "Vem vi är", url: "#vem-vi-ar", depth: 2 }]}
+      toc={[
+        { title: "Vem vi är", url: "#vem-vi-ar", depth: 2 },
+        { title: "Kakor", url: "#kakor", depth: 3 },
+        { title: "Dina rättigheter", url: "#dina-rattigheter", depth: 2 },
+      ]}
       ui={UI[doc.locale]}
       draft
       {...props}
@@ -50,11 +55,29 @@ describe("LegalView", () => {
     expect(html).toContain("Första utkastet.")
   })
 
-  test("lists the body's headings and the change log as its contents", () => {
+  test("one table of contents: each h2/h3 of the body, then the change log, following the reader", () => {
     const html = render(sv)
-    expect(html).toContain('aria-label="Innehåll"')
-    expect(html).toContain('href="#vem-vi-ar"')
-    expect(html).toContain('href="#changes"')
+    // One nav only: the contents list inline below lg is the same element as the right-hand
+    // column from lg up, never a second copy.
+    expect(html.match(/<nav /g)).toHaveLength(1)
+    const toc = html.slice(html.indexOf('<div data-slot="toc-active"'), html.indexOf("</nav>"))
+    expect(toc).toContain('<nav data-slot="toc" aria-label="Innehåll"')
+    const hrefs = [...toc.matchAll(/<a href="([^"]+)"/g)].map((match) => match[1])
+    expect(hrefs).toEqual(["#vem-vi-ar", "#kakor", "#dina-rattigheter", "#changes"])
+    // The h3 nests under its h2.
+    expect(toc).toMatch(/Vem vi är<\/a><ul class="[^"]*pl-4/)
+    // Nothing in it animates (prefers-reduced-motion).
+    expect(toc).not.toMatch(/transition|animate-/)
+  })
+
+  test("the contents sit inline on narrow screens and in a sticky column below the header from lg", () => {
+    const html = render(sv)
+    expect(html).toMatch(/class="[^"]*lg:grid-cols-\[minmax\(0,1fr\)_14rem\]/)
+    const column = html.match(/<div class="([^"]*)"><div data-slot="toc-active"/)?.[1] ?? ""
+    expect(column).toContain("lg:sticky")
+    expect(column).toContain("lg:top-(--sticky-header-offset)")
+    expect(column).toContain("lg:col-start-2")
+    expect(column).not.toMatch(/(^|\s)(hidden|sticky)(\s|$)/)
   })
 
   test("shows the draft notice only while in draft", () => {
@@ -77,18 +100,35 @@ describe("LegalView", () => {
 })
 
 describe("IndexView", () => {
-  test("links all four pages with their last update, in LEGAL_PAGES order", () => {
+  test("four cards in the blog's look, each a heading link to its page with its last update", () => {
     const html = renderToStaticMarkup(<IndexView locale="sv" docs={legal.inLocale("sv")} draft />)
-    const hrefs = [...html.matchAll(/<a href="([^"]+)"/g)].map((match) => match[1])
+    const cards = html.split('<article data-slot="page-card"').slice(1)
+    expect(cards).toHaveLength(4)
+    const hrefs = cards.map((card) => card.match(/<h3 [^>]*><a href="([^"]+)"/)?.[1])
+    expect(hrefs).toEqual(pages.map((page) => legalPath(page, "sv")))
     expect(hrefs).toEqual(["/integritet", "/villkor", "/tillganglighet", "/foretaget"])
-    expect(html.match(/<time dateTime="2026-11-12"[^>]*>12 nov. 2026<\/time>/g)).toHaveLength(4)
-    expect(html).toContain(">privacy (sv)</a>")
+    for (const card of cards) {
+      expect(card).toMatch(
+        /Senast uppdaterad <time dateTime="2026-11-12"[^>]*>12 nov. 2026<\/time>/
+      )
+      expect(card).toContain("rounded-3xl")
+      expect(card).toContain("font-display")
+    }
+    expect(html).toContain(">privacy (sv)</a></h3>")
+    expect(html).toContain('data-slot="card-description"')
   })
 
   test("in English, under /en", () => {
     const html = renderToStaticMarkup(<IndexView locale="en" docs={legal.inLocale("en")} draft />)
-    expect(html).toContain('<a href="/en/privacy"')
-    expect(html).toContain("Last updated")
+    const hrefs = [...html.matchAll(/<h3 [^>]*><a href="([^"]+)"/g)].map((match) => match[1])
+    expect(hrefs).toEqual(pages.map((page) => legalPath(page, "en")))
+    expect(html).toContain('Last updated <time dateTime="2026-11-12"')
+  })
+
+  test("the draft notice sits above the cards", () => {
+    const html = renderToStaticMarkup(<IndexView locale="sv" docs={legal.inLocale("sv")} draft />)
+    expect(html.indexOf('role="note"')).toBeGreaterThan(-1)
+    expect(html.indexOf('role="note"')).toBeLessThan(html.indexOf('data-slot="page-card"'))
   })
 
   test("shows the draft notice in both languages only while in draft", () => {
