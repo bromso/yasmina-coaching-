@@ -16,6 +16,7 @@ import {
   INVOICE_ADDRESS_MAX,
   isOwnManageUrl,
   notesWithBilling,
+  packageExtension,
   parseAvailabilityQuery,
   paymentOf,
   requestBookingCore,
@@ -360,10 +361,67 @@ describe("bookCore and payment", () => {
       expect(sent.notes).toBeUndefined()
     }
     const extra = await bookCore(
-      { api },
-      fields("package_6", { packageId: "12", paymentMethod: "invoice" })
+      { api: { ...api, manage: holder } },
+      fields("package_6", { manageToken: TOKEN, paymentMethod: "invoice" })
     )
     expect(extra).toEqual({ ok: true, redirectTo: doneUrl("BK-7", created.manageUrl, "member") })
+  })
+
+  test("a forged or unknown manage token gets the normal flow: payment and all", async () => {
+    for (const manage of [unknown, holder, undefined]) {
+      // `holder` with a token of the wrong shape, `unknown` with the right one, or no lookup.
+      const token = manage === holder ? "short" : TOKEN
+      const out = await bookCore(
+        { api: { ...api, manage } },
+        fields("package_6", { manageToken: token })
+      )
+      expect(out).toMatchObject({
+        ok: false,
+        fieldErrors: { paymentMethod: BOOKING_FORMS.sv.check.method },
+      })
+    }
+  })
+})
+
+/** A manage token of the right shape, and `booking.manage.get` for its holder or for nobody. */
+const TOKEN = "t".repeat(43)
+const holder = {
+  get: async ({ token }: { token: string }) => {
+    if (token !== TOKEN) throw new ORPCError("NOT_FOUND", { defined: true, message: "x" })
+    return {
+      customer: { name: "Ada Lovelace", email: "ada@example.com", organisation: null },
+      bookings: [],
+      package: { offering: "package_6" as const, sessionsTotal: 6, sessionsBooked: 2 },
+    }
+  },
+}
+const unknown = {
+  get: async () => {
+    throw new ORPCError("NOT_FOUND", { defined: true, message: "x" })
+  },
+}
+
+describe("packageExtension", () => {
+  test("the token, only when it names a package of this offering with sessions left", async () => {
+    expect(await packageExtension(holder, "package_6", TOKEN)).toBe(TOKEN)
+    expect(await packageExtension(holder, "package_10", TOKEN)).toBeUndefined()
+    expect(await packageExtension(holder, "session", TOKEN)).toBeUndefined()
+    expect(await packageExtension(unknown, "package_6", TOKEN)).toBeUndefined()
+    expect(await packageExtension(holder, "package_6", "short")).toBeUndefined()
+    expect(await packageExtension(holder, "package_6", undefined)).toBeUndefined()
+    const full = {
+      get: async () => ({
+        ...(await holder.get({ token: TOKEN })),
+        package: { offering: "package_6" as const, sessionsTotal: 6, sessionsBooked: 6 },
+      }),
+    }
+    expect(await packageExtension(full, "package_6", TOKEN)).toBeUndefined()
+    const down = {
+      get: async () => {
+        throw new Error("network")
+      },
+    }
+    expect(await packageExtension(down, "package_6", TOKEN)).toBeUndefined()
   })
 })
 
@@ -1144,26 +1202,44 @@ describe("a start within the withdrawal period", () => {
     expect((sent as { earlyStart?: boolean }).earlyStart).toBeUndefined()
   })
 
-  test("a further session of a programme is sent with its package and needs no box", async () => {
-    let sent: unknown
-    const out = await book(
-      "sv",
-      form({
-        ...customer,
-        offering: "package_6",
-        audience: "private",
-        location: "video",
-        slots: [SOON],
-        packageId: "12",
-      }),
-      (input) => {
-        sent = input
-      }
-    )
-    // The api checks the package is this customer's; if not, it refuses the box like any order.
-    expect(out.ok).toBe(true)
-    expect(sent).toMatchObject({ packageId: 12 })
-    expect((sent as { earlyStart?: boolean }).earlyStart).toBeUndefined()
+  test("a further session of a programme, its token verified, is sent with it and needs no box", async () => {
+    const extra = (manage: typeof holder) => {
+      let sent: unknown
+      const out = bookCore(
+        {
+          locale: "sv",
+          now,
+          api: {
+            book: async (input) => {
+              sent = input
+              return created
+            },
+            manage,
+          },
+        },
+        form({
+          ...customer,
+          offering: "package_6",
+          audience: "private",
+          location: "video",
+          slots: [SOON],
+          manageToken: TOKEN,
+        })
+      )
+      return out.then((result) => ({ result, sent }))
+    }
+    const verified = await extra(holder)
+    // The api checks the token again; if it names no package, it refuses the box like any order.
+    expect(verified.result.ok).toBe(true)
+    expect(verified.sent).toMatchObject({ manageToken: TOKEN })
+    expect((verified.sent as { earlyStart?: boolean }).earlyStart).toBeUndefined()
+    // A forged token: the box (and the payment step) as for any new order; nothing is sent.
+    const forged = await extra(unknown)
+    expect(forged.sent).toBeUndefined()
+    expect(forged.result).toMatchObject({
+      ok: false,
+      fieldErrors: { earlyStart: BOOKING_FORMS.sv.check.earlyStart },
+    })
   })
 
   test("a group form with other errors is refused without reading the events", async () => {

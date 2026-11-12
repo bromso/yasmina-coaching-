@@ -1017,19 +1017,20 @@ function earlyStartAt(
 }
 
 /**
- * The package a booking adds sessions to (`packageId`), when it is this customer's: the same
- * offering, the same address, and room for every slot. `null` otherwise, and the order is then a
- * new purchase. Called under the calendar lock, so two orders cannot both take the last session.
+ * The package a booking adds sessions to: the one whose manage token the order carries
+ * (`manageToken`, from the "Book another" link on its manage page), which proves it is the
+ * holder's, when it is of the same offering and has room for every slot. `null` otherwise, and the
+ * order is then a new purchase, answered exactly as one. Called under the calendar lock, so two
+ * orders cannot both take the last session.
  */
 async function extendedPackage(
   tx: Pick<Context["db"], "booking">,
-  input: { offering: OfferingKey; packageId?: number; customer: { email: string } },
+  input: { offering: OfferingKey; manageToken?: string },
   sessions: number
 ) {
-  if (input.packageId === undefined) return null
-  const pkg = await tx.booking.packages.find(input.packageId)
+  if (input.manageToken === undefined) return null
+  const pkg = await tx.booking.packages.byToken(tokenHash(input.manageToken))
   if (!pkg || pkg.offering !== input.offering) return null
-  if (pkg.customer_email.toLowerCase() !== input.customer.email.toLowerCase()) return null
   const booked = await tx.booking.packages.sessionsBooked(pkg.id)
   return booked + sessions <= pkg.sessions_total ? pkg : null
 }
@@ -4451,8 +4452,10 @@ export const router = api.router({
           engine.busy.push(slot)
         }
         // A further session of a programme already bought is part of that purchase, and so opens
-        // no new right of withdrawal; any package that is not this customer's is ignored.
+        // no new right of withdrawal; a token that names no such package is ignored.
         const extending = await extendedPackage(tx, input, slots.length)
+        // Its sessions join the package's own manage page; a new order gets the fresh token.
+        const rowsHash = extending ? extending.manage_token_hash : hash
         // Judged from the slots just checked, never from the client: see `earlyStartAt`.
         const earlyStart = extending ? null : earlyStartAt(input, input.offering, sorted, now)
         if (earlyStart === "missing") return "earlyStart" as const
@@ -4487,7 +4490,7 @@ export const router = api.router({
             venue: null,
             packageId: pkg?.id ?? null,
             groupEventId: null,
-            manageTokenHash: hash,
+            manageTokenHash: rowsHash,
             ipHash: context.clientId,
             locale,
             createdAt,
@@ -4498,7 +4501,10 @@ export const router = api.router({
           ids.push(id)
         }
         const reference = bookingReference(ids[0] as number)
-        const manageUrl = manageUrlFor(context.wwwUrl, token)
+        const manageUrl = manageUrlFor(
+          context.wwwUrl,
+          extending && input.manageToken ? input.manageToken : token
+        )
         const label = offeringLabel(input.offering, locale)
         const [firstSlot, ...rest] = slots
         await enqueueMail(
@@ -4547,7 +4553,10 @@ export const router = api.router({
           }),
           { tx, replyTo: input.customer.email }
         )
-        return { ids, pkg, reference, manageUrl }
+        const sessionsBooked = extending
+          ? await tx.booking.packages.sessionsBooked(extending.id)
+          : ids.length
+        return { ids, pkg, reference, manageUrl, rowsHash, sessionsBooked }
       })
       if (result === "taken") {
         throw errors.CONFLICT({ message: apiMessage(context, "bookingSlotTaken") })
@@ -4558,17 +4567,16 @@ export const router = api.router({
           data: { field: BOOKING_EARLY_START_FIELD },
         })
       }
-      const rows = await context.db.booking.byToken(hash)
+      const rows = await context.db.booking.byToken(result.rowsHash)
       return {
         reference: result.reference,
         manageUrl: result.manageUrl,
         bookings: rows.map((row) => toBookingSummary(row, now)),
         package: result.pkg
           ? {
-              id: result.pkg.id,
               offering: input.offering,
               sessionsTotal: offering.sessions,
-              sessionsBooked: result.ids.length,
+              sessionsBooked: result.sessionsBooked,
             }
           : null,
       }
@@ -4796,7 +4804,6 @@ export const router = api.router({
           bookings: rows.map((row) => toBookingSummary(row, now)),
           package: pkg
             ? {
-                id: pkg.id,
                 offering: pkg.offering,
                 sessionsTotal: pkg.sessions_total,
                 sessionsBooked: await context.db.booking.packages.sessionsBooked(pkg.id),

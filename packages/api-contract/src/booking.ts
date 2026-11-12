@@ -129,6 +129,8 @@ export {
 }
 
 const Id = z.number().int().positive()
+/** A manage link's token as the customer holds it (the api stores only its hash). */
+const ManageToken = z.string().min(20).max(200)
 const CoercedId = z.coerce.number().int().positive()
 const Iso = z.iso.datetime()
 /** `YYYY-MM-DD` in `BOOKING_TIMEZONE`. */
@@ -224,12 +226,14 @@ export const BookingCreateSchema = z
     termsAccepted: TermsAccepted,
     earlyStart: EarlyStart,
     /**
-     * A further session of a programme already bought (`?package=<id>` from the manage page).
-     * `apps/api` honours it only for a package of the same offering and address with sessions
-     * left: the session is then part of that purchase, with no new right of withdrawal and no
-     * early-start consent. Any other id is ignored, and the order is judged as a new purchase.
+     * A further session of a programme already bought: the package's manage token (the "Book
+     * another" link on its manage page, `?manage=<token>`), which proves the order is the
+     * package holder's. `apps/api` honours it only for a package of the same offering with room
+     * for every slot; the sessions are then part of that purchase (no new right of withdrawal, no
+     * early-start consent) and appear on its manage page. Any other token is ignored and the
+     * order is a new purchase, answered exactly as one, so nothing tells whether a package exists.
      */
-    packageId: Id.optional(),
+    manageToken: ManageToken.optional(),
   })
   .superRefine((v, ctx) => {
     const offering = OFFERINGS[v.offering]
@@ -253,7 +257,6 @@ export const BookingCreateSchema = z
 export type BookingCreateInput = z.infer<typeof BookingCreateSchema>
 
 export const BookingPackageSummarySchema = z.object({
-  id: Id,
   offering: OfferingKeySchema,
   sessionsTotal: z.number().int().positive(),
   /** Sessions already placed on the calendar (confirmed, not cancelled). */
@@ -338,7 +341,7 @@ export const BookingRequestResultSchema = z.object({
 
 // ── Manage (token link) ────────────────────────────────────────────────────────────────────────
 
-export const BookingManageSchema = z.object({ token: z.string().min(20).max(200) })
+export const BookingManageSchema = z.object({ token: ManageToken })
 export const BookingManageResultSchema = z.object({
   customer: z.object({
     name: z.string(),

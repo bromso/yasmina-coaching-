@@ -93,7 +93,9 @@ describe("booking flows", () => {
       if ((MEMBER_OFFERING_KEYS as readonly string[]).includes(key)) expect(flow).toBe("member")
       else expect(flow).toBe(OFFERINGS[key].kind)
     }
-    expect(flowFor("package_6", "42")).toBe("member")
+    // A further programme session, once the page has verified its manage token.
+    expect(flowFor("package_6", true)).toBe("member")
+    expect(flowFor("package_6", false)).toBe("instant")
     expect(paysIn("instant")).toBe(true)
     expect(paysIn("group")).toBe(true)
     expect(paysIn("request")).toBe(false)

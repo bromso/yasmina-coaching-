@@ -4,6 +4,7 @@ import {
   BookingAvailabilitySchema,
   BookingCancelSchema,
   BookingCreateSchema,
+  BookingManageSchema,
   BookingRequestSchema,
   BookingReserveSchema,
 } from "@repo/api-contract"
@@ -50,7 +51,10 @@ export const GENERIC_FAILURE: Record<Locale, string> = {
 export type BookingFormState = FormState & { code?: string }
 export type BookingOutcome = { ok: true; redirectTo: string } | (BookingFormState & { ok: false })
 
-export type BookApi = Pick<ApiClient["booking"], "book">
+/** `booking.manage.get`, which proves a manage token is a package holder's (`packageExtension`). */
+export type ManageApi = Pick<ApiClient["booking"]["manage"], "get">
+/** `manage` is optional: without it no manage token is ever taken as verified. */
+export type BookApi = Pick<ApiClient["booking"], "book"> & { manage?: ManageApi }
 /** `groupEvents` dates the ticked events, so a missing `earlyStart` is refused before the write. */
 export type ReserveApi = Pick<ApiClient["booking"], "reserve" | "groupEvents">
 export type RequestApi = Pick<ApiClient["booking"], "request">
@@ -125,7 +129,7 @@ export function paymentOf(
   offering: string,
   audience: string,
   locale: Locale = SITE_LOCALE,
-  packageId?: string
+  extending = false
 ): Payment {
   const values = {
     paymentMethod: str(fd, "paymentMethod"),
@@ -134,7 +138,7 @@ export function paymentOf(
     invoiceAddress: str(fd, "invoiceAddress"),
   }
   const key = offeringKey(offering)
-  if (!key || !paysIn(flowFor(key, packageId))) return { ok: true, values }
+  if (!key || !paysIn(flowFor(key, extending))) return { ok: true, values }
   const copy = BOOKING_FORMS[locale]
   const priced = amountFor(key) !== null
   const method = paidFor(values.paymentMethod, priced)
@@ -290,9 +294,32 @@ function failure(
 }
 
 /**
+ * The manage token of a "Book another" link (`?manage=<token>`), when `booking.manage.get` says it
+ * is a package of `offering` with a session left; `undefined` for a token of the wrong shape, one
+ * the api does not know, another offering's package, a full one, or any failure. Only then does a
+ * booking skip the payment step and the early-start pre-check; the api checks the token again.
+ */
+export async function packageExtension(
+  api: ManageApi | undefined,
+  offering: string,
+  token: string | undefined
+): Promise<string | undefined> {
+  if (!api || !token || !BookingManageSchema.safeParse({ token }).success) return undefined
+  try {
+    const { package: pkg } = await api.get({ token })
+    return pkg && pkg.offering === offering && pkg.sessionsBooked < pkg.sessionsTotal
+      ? token
+      : undefined
+  } catch {
+    return undefined
+  }
+}
+
+/**
  * An instant booking (a session or a programme's first sessions). `slots` arrives as one hidden
- * input per picked ISO start. `packageId` (from `?package=` on the page) marks a further session
- * of a programme already bought; the api decides whether the package is this customer's.
+ * input per picked ISO start. `manageToken` (the page's verified `?manage=`) marks a further
+ * session of a programme already bought; it counts only once `packageExtension` verifies it
+ * again here, and the api checks it a third time.
  */
 export async function bookCore(
   deps: { api: BookApi; locale?: Locale; now?: () => Date },
@@ -309,18 +336,15 @@ export async function bookCore(
     phone: str(fd, "phone"),
     notes: str(fd, "notes"),
     slots: slots.join(","),
-    packageId: str(fd, "packageId"),
     terms: str(fd, "terms"),
     earlyStart: str(fd, "earlyStart"),
   }
-  const payment = paymentOf(
-    fd,
+  const manageToken = await packageExtension(
+    deps.api.manage,
     values.offering,
-    values.audience,
-    deps.locale,
-    values.packageId || undefined
+    optional(str(fd, "manageToken"))
   )
-  const packageId = /^[1-9]\d{0,11}$/.test(values.packageId) ? Number(values.packageId) : undefined
+  const payment = paymentOf(fd, values.offering, values.audience, deps.locale, !!manageToken)
   const parsed = BookingCreateSchema.safeParse({
     offering: values.offering,
     slots,
@@ -330,13 +354,13 @@ export async function bookCore(
     notes: notesWithBilling(values.notes, payment.ok ? payment.block : undefined),
     termsAccepted: true,
     earlyStart: earlyStartOf(fd),
-    packageId,
+    manageToken,
   })
   const terms = termsRefusal(fd, deps.locale)
   const now = deps.now ? deps.now() : new Date()
   // A further session of a programme already bought opens no new right, so it needs no box. The
-  // api checks the package is this customer's and otherwise refuses the box like any new order.
-  const early = packageId ? {} : earlyStartRefusal(fd, values.audience, slots, now, deps.locale)
+  // api checks the token again and otherwise refuses the box like any new order.
+  const early = manageToken ? {} : earlyStartRefusal(fd, values.audience, slots, now, deps.locale)
   const all = { ...values, ...payment.values }
   if (!parsed.success || !payment.ok || terms.terms || early.earlyStart) {
     const fieldErrors = {
@@ -349,7 +373,7 @@ export async function bookCore(
   }
   try {
     const { reference, manageUrl } = await deps.api.book(parsed.data)
-    const flow = flowFor(parsed.data.offering, values.packageId || undefined)
+    const flow = flowFor(parsed.data.offering, !!manageToken)
     return {
       ok: true,
       redirectTo: doneUrl(

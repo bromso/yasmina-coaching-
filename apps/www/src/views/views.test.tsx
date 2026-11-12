@@ -15,6 +15,7 @@ const { InnerResearchView } = await import("./inner-research-view")
 const { InnerServiceView } = await import("./inner-service-view")
 const { OfferingView } = await import("./offering-view")
 const { DoneView } = await import("./done-view")
+const { ManageView } = await import("./manage-view")
 const { LocaleProvider } = await import("@/components/booking/locale-provider")
 const { PaymentError, PaymentStep } = await import("@/components/booking/payment-step")
 const { stepWithError, withClientErrors } = await import("@/components/booking/step-panel")
@@ -212,7 +213,7 @@ describe("the box for a start within the withdrawal period", () => {
       const html = render(
         <OfferingView
           offering="package_6"
-          packageId="12"
+          manageToken={"t".repeat(43)}
           audience="private"
           locale={locale}
           minDate={minDate}
@@ -314,7 +315,13 @@ describe("the booking journeys' steps", () => {
     test(`${locale}: members' sessions and programme extras have three steps and no payment`, () => {
       for (const node of [
         <OfferingView key="m" offering="inner_session" locale={locale} {...props} />,
-        <OfferingView key="p" offering="package_6" packageId="12" locale={locale} {...props} />,
+        <OfferingView
+          key="p"
+          offering="package_6"
+          manageToken={"t".repeat(43)}
+          locale={locale}
+          {...props}
+        />,
       ]) {
         const html = render(node)
         expect(html).toContain(`aria-label="${form.stepOf(1, 3)}"`)
@@ -636,5 +643,24 @@ describe("ContactDoneView", () => {
     for (const item of CONTACT.sv.done.whatNow.items) expect(html).toContain(item)
     expect(html).toContain('aria-current="step"')
     expect(count(html, /<h1[\s>]/g)).toBe(1)
+  })
+})
+
+describe("the manage page's link to the next session", () => {
+  test("carries the manage token, never the package's id", () => {
+    const token = "t".repeat(43)
+    const html = render(
+      <ManageView
+        token={token}
+        locale="sv"
+        data={{
+          customer: { name: "Ada Lovelace", email: "ada@example.com", organisation: null },
+          bookings: [],
+          package: { offering: "package_6", sessionsTotal: 6, sessionsBooked: 2 },
+        }}
+      />
+    )
+    expect(html).toContain(`href="/book/package_6?manage=${token}"`)
+    expect(html).not.toContain("?package=")
   })
 })

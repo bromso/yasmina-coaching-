@@ -193,11 +193,8 @@ describe("booking.book", () => {
       customer: { ...customer, organisation: "Varbergs kommun" },
       location: "varberg",
     })
-    expect(result.package).toMatchObject({
-      offering: "package_6",
-      sessionsTotal: 6,
-      sessionsBooked: 2,
-    })
+    // The package's id is never shown: only the manage token proves it is the customer's.
+    expect(result.package).toEqual({ offering: "package_6", sessionsTotal: 6, sessionsBooked: 2 })
     expect(result.bookings.map((b) => b.startsAt)).toEqual([
       "2026-01-07T08:00:00.000Z",
       "2026-01-14T08:00:00.000Z",
@@ -1013,9 +1010,9 @@ describe("a start within the withdrawal period", () => {
     expect(mail?.text).not.toContain(EARLY_EN)
   })
 
-  test("a further session of a programme already bought is part of it: no consent, no new package", async () => {
+  test("a further session of a programme, with its manage token, books onto that package", async () => {
     clock = BOOKED
-    const order = (email: string, slots: string[], extra: { packageId?: number } = {}) =>
+    const order = (email: string, slots: string[], extra: { manageToken?: string } = {}) =>
       anon().booking.book({
         termsAccepted: true,
         offering: "package_6",
@@ -1027,46 +1024,95 @@ describe("a start within the withdrawal period", () => {
       })
     // The programme itself, its first session after the period: a new purchase.
     const bought = await order("early-extra@example.com", ["2026-03-25T13:00:00.000Z"])
+    const manageToken = tokenOf(bought.manageUrl)
     const first = await app.db.booking.find(bought.bookings[0]?.id as number)
     const packageId = first?.package_id as number
-    expect(packageId).toEqual(expect.any(Number))
 
-    // The next session, inside the period and without the box: booked onto the same package.
-    const next = await order("Early-Extra@example.com", ["2026-03-12T13:00:00.000Z"], {
-      packageId,
+    // The next session, inside the period and without the box: on the same package, under the
+    // same manage token, so it shows on the original manage page.
+    const next = await order("early-extra@example.com", ["2026-03-12T13:00:00.000Z"], {
+      manageToken,
     })
     const row = await app.db.booking.find(idOf(next.reference))
     expect(row?.package_id).toBe(packageId)
+    expect(row?.manage_token_hash).toBe(first?.manage_token_hash as string)
     expect(row?.early_start_requested_at).toBeNull()
-    expect(await app.db.booking.packages.sessionsBooked(packageId)).toBe(2)
+    expect(next.manageUrl).toBe(bought.manageUrl)
+    expect(next.package).toEqual({ offering: "package_6", sessionsTotal: 6, sessionsBooked: 2 })
+    const manage = await anon().booking.manage.get({ token: manageToken })
+    expect(manage.bookings).toHaveLength(2)
+    expect(manage.package).toEqual({ offering: "package_6", sessionsTotal: 6, sessionsBooked: 2 })
     const [mail] = await mailsTo(
       app,
       "early-extra@example.com",
       bookingConfirmedSubject(next.reference)
     )
-    expect(mail?.text).toContain("The terms for your booking:")
+    expect(mail?.text).toContain(bought.manageUrl)
     expect(mail?.text).not.toContain(WITHDRAWAL_EN)
     expect(mail?.text).not.toContain(EARLY_EN)
 
-    // Someone else's package, or another offering's, is not theirs to extend: a new purchase,
-    // judged as one.
-    for (const [email, offering] of [
-      ["early-extra-other@example.com", "package_6"],
-      ["early-extra@example.com", "package_10"],
-    ] as const) {
-      const [error] = await safeCall(() =>
+    // Another offering's package is not this order's to extend: a new purchase.
+    const [other] = await safeCall(() =>
+      anon().booking.book({
+        termsAccepted: true,
+        offering: "package_10",
+        slots: ["2026-03-13T13:00:00.000Z"],
+        audience: "private",
+        customer: { ...customer, email: "early-extra@example.com" },
+        location: "video",
+        manageToken,
+      })
+    )
+    expect(other?.data).toEqual({ field: "earlyStart" })
+  })
+
+  test("the right address without the token is a new purchase, answered like any other", async () => {
+    clock = BOOKED
+    const bought = await anon().booking.book({
+      termsAccepted: true,
+      offering: "package_6",
+      slots: ["2026-03-26T13:00:00.000Z"],
+      audience: "private",
+      customer: { ...customer, email: "early-owner@example.com" },
+      location: "video",
+    })
+    const owned = await app.db.booking.find(bought.bookings[0]?.id as number)
+    const attempt = (slot: string, extra: { manageToken?: string; earlyStart?: boolean }) =>
+      safeCall(() =>
         anon().booking.book({
           termsAccepted: true,
-          offering,
-          slots: ["2026-03-13T13:00:00.000Z"],
+          offering: "package_6",
+          slots: [slot],
           audience: "private",
-          customer: { ...customer, email },
+          customer: { ...customer, email: "early-owner@example.com" },
           location: "video",
-          packageId,
+          // A package id in the input is not part of the contract: stripped, never honoured.
+          ...({ packageId: owned?.package_id } as object),
+          ...extra,
         })
       )
-      expect(error?.data).toEqual({ field: "earlyStart" })
-    }
+    // Inside the period, a missing or a forged token gets the same refusal as any new order.
+    const forged = "x".repeat(43)
+    const [missing] = await attempt("2026-03-12T08:00:00.000Z", {})
+    const [wrong] = await attempt("2026-03-12T08:00:00.000Z", { manageToken: forged })
+    expect(missing?.data).toEqual({ field: "earlyStart" })
+    expect({ code: wrong?.code, message: wrong?.message, data: wrong?.data }).toEqual({
+      code: missing?.code,
+      message: missing?.message,
+      data: missing?.data,
+    })
+    // With the box ticked, a forged token books a new package of its own, under a new token.
+    const [, made] = await attempt("2026-03-12T08:00:00.000Z", {
+      manageToken: forged,
+      earlyStart: true,
+    })
+    const row = await app.db.booking.find(idOf(made?.reference as string))
+    expect(row?.package_id).not.toBe(owned?.package_id)
+    expect(row?.manage_token_hash).not.toBe(owned?.manage_token_hash as string)
+    expect(row?.early_start_requested_at).toBe(BOOKED.toISOString())
+    expect(made?.manageUrl).not.toBe(bought.manageUrl)
+    expect(made?.package).toEqual({ offering: "package_6", sessionsTotal: 6, sessionsBooked: 1 })
+    expect(await app.db.booking.packages.sessionsBooked(owned?.package_id as number)).toBe(1)
   })
 
   test("a programme's package takes no more sessions than it covers", async () => {
@@ -1087,7 +1133,6 @@ describe("a start within the withdrawal period", () => {
       customer: { ...customer, email: "early-full@example.com" },
       location: "video",
     })
-    const packageId = (await app.db.booking.find(full.bookings[0]?.id as number))?.package_id
     // A seventh session is a new purchase: inside the period it needs the box.
     const [error] = await safeCall(() =>
       anon().booking.book({
@@ -1097,7 +1142,7 @@ describe("a start within the withdrawal period", () => {
         audience: "private",
         customer: { ...customer, email: "early-full@example.com" },
         location: "video",
-        packageId: packageId as number,
+        manageToken: tokenOf(full.manageUrl),
       })
     )
     expect(error?.data).toEqual({ field: "earlyStart" })

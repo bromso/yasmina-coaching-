@@ -12,7 +12,7 @@ browser can import it through `@repo/api-contract/booking-limits`). Each offerin
 
 | Kind | Offerings | How it is booked |
 |---|---|---|
-| `instant` | `session`, `package_6`, `package_10`, `inner_start_coaching`, `inner_start_mentoring`, `inner_start_lifestyle`, `inner_session`, `inner_mentoring_session` | Pick free slots on the calendar; confirmed at once. A package books one or more sessions now; the rest are placed later from the manage link (`?package=<id>`, sent as `packageId`: see *A purchase already made* below). |
+| `instant` | `session`, `package_6`, `package_10`, `inner_start_coaching`, `inner_start_mentoring`, `inner_start_lifestyle`, `inner_session`, `inner_mentoring_session` | Pick free slots on the calendar; confirmed at once. A package books one or more sessions now; the rest are placed later from the manage link (`?manage=<token>`, sent as `manageToken`: see *A purchase already made* below). |
 | `group` | `group`, `inner_group` | Reserve seats at a `group_events` row Yasmina scheduled, one date or several of a weekly series. |
 | `request` | `workshop`, `enterprise`, `keynote` | Propose up to three dates (morning / afternoon / full day), attendees, venue and a message; Yasmina confirms a time from `/admin/bookings`. Every request kind is B2B: an organisation is required. |
 
@@ -98,13 +98,28 @@ consent, and a request (organisation-only) never asks.
 **A purchase already made.** The right of withdrawal attaches to the contract, not to each session,
 so a booking that consumes an existing purchase gets neither the box nor the withdrawal line in its
 mail: a member's session (`MEMBER_OFFERING_KEYS`; `opensNewContract(offering)` is false, and
-`earlyStartRequired` says no), and a further session of a programme (`packageId`). The api honours
-`packageId` only for a package of the same offering and address with room for every slot
-(`extendedPackage`, under the calendar lock): the sessions are then booked onto that package rather
-than a new one. Any other id is ignored and the order is judged as a new purchase, so a forged id
-cannot skip the box. The www core and the instant form skip the box when `packageId` is set; when
-the api disagrees, its refusal shows the box as usual. The terms say so under *Ångerrätt*, with a
-placeholder for the lawyer.
+`earlyStartRequired` says no), and a further session of a programme. Ownership of the programme is
+proved by its manage token, never by an id or an address (package ids are sequential):
+
+- **The link.** The manage page's "Book another" link is `/book/<offering>?manage=<token>`, the
+  token already in the manage URL, so it exposes nothing new. No URL and no response carries a
+  package id (`BookingPackageSummary` has none).
+- **The page.** `/book/[offering]` asks `booking.manage.get` (`packageExtension` in
+  `src/lib/booking.ts`) whether the token holds a package of this offering with a session left.
+  Only then does it show the extension journey: one slot, no payment step, no early-start box, and
+  the token in a hidden `manageToken` field. A forged, unknown or spent token, or any failure,
+  gets the normal journey.
+- **The action.** `bookCore` verifies the posted token the same way before skipping the payment
+  step and the early-start pre-check, and sends it as `manageToken` (`BookingCreateSchema`).
+- **The api.** Inside the transaction, under the calendar lock, `extendedPackage` looks the package
+  up by `tokenHash(manageToken)` and requires the same offering and room for every slot. The new
+  rows take the package's id and its `manage_token_hash`, so they appear on the original manage
+  page, and the response and mail carry that page's URL. A missing or unmatched token is a new
+  purchase in every respect: payment, the early-start rule, the withdrawal line and a new package
+  under a fresh token. Its answer is the same as any new booking's, so nothing tells whether a
+  package exists.
+
+The terms say so under *Ångerrätt*, with a placeholder for the lawyer.
 
 - **The box.** `EarlyStartField` (`name="earlyStart"`, `value="on"`, required, error linked with
   `fieldAria`) sits under the terms box in the instant and group journeys, shown when a picked slot

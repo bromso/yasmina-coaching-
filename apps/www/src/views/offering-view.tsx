@@ -22,8 +22,11 @@ import { flowFor } from "@/lib/booking-flow"
 type OfferingViewProps = {
   offering: OfferingKey
   audience: BookingAudience
-  /** `?package=<id>`: an extra session on an existing programme (instant kinds only). */
-  packageId?: string
+  /**
+   * `?manage=<token>`, once the page has verified it (`packageExtension`): a further session on a
+   * programme already bought (instant kinds only). Unverified, it is left out.
+   */
+  manageToken?: string
   /** Tomorrow in the booking zone, the request form's earliest date. */
   minDate: string
   locale: Locale
@@ -37,7 +40,7 @@ type OfferingViewProps = {
 export function OfferingView({
   offering,
   audience,
-  packageId,
+  manageToken,
   minDate,
   locale,
 }: OfferingViewProps) {
@@ -47,7 +50,7 @@ export function OfferingView({
   const clipKey = OFFERING_CLIPS[offering]
   const clip = clipKey ? clipsFor(locale)[clipKey] : undefined
   const frame = "aspect-[16/10] w-full object-cover lg:aspect-[4/3]"
-  const flow = flowFor(offering, packageId)
+  const flow = flowFor(offering, Boolean(manageToken))
   const price = amountFor(offering)
   // The terms box's links: `legalUrl` reads the environment, so it runs here, on the server.
   const legalLinks = { terms: legalUrl("terms", locale), privacy: legalUrl("privacy", locale) }
@@ -114,7 +117,7 @@ export function OfferingView({
                   locations={spec.locations}
                   sessions={spec.sessions}
                   initialAudience={audience}
-                  packageId={packageId}
+                  manageToken={manageToken}
                   title={copy.title}
                   price={price}
                   flow={flow === "member" ? "member" : "instant"}

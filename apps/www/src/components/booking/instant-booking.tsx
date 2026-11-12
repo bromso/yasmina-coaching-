@@ -61,8 +61,11 @@ type InstantBookingProps = {
   /** How many sessions the offering covers; a package lets the visitor place up to this many now. */
   sessions: number
   initialAudience: BookingAudience
-  /** `?package=<id>` from a manage page: one extra session on an existing programme. */
-  packageId?: string
+  /**
+   * A "Book another" link's manage token, verified by the page: one further session on a
+   * programme already bought. Posted back so the action and the api can check it again.
+   */
+  manageToken?: string
   /** The offering's name, for the payment step's summary. */
   title: string
   /** Its fixed price, or `null` when it is priced in writing (invoice only). */
@@ -127,7 +130,7 @@ export function InstantBooking({
   locations,
   sessions,
   initialAudience,
-  packageId,
+  manageToken,
   title,
   price,
   flow,
@@ -137,7 +140,7 @@ export function InstantBooking({
   const locale = useLocale()
   const text = copy.instant
   const intl = INTL_LOCALE[locale]
-  const maxSlots = packageId ? 1 : sessions
+  const maxSlots = manageToken ? 1 : sessions
   const [state, action, pending] = useActionState(book, initialState)
   const [today, setToday] = useState<string | null>(null)
   const [month, setMonth] = useState<Date>(() => new Date())
@@ -242,7 +245,7 @@ export function InstantBooking({
   // A refusal naming the box (the api judges by its own clock) shows it whatever this one says.
   const needsEarlyStart =
     (audience === "private" &&
-      !packageId &&
+      !manageToken &&
       opensNewContract(offering) &&
       (picked.length === 0 ||
         earlyStartRequired(
@@ -293,20 +296,20 @@ export function InstantBooking({
       </noscript>
       {/* On the payment step the error shows beside the pay button instead. */}
       {step !== 3 && <FormMessage state={state} />}
-      {packageId && (
+      {manageToken && (
         <p className="rounded-2xl border border-border bg-background/70 px-4 py-3 text-sm">
           {text.packageExtraNote}
         </p>
       )}
 
       <input type="hidden" name="offering" value={offering} />
-      {packageId && <input type="hidden" name="packageId" value={packageId} />}
+      {manageToken && <input type="hidden" name="manageToken" value={manageToken} />}
       {picked.map((slot) => (
         <input key={slot.startsAt} type="hidden" name="slots" value={slot.startsAt} />
       ))}
 
       <StepPanel n={1} active={step === 1} heading={steps[0] ?? ""}>
-        {!packageId && sessions > 1 && (
+        {!manageToken && sessions > 1 && (
           <p className="text-muted-foreground text-sm">{text.packageHint(sessions)}</p>
         )}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[auto_1fr]">

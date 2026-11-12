@@ -193,7 +193,7 @@ describe("a start within the withdrawal period", () => {
     expect(earlyStartRequired("package_6", "private", [soon], now)).toBe(true)
   })
 
-  test("create takes an optional packageId: a further session of a programme already bought", () => {
+  test("create takes an optional manageToken: a further session of a programme already bought", () => {
     const create = {
       offering: "package_6",
       slots: ["2026-11-20T09:00:00.000Z"],
@@ -202,11 +202,14 @@ describe("a start within the withdrawal period", () => {
       location: "video",
       termsAccepted: true,
     }
-    expect(BookingCreateSchema.parse(create)).not.toHaveProperty("packageId")
-    expect(BookingCreateSchema.parse({ ...create, packageId: 7 }).packageId).toBe(7)
-    for (const packageId of [0, -1, 1.5, "7"]) {
-      expect(BookingCreateSchema.safeParse({ ...create, packageId }).success).toBe(false)
+    const token = "t".repeat(43)
+    expect(BookingCreateSchema.parse(create)).not.toHaveProperty("manageToken")
+    expect(BookingCreateSchema.parse({ ...create, manageToken: token }).manageToken).toBe(token)
+    for (const manageToken of ["short", 7, "t".repeat(201)]) {
+      expect(BookingCreateSchema.safeParse({ ...create, manageToken }).success).toBe(false)
     }
+    // A package id is no longer part of the contract, in or out.
+    expect(BookingCreateSchema.parse({ ...create, packageId: 7 })).not.toHaveProperty("packageId")
   })
 
   test("zonedDay is the Stockholm calendar day of an instant", () => {
