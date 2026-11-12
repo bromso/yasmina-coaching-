@@ -78,7 +78,7 @@ describe("LegalView", () => {
 
 describe("IndexView", () => {
   test("links all four pages with their last update, in LEGAL_PAGES order", () => {
-    const html = renderToStaticMarkup(<IndexView locale="sv" docs={legal.inLocale("sv")} />)
+    const html = renderToStaticMarkup(<IndexView locale="sv" docs={legal.inLocale("sv")} draft />)
     const hrefs = [...html.matchAll(/<a href="([^"]+)"/g)].map((match) => match[1])
     expect(hrefs).toEqual(["/integritet", "/villkor", "/tillganglighet", "/foretaget"])
     expect(html.match(/<time dateTime="2026-11-12"[^>]*>12 nov. 2026<\/time>/g)).toHaveLength(4)
@@ -86,8 +86,19 @@ describe("IndexView", () => {
   })
 
   test("in English, under /en", () => {
-    const html = renderToStaticMarkup(<IndexView locale="en" docs={legal.inLocale("en")} />)
+    const html = renderToStaticMarkup(<IndexView locale="en" docs={legal.inLocale("en")} draft />)
     expect(html).toContain('<a href="/en/privacy"')
     expect(html).toContain("Last updated")
+  })
+
+  test("shows the draft notice in both languages only while in draft", () => {
+    const sv = (draft: boolean) =>
+      renderToStaticMarkup(<IndexView locale="sv" docs={legal.inLocale("sv")} draft={draft} />)
+    const en = (draft: boolean) =>
+      renderToStaticMarkup(<IndexView locale="en" docs={legal.inLocale("en")} draft={draft} />)
+    expect(sv(true)).toMatch(/<div role="note"[^>]*>Utkast – granskas juridiskt<\/div>/)
+    expect(en(true)).toMatch(/<div role="note"[^>]*>Draft – under legal review<\/div>/)
+    expect(sv(false)).not.toContain('role="note"')
+    expect(en(false)).not.toContain('role="note"')
   })
 })

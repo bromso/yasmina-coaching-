@@ -30,7 +30,7 @@ export function indexRoute(locale: LegalLocale) {
     return (
       <>
         <PageHeader locale={locale} languageHref={indexPath(otherLocale(locale))} />
-        <IndexView locale={locale} docs={legal.inLocale(locale)} />
+        <IndexView locale={locale} docs={legal.inLocale(locale)} draft={isDraft()} />
       </>
     )
   }

@@ -1,16 +1,27 @@
 import type { LegalDoc } from "@repo/content/legal"
 import type { LegalLocale } from "@repo/sites/legal"
+import { DraftNotice } from "@repo/ui/components/draft-notice"
 import { formatPostDate, toISODate } from "@repo/ui/lib/post-date"
 import { UI } from "@/content/ui"
 
 /**
  * The index (`/`, `/en`): the app's name over its pages in `locale`, each linked with its
  * description and last update. `docs` is `legal.inLocale(locale)`, already in `LEGAL_PAGES` order.
+ * While the pages await legal review (`draft`, from `isDraft()`), the same notice as every page.
  */
-export function IndexView({ locale, docs }: { locale: LegalLocale; docs: LegalDoc[] }) {
+export function IndexView({
+  locale,
+  docs,
+  draft,
+}: {
+  locale: LegalLocale
+  docs: LegalDoc[]
+  draft: boolean
+}) {
   const ui = UI[locale]
   return (
     <main id="main" className="container flex max-w-3xl flex-col gap-10 py-12 md:py-16">
+      {draft && <DraftNotice>{ui.draft}</DraftNotice>}
       <header className="flex flex-col gap-3">
         <h1 className="text-balance break-words font-display font-normal text-4xl sm:text-6xl">
           {ui.title}
