@@ -70,6 +70,7 @@ import {
   WORKSPACE_TWO_FACTOR_REASON,
   workspaceChannel,
 } from "@repo/api-contract"
+import { TERMS_VERSION } from "@repo/api-contract/legal"
 import { formatUtcDate } from "@repo/i18n/dates"
 import { DEFAULT_LOCALE, isLocale, type Locale } from "@repo/i18n/locales"
 import type { FailureLimiter, RateLimiter } from "@repo/service-kit"
@@ -117,6 +118,8 @@ import {
   newBookingMailProps,
   newManageToken,
   offeringLabel,
+  termsMailProps,
+  termsUrlFor,
   toAdminBooking,
   toBlock,
   toSummary as toBookingSummary,
@@ -4441,6 +4444,8 @@ export const router = api.router({
             ipHash: context.clientId,
             locale,
             createdAt,
+            termsVersion: TERMS_VERSION,
+            termsAcceptedAt: createdAt,
           })
           ids.push(id)
         }
@@ -4468,6 +4473,7 @@ export const router = api.router({
               : undefined,
             cancelCutoffHours: BOOKING_CANCEL_CUTOFF_HOURS,
             memberBookingUrl: memberBookingUrlFor(context.wwwUrl, input.offering),
+            ...termsMailProps(input.audience, locale),
           },
           { tx, locale, replyTo: context.bookingEmail }
         )
@@ -4552,6 +4558,8 @@ export const router = api.router({
             ipHash: context.clientId,
             locale,
             createdAt,
+            termsVersion: TERMS_VERSION,
+            termsAcceptedAt: createdAt,
           })
           ids.push(id)
         }
@@ -4574,6 +4582,7 @@ export const router = api.router({
               ? rest.map((e) => `${e.title}: ${formatWhen(e.starts_at, e.ends_at, locale)}`)
               : undefined,
             cancelCutoffHours: BOOKING_CANCEL_CUTOFF_HOURS,
+            ...termsMailProps(input.audience, locale),
           },
           { tx, locale, replyTo: context.bookingEmail }
         )
@@ -4637,6 +4646,8 @@ export const router = api.router({
           ipHash: context.clientId,
           locale,
           createdAt: now.toISOString(),
+          termsVersion: TERMS_VERSION,
+          termsAcceptedAt: now.toISOString(),
         })
         const reference = bookingReference(id)
         const manageUrl = manageUrlFor(context.wwwUrl, token)
@@ -4649,6 +4660,8 @@ export const router = api.router({
             offeringLabel: offeringLabel(input.offering, locale),
             manageUrl,
             name: input.customer.name,
+            // Every request kind is an organisation's: the terms, never the right of withdrawal.
+            termsUrl: termsUrlFor(locale),
           },
           { tx, locale, replyTo: context.bookingEmail }
         )
@@ -5581,6 +5594,7 @@ export const router = api.router({
               manageUrl: manageUrlFor(context.wwwUrl, token),
               name: row.customer_name,
               cancelCutoffHours: BOOKING_CANCEL_CUTOFF_HOURS,
+              ...termsMailProps(row.audience, locale),
             },
             { tx, locale, replyTo: context.bookingEmail }
           )

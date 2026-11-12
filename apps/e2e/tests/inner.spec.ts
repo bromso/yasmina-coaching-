@@ -37,6 +37,7 @@ test("from the hub to a booked start call", async ({ page }) => {
 
   await page.getByLabel("Namn", { exact: true }).fill("Ada Lovelace")
   await page.getByLabel("E-post", { exact: true }).fill(email)
+  await page.getByRole("checkbox", { name: /jag har läst villkoren/i }).check()
   await page.getByRole("button", { name: /fortsätt till betalning/i }).click()
 
   // Payment: the start call has a fixed price, so all four methods are offered. Pay with the

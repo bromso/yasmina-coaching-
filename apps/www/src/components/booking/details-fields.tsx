@@ -7,10 +7,11 @@ import { useBookingCopy } from "@/components/booking/locale-provider"
 import { cn } from "@/lib/utils"
 
 /*
- * The fields every booking form shares: who is booking, where, and a note. Plain inputs and
- * native radios, so each form posts without JavaScript; the parents (client components) own
- * the `useActionState` and pass `state` down for errors and repopulation. Rendered only inside
- * those client forms, so they read their labels with `useBookingCopy()` (the page's language).
+ * The fields every booking form shares: who is booking, where, a note and the terms. Plain
+ * inputs and native radios, so each form posts without JavaScript; the parents (client
+ * components) own the `useActionState` and pass `state` down for errors and repopulation.
+ * Rendered only inside those client forms, so they read their labels with `useBookingCopy()`
+ * (the page's language).
  */
 
 export const value = (state: FormState, name: string, fallback = ""): string =>
@@ -212,6 +213,52 @@ export function NotesField({ state, label }: { state: FormState; label?: string 
         {...fieldAria("notes", state)}
       />
       <FieldError name="notes" state={state} />
+    </div>
+  )
+}
+
+/**
+ * The legal app's terms and privacy pages in the page's language. `legalUrl` reads the
+ * environment, so the server view computes both and passes them down as plain strings.
+ */
+export type TermsLinks = { terms: string; privacy: string }
+
+const legalLinkClass =
+  "font-medium underline underline-offset-4 hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+
+/**
+ * "I have read the terms and the privacy policy": a native, required checkbox (`terms`, posted as
+ * `on`), so it works without JavaScript; the server refuses the booking without it either way.
+ * Both links open in a new tab, so reading them never loses the booking in progress.
+ */
+export function TermsField({ state, links }: { state: FormState; links: TermsLinks }) {
+  const { terms } = useBookingCopy()
+  return (
+    <div className="grid gap-1">
+      <label className={cn(choiceClass, "items-start")}>
+        <input
+          type="checkbox"
+          name="terms"
+          value="on"
+          required
+          defaultChecked={value(state, "terms") === "on"}
+          className={cn(choiceInputClass, "mt-0.5")}
+          {...fieldAria("terms", state)}
+        />
+        <span>
+          {terms.before}
+          <a href={links.terms} target="_blank" rel="noopener" className={legalLinkClass}>
+            {terms.terms}
+            <span className="sr-only"> {terms.newTab}</span>
+          </a>
+          {terms.between}
+          <a href={links.privacy} target="_blank" rel="noopener" className={legalLinkClass}>
+            {terms.privacy}
+            <span className="sr-only"> {terms.newTab}</span>
+          </a>
+        </span>
+      </label>
+      <FieldError name="terms" state={state} />
     </div>
   )
 }

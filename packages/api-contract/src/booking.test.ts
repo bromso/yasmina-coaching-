@@ -1,11 +1,15 @@
 import { describe, expect, test } from "bun:test"
 import {
   AdminGroupEventCreateSchema,
+  BookingCreateSchema,
   BookingGroupEventsSchema,
+  BookingRequestSchema,
+  BookingReserveSchema,
   GROUP_OFFERING_KEYS,
   MEMBER_OFFERING_KEYS,
   OFFERINGS,
 } from "./booking"
+import { TERMS_VERSION } from "./legal"
 
 describe("Ledarskap inifrån offerings", () => {
   test("the start calls are 90-minute instant offerings", () => {
@@ -50,5 +54,53 @@ describe("Ledarskap inifrån offerings", () => {
     expect(AdminGroupEventCreateSchema.parse({ ...base, offering: "inner_group" }).offering).toBe(
       "inner_group"
     )
+  })
+})
+
+describe("consent to the terms", () => {
+  const customer = { name: "Ada Lovelace", email: "ada@example.com", organisation: "SKR" }
+  const inputs = [
+    [
+      BookingCreateSchema,
+      {
+        offering: "session",
+        slots: ["2026-03-02T09:00:00.000Z"],
+        audience: "private",
+        customer,
+        location: "video",
+      },
+    ],
+    [BookingReserveSchema, { eventIds: [3], audience: "private", customer }],
+    [
+      BookingRequestSchema,
+      {
+        offering: "keynote",
+        customer,
+        location: "on_site",
+        preferredDates: [{ date: "2026-04-01", part: "morning" }],
+        message: "Opening keynote at our conference.",
+      },
+    ],
+  ] as const
+
+  test("every booking write needs termsAccepted: true, and nothing else counts", () => {
+    for (const [schema, input] of inputs) {
+      expect(schema.safeParse({ ...input, termsAccepted: true }).success).toBe(true)
+      expect(schema.safeParse(input).success).toBe(false)
+      for (const termsAccepted of [false, "on", "true", 1]) {
+        expect(schema.safeParse({ ...input, termsAccepted }).success).toBe(false)
+      }
+    }
+  })
+
+  test("a version from the client is not part of the input", () => {
+    for (const [schema, input] of inputs) {
+      const parsed = schema.parse({ ...input, termsAccepted: true, termsVersion: "1999-01-01" })
+      expect(parsed).not.toHaveProperty("termsVersion")
+    }
+  })
+
+  test("TERMS_VERSION is a calendar date", () => {
+    expect(TERMS_VERSION).toMatch(/^\d{4}-\d{2}-\d{2}$/)
   })
 })

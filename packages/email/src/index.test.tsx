@@ -479,6 +479,8 @@ describe("bookingConfirmed", () => {
     manageUrl: "https://www.example.com/bookings/BK-2041?token=abc",
     name: "Ada",
     cancelCutoffHours: 24,
+    termsUrl: "https://legal.example.com/en/terms",
+    withdrawal: false,
   }
 
   test("renders the subject, greeting, booking line, link and cancel cutoff", async () => {
@@ -530,6 +532,33 @@ describe("bookingConfirmed", () => {
     expect(plain.text).not.toContain("book your sessions here")
     expect(plain.html).not.toContain("/book/inner_session")
   })
+
+  test("links the terms, and tells a private client about the right of withdrawal", async () => {
+    const termsUrl = "https://legal.example.com/villkor"
+    const sv = await emails.bookingConfirmed({ ...props, termsUrl, withdrawal: true }, "sv")
+    for (const part of [sv.html, sv.text]) {
+      expect(part).toContain(termsUrl)
+      expect(part).toContain(
+        "Som privatperson har du 14 dagars ångerrätt. Villkoren beskriver hur den fungerar när en session redan har ägt rum."
+      )
+    }
+    expect(sv.html).toContain(`href="${termsUrl}"`)
+    expect(sv.text).toContain(`Villkoren för bokningen: ${termsUrl}`)
+    const en = await emails.bookingConfirmed({ ...props, withdrawal: true })
+    expect(en.text).toContain(`The terms for your booking: ${props.termsUrl}`)
+    expect(en.text).toContain(
+      "As a private client you have a 14-day right of withdrawal. The terms explain how it works once a session has taken place."
+    )
+  })
+
+  test("leaves the right of withdrawal out for an organisation", async () => {
+    const sv = await emails.bookingConfirmed({ ...props, withdrawal: false }, "sv")
+    expect(sv.text).toContain(`Villkoren för bokningen: ${props.termsUrl}`)
+    for (const part of [sv.html, sv.text]) expect(part).not.toContain("ångerrätt")
+    const en = await emails.bookingConfirmed(props)
+    expect(en.text).toContain(`The terms for your booking: ${props.termsUrl}`)
+    for (const part of [en.html, en.text]) expect(part).not.toContain("right of withdrawal")
+  })
 })
 
 describe("bookingRequestReceived", () => {
@@ -538,6 +567,7 @@ describe("bookingRequestReceived", () => {
     offeringLabel: "leadership programme",
     manageUrl: "https://www.example.com/bookings/BK-2042?token=abc",
     name: "Ada",
+    termsUrl: "https://legal.example.com/en/terms",
   }
 
   test("renders the subject, the promise of a reply and the link", async () => {
@@ -551,6 +581,18 @@ describe("bookingRequestReceived", () => {
     )
     expect(mail.text).toContain("View your request")
     expect(mail.text).not.toMatch(/<[a-z][\s\S]*>/i)
+  })
+
+  test("links the terms, in the request's language, and never the right of withdrawal", async () => {
+    const en = await emails.bookingRequestReceived(props)
+    for (const part of [en.html, en.text]) expect(part).toContain(props.termsUrl)
+    expect(en.text).toContain(`The terms for your booking: ${props.termsUrl}`)
+    expect(en.text).not.toContain("right of withdrawal")
+    const termsUrl = "https://legal.example.com/villkor"
+    const sv = await emails.bookingRequestReceived({ ...props, termsUrl }, "sv")
+    expect(sv.html).toContain(`href="${termsUrl}"`)
+    expect(sv.text).toContain(`Villkoren för bokningen: ${termsUrl}`)
+    expect(sv.text).not.toContain("ångerrätt")
   })
 
   test("its props carry no customer message (the recipient is any typed address)", async () => {
@@ -1419,6 +1461,8 @@ describe("Swedish rendering", () => {
         name: "Ada",
         extraSessions: ["tisdag 19 maj 2026 kl. 10.00"],
         cancelCutoffHours: 24,
+        termsUrl: "https://legal.example.com/villkor",
+        withdrawal: true,
       },
       "sv"
     )
@@ -1442,7 +1486,12 @@ describe("Swedish rendering", () => {
   test("bookingRequestReceived: Swedish subject and body, link still present", async () => {
     const manageUrl = "https://www.example.com/bookings/BK-2042?token=abc"
     const mail = await emails.bookingRequestReceived(
-      { reference: "BK-2042", offeringLabel: "ledarskapsprogram", manageUrl },
+      {
+        reference: "BK-2042",
+        offeringLabel: "ledarskapsprogram",
+        manageUrl,
+        termsUrl: "https://legal.example.com/villkor",
+      },
       "sv"
     )
     expect(mail.subject).toBe(sv("bookingRequestReceived.subject", { reference: "BK-2042" }))

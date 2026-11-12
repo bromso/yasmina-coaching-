@@ -153,6 +153,23 @@ describe("OfferingView", () => {
     const html = render(<OfferingView offering="keynote" locale="sv" {...props} />)
     expect(html).toContain("/media/keynote-poster")
   })
+
+  // Every journey kind (instant, group, request) carries the terms box, its links in the page's
+  // language, computed on the server; it is a plain required checkbox, so it posts without JS.
+  for (const locale of LOCALES) {
+    for (const offering of ["session", "group", "workshop"] as const) {
+      test(`${offering} (${locale}): the terms box links the terms and the privacy policy`, () => {
+        const html = render(<OfferingView offering={offering} locale={locale} {...props} />)
+        const copy = BOOKING[locale].form.terms
+        expect(html).toMatch(/<input type="checkbox" required=""[^>]* name="terms" value="on"/)
+        expect(html).toContain(`href="${legalUrl("terms", locale)}"`)
+        expect(html).toContain(`href="${legalUrl("privacy", locale)}"`)
+        expect(html).toContain(copy.before)
+        expect(html).toContain(copy.terms)
+        expect(html).toContain(copy.privacy)
+      })
+    }
+  }
 })
 
 describe("the booking journeys' steps", () => {

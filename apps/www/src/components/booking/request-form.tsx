@@ -17,11 +17,19 @@ import { NativeSelect } from "@repo/ui/components/native-select"
 import { Textarea } from "@repo/ui/components/textarea"
 import { useActionState, useState } from "react"
 import { requestBooking } from "@/app/actions"
-import { CustomerFields, Fieldset, LocationField, value } from "@/components/booking/details-fields"
+import {
+  CustomerFields,
+  Fieldset,
+  LocationField,
+  TermsField,
+  type TermsLinks,
+  value,
+} from "@/components/booking/details-fields"
 import { useBookingCopy, useLocale } from "@/components/booking/locale-provider"
 import { StepIndicator } from "@/components/booking/step-indicator"
 import {
   checkDetails,
+  checkTerms,
   fieldText,
   primaryClass,
   StepNav,
@@ -36,6 +44,8 @@ type RequestFormProps = {
   locations: readonly BookingLocation[]
   /** Tomorrow in the booking zone (`YYYY-MM-DD`), the earliest date to propose. */
   minDate: string
+  /** The terms and privacy pages the terms box links, from the server. */
+  legalLinks: TermsLinks
 }
 
 const initialState: BookingFormState = { ok: false }
@@ -53,6 +63,7 @@ const STEP_FIELDS = [
     ...DATE_SLOTS.flatMap((n) => [`date_${n}`, `part_${n}`]),
   ],
   ["name", "email", "organisation", "phone"],
+  ["terms"],
 ]
 
 /**
@@ -79,7 +90,7 @@ type Review = {
  * `<form action>` that works without JavaScript (every step then shows at once); the server
  * re-checks every date is tomorrow or later, the browser's `min` being only a hint.
  */
-export function RequestForm({ offering, locations, minDate }: RequestFormProps) {
+export function RequestForm({ offering, locations, minDate, legalLinks }: RequestFormProps) {
   const copy = useBookingCopy()
   const locale = useLocale()
   const text = copy.request
@@ -281,6 +292,7 @@ export function RequestForm({ offering, locations, minDate }: RequestFormProps) 
         <p className="rounded-2xl border border-border bg-background/70 px-4 py-3 text-sm">
           {copy.review.note}
         </p>
+        <TermsField state={shown} links={legalLinks} />
         <p className="text-muted-foreground text-xs">{text.legal}</p>
         <div className="flex flex-wrap-reverse items-center justify-between gap-3 border-border border-t pt-5">
           <Button
@@ -292,7 +304,15 @@ export function RequestForm({ offering, locations, minDate }: RequestFormProps) 
             <Icon icon="lucide:arrow-left" aria-hidden="true" />
             {copy.stepper.back}
           </Button>
-          <Button type="submit" size="lg" disabled={pending} className={primaryClass}>
+          <Button
+            type="submit"
+            size="lg"
+            disabled={pending}
+            className={primaryClass}
+            onClick={(event) => {
+              if (fail(checkTerms(formRef.current, copy.check))) event.preventDefault()
+            }}
+          >
             {pending ? text.submitting : text.submit}
           </Button>
         </div>

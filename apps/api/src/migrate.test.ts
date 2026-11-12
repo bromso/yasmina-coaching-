@@ -860,6 +860,7 @@ for (const engine of engines) {
         "0034_booking",
         "0035_group_event_offering",
         "0036_leads",
+        "0037_booking_terms",
       ])
       const [workspace] = await sql`
         INSERT INTO workspaces (name, slug, created_at) VALUES ('w', 'w', '2026-01-01T00:00:00.000Z')

@@ -182,6 +182,13 @@ export const BookingSummarySchema = z.object({
 })
 export type BookingSummary = z.infer<typeof BookingSummarySchema>
 
+/**
+ * The visitor ticked "I have read the terms and the privacy policy". Only `true` is accepted; the
+ * version accepted is never part of the input — `apps/api` stamps `TERMS_VERSION`
+ * (`@repo/api-contract/legal`) itself.
+ */
+const TermsAccepted = z.literal(true)
+
 export const BookingCreateSchema = z
   .object({
     offering: InstantOfferingKeySchema,
@@ -191,6 +198,7 @@ export const BookingCreateSchema = z
     customer: BookingCustomerSchema,
     location: BookingLocationSchema,
     notes: z.string().trim().max(BOOKING_NOTES_MAX).optional(),
+    termsAccepted: TermsAccepted,
   })
   .superRefine((v, ctx) => {
     const offering = OFFERINGS[v.offering]
@@ -260,6 +268,7 @@ export const BookingReserveSchema = z.object({
   audience: BookingAudienceSchema,
   customer: BookingCustomerSchema,
   notes: z.string().trim().max(BOOKING_NOTES_MAX).optional(),
+  termsAccepted: TermsAccepted,
 })
 export type BookingReserveInput = z.infer<typeof BookingReserveSchema>
 
@@ -282,6 +291,7 @@ export const BookingRequestSchema = z
     attendees: z.number().int().min(1).max(BOOKING_ATTENDEES_MAX).optional(),
     venue: z.string().trim().max(BOOKING_VENUE_MAX).optional(),
     message: z.string().trim().min(BOOKING_MESSAGE_MIN).max(BOOKING_MESSAGE_MAX),
+    termsAccepted: TermsAccepted,
   })
   .superRefine((v, ctx) => {
     if (!OFFERINGS[v.offering].locations.includes(v.location)) {

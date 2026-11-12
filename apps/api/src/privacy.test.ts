@@ -13,6 +13,7 @@ import {
   IMPERSONATING_MESSAGE,
   TWO_FACTOR_REAUTH_REASON,
 } from "@repo/api-contract"
+import { TERMS_VERSION } from "@repo/api-contract/legal"
 import { emails } from "@repo/email"
 import { createMemoryRateLimiter } from "@repo/service-kit"
 import { BRAND_NAME } from "@repo/sites/brand"
@@ -324,6 +325,7 @@ describe("account.export", () => {
     const user = await signUpVerified(app)
     const request = (email: string) =>
       clientFor(app).booking.request({
+        termsAccepted: true,
         offering: "workshop",
         customer: { name: "Ada", email, organisation: "Analytical Engines AB" },
         location: "on_site",
@@ -356,6 +358,8 @@ describe("account.export", () => {
         venue: "Stadshuset",
         createdAt: expect.any(String),
         cancelledAt: null,
+        termsVersion: TERMS_VERSION,
+        termsAcceptedAt: expect.any(String),
       },
     ])
     expect(text).not.toContain("token")

@@ -14,6 +14,8 @@ import {
   choiceInputClass,
   Fieldset,
   NotesField,
+  TermsField,
+  type TermsLinks,
   value,
 } from "@/components/booking/details-fields"
 import { LazyPaymentStep } from "@/components/booking/lazy-payment-step"
@@ -21,6 +23,7 @@ import { useBookingCopy, useLocale } from "@/components/booking/locale-provider"
 import { StepIndicator } from "@/components/booking/step-indicator"
 import {
   checkDetails,
+  checkTerms,
   fieldText,
   PAYMENT_FIELDS,
   primaryClass,
@@ -43,6 +46,8 @@ type GroupBookingProps = {
   title: string
   /** Its fixed price (the Inifrån group, per month), or `null` when priced in writing. */
   price: OfferingAmount | null
+  /** The terms and privacy pages the terms box links, from the server. */
+  legalLinks: TermsLinks
 }
 
 type Events =
@@ -55,7 +60,7 @@ const initialState: BookingFormState = { ok: false }
 /** Each step's fields, so a refusal from the server reopens the step that holds the field. */
 const STEP_FIELDS = [
   ["eventIds"],
-  ["audience", "name", "email", "organisation", "phone", "notes"],
+  ["audience", "name", "email", "organisation", "phone", "notes", "terms"],
   PAYMENT_FIELDS,
 ]
 
@@ -71,6 +76,7 @@ export function GroupBooking({
   initialAudience,
   title,
   price,
+  legalLinks,
 }: GroupBookingProps) {
   const copy = useBookingCopy()
   const locale = useLocale()
@@ -123,7 +129,11 @@ export function GroupBooking({
     if (!fail(ticked().length === 0 ? { eventIds: copy.check.eventIds } : {})) goTo(2)
   }
   const toPayment = () => {
-    if (fail(checkDetails(formRef.current, copy.check))) return
+    const errors = {
+      ...checkDetails(formRef.current, copy.check),
+      ...checkTerms(formRef.current, copy.check),
+    }
+    if (fail(errors)) return
     const ids = new Set(ticked())
     const list = (events.status === "ready" ? events.events : []).filter((event) =>
       ids.has(String(event.id))
@@ -245,6 +255,7 @@ export function GroupBooking({
           organisation={audience === "organisation" ? "optional" : "hidden"}
         />
         <NotesField state={shown} />
+        <TermsField state={shown} links={legalLinks} />
         <p className="text-muted-foreground text-xs">{copy.instant.legal}</p>
         <StepNav backLabel={copy.stepper.back} onBack={() => goTo(1)}>
           <Button type="button" size="lg" className={primaryClass} onClick={toPayment}>

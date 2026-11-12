@@ -14,6 +14,7 @@ import {
   type PreferredDate,
 } from "@repo/api-contract"
 import type { Locale } from "@repo/i18n/locales"
+import { legalUrl } from "@repo/sites/legal"
 import { newToken, tokenHash } from "../credentials"
 import type { AdminBookingRow, BookingBlockRow, GroupEventWithSeats } from "../queries/booking"
 import { formatPreferredDate, formatWhen, formatWhere } from "./format"
@@ -148,6 +149,18 @@ export function offeringLabel(key: OfferingKey, locale: Locale): string {
   }
   return sv[key]
 }
+
+/**
+ * The terms a customer's booking mail links, in their language. `withdrawal` adds the line on the
+ * 14-day right of withdrawal, which only a private client has (an organisation does not); a request
+ * is always an organisation's, so its mail takes `termsUrl` alone.
+ */
+export function termsMailProps(audience: BookingAudience, locale: Locale) {
+  return { termsUrl: termsUrlFor(locale), withdrawal: audience === "private" }
+}
+
+/** The terms page on the legal app, in the customer's language. */
+export const termsUrlFor = (locale: Locale) => legalUrl("terms", locale)
 
 /** The props every customer-facing booking mail starts from. */
 export function mailBasics(

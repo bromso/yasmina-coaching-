@@ -154,6 +154,14 @@ export function checkDetails(
   return errors
 }
 
+/** The terms box before booking: ticked, or its message. The server checks it again. */
+export function checkTerms(
+  form: HTMLFormElement | null,
+  check: BookingFormCopy["check"]
+): Record<string, string> {
+  return fieldText(form, "terms") === "on" ? {} : { terms: check.terms }
+}
+
 /** Moves focus to the first field with an error, the way a server answer would be read. */
 export function focusFirstError(form: HTMLFormElement | null, names: string[]) {
   const first = names[0]

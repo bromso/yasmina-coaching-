@@ -17,6 +17,8 @@ import {
   CustomerFields,
   LocationField,
   NotesField,
+  TermsField,
+  type TermsLinks,
   value,
 } from "@/components/booking/details-fields"
 import { LazyPaymentStep } from "@/components/booking/lazy-payment-step"
@@ -24,6 +26,7 @@ import { useBookingCopy, useLocale } from "@/components/booking/locale-provider"
 import { StepIndicator } from "@/components/booking/step-indicator"
 import {
   checkDetails,
+  checkTerms,
   fieldText,
   PAYMENT_FIELDS,
   primaryClass,
@@ -62,6 +65,8 @@ type InstantBookingProps = {
   price: OfferingAmount | null
   /** `member` (a members' session or an extra programme session) has no payment step. */
   flow: "instant" | "member"
+  /** The terms and privacy pages the terms box links, from the server. */
+  legalLinks: TermsLinks
 }
 
 /** One free slot as `/api/booking/availability` hands it back: ISO UTC instants. */
@@ -88,7 +93,7 @@ const gridDate = (day: string) => {
 /** Each step's fields, so a refusal from the server reopens the step that holds the field. */
 const STEP_FIELDS = [
   ["slots"],
-  ["audience", "name", "email", "organisation", "phone", "location", "notes"],
+  ["audience", "name", "email", "organisation", "phone", "location", "notes", "terms"],
   PAYMENT_FIELDS,
 ]
 
@@ -112,6 +117,7 @@ export function InstantBooking({
   title,
   price,
   flow,
+  legalLinks,
 }: InstantBookingProps) {
   const copy = useBookingCopy()
   const locale = useLocale()
@@ -215,8 +221,13 @@ export function InstantBooking({
               ? text.noSlotsThisDay
               : ""
 
+  /** The details step's own checks, the terms box included. */
+  const detailsErrors = () => ({
+    ...checkDetails(formRef.current, copy.check),
+    ...checkTerms(formRef.current, copy.check),
+  })
   const toPayment = () => {
-    if (fail(checkDetails(formRef.current, copy.check))) return
+    if (fail(detailsErrors())) return
     setDetails({
       email: fieldText(formRef.current, "email"),
       location: fieldText(formRef.current, "location"),
@@ -433,6 +444,7 @@ export function InstantBooking({
         />
         <LocationField locations={locations} state={shown} />
         <NotesField state={shown} />
+        <TermsField state={shown} links={legalLinks} />
         <p className="text-muted-foreground text-xs">{text.legal}</p>
         <StepNav backLabel={copy.stepper.back} onBack={() => goTo(1)}>
           {pays ? (
@@ -447,7 +459,7 @@ export function InstantBooking({
               disabled={pending || picked.length === 0}
               className={primaryClass}
               onClick={(event) => {
-                if (fail(checkDetails(formRef.current, copy.check))) event.preventDefault()
+                if (fail(detailsErrors())) event.preventDefault()
               }}
             >
               {pending ? text.submitting : text.submit}

@@ -4,6 +4,7 @@ import {
   type OfferingKey,
 } from "@repo/api-contract/booking-limits"
 import type { Locale } from "@repo/i18n/locales"
+import { legalUrl } from "@repo/sites/legal"
 import { Eyebrow } from "@repo/ui/components/eyebrow"
 import { Icon } from "@repo/ui/components/icon"
 import { MediaClip } from "@repo/ui/components/motion/media-clip"
@@ -48,6 +49,8 @@ export function OfferingView({
   const frame = "aspect-[16/10] w-full object-cover lg:aspect-[4/3]"
   const flow = flowFor(offering, packageId)
   const price = amountFor(offering)
+  // The terms box's links: `legalUrl` reads the environment, so it runs here, on the server.
+  const legalLinks = { terms: legalUrl("terms", locale), privacy: legalUrl("privacy", locale) }
   return (
     <main id="main">
       <section aria-labelledby="offering-title" className="container py-16 lg:py-24">
@@ -115,6 +118,7 @@ export function OfferingView({
                   title={copy.title}
                   price={price}
                   flow={flow === "member" ? "member" : "instant"}
+                  legalLinks={legalLinks}
                 />
               )}
               {spec.kind === "group" && (
@@ -124,10 +128,16 @@ export function OfferingView({
                   initialAudience={audience}
                   title={copy.title}
                   price={price}
+                  legalLinks={legalLinks}
                 />
               )}
               {spec.kind === "request" && (
-                <RequestForm offering={offering} locations={spec.locations} minDate={minDate} />
+                <RequestForm
+                  offering={offering}
+                  locations={spec.locations}
+                  minDate={minDate}
+                  legalLinks={legalLinks}
+                />
               )}
             </LocaleProvider>
           </SunPanel>

@@ -199,6 +199,17 @@ export function isOwnManageUrl(url: string, origin: string): boolean {
   }
 }
 
+/**
+ * The terms box (`name="terms"`, `value="on"`, see `TermsField`): a refusal naming it in the page's
+ * language when it was not ticked, else nothing. Each core parses its input with
+ * `termsAccepted: true` so every other field is still checked (a schema's cross-field rules run
+ * only once every field parses), and sends that input only after this check passed; the api
+ * stamps the terms version itself.
+ */
+function termsRefusal(fd: FormData, locale: Locale = SITE_LOCALE): Record<string, string> {
+  return str(fd, "terms") === "on" ? {} : { terms: BOOKING_FORMS[locale].check.terms }
+}
+
 /** The customer block every write shares, from the flat form fields. */
 function customerOf(fd: FormData) {
   return {
@@ -246,6 +257,7 @@ export async function bookCore(
     notes: str(fd, "notes"),
     slots: slots.join(","),
     packageId: str(fd, "packageId"),
+    terms: str(fd, "terms"),
   }
   const payment = paymentOf(
     fd,
@@ -261,12 +273,15 @@ export async function bookCore(
     customer: customerOf(fd),
     location: values.location,
     notes: notesWithBilling(values.notes, payment.ok ? payment.block : undefined),
+    termsAccepted: true,
   })
+  const terms = termsRefusal(fd, deps.locale)
   const all = { ...values, ...payment.values }
-  if (!parsed.success || !payment.ok) {
+  if (!parsed.success || !payment.ok || terms.terms) {
     const fieldErrors = {
       ...(payment.ok ? {} : payment.fieldErrors),
       ...(parsed.success ? {} : bookingFieldErrors(parsed.error.issues)),
+      ...terms,
     }
     return { ok: false, fieldErrors, values: all }
   }
@@ -308,6 +323,7 @@ export async function reserveSeatsCore(
     phone: str(fd, "phone"),
     notes: str(fd, "notes"),
     eventIds: eventIds.join(","),
+    terms: str(fd, "terms"),
   }
   const payment = paymentOf(fd, str(fd, "offering"), values.audience, deps.locale)
   const parsed = BookingReserveSchema.safeParse({
@@ -315,12 +331,15 @@ export async function reserveSeatsCore(
     audience: values.audience,
     customer: customerOf(fd),
     notes: notesWithBilling(values.notes, payment.ok ? payment.block : undefined),
+    termsAccepted: true,
   })
+  const terms = termsRefusal(fd, deps.locale)
   const all = { ...values, ...payment.values }
-  if (!parsed.success || !payment.ok) {
+  if (!parsed.success || !payment.ok || terms.terms) {
     const fieldErrors = {
       ...(payment.ok ? {} : payment.fieldErrors),
       ...(parsed.success ? {} : bookingFieldErrors(parsed.error.issues)),
+      ...terms,
     }
     return { ok: false, fieldErrors, values: all }
   }
@@ -358,6 +377,7 @@ export async function requestBookingCore(
     attendees: str(fd, "attendees"),
     venue: str(fd, "venue"),
     message: str(fd, "message"),
+    terms: str(fd, "terms"),
   }
   const preferredDates: Array<{ date: string; part: string; n: number }> = []
   for (const n of PREFERRED_DATE_SLOTS) {
@@ -381,18 +401,20 @@ export async function requestBookingCore(
     attendees: attendees === "" ? undefined : Number(attendees),
     venue: optional(values.venue),
     message: values.message,
+    termsAccepted: true,
   })
+  const terms = termsRefusal(fd, deps.locale)
   if (!parsed.success) {
     const errors = bookingFieldErrors(parsed.error.issues)
     // A path on the list itself ("at least one date") belongs to the first date field.
     if (errors.preferredDates && !errors.date_1) errors.date_1 = errors.preferredDates
     delete errors.preferredDates
-    return { ok: false, fieldErrors: errors, values }
+    return { ok: false, fieldErrors: { ...errors, ...terms }, values }
   }
   const tomorrow = shiftDay(zonedDay(deps.now ? deps.now() : new Date()), 1)
   const tooSoon = preferredDates.filter((d) => d.date < tomorrow)
-  if (tooSoon.length > 0) {
-    const errors: Record<string, string> = {}
+  if (tooSoon.length > 0 || terms.terms) {
+    const errors: Record<string, string> = { ...terms }
     for (const d of tooSoon) errors[`date_${d.n}`] = DATE_TOO_SOON[deps.locale ?? SITE_LOCALE]
     return { ok: false, fieldErrors: errors, values }
   }

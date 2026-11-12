@@ -36,6 +36,7 @@ test("a workshop request: admin confirms, the customer gets a new manage link an
       attendees: 12,
       venue: "Stadshuset",
       message: "A team day for our new preventive unit.",
+      termsAccepted: true,
     },
   })
   expect(response.ok()).toBe(true)
@@ -133,6 +134,10 @@ test("a visitor books a coaching session from the calendar and gets the confirma
   // Step 2: who is booking. "Name" and "Email" are the details form's own (still English) labels.
   await page.getByLabel("Namn", { exact: true }).fill("Ada Lovelace")
   await page.getByLabel("E-post", { exact: true }).fill(email)
+  // The terms box: unticked, the next step is refused with its own message; ticked, it opens.
+  await page.getByRole("button", { name: /fortsätt till betalning/i }).click()
+  await expect(page.getByText("Du behöver godkänna villkoren för att boka.")).toBeVisible()
+  await page.getByRole("checkbox", { name: /jag har läst villkoren/i }).check()
   await expectAccessible(page, {
     label: "www /book/session details",
     route: "www:/book/[offering]",

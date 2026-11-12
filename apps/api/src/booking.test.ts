@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from "bun:test"
 import { ORPCError } from "@orpc/client"
 import { BOOKING_CANCEL_LATE_MESSAGE, BOOKING_RATE_MESSAGE } from "@repo/api-contract"
+import { TERMS_VERSION } from "@repo/api-contract/legal"
 import {
   bookingCancelledSubject,
   bookingConfirmedSubject,
@@ -9,6 +10,7 @@ import {
   bookingRequestReceivedSubject,
 } from "@repo/email"
 import { createMemoryRateLimiter } from "@repo/service-kit"
+import { legalUrl } from "@repo/sites/legal"
 import { clientFor, mailsTo, signUpVerified, start } from "./test-server"
 
 const ROOT = "booking-root@example.com"
@@ -81,6 +83,7 @@ describe("booking.availability", () => {
 describe("booking.book", () => {
   test("a session: stores it confirmed, mails the customer (in their language) and Yasmina", async () => {
     const result = await clientFor(app, undefined, "sv").booking.book({
+      termsAccepted: true,
       offering: "session",
       slots: ["2026-01-06T08:00:00.000Z"],
       audience: "private",
@@ -146,6 +149,7 @@ describe("booking.book", () => {
 
     const [error] = await safeCall(() =>
       anon().booking.book({
+        termsAccepted: true,
         offering: "session",
         slots: ["2026-01-06T08:00:00.000Z"],
         audience: "private",
@@ -165,6 +169,7 @@ describe("booking.book", () => {
     ]) {
       const [error] = await safeCall(() =>
         anon().booking.book({
+          termsAccepted: true,
           offering: "session",
           slots: [slot],
           audience: "private",
@@ -178,6 +183,7 @@ describe("booking.book", () => {
 
   test("a package books several slots at once, creates the package and lists the rest later", async () => {
     const result = await anon().booking.book({
+      termsAccepted: true,
       offering: "package_6",
       slots: ["2026-01-07T08:00:00.000Z", "2026-01-14T08:00:00.000Z"],
       audience: "organisation",
@@ -218,6 +224,7 @@ describe("booking.book", () => {
       const slot = day?.slots[0]?.startsAt
       expect(slot).toBeDefined()
       const result = await anon().booking.book({
+        termsAccepted: true,
         offering,
         slots: [slot as string],
         audience: "private",
@@ -238,6 +245,7 @@ describe("booking.book", () => {
   test("two slots of one order that overlap each other are refused together", async () => {
     const [error] = await safeCall(() =>
       anon().booking.book({
+        termsAccepted: true,
         offering: "package_6",
         slots: ["2026-01-08T08:00:00.000Z", "2026-01-08T08:30:00.000Z"],
         audience: "private",
@@ -252,6 +260,7 @@ describe("booking.book", () => {
   test("the contract refuses a location the offering does not list, and too many slots", async () => {
     const [wrongPlace] = await safeCall(() =>
       anon().booking.book({
+        termsAccepted: true,
         offering: "session",
         slots: ["2026-01-06T12:00:00.000Z"],
         audience: "private",
@@ -262,6 +271,7 @@ describe("booking.book", () => {
     expect(wrongPlace?.code).toBe("BAD_REQUEST")
     const [tooMany] = await safeCall(() =>
       anon().booking.book({
+        termsAccepted: true,
         offering: "session",
         slots: ["2026-01-06T12:00:00.000Z", "2026-01-06T13:30:00.000Z"],
         audience: "private",
@@ -276,6 +286,7 @@ describe("booking.book", () => {
 describe("booking.manage", () => {
   test("cancel: allowed until 24 h before, mails both sides; late or wrong token is refused", async () => {
     const result = await anon().booking.book({
+      termsAccepted: true,
       offering: "session",
       slots: ["2026-01-09T10:00:00.000Z"],
       audience: "private",
@@ -316,6 +327,7 @@ describe("booking.manage", () => {
 describe("booking.request and the admin decision", () => {
   const request = {
     offering: "workshop" as const,
+    termsAccepted: true as const,
     customer: { ...customer, organisation: "Falkenbergs kommun" },
     location: "on_site" as const,
     preferredDates: [
@@ -374,6 +386,9 @@ describe("booking.request and the admin decision", () => {
     })
     const [mail] = await mailsTo(app, "ada@example.com", bookingConfirmedSubject(result.reference))
     expect(mail?.text).toContain("Tuesday 10 February 2026, 09:00–13:00")
+    // An organisation's request: the terms, never the private client's right of withdrawal.
+    expect(mail?.text).toContain(`The terms for your booking: ${legalUrl("terms", "en")}`)
+    expect(mail?.text).not.toContain("right of withdrawal")
     const newToken = tokenOf(mail?.text.match(/\/book\/manage\/[^\s)]+/)?.[0] ?? "")
     expect(newToken).not.toBe(oldToken)
     const [dead] = await safeCall(() => anon().booking.manage.get({ token: oldToken }))
@@ -386,6 +401,7 @@ describe("booking.request and the admin decision", () => {
     expect(calendar.bookings.map((b) => b.id)).toContain(id)
     const [overlap] = await safeCall(() =>
       anon().booking.book({
+        termsAccepted: true,
         offering: "session",
         slots: ["2026-02-10T09:00:00.000Z"],
         audience: "private",
@@ -418,6 +434,7 @@ describe("booking.request and the admin decision", () => {
     expect(mail?.text).toContain("Fully booked in February.")
 
     const booked = await anon().booking.book({
+      termsAccepted: true,
       offering: "session",
       slots: ["2026-01-13T08:00:00.000Z"],
       audience: "private",
@@ -517,7 +534,12 @@ describe("group events", () => {
     expect(events[0]?.seriesKey).toBe(events[1]?.seriesKey as string)
     expect(events[0]?.seatsLeft).toBe(2)
 
-    const first = await anon().booking.reserve({ eventIds: ids, audience: "private", customer })
+    const first = await anon().booking.reserve({
+      termsAccepted: true,
+      eventIds: ids,
+      audience: "private",
+      customer,
+    })
     expect(first.bookings).toHaveLength(2)
     expect(first.bookings[0]?.groupEvent).toEqual({
       id: ids[0] as number,
@@ -529,6 +551,7 @@ describe("group events", () => {
 
     const bob = { name: "Bob", email: "bob@example.com" }
     const bobSeat = await anon().booking.reserve({
+      termsAccepted: true,
       eventIds: [ids[0] as number],
       audience: "private",
       customer: bob,
@@ -538,6 +561,7 @@ describe("group events", () => {
     ).toBe(0)
     const [full] = await safeCall(() =>
       anon().booking.reserve({
+        termsAccepted: true,
         eventIds: [ids[0] as number],
         audience: "private",
         customer: { name: "Cy", email: "cy@example.com" },
@@ -612,6 +636,7 @@ describe("group events per offering", () => {
     expect(listed.events[0]?.offering).toBe("inner_group")
 
     const seat = await anon().booking.reserve({
+      termsAccepted: true,
       eventIds: inner.ids,
       audience: "private",
       customer,
@@ -641,6 +666,7 @@ describe("group events per offering", () => {
     })
     const [error] = await safeCall(() =>
       anon().booking.reserve({
+        termsAccepted: true,
         eventIds: [plain.ids[0] as number, inner.ids[0] as number],
         audience: "private",
         customer: { name: "Mixed", email: "mixed@example.com" },
@@ -663,6 +689,7 @@ describe("limits", () => {
     })
     try {
       await clientFor(strict).booking.request({
+        termsAccepted: true,
         offering: "keynote",
         customer: { ...customer, organisation: "SKR" },
         location: "on_site",
@@ -671,6 +698,7 @@ describe("limits", () => {
       })
       const [error] = await safeCall(() =>
         clientFor(strict, undefined, "sv").booking.request({
+          termsAccepted: true,
           offering: "keynote",
           customer: { ...customer, organisation: "SKR" },
           location: "on_site",
@@ -684,6 +712,134 @@ describe("limits", () => {
     } finally {
       await strict.stop()
     }
+  })
+})
+
+describe("the terms", () => {
+  const WITHDRAWAL_SV = "Som privatperson har du 14 dagars ångerrätt."
+  const WITHDRAWAL_EN = "As a private client you have a 14-day right of withdrawal."
+
+  test("a booking stores the version the api stamps and when, and its mail links the terms", async () => {
+    clock = new Date("2026-03-02T08:00:00.000Z")
+    const result = await clientFor(app, undefined, "sv").booking.book({
+      termsAccepted: true,
+      offering: "session",
+      slots: ["2026-03-10T09:00:00.000Z"],
+      audience: "private",
+      customer: { ...customer, email: "terms-book@example.com" },
+      location: "video",
+    })
+    const row = await app.db.booking.find(idOf(result.reference))
+    expect(row?.terms_version).toBe(TERMS_VERSION)
+    expect(row?.terms_accepted_at).toBe("2026-03-02T08:00:00.000Z")
+    await app.drain()
+    const [mail] = app.mailer.sent.filter((m) => m.to === "terms-book@example.com")
+    expect(mail?.text).toContain(`Villkoren för bokningen: ${legalUrl("terms", "sv")}`)
+    expect(mail?.text).toContain(WITHDRAWAL_SV)
+  })
+
+  test("an organisation's booking links the terms without the private right of withdrawal", async () => {
+    clock = new Date("2026-03-02T08:00:00.000Z")
+    const result = await anon().booking.book({
+      termsAccepted: true,
+      offering: "session",
+      slots: ["2026-03-10T11:00:00.000Z"],
+      audience: "organisation",
+      customer: { ...customer, email: "terms-org@example.com", organisation: "Varbergs kommun" },
+      location: "video",
+    })
+    const [mail] = await mailsTo(
+      app,
+      "terms-org@example.com",
+      bookingConfirmedSubject(result.reference)
+    )
+    expect(mail?.text).toContain(`The terms for your booking: ${legalUrl("terms", "en")}`)
+    expect(mail?.text).not.toContain(WITHDRAWAL_EN)
+  })
+
+  test("seats and requests store the acceptance too; the request mail links the terms", async () => {
+    clock = new Date("2026-03-02T08:00:00.000Z")
+    const root = await admin()
+    const { ids } = await root.admin.bookings.groupEvents.create({
+      title: "Terms evening",
+      startsAt: "2026-03-12T16:00:00.000Z",
+      durationMinutes: 120,
+      capacity: 5,
+      location: "varberg",
+    })
+    const seat = await anon().booking.reserve({
+      termsAccepted: true,
+      eventIds: ids,
+      audience: "private",
+      customer: { ...customer, email: "terms-seat@example.com" },
+    })
+    const seatRow = await app.db.booking.find(idOf(seat.reference))
+    expect(seatRow?.terms_version).toBe(TERMS_VERSION)
+    expect(seatRow?.terms_accepted_at).toBe("2026-03-02T08:00:00.000Z")
+    const [seatMail] = await mailsTo(
+      app,
+      "terms-seat@example.com",
+      bookingConfirmedSubject(seat.reference)
+    )
+    expect(seatMail?.text).toContain(`The terms for your booking: ${legalUrl("terms", "en")}`)
+    expect(seatMail?.text).toContain(WITHDRAWAL_EN)
+
+    const request = await anon().booking.request({
+      termsAccepted: true,
+      offering: "keynote",
+      customer: { ...customer, email: "terms-request@example.com", organisation: "SKR" },
+      location: "on_site",
+      preferredDates: [{ date: "2026-04-01", part: "morning" }],
+      message: "Opening keynote at our conference.",
+    })
+    const requestRow = await app.db.booking.find(idOf(request.reference))
+    expect(requestRow?.terms_version).toBe(TERMS_VERSION)
+    expect(requestRow?.terms_accepted_at).toBe("2026-03-02T08:00:00.000Z")
+    const [requestMail] = await mailsTo(
+      app,
+      "terms-request@example.com",
+      bookingRequestReceivedSubject(request.reference)
+    )
+    expect(requestMail?.text).toContain(`The terms for your booking: ${legalUrl("terms", "en")}`)
+    expect(requestMail?.text).not.toContain(WITHDRAWAL_EN)
+  })
+
+  test("a write without the acceptance is refused by the contract, and nothing is stored", async () => {
+    const before = app.mailer.sent.length
+    const inputs = [
+      () =>
+        anon().booking.book({
+          offering: "session",
+          slots: ["2026-01-13T08:00:00.000Z"],
+          audience: "private",
+          customer,
+          location: "video",
+        } as never),
+      () =>
+        anon().booking.book({
+          termsAccepted: false,
+          offering: "session",
+          slots: ["2026-01-13T08:00:00.000Z"],
+          audience: "private",
+          customer,
+          location: "video",
+        } as never),
+      () => anon().booking.reserve({ eventIds: [1], audience: "private", customer } as never),
+      () =>
+        anon().booking.request({
+          offering: "keynote",
+          customer: { ...customer, organisation: "SKR" },
+          location: "on_site",
+          preferredDates: [{ date: "2026-03-01", part: "morning" }],
+          message: "Opening keynote at our conference.",
+        } as never),
+    ]
+    for (const call of inputs) {
+      const [error] = await safeCall(call)
+      expect(error?.code).toBe("BAD_REQUEST")
+    }
+    await app.drain()
+    expect(app.mailer.sent.length).toBe(before)
   })
 })
 

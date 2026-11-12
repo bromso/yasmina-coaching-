@@ -89,6 +89,7 @@ async function resolveBookingPath(page: Page): Promise<string> {
       location: "on_site",
       preferredDates: [{ date: "2099-03-02", part: "morning" }],
       message: "A request the accessibility sweep made, to render the detail page.",
+      termsAccepted: true,
     },
   })
   if (!response.ok()) throw new Error(`booking.request failed: ${response.status()}`)

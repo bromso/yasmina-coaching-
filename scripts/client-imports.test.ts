@@ -35,13 +35,17 @@ describe("the repo's client files", () => {
 })
 
 describe("the client-safe @repo/api-contract subpaths", () => {
-  // Subpaths documented as allowed in client code (the invitation domain rules; apps/account uses
-  // them server-side today — and the notification vocabulary): each must stay Zod-free, or the rule above would fail the first
-  // client file that imports one. Checked here so a regression names the subpath itself.
+  // Subpaths documented as allowed in client code (the invitation domain rules, which apps/account
+  // uses server-side today; the terms version; the notification vocabulary): each must stay
+  // Zod-free, or the rule above would fail the first client file that imports one. Checked here
+  // so a regression names the subpath itself.
   const contractSrc = join(repoRoot, "packages/api-contract/src")
-  test.each(["invite-domains", "notifications"])("./%s reaches no bare package", (subpath) => {
-    expect(findBarePackageImport(join(contractSrc, `${subpath}.ts`), contractSrc)).toBeNull()
-  })
+  test.each(["invite-domains", "legal", "notifications"])(
+    "./%s reaches no bare package",
+    (subpath) => {
+      expect(findBarePackageImport(join(contractSrc, `${subpath}.ts`), contractSrc)).toBeNull()
+    }
+  )
 })
 
 describe("moduleImports", () => {

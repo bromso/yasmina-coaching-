@@ -43,6 +43,8 @@ export type BookingFormCopy = {
     message: string
     date: string
     method: string
+    /** The terms box left unticked. */
+    terms: string
   }
   payment: {
     summary: {
@@ -124,6 +126,18 @@ export type BookingFormCopy = {
     audienceLegend: string
     locationLegend: string
     notesLabel: string
+  }
+  /**
+   * The terms box: "I have read the [terms] and the [privacy policy]", the two bracketed parts
+   * linking the legal app's pages (their hrefs come from the server, see `TermsField`).
+   */
+  terms: {
+    before: string
+    terms: string
+    between: string
+    privacy: string
+    /** Read after each link's name: both open in a new tab, so the booking is not lost. */
+    newTab: string
   }
   timezoneNote: string
   /**
@@ -223,6 +237,7 @@ const sv: BookingFormCopy = {
     message: "Berätta kort vad du vill uppnå.",
     date: "Välj minst ett datum, från och med i morgon.",
     method: "Välj hur du vill betala.",
+    terms: "Du behöver godkänna villkoren för att boka.",
   },
   payment: {
     summary: {
@@ -321,6 +336,13 @@ const sv: BookingFormCopy = {
     audienceLegend: "Bokar som",
     locationLegend: "Var",
     notesLabel: "Något Yasmina bör veta innan ni ses? (valfritt)",
+  },
+  terms: {
+    before: "Jag har läst ",
+    terms: "villkoren",
+    between: " och ",
+    privacy: "integritetspolicyn",
+    newTab: "(öppnas i en ny flik)",
   },
   timezoneNote: "Tiderna visas i svensk tid (Europe/Stockholm).",
   calendar: { previous: "Föregående månad", next: "Nästa månad", today: "I dag", selected: "Vald" },
@@ -422,6 +444,7 @@ const en: BookingFormCopy = {
     message: "Tell Yasmina briefly what you want to achieve.",
     date: "Pick at least one date, from tomorrow onwards.",
     method: "Choose how you want to pay.",
+    terms: "You need to accept the terms to book.",
   },
   payment: {
     summary: {
@@ -520,6 +543,13 @@ const en: BookingFormCopy = {
     audienceLegend: "Booking as",
     locationLegend: "Where",
     notesLabel: "Anything Yasmina should know before you meet? (optional)",
+  },
+  terms: {
+    before: "I have read the ",
+    terms: "terms",
+    between: " and the ",
+    privacy: "privacy policy",
+    newTab: "(opens in a new tab)",
   },
   timezoneNote: "Times are shown in Swedish time (Europe/Stockholm).",
   calendar: {

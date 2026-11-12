@@ -3,7 +3,9 @@ import { ORPCError } from "@orpc/client"
 import type { GroupEvent } from "@repo/api-contract"
 import { BOOKING_NOTES_MAX, MEMBER_OFFERING_KEYS } from "@repo/api-contract/booking-limits"
 import { BOOKING_FORMS } from "@/content/booking-forms"
+import type { Locale } from "@/lib/site-locale"
 import {
+  type BookingOutcome,
   bookCore,
   bookingFieldErrors,
   CONFIRM_REQUIRED,
@@ -36,6 +38,8 @@ const customer = {
   email: "ada@example.com",
   organisation: "Varbergs kommun",
   phone: "",
+  // The terms checkbox, ticked: every booking form posts it with the customer's details.
+  terms: "on",
 }
 
 const created = {
@@ -853,5 +857,120 @@ describe("the cores in English", () => {
       ok: false,
       fieldErrors: { confirm: CONFIRM_REQUIRED.en },
     })
+  })
+})
+
+describe("the terms", () => {
+  const { terms: _ticked, ...unticked } = customer
+  type Case = {
+    name: string
+    run: (locale: Locale, fd: FormData, onCall: (input: unknown) => void) => Promise<BookingOutcome>
+    fields: Record<string, string | string[]>
+  }
+  const cases: Case[] = [
+    {
+      name: "bookCore",
+      run: (locale, fd, onCall) =>
+        bookCore(
+          {
+            locale,
+            api: {
+              book: async (input) => {
+                onCall(input)
+                return created
+              },
+            },
+          },
+          fd
+        ),
+      fields: {
+        offering: "session",
+        audience: "organisation",
+        location: "video",
+        slots: ["2026-03-02T09:00:00.000Z"],
+        notes: "First time",
+        ...orgInvoice,
+      },
+    },
+    {
+      name: "reserveSeatsCore",
+      run: (locale, fd, onCall) =>
+        reserveSeatsCore(
+          {
+            locale,
+            api: {
+              reserve: async (input) => {
+                onCall(input)
+                return created
+              },
+            },
+          },
+          fd
+        ),
+      fields: { audience: "private", eventIds: ["3", "4"], notes: "First time" },
+    },
+    {
+      name: "requestBookingCore",
+      run: (locale, fd, onCall) =>
+        requestBookingCore(
+          {
+            locale,
+            now: () => new Date("2026-03-01T10:00:00Z"),
+            api: {
+              request: async (input) => {
+                onCall(input)
+                return { reference: "BK-9", manageUrl: created.manageUrl }
+              },
+            },
+          },
+          fd
+        ),
+      fields: {
+        offering: "workshop",
+        location: "on_site",
+        date_1: "2026-03-10",
+        part_1: "full_day",
+        message: "A team day for the management group before the reorganisation.",
+      },
+    },
+  ]
+
+  for (const { name, run, fields } of cases) {
+    for (const locale of ["sv", "en"] as const) {
+      test(`${name} (${locale}): without the box nothing is sent, the rest is kept`, async () => {
+        let calls = 0
+        const out = await run(locale, form({ ...unticked, ...fields }), () => calls++)
+        expect(calls).toBe(0)
+        expect(out).toMatchObject({
+          ok: false,
+          fieldErrors: { terms: BOOKING_FORMS[locale].check.terms },
+        })
+        if (out.ok) throw new Error("unreachable")
+        expect(Object.keys(out.fieldErrors ?? {})).toEqual(["terms"])
+        expect(out.values).toMatchObject({ name: "Ada Lovelace", email: "ada@example.com" })
+      })
+
+      test(`${name} (${locale}): a ticked box sends termsAccepted, never a version`, async () => {
+        let sent: unknown
+        const out = await run(locale, form({ ...customer, ...fields }), (input) => {
+          sent = input
+        })
+        expect(out.ok).toBe(true)
+        expect(sent).toMatchObject({ termsAccepted: true })
+        expect(JSON.stringify(sent)).not.toContain("termsVersion")
+      })
+    }
+
+    test(`${name}: a box posted with anything but "on" is not a consent`, async () => {
+      let calls = 0
+      const out = await run("sv", form({ ...unticked, ...fields, terms: "yes" }), () => calls++)
+      expect(calls).toBe(0)
+      expect(out).toMatchObject({ ok: false, fieldErrors: { terms: BOOKING_FORMS.sv.check.terms } })
+    })
+  }
+
+  test("the message is the page's own, in both languages", () => {
+    expect(BOOKING_FORMS.sv.check.terms).toBe("Du behöver godkänna villkoren för att boka.")
+    expect(BOOKING_FORMS.en.check.terms).toBe("You need to accept the terms to book.")
   })
 })

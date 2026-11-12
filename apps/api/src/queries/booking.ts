@@ -71,6 +71,9 @@ export type BookingRow = {
   decided_by: number | null
   cancelled_at: string | null
   created_at: string
+  /** The `TERMS_VERSION` accepted when booking; null on rows from before consent was asked. */
+  terms_version: string | null
+  terms_accepted_at: string | null
 }
 /** What `privacy.export` lists for an address: never the hashes, the ip or the admin's note. */
 export type ExportedBookingRow = Pick<
@@ -93,6 +96,8 @@ export type ExportedBookingRow = Pick<
   | "venue"
   | "created_at"
   | "cancelled_at"
+  | "terms_version"
+  | "terms_accepted_at"
 >
 
 /** A booking plus its group event's title and the deciding admin's email, for the admin pages. */
@@ -342,18 +347,22 @@ export function bookingQueries(sql: SQL) {
       ipHash: string | null
       locale: string | null
       createdAt: string
+      /** `TERMS_VERSION`, stamped by the handler; never a value the visitor sent. */
+      termsVersion: string
+      termsAcceptedAt: string
     }): Promise<{ id: number }> {
       const [row]: Array<{ id: number }> = await sql`
         INSERT INTO bookings
           (offering, kind, status, audience, customer_name, customer_email, organisation, phone,
             location, starts_at, ends_at, notes, preferred_dates, attendees, venue, package_id,
-            group_event_id, manage_token_hash, ip_hash, locale, created_at)
+            group_event_id, manage_token_hash, ip_hash, locale, created_at, terms_version,
+            terms_accepted_at)
         VALUES (${input.offering}, ${input.kind}, ${input.status}, ${input.audience},
           ${input.customerName}, ${input.customerEmail}, ${input.organisation}, ${input.phone},
           ${input.location}, ${input.startsAt}, ${input.endsAt}, ${input.notes},
           ${input.preferredDates}, ${input.attendees}, ${input.venue}, ${input.packageId},
           ${input.groupEventId}, ${input.manageTokenHash}, ${input.ipHash}, ${input.locale},
-          ${input.createdAt})
+          ${input.createdAt}, ${input.termsVersion}, ${input.termsAcceptedAt})
         RETURNING id`
       if (!row) throw new Error("INSERT … RETURNING produced no row")
       return { id: Number(row.id) }
@@ -455,7 +464,7 @@ export function bookingQueries(sql: SQL) {
       const rows: ExportedBookingRow[] = await sql`
         SELECT id, offering, kind, status, audience, customer_name, customer_email, organisation,
           phone, location, starts_at, ends_at, notes, preferred_dates, attendees, venue,
-          created_at, cancelled_at
+          created_at, cancelled_at, terms_version, terms_accepted_at
         FROM bookings WHERE lower(customer_email) = lower(${email}) ORDER BY id`
       return rows.map((r) => ({ ...r, id: Number(r.id), attendees: num(r.attendees) }))
     },
