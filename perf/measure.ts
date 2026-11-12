@@ -6,14 +6,14 @@
 //
 //   - Bundle budgets (`scripts/bundle-budget.ts --write-results`) read whichever apps under
 //     `apps/*/.next` are already built — skipped entirely with none built.
-//   - The Lighthouse and Web Vitals perf specs (`apps/e2e/tests/perf-*.spec.ts`) start all eight
+//   - The Lighthouse and Web Vitals perf specs (`apps/e2e/tests/perf-*.spec.ts`) start all nine
 //     Next apps with `next start` (`apps/e2e/playwright.config.ts`'s `webServer` entries), so they
-//     need all eight built first — skipped, naming the missing ones, if any aren't.
+//     need all nine built first — skipped, naming the missing ones, if any aren't.
 //
 // Build them with, e.g.:
 //   COOKIE_DOMAIN=.brand.localhost bun run --filter @repo/www --filter @repo/app \
 //     --filter @repo/auth --filter @repo/account --filter @repo/blog --filter @repo/docs \
-//     --filter @repo/help --filter @repo/jobs build
+//     --filter @repo/help --filter @repo/jobs --filter @repo/legal build
 // (the same build `apps/e2e`'s own `bun run e2e` runs before its tests; `apps/e2e/README.md`.)
 //
 // The third step, the load smoke (`bun run --filter @repo/load smoke`), needs nothing built: it
@@ -29,8 +29,8 @@ const ROOT = join(import.meta.dirname, "..")
 const E2E_DIR = join(ROOT, "apps", "e2e")
 const APPS_DIR = join(ROOT, "apps")
 
-/** The eight Next apps `apps/e2e/playwright.config.ts`'s `webServer` starts with `next start`. */
-const E2E_APPS = ["www", "app", "auth", "account", "blog", "docs", "help", "jobs"] as const
+/** The nine Next apps `apps/e2e/playwright.config.ts`'s `webServer` starts with `next start`. */
+const E2E_APPS = ["www", "app", "auth", "account", "blog", "docs", "help", "jobs", "legal"] as const
 
 const hasBuild = (app: string) => existsSync(join(APPS_DIR, app, ".next", "build-manifest.json"))
 
@@ -69,7 +69,7 @@ async function measureE2e(): Promise<StepResult> {
   if (missing.length > 0) {
     console.log(
       `\nSkipping the Lighthouse/Web Vitals perf specs — not built: ${missing.join(", ")}. All ` +
-        "eight Next apps must be built first (see this file's header comment, or " +
+        "nine Next apps must be built first (see this file's header comment, or " +
         "`bun run --filter @repo/e2e e2e`, which builds them before running every e2e spec)."
     )
     return "skipped"
@@ -93,7 +93,7 @@ async function measureApi(): Promise<StepResult> {
 
 async function main(): Promise<number> {
   console.log(
-    "perf:measure needs the eight Next apps built for the bundle and e2e steps (see this file's " +
+    "perf:measure needs the nine Next apps built for the bundle and e2e steps (see this file's " +
       "header comment for the exact command); the load smoke needs nothing built — it starts its " +
       "own stack. Builds nothing itself."
   )
