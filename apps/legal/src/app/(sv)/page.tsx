@@ -1,5 +1,6 @@
-import { IndexView } from "@/views/index-view"
+import { indexRoute } from "@/lib/pages"
 
-export default function Page() {
-  return <IndexView locale="sv" />
-}
+const route = indexRoute("sv")
+
+export const metadata = route.metadata
+export default route.Page

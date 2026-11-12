@@ -47,6 +47,16 @@ renders the 404 as a whole document, in Swedish with an English line linking to 
   `locale: en`, each naming its `page` (a `LEGAL_PAGES` key) and a `changes` log (newest first, at
   least one entry). Compiled by fumadocs-mdx (`source.config.ts`) against `@repo/content`'s
   `legalFrontmatterSchema`, imported by relative path.
+- **`src/lib/legal.ts`** — `legal`, every page validated by `createLegal` when the module loads,
+  so a bad page (frontmatter, a missing language, a change log out of step with its translation, a
+  malformed placeholder, a body `# h1`) fails `next build`. `src/lib/pages.tsx` holds the route
+  factories each `page.tsx` is a few lines over.
+- **Placeholders** — write `[ATT FYLLA: …]` in Swedish and `[TO FILL: …]` in English.
+  `src/lib/remark-placeholders.ts` turns each into a `<mark data-placeholder>`, rendered as
+  `@repo/ui`'s `Placeholder`. A production build does not fail on them.
+- **Draft mode** — `LEGAL_DRAFT` (build time; on unless set to `false`, `src/lib/draft.ts`). While
+  on, every page shows `DraftNotice`, every page sends `noindex, nofollow` and `robots.txt`
+  disallows `/`.
 - **`src/content/ui.ts`** — the app's own words in both languages; `src/content/legal-meta.ts`
   holds its name and description with no imports, for the manifest.
 - **Styles** — `src/styles/globals.css` is the one import of `@repo/ui/globals.css`. See

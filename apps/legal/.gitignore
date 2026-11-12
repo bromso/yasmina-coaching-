@@ -40,14 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# development database
-dev.db
-dev.db-*
-/drizzle
-
-# GraphQL
-.graphqlrc.json
-graphql.ts
-
 # fumadocs-mdx output, generated on install and by next build
 /.source/

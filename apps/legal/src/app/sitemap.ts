@@ -1,7 +1,7 @@
-import { sitemapFor } from "@repo/sites"
 import type { MetadataRoute } from "next"
-import { PUBLIC_ROUTES } from "@/lib/routes"
+import { legal } from "@/lib/legal"
+import { legalSitemap } from "@/lib/sitemap"
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return sitemapFor("legal", PUBLIC_ROUTES)
+  return legalSitemap(legal)
 }

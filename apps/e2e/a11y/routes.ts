@@ -174,9 +174,17 @@ export const A11Y_PAGES: A11yPage[] = [
   { app: "blog", path: "/authors/yasmina", route: "/authors/[author]", auth: "none" },
   { app: "blog", path: "/en/authors/yasmina", route: "/en/authors/[author]", auth: "none" },
   notFound("blog"),
-  // legal (Swedish at the root, English under /en)
+  // legal (Swedish at the root, English under /en: both indexes and all four pages in each)
   { app: "legal", path: "/", auth: "none" },
   { app: "legal", path: "/en", auth: "none" },
+  { app: "legal", path: "/integritet", route: "/[slug]", auth: "none" },
+  { app: "legal", path: "/villkor", route: "/[slug]", auth: "none" },
+  { app: "legal", path: "/tillganglighet", route: "/[slug]", auth: "none" },
+  { app: "legal", path: "/foretaget", route: "/[slug]", auth: "none" },
+  { app: "legal", path: "/en/privacy", route: "/en/[slug]", auth: "none" },
+  { app: "legal", path: "/en/terms", route: "/en/[slug]", auth: "none" },
+  { app: "legal", path: "/en/accessibility", route: "/en/[slug]", auth: "none" },
+  { app: "legal", path: "/en/company", route: "/en/[slug]", auth: "none" },
   notFound("legal"),
 ]
 

@@ -14,6 +14,7 @@ import type { ReactElement, ReactNode } from "react"
 import { Providers } from "@/app/providers"
 import { UI } from "@/content/ui"
 import { cookieDomain } from "@/lib/cookie-domain"
+import { isDraft } from "@/lib/draft"
 import "@/styles/globals.css"
 
 /**
@@ -25,7 +26,10 @@ import "@/styles/globals.css"
  * link to this app's own pages in the page's language.
  */
 
-/** Each language's root `metadata`. Every page sets its own canonical and alternates. */
+/**
+ * Each language's root `metadata`. Every page sets its own canonical and alternates. While the
+ * pages are drafts (`isDraft()`), every page also asks search engines not to index or follow it.
+ */
 export function documentMetadata(locale: LegalLocale): Metadata {
   const ui = UI[locale]
   return {
@@ -37,6 +41,7 @@ export function documentMetadata(locale: LegalLocale): Metadata {
     openGraph: { siteName: BRAND_NAME, locale: ui.ogLocale },
     appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: ui.title },
     formatDetection: { telephone: false },
+    ...(isDraft() && { robots: { index: false, follow: false } }),
   }
 }
 

@@ -3,6 +3,7 @@ import { defineCollections, defineConfig } from "fumadocs-mdx/config"
 // packages external, so a package import would make Node load the schema's .ts source at runtime
 // (type stripping). Relative, it is bundled into .source/source.config.mjs; only zod stays external.
 import { legalFrontmatterSchema } from "../../packages/content/src/schema"
+import { remarkPlaceholders } from "./src/lib/remark-placeholders"
 
 export const pages = defineCollections({
   type: "doc",
@@ -10,4 +11,9 @@ export const pages = defineCollections({
   schema: legalFrontmatterSchema,
 })
 
-export default defineConfig()
+export default defineConfig({
+  mdxOptions: {
+    // `[ATT FYLLA: …]` / `[TO FILL: …]` become `<mark data-placeholder>`, rendered as `Placeholder`.
+    remarkPlugins: [remarkPlaceholders],
+  },
+})
