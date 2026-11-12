@@ -5,6 +5,47 @@ locale: sv
 page: accessibility
 changes:
   - date: 2026-11-12
-    summary: "Första utkastet."
+    summary: "Första versionen."
 ---
-Sidan är ett utkast och skrivs klart före lansering.
+Här beskriver vi hur tillgänglig webbplatsen är, vad vi vet inte fungerar och hur du säger till om något är svårt att använda. Redogörelsen gäller webbplatsen, bloggen, inloggningen, appen, kontosidorna och de här juridiska sidorna.
+
+## Hur tillgänglig webbplatsen är
+
+Målet är att webbplatsen ska uppfylla WCAG 2.2 på nivå AA. Vi känner till några brister, som står längre ner på sidan. [ATT FYLLA: om webbplatsen bedöms vara helt eller delvis förenlig med WCAG 2.2 AA]
+
+## Så kontrollerar vi tillgängligheten
+
+Varje gång webbplatsen ändras körs automatiska tester i en riktig webbläsare:
+
+- Varje sida kontrolleras med verktyget axe mot kraven i WCAG 2.0, 2.1 och 2.2 på nivå A och AA, i både ljust och mörkt tema och på svenska och engelska där sidan finns på båda språken.
+- Några vanliga vägar genom webbplatsen görs med bara tangentbordet: att logga in, fylla i kontaktformuläret, byta namn på en arbetsyta och använda kontomenyn. Testerna kontrollerar att du alltid ser var du är på sidan, och att en dialogruta håller kvar fokus och lämnar tillbaka det när du trycker på Escape.
+- Varje sida visas 320 pixlar bred, som på en liten mobil, och får inte kräva att du scrollar i sidled.
+- Startsidan och ett blogginlägg visas med inställningen för minskad rörelse, och då får inget på sidan fortsätta att röra sig.
+
+Automatiska tester hittar inte allt. Hur sidorna fungerar med en skärmläsare, om bildbeskrivningarna säger något och hur lätta texterna är att förstå behöver en människa bedöma. [ATT FYLLA: om webbplatsen har granskats manuellt, till exempel med skärmläsare, och i så fall när och av vem]
+
+## Kända brister
+
+Det här vet vi om och håller på att åtgärda:
+
+- I innehållsförteckningen på de juridiska sidorna kan ramen som visar var tangentbordet befinner sig bli avskuren i kanten.
+- Tabellerna på de juridiska sidorna går att nå med tabbtangenten men saknar namn, så en skärmläsare säger inte vad tabellen handlar om när du kommer dit.
+- När kontomenyn är öppen på sidan för arbetsytan döljs resten av sidan för skärmläsare medan fokus stannar i menyn. Testverktyget flaggar det, men eftersom det dolda inte går att nå medan menyn är öppen har vi bedömt att det inte hindrar någon.
+
+[ATT FYLLA: bekräfta listan över kända brister och när de ska vara åtgärdade]
+
+## Rapportera ett problem
+
+Stöter du på något som är svårt att använda, eller behöver du innehåll i ett annat format, skriv till [ATT FYLLA: e-postadress för tillgänglighetsfrågor] eller använd kontaktformuläret på `/kontakt`. Berätta gärna vilken sida det gäller och vad som hände.
+
+Vi svarar [ATT FYLLA: inom vilken tid vi svarar på en rapport].
+
+## Varför vi har en redogörelse
+
+Lagen (2018:1937) om tillgänglighet till digital offentlig service gäller för offentlig sektor, och vi omfattas inte av den. Redogörelsen skriver vi frivilligt och följer den modell som myndigheter använder. [ATT FYLLA: kontrollera lag (2018:1937) om vilka lagen gäller för]
+
+[ATT FYLLA: kontrollera om lag (2023:254) om vissa produkters och tjänsters tillgänglighet gäller för bokningen på webbplatsen, mikroföretag som tillhandahåller tjänster är undantagna]
+
+## Senaste granskning
+
+Redogörelsen skrevs den 12 november 2026 och bygger på de automatiska testerna ovan. Vi uppdaterar den när vi hittar eller åtgärdar en brist.
