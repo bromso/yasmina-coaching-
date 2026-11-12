@@ -74,11 +74,11 @@ When something happens that concerns you, for example your role changes, you get
 
 ### Emails we send
 
-We send confirmations, receipts, sign-in links and notifications by email. Each email first goes into a queue with the recipient's address and the email's content.
+We send confirmations, receipts, sign-in links and notifications by email. Each email first goes into a queue with the recipient's address and the email's content, where it stays until it has been sent.
 
 - **Purpose:** to send the emails that bookings, enquiries, the account and notifications give rise to, and to be able to resend an email that did not arrive.
 - **Legal basis:** [TO FILL: legal basis for the mail queue, or whether it follows the basis of what the email is about]
-- **How long:** a sent email stays in the queue for 7 days. An email that could not be sent stays for 30 days, so the failure can be looked into.
+- **How long:** once the email has been sent, its address and content are removed from the queue at once. All that remains is a record that an email was sent, which is deleted after 7 days. If an email cannot be sent after several attempts, its address and content are kept for 30 days, so the failure can be looked into.
 
 ### Data export and deleting your account
 
@@ -96,19 +96,17 @@ Bookings and contact-form enquiries are kept by email address and are never link
 
 We count visits without cookies. Each page view is stored with the part of the site and the page, the site the visitor came from and a visitor id. The visitor id is a hash of the IP address and browser together with a random value that changes every day. So we can count visitors per day but not follow anyone from one day to the next, and the IP address and browser are never stored. If you have accepted all cookies and are signed in, the page view also gets your user id and your workspace's id. Page views from browsers that send Do Not Track are not counted.
 
-We also record some account events, for example that an account is created, confirmed or changes plan, and that an enquiry arrives (with only its three answers about who, what and when).
-
 - **Purpose:** to understand how the site is used and improve it.
 - **Legal basis:** [TO FILL: legal basis for visitor statistics, suggested legitimate interest under Art. 6(1)(f)]
 - **How long:** single page views for 90 days. The random value is deleted the day after. Daily totals, with nothing about individual visitors, are kept with no end date.
 
 ### Account events
 
-When you use the account we record some events: that the account is created and its email address confirmed, that a workspace is created, that someone is invited or joins, that a note is created, that the plan changes and that two-step verification is turned on. These events are stored with your user id and the workspace's id. That happens whatever you choose in the cookie banner and whether or not your browser sends Do Not Track. When an enquiry arrives we store only its three answers about who, what and when, with nothing about who wrote it.
+When you use the account we record some events: that the account is created and its email address confirmed, that a workspace is created, that someone is invited or joins, that a note is created, that the plan changes and that two-step verification is turned on. These events are stored with your user id and, where the event concerns a workspace, the workspace's id. A note created with an API key is stored without a user id, and plan changes are stored with the workspace's id only. That happens whatever you choose in the cookie banner and whether or not your browser sends Do Not Track. When an enquiry arrives we store only its three answers about who, what and when, with nothing about who wrote it.
 
 - **Purpose:** to follow how the service is used, for example how many new accounts get started with a workspace.
 - **Legal basis:** [TO FILL: legal basis for events stored with a user id without consent]
-- **How long:** single events for 90 days. Daily totals, with nothing about individual people, are kept with no end date.
+- **How long:** single events for 90 days. If the account is deleted before then, the events remain but without your user id. Daily totals, with nothing about individual people, are kept with no end date.
 
 ### Error reports and performance
 

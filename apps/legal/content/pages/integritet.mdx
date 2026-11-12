@@ -74,11 +74,11 @@ När något händer som rör dig, till exempel att din roll ändras, får du en 
 
 ### Mejl vi skickar
 
-Vi skickar bekräftelser, kvitton, inloggningslänkar och notiser med e-post. Varje mejl läggs först i en kö med mottagarens adress och mejlets innehåll.
+Vi skickar bekräftelser, kvitton, inloggningslänkar och notiser med e-post. Varje mejl läggs först i en kö med mottagarens adress och mejlets innehåll, där det ligger tills det har skickats.
 
 - **Syfte:** att skicka de mejl som bokningar, förfrågningar, kontot och notiserna ger upphov till, och att kunna skicka om ett mejl som inte kom fram.
 - **Rättslig grund:** [ATT FYLLA: rättslig grund för mejlkön, eller om den följer grunden för det som mejlet gäller]
-- **Hur länge:** ett skickat mejl ligger kvar i kön i 7 dagar. Ett mejl som inte gick att skicka ligger kvar i 30 dagar, så att felet kan utredas.
+- **Hur länge:** när mejlet har skickats tas adressen och innehållet bort ur kön direkt. Kvar finns bara en rad om att ett mejl skickades, och den raderas efter 7 dagar. Går ett mejl inte att skicka efter flera försök sparas adressen och innehållet i 30 dagar, så att felet kan utredas.
 
 ### Dataexport och radering av kontot
 
@@ -102,11 +102,11 @@ Vi räknar besök utan cookies. Varje sidvisning sparas med vilken del av webbpl
 
 ### Händelser i kontot
 
-När du använder kontot sparar vi vissa händelser: att kontot skapas och e-postadressen bekräftas, att en arbetsyta skapas, att någon bjuds in eller går med, att en anteckning skapas, att abonnemanget ändras och att tvåstegsverifiering slås på. Händelserna sparas med ditt användar-id och arbetsytans id. Det sker oavsett vad du väljer i cookierutan och oavsett om din webbläsare skickar Do Not Track. När en kontaktförfrågan kommer in sparar vi bara de tre svaren om vem, vad och när, utan uppgifter om vem som skrev.
+När du använder kontot sparar vi vissa händelser: att kontot skapas och e-postadressen bekräftas, att en arbetsyta skapas, att någon bjuds in eller går med, att en anteckning skapas, att abonnemanget ändras och att tvåstegsverifiering slås på. Händelserna sparas med ditt användar-id och, när händelsen gäller en arbetsyta, arbetsytans id. En anteckning som skapas med en API-nyckel sparas utan användar-id, och ändringar i abonnemanget sparas bara med arbetsytans id. Det sker oavsett vad du väljer i cookierutan och oavsett om din webbläsare skickar Do Not Track. När en kontaktförfrågan kommer in sparar vi bara de tre svaren om vem, vad och när, utan uppgifter om vem som skrev.
 
 - **Syfte:** att följa hur tjänsten används, till exempel hur många nya konton som kommer i gång med en arbetsyta.
 - **Rättslig grund:** [ATT FYLLA: rättslig grund för händelser som sparas med användar-id utan samtycke]
-- **Hur länge:** enskilda händelser i 90 dagar. Sammanställningar per dag, utan uppgifter om enskilda personer, sparas utan slutdatum.
+- **Hur länge:** enskilda händelser i 90 dagar. Raderas kontot före dess finns händelserna kvar, men utan ditt användar-id. Sammanställningar per dag, utan uppgifter om enskilda personer, sparas utan slutdatum.
 
 ### Felrapporter och prestanda
 
