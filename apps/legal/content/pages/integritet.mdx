@@ -5,6 +5,167 @@ locale: sv
 page: privacy
 changes:
   - date: 2026-11-12
-    summary: "Första utkastet."
+    summary: "Första versionen."
 ---
-Sidan är ett utkast och skrivs klart före lansering.
+Här beskriver vi vilka personuppgifter vi behandlar när du besöker webbplatsen, bokar coachning, skickar en förfrågan eller använder ett konto. Texten gäller webbplatsen, bloggen, inloggningen, appen, kontosidorna och de här juridiska sidorna.
+
+## Vem som ansvarar
+
+Personuppgiftsansvarig är [ATT FYLLA: företagets namn], organisationsnummer [ATT FYLLA: organisationsnummer]. Frågor om dina personuppgifter skickar du till [ATT FYLLA: e-postadress för integritetsfrågor]. Fler kontaktuppgifter finns på sidan [Företaget och kontakt](/foretaget).
+
+## Vilka uppgifter vi behandlar och varför
+
+### När du bokar coachning
+
+När du bokar en tid, en plats på en gruppträff eller skickar en bokningsförfrågan sparar vi det du fyller i: namn, e-postadress, telefonnummer om du anger det, organisation om du bokar för en arbetsgivare, vad du bokar, tid eller önskade datum, plats, antal deltagare och lokal om du anger dem, och dina egna anteckningar. Väljer du att betala mot faktura sparar vi betalsättet och, för en organisation, organisationsnummer, fakturareferens och fakturaadress. Vi sparar också vilket språk du använde och ett hashvärde av din IP-adress, som skyddar bokningen mot missbruk.
+
+Du kryssar i att du har läst villkoren och den här policyn innan du bokar. Vi sparar då vilken version av villkoren du godkände (datumet för villkorens senaste ändring) och när du godkände dem. Det gör vi för att kunna visa vilka villkor som gällde för just din bokning.
+
+Du får en bekräftelse med en länk där du kan se och avboka din bokning. Länken är din nyckel, och vi sparar bara ett hashvärde av den. Yasmina får ett mejl om bokningen och kan skriva egna anteckningar om den.
+
+- **Syfte:** att ta emot och genomföra bokningen, skicka bekräftelser och fakturera.
+- **Rättslig grund:** [ATT FYLLA: rättslig grund för bokningar, förslag avtal enligt art. 6.1 b]
+- **Hur länge:** [ATT FYLLA: hur länge bokningar sparas, i dag raderas de inte automatiskt] Uppgifterna om vilka villkor du godkände sparas lika länge som bokningen.
+
+### När du skickar en förfrågan via kontaktformuläret
+
+Kontaktformuläret på `/kontakt` sparar dina svar på frågorna om vem du är, vad du behöver och när, ditt meddelande, namn, e-postadress, telefonnummer, organisation och roll om du anger dem, hur du vill bli kontaktad, när du gav ditt samtycke till att bli kontaktad, om du vill ha nyhetsbrev, vilket språk och vilken sida du skrev från, och ett hashvärde av din IP-adress. Yasmina får alla svar i ett mejl och kan anteckna hur förfrågan går. Du får ett kvitto med ett referensnummer, utan texten du skrev.
+
+Vi skickar inga nyhetsbrev i dag. Kryssar du i rutan sparar vi bara ditt val.
+
+- **Syfte:** att svara på din förfrågan och föreslå ett nästa steg.
+- **Rättslig grund:** [ATT FYLLA: rättslig grund för kontaktförfrågningar, samtycke eller åtgärder före avtal]
+- **Hur länge:** 12 månader från att förfrågan kom in. Därefter raderas den automatiskt.
+
+### När du har ett konto
+
+Ett konto innehåller din e-postadress, ditt namn, ett lösenord som vi bara sparar som ett hashvärde, om din e-postadress är bekräftad, vilket språk du valt och din profilbild om du laddar upp en. Använder du tvåstegsverifiering sparar vi den hemliga nyckeln krypterad och dina reservkoder. Lägger du till en passkey sparar vi dess publika nyckel, namnet du gav den och när den senast användes. [ATT FYLLA: används inloggning med Google, GitHub eller Apple vid lansering] Om du loggar in på det sättet sparar vi vilken tjänst du använde och ditt id hos den.
+
+För varje inloggning sparar vi när den skapades och senast användes, webbläsarens användaragent och IP-adressen. Det visas för dig under inloggade enheter, så att du kan se och logga ut enheter du inte känner igen.
+
+- **Syfte:** att du ska kunna logga in och använda kontot säkert.
+- **Rättslig grund:** [ATT FYLLA: rättslig grund för konton, förslag avtal enligt art. 6.1 b]
+- **Hur länge:** så länge du har kontot. En inloggning gäller i 30 dagar. Utgångna inloggningar raderas nästa gång du loggar in. Engångslänkar för att bekräfta e-post, återställa lösenord eller logga in raderas inom en timme efter att de använts eller gått ut.
+
+### Arbetsytor, anteckningar och abonnemang
+
+I appen hör ditt arbete till en arbetsyta. Vi sparar arbetsytans namn och logotyp, vilka som är medlemmar och med vilken roll, inbjudningar (e-postadress, roll och vem som bjöd in, giltiga i sju dagar) och de anteckningar medlemmarna skriver.
+
+Har arbetsytan ett betalt abonnemang sparar vi plan, betalperiod och status, och betalleverantörens kund-id och den e-postadress som fakturorna går till. [ATT FYLLA: vilken betalleverantör som används för abonnemang vid lansering, Stripe eller ingen]
+
+Arbetsytans administratörer kan skapa API-nycklar och webhooks. För en API-nyckel sparar vi namnet, ett hashvärde av nyckeln, behörigheterna, vem som skapade den och när den senast användes. För en webhook sparar vi adressen den skickar till, en krypterad hemlighet och en logg över leveranserna. Webhooks innehåller aldrig någons e-postadress.
+
+- **Syfte:** att arbetsytan ska fungera för alla medlemmar och att abonnemanget ska kunna debiteras.
+- **Rättslig grund:** [ATT FYLLA: rättslig grund för arbetsytor och abonnemang]
+- **Hur länge:** så länge arbetsytan finns. Webhookloggen sparas i 30 dagar.
+
+### Notiser
+
+När något händer som rör dig, till exempel att din roll ändras, får du en notis i kontot och ibland ett mejl. Notisen innehåller id och namn, aldrig e-postadresser. Du väljer själv under Notiser vilka av de valfria typerna som också ska mejlas.
+
+- **Rättslig grund:** [ATT FYLLA: rättslig grund för notiser]
+- **Hur länge:** lästa notiser raderas efter 30 dagar och alla notiser efter 90 dagar.
+
+### Mejl vi skickar
+
+Vi skickar bekräftelser, kvitton, inloggningslänkar och notiser med e-post. Varje mejl läggs först i en kö med mottagarens adress och mejlets innehåll.
+
+- **Hur länge:** ett skickat mejl ligger kvar i kön i 7 dagar. Ett mejl som inte gick att skicka ligger kvar i 30 dagar, så att felet kan utredas.
+
+### Dataexport och radering av kontot
+
+Under Data och integritet i ditt konto kan du begära en export av dina uppgifter. Exporten är en JSON-fil med kontot, dina arbetsytor och de förfrågningar och bokningar du gjort med kontots bekräftade e-postadress, inklusive vilken version av villkoren du godkände och när. Filen går att hämta i 7 dagar och raderas sedan. Du kan begära en ny export en gång per dygn.
+
+Där kan du också radera kontot. Kontot raderas 7 dagar efter att du bad om det, och fram till dess kan du ångra dig. Alla inloggningar avslutas direkt. Bokningar och förfrågningar som du gjort utan konto är inte kopplade till kontot och raderas enligt sina egna tider ovan.
+
+### Besöksstatistik
+
+Vi räknar besök utan cookies. Varje sidvisning sparas med vilken del av webbplatsen och vilken sida det gällde, vilken webbplats besökaren kom från och ett besöks-id. Besöks-id:t är ett hashvärde av IP-adress och webbläsare tillsammans med ett slumpvärde som byts varje dygn. Därför kan vi räkna besökare per dag men inte följa någon mellan dagar, och IP-adressen och webbläsaren sparas aldrig. Har du valt att godkänna alla cookies sparas också ditt användar-id och din arbetsytas id om du är inloggad. Webbläsare som skickar Do Not Track räknas inte.
+
+Vi sparar också vissa händelser i kontot, till exempel att ett konto skapas, bekräftas eller byter abonnemang, och att en kontaktförfrågan kommer in (då bara de tre svaren om vem, vad och när).
+
+- **Syfte:** att förstå hur webbplatsen används och förbättra den.
+- **Rättslig grund:** [ATT FYLLA: rättslig grund för besöksstatistik, förslag berättigat intresse enligt art. 6.1 f]
+- **Hur länge:** enskilda sidvisningar och händelser i 90 dagar. Slumpvärdet raderas dagen efter. Sammanställningar per dag, utan uppgifter om enskilda besökare, sparas utan slutdatum.
+
+### Felrapporter och prestanda
+
+När en sida kraschar eller laddar långsamt skickar webbläsaren en rapport: vilken sida (utan id:n och nycklar i adressen), felmeddelandet och mätvärden för laddningstid. Webbläsarens användaragent skickas bara om du godkänt alla cookies. Rapporterna innehåller aldrig IP-adress, användar-id eller det du skrivit.
+
+- **Syfte:** att hitta och rätta fel.
+- **Rättslig grund:** [ATT FYLLA: rättslig grund för felrapporter, förslag berättigat intresse enligt art. 6.1 f]
+- **Hur länge:** felrapporter i 30 dagar, mätvärden i 7 dagar.
+
+### Säkerhetslogg
+
+Vi loggar administrativa och säkerhetsrelaterade händelser, till exempel ändringar i en arbetsyta, avstängning av ett konto och när en administratör loggar in som en användare för att ge support. Sådan support-inloggning kräver ett skäl, gäller i högst en timme och loggas. Loggen innehåller vem som gjorde vad och när, och IP-adress och användaragent.
+
+- **Syfte:** att skydda konton och kunna utreda missbruk.
+- **Rättslig grund:** [ATT FYLLA: rättslig grund för säkerhetsloggen, förslag berättigat intresse enligt art. 6.1 f]
+- **Hur länge:** IP-adress och användaragent tas bort efter 90 dagar och hela raden efter 365 dagar.
+
+### Säkerhetskopior
+
+[ATT FYLLA: om säkerhetskopior av databasen tas vid lansering, var de lagras och hur länge, standard i koden är 14 dagar] En säkerhetskopia kan innehålla uppgifter som redan raderats i databasen, tills kopian själv raderas.
+
+## Mottagare och biträden
+
+De som behandlar uppgifter för vår räkning är:
+
+- **Webbhotell:** servern som kör webbplatsen och databasen. [ATT FYLLA: värdleverantör och i vilket land servern står]
+- **E-posttjänst:** tjänsten som skickar våra mejl. [ATT FYLLA: Resend eller vilken SMTP-tjänst som används]
+- **Yasminas e-post:** bokningar och förfrågningar mejlas till Yasmina. [ATT FYLLA: vilken e-postleverantör Yasmina använder]
+- **Lagring av filer:** profilbilder, logotyper och exporter. [ATT FYLLA: om filer lagras på servern eller hos en S3-kompatibel lagringstjänst, och vilken]
+- **Betalningar:** [ATT FYLLA: om Stripe används för abonnemang vid lansering]
+- **Inloggning med andra tjänster:** [ATT FYLLA: om Google, GitHub eller Apple används för inloggning vid lansering]
+
+[ATT FYLLA: om personuppgiftsbiträdesavtal finns med varje biträde]
+
+## Överföring utanför EU/EES
+
+[ATT FYLLA: om någon mottagare behandlar uppgifter utanför EU/EES, vilka, och vilken skyddsåtgärd som gäller, till exempel EU-kommissionens beslut om adekvat skyddsnivå eller standardavtalsklausuler]
+
+## Dina rättigheter
+
+Enligt dataskyddsförordningen (GDPR) har du rätt att:
+
+- få veta vilka uppgifter vi har om dig och få en kopia av dem (artikel 15). Med ett konto kan du själv hämta en export.
+- få felaktiga uppgifter rättade (artikel 16). Namn, e-post och profilbild ändrar du själv i kontot.
+- få dina uppgifter raderade (artikel 17), om vi inte måste spara dem av något annat skäl.
+- begära att behandlingen begränsas medan något utreds (artikel 18).
+- få ut uppgifter du själv lämnat i ett maskinläsbart format, när behandlingen bygger på samtycke eller avtal (artikel 20).
+- inte bli föremål för beslut som enbart grundas på automatiserad behandling (artikel 22). Vi fattar inga sådana beslut.
+
+Bygger en behandling på ditt samtycke kan du när som helst återkalla det. [ATT FYLLA: kontrollera hänvisningen till artikel 7.3 om återkallat samtycke]
+
+**Rätt att invända.** Du har rätt att när som helst invända mot behandling som bygger på vårt berättigade intresse (artikel 21). Då slutar vi, om vi inte kan visa tungt vägande skäl som går före ditt intresse. Du har alltid rätt att invända mot direktmarknadsföring.
+
+Hör av dig till [ATT FYLLA: e-postadress för integritetsfrågor] för att använda dina rättigheter. Vi svarar [ATT FYLLA: inom vilken tid vi svarar, GDPR anger normalt en månad].
+
+## Klagomål till IMY
+
+Tycker du att vi behandlar dina uppgifter fel får du gärna kontakta oss först. Du har också rätt att klaga hos en tillsynsmyndighet (artikel 77 GDPR). I Sverige är det Integritetsskyddsmyndigheten, IMY, som du når på [imy.se](https://www.imy.se). [ATT FYLLA: kontrollera hänvisningen till IMY som tillsynsmyndighet]
+
+## Cookies
+
+En cookie är en liten textfil som webbplatsen sparar i din webbläsare. Enligt 9 kap. 28 § lagen (2022:482) om elektronisk kommunikation får vi bara spara sådant i din webbläsare om du har fått veta varför och samtyckt, utom när det behövs för en tjänst du uttryckligen bett om.
+
+Vi sätter bara egna cookies, och alla behövs för att webbplatsen ska fungera. Besöksstatistiken klarar sig helt utan cookies. När du väljer i cookierutan påverkar du ändå två saker: om du godkänner alla får besöksstatistiken ditt användar-id när du är inloggad, och felrapporter får din webbläsares användaragent.
+
+| Namn | Vad den gör | Hur länge | Typ |
+| --- | --- | --- | --- |
+| `session` | Håller dig inloggad. Delas mellan våra webbplatser. | 30 dagar | Nödvändig |
+| `workspace` | Kommer ihåg vilken arbetsyta du arbetar i. | 1 år | Nödvändig |
+| `locale` | Kommer ihåg vilket språk du valt. | 1 år | Nödvändig |
+| `consent` | Kommer ihåg vad du valde i cookierutan. | 180 dagar | Nödvändig |
+| `two_factor` | Håller reda på inloggningen medan du skriver in din kod för tvåstegsverifiering. | 5 minuter | Nödvändig |
+| `oauth` | Skyddar inloggningen när du loggar in med en annan tjänst. | 10 minuter | Nödvändig |
+| `admin_session` | Används bara av våra administratörer medan de ger support inloggade som en användare. | 1 timme | Nödvändig |
+
+Väljer du ljust eller mörkt tema sparas valet under namnet `theme` i webbläsarens lokala lagring, tills du rensar den. Webbplatsen sparar också kopior av sidor du besökt i webbläsarens cache, så att de går att läsa utan uppkoppling. I appen, inloggningen och kontosidorna sparas bara programfiler, aldrig sidor med dina uppgifter.
+
+[ATT FYLLA: kontrollera att alla cookies i tabellen räknas som nödvändiga enligt 9 kap. 28 § andra stycket]
+
+## Ändringar i policyn
+
+När vi ändrar policyn uppdaterar vi datumet överst och skriver vad som ändrats i ändringsloggen längst ner på sidan. Ändras något som påverkar dig mer än lite meddelar vi det också [ATT FYLLA: hur vi meddelar större ändringar, till exempel med mejl till kontoinnehavare].
