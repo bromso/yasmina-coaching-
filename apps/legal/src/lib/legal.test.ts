@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test"
-import { readdirSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 import { ContentError } from "@repo/content/posts"
 import { allInputs, legalInput } from "./fixtures"
 import { assembleLegal, fileSlug, slugOf, toLegalInput } from "./legal-core"
+import { readLegalInput, readLegalInputs } from "./read-pages"
 
 const PAGES_DIR = join(import.meta.dir, "../../content/pages")
 
@@ -75,11 +75,28 @@ describe("the real content", () => {
   // The same gate `next build` runs (lib/legal.ts), over the files themselves, so a bad page is
   // caught by `bun test` too. Frontmatter is read with Bun's YAML parser, as fumadocs reads it.
   test("passes the build gate", () => {
-    const inputs = readdirSync(PAGES_DIR).map((name) => {
-      const raw = readFileSync(join(PAGES_DIR, name), "utf8")
-      const yaml = raw.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? ""
-      return toLegalInput(name, Bun.YAML.parse(yaml), raw)
-    })
-    expect(assembleLegal(inputs, []).docs()).toHaveLength(8)
+    expect(assembleLegal(readLegalInputs(PAGES_DIR), []).docs()).toHaveLength(8)
+  })
+})
+
+describe("readLegalInput", () => {
+  const page = `---\ntitle: "T"\nlocale: en\n---\nText [TO FILL: x].\n`
+
+  test("parses the frontmatter and keeps only the body for the placeholder scan", () => {
+    const input = readLegalInput("en-privacy.mdx", page)
+    expect(input.frontmatter).toEqual({ title: "T", locale: "en" })
+    expect(input.text).toBe("Text [TO FILL: x].\n")
+  })
+
+  test("drops a leading byte-order mark", () => {
+    expect(readLegalInput("en-privacy.mdx", `\uFEFF${page}`)).toEqual(
+      readLegalInput("en-privacy.mdx", page)
+    )
+  })
+
+  test("names a file with no frontmatter block", () => {
+    expect(() => readLegalInput("en-privacy.mdx", "Text only.\n")).toThrow(
+      "apps/legal/content/pages/en-privacy.mdx: no frontmatter block"
+    )
   })
 })
