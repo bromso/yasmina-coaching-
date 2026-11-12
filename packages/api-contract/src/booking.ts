@@ -56,6 +56,8 @@ import {
   type OfferingKind,
   REQUEST_OFFERING_KEYS,
   startsWithinWithdrawal,
+  withdrawalLastDay,
+  zonedDay,
 } from "./booking-limits"
 
 // Like support.ts: this file imports only zod, ./auth and the Zod-free ./booking-limits, never the
@@ -120,6 +122,8 @@ export {
   OFFERINGS,
   REQUEST_OFFERING_KEYS,
   startsWithinWithdrawal,
+  withdrawalLastDay,
+  zonedDay,
 }
 
 const Id = z.number().int().positive()

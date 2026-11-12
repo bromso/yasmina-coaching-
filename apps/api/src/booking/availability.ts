@@ -5,7 +5,8 @@ import {
   BOOKING_SLOT_STEP_MINUTES,
   BOOKING_TIMEZONE,
 } from "@repo/api-contract"
-import { formatInTimeZone, fromZonedTime } from "date-fns-tz"
+import { shiftDay, zonedDay } from "@repo/api-contract/booking-limits"
+import { fromZonedTime } from "date-fns-tz"
 
 /*
  * The slot engine, pure: rules and busy intervals in, free slots out. Rules are wall-clock windows
@@ -22,9 +23,8 @@ export type Block = { from: string; to: string }
 const MINUTE = 60_000
 const DAY = 24 * 60 * MINUTE
 
-/** `YYYY-MM-DD` of `at` in the booking zone. */
-export const zonedDay = (at: Date, timeZone = BOOKING_TIMEZONE) =>
-  formatInTimeZone(at, timeZone, "yyyy-MM-dd")
+// The calendar-day rules every booking surface shares (the withdrawal period uses them too).
+export { shiftDay, zonedDay }
 
 /** `Date#getDay` of a `YYYY-MM-DD` calendar day (the weekday is zone-independent for a date). */
 export const weekdayOf = (day: string) => new Date(`${day}T12:00:00Z`).getUTCDay()
@@ -32,13 +32,6 @@ export const weekdayOf = (day: string) => new Date(`${day}T12:00:00Z`).getUTCDay
 /** The UTC instant of `HH:MM` on `day` in the booking zone (DST-aware). */
 export const zonedInstant = (day: string, time: string, timeZone = BOOKING_TIMEZONE) =>
   fromZonedTime(`${day}T${time}:00`, timeZone)
-
-/** `day` shifted by `delta` days, as `YYYY-MM-DD`. */
-export function shiftDay(day: string, delta: number): string {
-  const d = new Date(`${day}T12:00:00Z`)
-  d.setUTCDate(d.getUTCDate() + delta)
-  return d.toISOString().slice(0, 10)
-}
 
 /** Every day from `from` through `to`, inclusive. */
 export function daysBetween(from: string, to: string): string[] {

@@ -4,6 +4,10 @@
  * `@repo/api-contract/booking-limits`); `booking.ts` re-exports everything here for server code.
  */
 
+import { isSwedishNonWorkingDay, shiftDay } from "./swedish-calendar"
+
+export { isSwedishNonWorkingDay, shiftDay, swedishHolidays } from "./swedish-calendar"
+
 /** Every availability rule and every slot a visitor sees is in this zone; storage is UTC. */
 export const BOOKING_TIMEZONE = "Europe/Stockholm"
 
@@ -256,36 +260,54 @@ export const BOOKING_EARLY_START_FIELD = "earlyStart"
 
 /**
  * A private client's right of withdrawal, in days (lag (2005:59) 2 kap. 12 §): counted in calendar
- * days in `BOOKING_TIMEZONE` from the day of booking, the last day included.
+ * days in `BOOKING_TIMEZONE` from the day of booking, see `withdrawalLastDay`.
  */
 export const BOOKING_WITHDRAWAL_DAYS = 14
 
-const stockholmDay = new Intl.DateTimeFormat("en-CA", {
-  timeZone: BOOKING_TIMEZONE,
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-})
-const dayAfter = (day: string, delta: number) => {
-  const d = new Date(`${day}T12:00:00Z`)
-  d.setUTCDate(d.getUTCDate() + delta)
-  return d.toISOString().slice(0, 10)
+const dayFormats = new Map<string, Intl.DateTimeFormat>()
+
+/**
+ * The `YYYY-MM-DD` of an instant in `timeZone` (the booking zone by default): the one calendar-day
+ * rule the slot engine (`apps/api`), the booking pages (`apps/www`) and the withdrawal period share.
+ */
+export function zonedDay(at: Date, timeZone: string = BOOKING_TIMEZONE): string {
+  let format = dayFormats.get(timeZone)
+  if (!format) {
+    format = new Intl.DateTimeFormat("en-CA", {
+      timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    })
+    dayFormats.set(timeZone, format)
+  }
+  return format.format(at)
+}
+
+/**
+ * The last day of the withdrawal period of a booking made at `now`: the booking's day in the
+ * booking zone plus `BOOKING_WITHDRAWAL_DAYS`, moved on past a Saturday, a Sunday, a public holiday
+ * or midsommar-, jul- or nyårsafton to the next working day (lag (1930:173) om beräkning av
+ * lagstadgad tid).
+ */
+export function withdrawalLastDay(now: Date): string {
+  let day = shiftDay(zonedDay(now), BOOKING_WITHDRAWAL_DAYS)
+  while (isSwedishNonWorkingDay(day)) day = shiftDay(day, 1)
+  return day
 }
 
 /**
  * Whether a session starting at `startsAt` (ISO) falls within the withdrawal period of a booking
- * made at `now`: its calendar day in the booking zone is today or one of the next
- * `BOOKING_WITHDRAWAL_DAYS` days.
+ * made at `now`: its calendar day in the booking zone is from today through `withdrawalLastDay`.
  */
 export function startsWithinWithdrawal(startsAt: string, now: Date): boolean {
-  const day = stockholmDay.format(new Date(startsAt))
-  const today = stockholmDay.format(now)
-  return day >= today && day <= dayAfter(today, BOOKING_WITHDRAWAL_DAYS)
+  const day = zonedDay(new Date(startsAt))
+  return day >= zonedDay(now) && day <= withdrawalLastDay(now)
 }
 
 /**
  * Whether a booking needs the consent to start within the withdrawal period (lag (2005:59)
- * 2 kap. 11 § 1): a private client with at least one session inside it. Organisations have no
+ * 2 kap. 11 § 1): a private client whose first session falls inside it. Organisations have no
  * right of withdrawal, so they never do.
  */
 export function earlyStartRequired(
@@ -293,7 +315,9 @@ export function earlyStartRequired(
   startsAts: readonly string[],
   now: Date
 ): boolean {
-  return audience === "private" && startsAts.some((at) => startsWithinWithdrawal(at, now))
+  if (audience !== "private" || startsAts.length === 0) return false
+  const first = [...startsAts].sort((a, b) => Date.parse(a) - Date.parse(b))[0] as string
+  return startsWithinWithdrawal(first, now)
 }
 
 /** The reference a booking is known by, in mail and on the admin pages: `BK-<id>`. */

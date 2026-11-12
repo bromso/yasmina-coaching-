@@ -555,14 +555,14 @@ describe("bookingConfirmed", () => {
     const sv = await emails.bookingConfirmed({ ...props, withdrawal: true, earlyStart: true }, "sv")
     for (const part of [sv.html, sv.text]) {
       expect(part).toContain(
-        "Du har bett att sessionen äger rum inom ångerfristen. Ångerrätten upphör när sessionen har genomförts."
+        "Du har bett att tjänsten börjar inom ångerfristen. Ångerrätten upphör när tjänsten har fullgjorts."
       )
       expect(part).not.toContain("Som privatperson har du 14 dagars ångerrätt.")
     }
     const en = await emails.bookingConfirmed({ ...props, withdrawal: true, earlyStart: true })
     for (const part of [en.html, en.text]) {
       expect(part).toContain(
-        "You asked for the session to take place within the withdrawal period. The right of withdrawal ends once the session has taken place."
+        "You asked for the service to start within the withdrawal period. The right of withdrawal ends once the service has been fully performed."
       )
       expect(part).not.toContain("As a private client you have a 14-day right of withdrawal.")
     }
@@ -570,7 +570,7 @@ describe("bookingConfirmed", () => {
     const plain = await emails.bookingConfirmed({ ...props, withdrawal: true, earlyStart: false })
     expect(plain.text).toContain("As a private client you have a 14-day right of withdrawal.")
     for (const part of [plain.html, plain.text]) {
-      expect(part).not.toContain("You asked for the session to take place")
+      expect(part).not.toContain("You asked for the service to start")
     }
   })
 

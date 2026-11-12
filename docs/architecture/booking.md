@@ -82,14 +82,18 @@ withdrawal. Requests are organisation-only, so theirs never does.
 
 ### A start within the withdrawal period
 
-A private client keeps a 14-day right of withdrawal and loses it once a session has been performed
-only if they expressly asked for the service to start within that period (lag (2005:59) 2 kap.
-11 § 1 and 15 §). `startsWithinWithdrawal(startsAt, now)` in `@repo/api-contract/booking-limits`
-(Zod-free) decides it with the engine's calendar rules: the session's day in `Europe/Stockholm` is
-today or one of the next `BOOKING_WITHDRAWAL_DAYS` (14) days, the 14th included, so a session on
-the 15th day needs nothing. `earlyStartRequired(audience, startsAts, now)` is that test for any
-session of a `private` booking; an organisation never needs it, and a request (organisation-only)
-never asks.
+A private client keeps a 14-day right of withdrawal, which ends once the whole service has been
+fully performed only if they expressly asked for it to start within that period and were told so
+(lag (2005:59) 2 kap. 11 § 1; whether a proportionate payment is owed under 15 § is open in the
+terms). `withdrawalLastDay(now)` in `@repo/api-contract/booking-limits` (Zod-free) is the period's
+last day: the booking's day in `Europe/Stockholm` (`zonedDay`, the same function the slot engine
+and the www pages use) plus `BOOKING_WITHDRAWAL_DAYS` (14), moved on past a Saturday, a Sunday, a
+public holiday or midsommar-, jul- or nyårsafton to the next working day (lag (1930:173) om
+beräkning av lagstadgad tid; the table is `swedishHolidays(year)` in `swedish-calendar.ts`, Easter by
+the Gregorian computus). `startsWithinWithdrawal(startsAt, now)` is true when a session's
+Stockholm day is from today through that last day, and `earlyStartRequired(audience, startsAts,
+now)` asks it of a `private` booking's first session. An organisation never needs the consent, and
+a request (organisation-only) never asks.
 
 - **The box.** `EarlyStartField` (`name="earlyStart"`, `value="on"`, required, error linked with
   `fieldAria`) sits under the terms box in the instant and group journeys, shown when a picked slot

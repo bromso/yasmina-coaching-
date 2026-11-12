@@ -1,4 +1,4 @@
-import { BOOKING_TIMEZONE } from "@repo/api-contract/booking-limits"
+import { BOOKING_TIMEZONE, shiftDay, zonedDay } from "@repo/api-contract/booking-limits"
 import { INTL_LOCALE, type Locale } from "@/lib/site-locale"
 
 /*
@@ -7,15 +7,9 @@ import { INTL_LOCALE, type Locale } from "@/lib/site-locale"
  * shown in that zone through `Intl`, whatever the browser's own zone.
  */
 
-const dayParts = new Intl.DateTimeFormat("en-CA", {
-  timeZone: BOOKING_TIMEZONE,
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-})
-
-/** The `YYYY-MM-DD` of an instant in the booking zone. */
-export const zonedDay = (at: Date): string => dayParts.format(at)
+// `zonedDay` (an instant's `YYYY-MM-DD` in the booking zone) and `shiftDay` are the contract's,
+// the same rules the api's slot engine and the withdrawal period use.
+export { shiftDay, zonedDay }
 
 /** A `YYYY-MM-DD` key for a calendar-grid date (react-day-picker hands local-midnight dates). */
 export function gridDay(date: Date): string {
@@ -23,13 +17,6 @@ export function gridDay(date: Date): string {
   const m = String(date.getMonth() + 1).padStart(2, "0")
   const d = String(date.getDate()).padStart(2, "0")
   return `${y}-${m}-${d}`
-}
-
-/** `day` shifted by `delta` days, as `YYYY-MM-DD` (UTC noon avoids any DST edge). */
-export function shiftDay(day: string, delta: number): string {
-  const d = new Date(`${day}T12:00:00Z`)
-  d.setUTCDate(d.getUTCDate() + delta)
-  return d.toISOString().slice(0, 10)
 }
 
 /** The first and last `YYYY-MM-DD` of the month a grid date falls in. */

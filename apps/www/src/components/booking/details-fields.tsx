@@ -3,6 +3,7 @@ import { FieldError, type FormState, fieldAria } from "@repo/ui/components/form-
 import { Input } from "@repo/ui/components/input"
 import { Label } from "@repo/ui/components/label"
 import { Textarea } from "@repo/ui/components/textarea"
+import { useId } from "react"
 import { useBookingCopy } from "@/components/booking/locale-provider"
 import { cn } from "@/lib/utils"
 
@@ -226,9 +227,6 @@ export type TermsLinks = { terms: string; privacy: string }
 const legalLinkClass =
   "font-medium underline underline-offset-4 hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
 
-/** The id of the "(opens in a new tab)" note both terms links are described by. */
-const NEW_TAB_ID = "terms-new-tab"
-
 /**
  * "I have read the terms and the privacy policy": a native, required checkbox (`terms`, posted as
  * `on`), so it works without JavaScript; the server refuses the booking without it either way.
@@ -238,6 +236,8 @@ const NEW_TAB_ID = "terms-new-tab"
  */
 export function TermsField({ state, links }: { state: FormState; links: TermsLinks }) {
   const { terms } = useBookingCopy()
+  // The "(opens in a new tab)" note both links are described by.
+  const newTabId = useId()
   return (
     <div className="grid gap-1">
       <label className={cn(choiceClass, "items-start")}>
@@ -256,7 +256,7 @@ export function TermsField({ state, links }: { state: FormState; links: TermsLin
             href={links.terms}
             target="_blank"
             rel="noopener"
-            aria-describedby={NEW_TAB_ID}
+            aria-describedby={newTabId}
             className={legalLinkClass}
           >
             {terms.terms}
@@ -266,7 +266,7 @@ export function TermsField({ state, links }: { state: FormState; links: TermsLin
             href={links.privacy}
             target="_blank"
             rel="noopener"
-            aria-describedby={NEW_TAB_ID}
+            aria-describedby={newTabId}
             className={legalLinkClass}
           >
             {terms.privacy}
@@ -274,7 +274,7 @@ export function TermsField({ state, links }: { state: FormState; links: TermsLin
         </span>
       </label>
       {/* Hidden, yet still read as a description: `aria-describedby` follows hidden elements. */}
-      <span id={NEW_TAB_ID} hidden>
+      <span id={newTabId} hidden>
         {terms.newTab}
       </span>
       <FieldError name="terms" state={state} />

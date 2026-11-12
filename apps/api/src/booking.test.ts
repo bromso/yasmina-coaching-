@@ -861,7 +861,7 @@ describe("the terms", () => {
 describe("a start within the withdrawal period", () => {
   // Monday 2 March, 09:00 in Stockholm: the period's last day is Monday 16 March.
   const BOOKED = new Date("2026-03-02T08:00:00.000Z")
-  const EARLY_EN = "You asked for the session to take place within the withdrawal period."
+  const EARLY_EN = "You asked for the service to start within the withdrawal period."
   const WITHDRAWAL_EN = "As a private client you have a 14-day right of withdrawal."
   const book = (
     email: string,
@@ -927,7 +927,7 @@ describe("a start within the withdrawal period", () => {
     await app.drain()
     const [mail] = app.mailer.sent.filter((m) => m.to === "early-given@example.com")
     expect(mail?.text).toContain(
-      "Du har bett att sessionen äger rum inom ångerfristen. Ångerrätten upphör när sessionen har genomförts."
+      "Du har bett att tjänsten börjar inom ångerfristen. Ångerrätten upphör när tjänsten har fullgjorts."
     )
     expect(mail?.text).not.toContain("Som privatperson har du 14 dagars ångerrätt.")
   })
@@ -948,6 +948,47 @@ describe("a start within the withdrawal period", () => {
     )
     expect(mail?.text).toContain(WITHDRAWAL_EN)
     expect(mail?.text).not.toContain(EARLY_EN)
+  })
+
+  test("a programme is judged by its first session; every row of the order is stamped", async () => {
+    clock = BOOKED
+    // The first session on the period's last day, the rest after it.
+    const slots = [
+      "2026-03-16T08:00:00.000Z",
+      "2026-03-23T09:00:00.000Z",
+      "2026-03-30T08:00:00.000Z",
+    ]
+    const programme = (email: string, earlyStart?: boolean) =>
+      anon().booking.book({
+        termsAccepted: true,
+        offering: "package_6",
+        slots,
+        audience: "private",
+        customer: { ...customer, email },
+        location: "video",
+        ...(earlyStart === undefined ? {} : { earlyStart }),
+      })
+    const [error] = await safeCall(() => programme("early-programme-refused@example.com"))
+    expect(error?.code).toBe("BAD_REQUEST")
+    expect(error?.data).toEqual({ field: "earlyStart" })
+    const result = await programme("early-programme@example.com", true)
+    expect(result.bookings).toHaveLength(3)
+    for (const booking of result.bookings) {
+      const row = await app.db.booking.find(booking.id)
+      expect(row?.early_start_requested_at).toBe("2026-03-02T08:00:00.000Z")
+    }
+    // Every session after the period: nothing needed.
+    const later = await anon().booking.book({
+      termsAccepted: true,
+      offering: "package_6",
+      slots: ["2026-03-25T09:00:00.000Z", "2026-04-01T08:00:00.000Z"],
+      audience: "private",
+      customer: { ...customer, email: "early-programme-later@example.com" },
+      location: "video",
+    })
+    expect(
+      (await app.db.booking.find(later.bookings[0]?.id as number))?.early_start_requested_at
+    ).toBeNull()
   })
 
   test("an organisation never needs it", async () => {

@@ -354,7 +354,7 @@ const sv: BookingFormCopy = {
     newTab: "(öppnas i en ny flik)",
   },
   earlyStart:
-    "Jag vill att tjänsten börjar inom ångerfristen och förstår att ångerrätten upphör när sessionen har genomförts.",
+    "Jag vill att tjänsten börjar inom ångerfristen och förstår att ångerrätten upphör när tjänsten har fullgjorts.",
   timezoneNote: "Tiderna visas i svensk tid (Europe/Stockholm).",
   calendar: { previous: "Föregående månad", next: "Nästa månad", today: "I dag", selected: "Vald" },
   noScriptLink: { label: "Be om ett introsamtal", href: contactFrom("/book") },
@@ -565,7 +565,7 @@ const en: BookingFormCopy = {
     newTab: "(opens in a new tab)",
   },
   earlyStart:
-    "I want the service to start within the withdrawal period, and I understand the right of withdrawal ends once the session has taken place.",
+    "I want the service to start within the withdrawal period, and I understand the right of withdrawal ends once the service has been fully performed.",
   timezoneNote: "Times are shown in Swedish time (Europe/Stockholm).",
   calendar: {
     previous: "Previous month",

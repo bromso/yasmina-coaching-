@@ -59,8 +59,8 @@ export const PrivateClient: Story = {
 }
 
 /**
- * A private client who asked for the session to take place within the withdrawal period: the line
- * saying the right ends once it has, in place of the generic one.
+ * A private client who asked for the service to start within the withdrawal period: the line
+ * saying the right ends once the service has been fully performed, in place of the generic one.
  */
 export const StartWithinWithdrawalPeriod: Story = {
   args: {
@@ -70,7 +70,7 @@ export const StartWithinWithdrawalPeriod: Story = {
     const canvas = within(canvasElement)
     await waitFor(() =>
       expect(canvas.getByTestId("text")).toHaveTextContent(
-        "You asked for the session to take place within the withdrawal period. The right of withdrawal ends once the session has taken place."
+        "You asked for the service to start within the withdrawal period. The right of withdrawal ends once the service has been fully performed."
       )
     )
     await expect(canvas.getByTestId("text")).not.toHaveTextContent(

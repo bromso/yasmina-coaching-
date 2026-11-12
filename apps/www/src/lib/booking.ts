@@ -393,9 +393,14 @@ export async function reserveSeatsCore(
     earlyStart: earlyStartOf(fd),
   })
   const terms = termsRefusal(fd, deps.locale)
-  // The events' dates are read only when they could matter: a private client, the box unticked.
+  // The events' dates are read only when they could matter: a private client, the box unticked,
+  // and a form that would otherwise be sent (with other errors it is refused anyway).
   const starts =
-    values.audience === "private" && values.earlyStart !== "on" && eventIds.length > 0
+    parsed.success &&
+    payment.ok &&
+    !terms.terms &&
+    values.audience === "private" &&
+    values.earlyStart !== "on"
       ? await groupEventStarts(deps.api, str(fd, "offering"), eventIds)
       : null
   const now = deps.now ? deps.now() : new Date()

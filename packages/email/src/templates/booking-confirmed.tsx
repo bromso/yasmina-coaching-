@@ -25,7 +25,7 @@ export type BookingConfirmedProps = {
   withdrawal: boolean
   /**
    * The client asked for the session to start within the withdrawal period: the line saying the
-   * right ends once the session has taken place, in place of the generic one.
+   * right ends once the service has been fully performed, in place of the generic one.
    */
   earlyStart?: boolean
   brand?: string

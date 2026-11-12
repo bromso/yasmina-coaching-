@@ -263,9 +263,10 @@ describe("the consent boxes after a refusal", () => {
     const label = /<label[^>]*>[\s\S]*?<\/label>/.exec(html)?.[0] ?? ""
     expect(label).toContain(BOOKING.sv.form.terms.terms)
     expect(label).not.toContain(BOOKING.sv.form.terms.newTab)
-    expect(count(label, /aria-describedby="terms-new-tab"/g)).toBe(2)
+    const note = /<span id="([^"]+)" hidden="">\(öppnas i en ny flik\)<\/span>/.exec(html)
+    const id = note?.[1] ?? "missing"
+    expect(count(label, new RegExp(`aria-describedby="${id}"`, "g"))).toBe(2)
     expect(count(html, /\(öppnas i en ny flik\)/g)).toBe(1)
-    expect(html).toContain('<span id="terms-new-tab" hidden="">(öppnas i en ny flik)</span>')
   })
 })
 

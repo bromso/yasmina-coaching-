@@ -1125,6 +1125,26 @@ describe("a start within the withdrawal period", () => {
     }
   }
 
+  test("a group form with other errors is refused without reading the events", async () => {
+    let reads = 0
+    const out = await reserveSeatsCore(
+      {
+        locale: "sv",
+        now,
+        api: {
+          groupEvents: async () => {
+            reads++
+            return { events: [groupEvent(3, SOON)] }
+          },
+          reserve: async () => created,
+        },
+      },
+      form({ ...customer, terms: "", audience: "private", eventIds: ["3"] })
+    )
+    expect(reads).toBe(0)
+    expect(out).toMatchObject({ ok: false, fieldErrors: { terms: BOOKING_FORMS.sv.check.terms } })
+  })
+
   test("an unticked box is refused alongside the other answers' errors", async () => {
     const out = await book(
       "sv",
@@ -1173,10 +1193,10 @@ describe("a start within the withdrawal period", () => {
 
   test("the label and the message are the brief's, in both languages", () => {
     expect(BOOKING_FORMS.sv.earlyStart).toBe(
-      "Jag vill att tjänsten börjar inom ångerfristen och förstår att ångerrätten upphör när sessionen har genomförts."
+      "Jag vill att tjänsten börjar inom ångerfristen och förstår att ångerrätten upphör när tjänsten har fullgjorts."
     )
     expect(BOOKING_FORMS.en.earlyStart).toBe(
-      "I want the service to start within the withdrawal period, and I understand the right of withdrawal ends once the session has taken place."
+      "I want the service to start within the withdrawal period, and I understand the right of withdrawal ends once the service has been fully performed."
     )
     expect(BOOKING_FORMS.sv.check.earlyStart).toBe(
       "Bekräfta att sessionen får äga rum inom ångerfristen, eller välj en tid längre fram."
