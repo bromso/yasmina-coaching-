@@ -37,6 +37,8 @@ type ContactFormProps = {
   locale: Locale
   /** The www page the visitor came from (`?from=`), checked by the page; sent as `page`. */
   page: string
+  /** The legal app's privacy policy in the form's language (from the server: `legalUrl`). */
+  privacyHref: string
 }
 
 const initialState: FormState = { ok: false }
@@ -64,7 +66,7 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
  * `<form action>` that works without JavaScript; the browser checks each step before the next,
  * and the server checks everything again.
  */
-export function ContactForm({ locale, page }: ContactFormProps) {
+export function ContactForm({ locale, page, privacyHref }: ContactFormProps) {
   const copy = CONTACT[locale].form
   const [state, action, pending] = useActionState(sendLead, initialState)
   const [audience, setAudience] = useState<LeadAudience | "">(
@@ -290,7 +292,7 @@ export function ContactForm({ locale, page }: ContactFormProps) {
         </div>
         <p className="text-muted-foreground text-xs">
           {copy.legal}{" "}
-          <a href="/privacy" className="underline underline-offset-4 hover:text-foreground">
+          <a href={privacyHref} className="underline underline-offset-4 hover:text-foreground">
             {copy.privacyLink}
           </a>
           .

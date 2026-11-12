@@ -21,10 +21,24 @@ test("home: header, footer, the four coaching formats", async ({ page }) => {
   }
 })
 
-test("legal pages render", async ({ page }) => {
-  for (const path of ["/terms", "/privacy"]) {
-    await page.goto(`${URLS.www}${path}`)
-    await expect(page.getByRole("heading", { level: 1 })).toBeVisible()
+// The legal pages moved to the legal app; www's old paths redirect there permanently, in the
+// reader's language: Swedish without a `locale` cookie, English with `locale=en`.
+test("the old legal pages redirect to the legal app in the reader's language", async ({
+  request,
+}) => {
+  for (const [path, sv, en] of [
+    ["/privacy", "/integritet", "/en/privacy"],
+    ["/terms", "/villkor", "/en/terms"],
+  ]) {
+    const swedish = await request.get(`${URLS.www}${path}`, { maxRedirects: 0 })
+    expect(swedish.status()).toBe(308)
+    expect(swedish.headers().location).toBe(`${URLS.legal}${sv}`)
+    const english = await request.get(`${URLS.www}${path}`, {
+      maxRedirects: 0,
+      headers: { cookie: "locale=en" },
+    })
+    expect(english.status()).toBe(308)
+    expect(english.headers().location).toBe(`${URLS.legal}${en}`)
   }
 })
 

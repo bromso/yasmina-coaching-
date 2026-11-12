@@ -32,6 +32,11 @@
   },
   "siteNav": "Webbplats",
   "footerNav": "Sidfot",
+  "footerLegal": {
+    "privacy": "Integritet",
+    "terms": "Villkor",
+    "accessibility": "Tillgänglighet"
+  },
   "menu": {
     "open": "Öppna menyn",
     "title": "Meny",

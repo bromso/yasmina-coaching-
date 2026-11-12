@@ -31,9 +31,6 @@ const notFound = (app: AppId, auth: A11yPage["auth"] = "none"): A11yPage => ({
 export const A11Y_PAGES: A11yPage[] = [
   // www (Swedish by default; the landing page is also checked in English, the `locale` cookie set)
   { app: "www", path: "/", auth: "none", variants: ["light", "dark", "en-light", "en-dark"] },
-  // The legal pages are Swedish by default and English through the `locale` cookie.
-  { app: "www", path: "/terms", auth: "none", variants: ["light", "dark", "en-light"] },
-  { app: "www", path: "/privacy", auth: "none", variants: ["light", "dark", "en-light"] },
   // Ledarskap inifrån: the hub (also in English), the four services (one route) and the research.
   {
     app: "www",
@@ -204,6 +201,16 @@ export const EXCLUDED: Array<{ app: AppId; route: string; reason: string }> = [
     app: "auth",
     route: "/admin/stop",
     reason: "renders only while impersonating; checked as a state in admin.spec",
+  },
+  {
+    app: "www",
+    route: "/privacy",
+    reason: "redirect only, to the legal app's privacy page (checked there); www.spec follows it",
+  },
+  {
+    app: "www",
+    route: "/terms",
+    reason: "redirect only, to the legal app's terms page (checked there); www.spec follows it",
   },
   {
     app: "www",

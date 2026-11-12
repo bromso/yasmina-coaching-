@@ -41,8 +41,9 @@ const meta = {
       <SiteFooterLegal
         year={2026}
         links={[
-          { label: "Terms", href: "https://www.brand.com/terms" },
-          { label: "Privacy", href: "https://www.brand.com/privacy" },
+          { label: "Privacy", href: "https://legal.brand.com/en/privacy" },
+          { label: "Terms", href: "https://legal.brand.com/en/terms" },
+          { label: "Accessibility", href: "https://legal.brand.com/en/accessibility" },
           { label: "Contact", href: "https://www.brand.com/kontakt" },
         ]}
       />
@@ -65,10 +66,12 @@ export const Default: Story = {
     )
     const legal = canvas.getByText(/^© 2026/)
     await expect(legal).toBeVisible()
-    await expect(legal).toHaveTextContent(`© 2026 ${BRAND_NAME} · Terms · Privacy · Contact`)
+    await expect(legal).toHaveTextContent(
+      `© 2026 ${BRAND_NAME} · Privacy · Terms · Accessibility · Contact`
+    )
     await expect(within(legal).getByRole("link", { name: "Privacy" })).toHaveAttribute(
       "href",
-      "https://www.brand.com/privacy"
+      "https://legal.brand.com/en/privacy"
     )
   },
 }
@@ -86,8 +89,8 @@ export const Narrow: Story = {
     await expect(doc.scrollWidth).toBeLessThanOrEqual(doc.clientWidth)
     await expect(canvas.getAllByRole("contentinfo")).toHaveLength(1)
     const links = within(canvas.getByRole("contentinfo")).getAllByRole("link")
-    // The brand, six group links and three legal links.
-    await expect(links).toHaveLength(10)
+    // The brand, six group links and four legal links.
+    await expect(links).toHaveLength(11)
     for (const link of links) {
       await expect(link).toBeVisible()
       const rect = link.getBoundingClientRect()

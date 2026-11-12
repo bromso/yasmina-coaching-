@@ -15,7 +15,6 @@ export const VISUAL_PAGES: VisualPage[] = [
   { app: "www", path: "/inifran", name: "www-inifran" },
   { app: "www", path: "/inifran/coachning", name: "www-inifran-coachning" },
   { app: "www", path: "/kontakt", name: "www-kontakt" },
-  { app: "www", path: "/privacy", name: "www-privacy" },
   { app: "blog", path: "/", name: "blog-home" },
   { app: "blog", path: "/att-leda-genom-en-kris", name: "blog-post" },
   { app: "blog", path: "/en", name: "blog-en" },

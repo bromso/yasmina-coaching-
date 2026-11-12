@@ -22,12 +22,12 @@ export function LoginForm({
   className,
   next,
   social,
-  legalBaseUrl,
+  legal,
   ...props
 }: React.ComponentPropsWithoutRef<"div"> & {
   next?: string
-  /** The marketing site's origin, for the Terms and Privacy links. */
-  legalBaseUrl: string
+  /** The legal app's terms and privacy URLs, for the consent line (from the server view). */
+  legal: { termsHref: string; privacyHref: string }
   /** The provider buttons, rendered by the (server) view; null when none are configured. */
   social?: React.ReactNode
 }) {
@@ -111,7 +111,7 @@ export function LoginForm({
           </div>
         </CardContent>
       </Card>
-      <TermsNote legalBaseUrl={legalBaseUrl} />
+      <TermsNote {...legal} />
     </div>
   )
 }

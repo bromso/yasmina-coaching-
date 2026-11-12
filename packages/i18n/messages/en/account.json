@@ -11,8 +11,6 @@
     "notifications": "Notifications"
   },
   "layout": {
-    "terms": "Terms",
-    "privacy": "Privacy",
     "impersonating": "(impersonating)",
     "deletionScheduled": "Your account will be deleted on {date}.",
     "cancelDeletion": "Cancel deletion"

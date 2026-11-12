@@ -5,6 +5,7 @@ import { describe, expect, mock, test } from "bun:test"
 mock.module("server-only", () => ({}))
 
 const { renderToStaticMarkup } = await import("react-dom/server")
+const { legalUrl } = await import("@repo/sites/legal")
 const { INNER, INNER_SERVICE_IDS } = await import("@/content/inner")
 const { BOOKING } = await import("@/content/booking")
 const { formatKr, INNER_PRICES } = await import("@/content/inner-pricing")
@@ -390,7 +391,7 @@ describe("ContactView", () => {
       for (const label of Object.values(copy.form.need.labels)) expect(html).toContain(esc(label))
       for (const label of Object.values(copy.form.timeline.labels))
         expect(html).toContain(esc(label))
-      expect(html).toContain('href="/privacy"')
+      expect(html).toContain(`href="${legalUrl("privacy", locale)}"`)
     })
   }
 
@@ -500,38 +501,5 @@ describe("ContactDoneView", () => {
     for (const item of CONTACT.sv.done.whatNow.items) expect(html).toContain(item)
     expect(html).toContain('aria-current="step"')
     expect(count(html, /<h1[\s>]/g)).toBe(1)
-  })
-})
-
-describe("the legal pages render in both languages", () => {
-  test("privacy and terms, with the page's own words around the sections", async () => {
-    const { LegalPage } = await import("@repo/ui/blocks/legal-page")
-    const { LEGAL_CHROME } = await import("@/content/legal-notice")
-    const { PRIVACY } = await import("@/content/privacy")
-    const { TERMS } = await import("@/content/terms")
-    for (const locale of LOCALES) {
-      const chrome = LEGAL_CHROME[locale]
-      for (const doc of [PRIVACY[locale], TERMS[locale]]) {
-        const html = render(
-          <LegalPage
-            title={doc.title}
-            updatedAt={doc.updatedAt}
-            sections={doc.sections}
-            notice={chrome.notice}
-            labels={{ lastUpdated: chrome.lastUpdated, contents: chrome.contents }}
-            dateLocale={chrome.dateLocale}
-          />
-        )
-        expect(count(html, /<h1[\s>]/g)).toBe(1)
-        expect(html).toContain(esc(doc.title))
-        expect(html).toContain(`aria-label="${chrome.contents}"`)
-        expect(html).toContain(chrome.lastUpdated)
-        for (const section of doc.sections) expect(html).toContain(`id="${section.id}"`)
-      }
-    }
-    const sv = render(
-      <LegalPage title="x" updatedAt="2026-11-11" sections={[]} dateLocale="sv-SE" />
-    )
-    expect(sv).toContain("11 november 2026")
   })
 })

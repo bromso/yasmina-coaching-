@@ -16,7 +16,9 @@
  * - **`@repo/sites`** (the email-change branch): every function on the root entry reads
  *   `process.env` at call time (`siteUrl`, `siteNav`, …), which a browser bundle never inlines, so
  *   a client component gets such a value as a prop from a server component instead.
- *   `@repo/sites/brand` (`BRAND_NAME`) is the client-safe subpath.
+ *   `@repo/sites/brand` (`BRAND_NAME`) is the client-safe subpath. `@repo/sites/legal` is
+ *   client-safe too except `legalUrl`, which calls `siteUrl`: a client file may import
+ *   `LEGAL_PAGES` and `legalPath` from it, never `legalUrl` (nor `* as`, which carries it).
  *
  * A type-only import is erased at compile time and costs nothing, so it is never a violation.
  *
@@ -157,6 +159,7 @@ export type ClientImportViolation =
   | { rule: `${ContractName} root`; chain: string[]; value: string }
   | { rule: `${ContractName} subpath`; chain: string[]; subpath: string; bareChain: string[] }
   | { rule: "sites root"; chain: string[]; value: string }
+  | { rule: "sites legalUrl"; chain: string[]; value: string }
 
 export type ScanResult = {
   violations: ClientImportViolation[]
@@ -225,6 +228,13 @@ export function scanClientImports(
       }
       if (specifier === "@repo/sites") {
         for (const value of values) violations.push({ rule: "sites root", chain, value })
+      }
+      if (specifier === "@repo/sites/legal") {
+        for (const value of values) {
+          if (/^legalUrl\b/.test(value) || value.startsWith("*")) {
+            violations.push({ rule: "sites legalUrl", chain, value })
+          }
+        }
       }
     }
   }

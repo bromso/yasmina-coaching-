@@ -1,6 +1,6 @@
 /**
- * The indexable pages. `/book/<offering>`, `/book/done`, `/kontakt/tack` and the token manage pages
- * are not listed.
+ * The indexable pages. `/book/<offering>`, `/book/done`, `/kontakt/tack`, the token manage pages
+ * and the old legal pages (they redirect to the legal app) are not listed.
  */
 export const PUBLIC_ROUTES = [
   "/",
@@ -12,6 +12,4 @@ export const PUBLIC_ROUTES = [
   "/inifran/forskning",
   "/book",
   "/kontakt",
-  "/terms",
-  "/privacy",
 ] as const

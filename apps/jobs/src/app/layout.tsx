@@ -1,5 +1,6 @@
 import { LOCALE_NAMES, LOCALES } from "@repo/i18n/locales"
 import { BRAND_NAME, footerGroups, siteNav, siteUrl } from "@repo/sites"
+import { legalUrl } from "@repo/sites/legal"
 import { SiteFooter, SiteFooterLegal } from "@repo/ui/blocks/site-footer"
 import { SiteHeader } from "@repo/ui/blocks/site-header"
 import { Analytics } from "@repo/ui/components/analytics"
@@ -59,8 +60,9 @@ const cookieDomain =
 const legal = (
   <SiteFooterLegal
     links={[
-      { label: "Terms", href: `${siteUrl("www")}/terms` },
-      { label: "Privacy", href: `${siteUrl("www")}/privacy` },
+      { label: "Privacy", href: legalUrl("privacy", "en") },
+      { label: "Terms", href: legalUrl("terms", "en") },
+      { label: "Accessibility", href: legalUrl("accessibility", "en") },
     ]}
   />
 )
@@ -110,7 +112,7 @@ export default function RootLayout({
             groups={footerGroups()}
             legal={legal}
           />
-          <CookieConsent domain={cookieDomain} privacyHref={`${siteUrl("www")}/privacy`} />
+          <CookieConsent domain={cookieDomain} privacyHref={legalUrl("privacy", "en")} />
         </Providers>
         <Toaster />
       </body>
