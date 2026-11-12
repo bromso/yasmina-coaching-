@@ -335,6 +335,8 @@ the sign-in redirect first). The gate is `canUseAdmin(me)` in `src/lib/admin.ts`
 | `/admin/workspaces/<id>` | Members, the mirrored subscription, recent audit entries |
 | `/admin/support?status=open\|resolved\|all` | Help-center contact requests, newest first; the message as text in a `white-space: pre-wrap` block, never HTML; **Mark resolved** / **Reopen** per request |
 | `/admin/applications?status=all\|new\|reviewing\|rejected\|hired&job=` | Job applications, newest first; status tabs (`all` first and the default) and a role-slug filter, both GET forms; **Download CV**, a **Set status** select and **Delete** per application |
+| `/admin/leads?status=all\|new\|contacted\|call_booked\|won\|lost` | The coaching site's contact-form leads, newest first; a tab per status with its count (`all` first and the default), each lead linking its detail page (see **Leads.** in `CLAUDE.md`) |
+| `/admin/leads/<id>` | One lead: every answer, the next step the visitor was shown, `mailto:` / `tel:` links, the message as text in a `white-space: pre-wrap` block, and one form for the status and Yasmina's notes (`updateLeadCore`, audited as `lead.updated` without the notes' text) |
 | `/admin/audit?actorId=&targetType=&targetId=` | The audit log, filterable; the retention limits; an **Export** card (CSV or JSON Lines) |
 | `/admin/analytics?days=7\|30\|90` | Visitors/pageviews chart and table, top pages, top referrers, events per day, and the sign-up funnel |
 | `/admin/stop` | Outside the gate: the page the banner's **Stop impersonating** links to |
@@ -449,7 +451,7 @@ plain `<form method="post" action="/admin/audit/export">` (no JavaScript require
 with `min` — the oldest day an entry can still exist, today − `rowDays` — and `max` — tomorrow, the
 latest `to` the api accepts — from `auditExportDateBounds()`, both in `src/lib/admin.ts` and
 computed on the server), **Format** (a native `<select>` — CSV or JSON Lines, not the Radix-based
-select, for the same no-JavaScript reason the locale switchers use one), and the page's current
+select, for the same no-JavaScript reason the Language card's `LocaleSelect` uses one), and the page's current
 `actorId`/`targetType`/`targetId` filters carried as hidden fields.
 `src/app/admin/(gated)/audit/export/route.ts` (`POST` only) runs `assertSameOrigin` first (`403` on
 a cross-site post), resolves the signed-in admin and calls `admin.audit.export`. The `(gated)`
@@ -484,8 +486,9 @@ purpose (internal tooling, out of scope).
   the `auth` namespace (client components read nothing else; `ui` strings reach `@repo/ui`
   components as props, computed server-side, so that namespace never ships to the browser).
 - **The switcher.** `LocaleSwitcher` (`@repo/ui/components/locale-switcher`) sits in the header,
-  before `ThemeToggle`: a native `<select>` plus an always-visible submit button, applied only on
-  submit — never on the select's own `change` (arrow keys fire that on every step). It posts to
+  before `ThemeToggle`: a language menu (the trigger shows the current language's flag and name;
+  each language is a button, applied as soon as it is activated — an explicit choice, so WCAG
+  3.2.2 holds; without JavaScript a `<details>` whose languages are submit buttons). It posts to
   the `setLocale` server action (`src/app/actions.ts`), which validates the value, calls
   `getAuth().setLocale(locale)` (saves the profile when signed in, then the cookie — see
   `packages/session/README.md`), revalidates the whole layout on success, and redirects to

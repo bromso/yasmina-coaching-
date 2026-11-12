@@ -24,6 +24,7 @@ import { siteFor } from "@/content/site"
 import { getLocale } from "@/lib/locale"
 import { OG_LOCALE } from "@/lib/site-locale"
 import "@/styles/globals.css"
+import { CONTACT_HREF } from "@/content/contact-links"
 
 const LOCALE_OPTIONS = LOCALES.map((value) => ({ value, label: LOCALE_NAMES[value] }))
 
@@ -123,6 +124,13 @@ export default async function RootLayout({
         className="underline underline-offset-4 hover:text-foreground"
       >
         {site.legal.privacy}
+      </a>{" "}
+      ·{" "}
+      <a
+        href={`${siteUrl("www")}${CONTACT_HREF}`}
+        className="underline underline-offset-4 hover:text-foreground"
+      >
+        {site.legal.contact}
       </a>
     </p>
   )
@@ -144,7 +152,7 @@ export default async function RootLayout({
               offerings={navOfferings(locale)}
               links={[
                 { label: t("signIn"), href: `${siteUrl("auth")}/login` },
-                { label: site.contact, href: "/#contact" },
+                { label: site.contact, href: CONTACT_HREF },
               ]}
               controls={
                 <>
@@ -154,7 +162,6 @@ export default async function RootLayout({
                     domain={cookieDomain}
                     options={LOCALE_OPTIONS}
                     label={site.switcher.label}
-                    submitLabel={site.switcher.submit}
                     reloadOnChange
                   />
                 </>

@@ -3,7 +3,7 @@
 Marketing site — Next.js 16 on www.brand.localhost:3000 in development, `www.brand.com` in production.
 
 Yasmina Petersson's leadership-coaching site: one landing page, `/terms` and `/privacy` templates,
-an intro-call request form backed by `apps/api`'s waitlist, the cookie consent banner, OG images,
+the `/kontakt` contact page backed by `apps/api`'s lead pipeline, the cookie consent banner, OG images,
 `sitemap.ts`, `robots.ts` and a `not-found` page, in Swedish and English. Every page renders per
 request (ƒ): it reads the visitor's language from the `locale` cookie.
 
@@ -18,8 +18,9 @@ www is **bilingual**: Swedish by default, English when the visitor picks it.
   `src/lib/site-locale.ts`. Reading the cookie makes every page dynamic (ƒ); that is the price of
   switching the page itself.
 - **Switching.** The header's `StaticLocaleSwitcher` (in the navigation's panel) gets
-  `current={locale}` and `reloadOnChange`: pressing **Byt** / **Change** writes the cookie on the
-  shared cookie domain and reloads, so the page comes back in the other language at once (no
+  `current={locale}` and `reloadOnChange`: choosing **English** / **Svenska** in its language
+  menu (the trigger shows the current flag and name) writes the cookie on the shared cookie domain
+  and reloads, so the page comes back in the other language at once (no
   saved note). Switching needs JavaScript; reading the page in either language does not.
 - **Where each language's copy lives.** Every content file exports both languages with one type
   and a picker: `src/content/home.tsx` (`HOME`, `homeFor` — the landing page, the nav links, the
@@ -27,18 +28,21 @@ www is **bilingual**: Swedish by default, English when the visitor picks it.
   `src/content/booking-forms.ts` (`BOOKING_FORMS` — what the client booking forms say,
   client-safe, read through `useBookingCopy()` under the `LocaleProvider` in
   `src/components/booking/locale-provider.tsx`), `src/content/media.ts` (`mediaFor`, `clipsFor`,
-  `mediaTextFor` — alt texts and media labels), `src/content/site.ts` (`SITE` — the navigation's
+  `mediaTextFor` — alt texts and media labels), `src/content/contact.ts` (`CONTACT`, `contactFor` —
+  the contact page, its form and its done page, client-safe like `booking-forms.ts`),
+  `src/content/site.ts` (`SITE` — the navigation's
   own labels, the footer's legal line, the switcher) and `src/content/status.ts` (`STATUS` — the
-  404 and error pages). The cores' own messages are per-locale maps in `src/lib/actions.ts`
-  (`JOINED`, `GENERIC_FAILURE`, `TOO_MANY_REQUESTS`) and `src/lib/booking.ts`
+  404 and error pages). The cores' own messages are per-locale maps in `src/lib/leads.ts`
+  (`GENERIC_FAILURE`, `TOO_MANY_REQUESTS`; every field's message is `CONTACT[locale].form.check`)
+  and `src/lib/booking.ts`
   (`GENERIC_FAILURE`, `DATE_TOO_SOON`, `CONFIRM_REQUIRED`). `src/content/home.test.ts` checks that
   every Swedish key exists in English as a non-empty string (and back), and that neither language
   carries an exclamation mark.
 - **Flow.** Cookie → `getLocale()` in the layout and each page → props down to the server
   sections (and `LocaleProvider` around the client booking forms) → `getLocale()` again in each
   server action, which passes it to the cores and sends it to `apps/api` as `x-locale`, so the
-  api's declared error messages on the forms and every mail (welcome, booking confirmed, request
-  received, cancelled) follow the page; the api stores it on the booking order, so later mails
+  api's declared error messages on the forms and every mail (the contact form's confirmation,
+  booking confirmed, request received, cancelled) follow the page; the api stores it on the booking order, so later mails
   about it follow too.
 - **Chrome.** The shared chrome (nav landmark, cookie banner, sign-in link, theme toggle, skip
   link, footer groups) reads `translatorFor(locale, "ui")`; `<html lang>`, the metadata (title,
@@ -46,8 +50,11 @@ www is **bilingual**: Swedish by default, English when the visitor picks it.
   `error.tsx` (a client component) reads `<html lang>`; `global-error.tsx` stays Swedish.
 - **Dates** on the booking pages format with `sv-SE` or `en-GB`, 24-hour, in `Europe/Stockholm`
   (`src/lib/booking-dates.ts`; every formatter takes the locale).
-- **Left alone on purpose.** `/terms` and `/privacy` are English templates in both languages
-  (placeholders for counsel, see **Content**), rendered inside the localized layout. The web
+- **Legal pages.** `/terms` and `/privacy` follow the page's language like every other page:
+  Swedish by default, English through the cookie (`TERMS` / `PRIVACY`, `termsFor` / `privacyFor`;
+  `LEGAL_CHROME` in `src/content/legal-notice.ts` for the notice, "Senast uppdaterad" /
+  "Innehåll" and the date's locale, passed to `@repo/ui`'s `LegalPage` as props). Both are still
+  templates for counsel (see **Content**). The web
   manifest and the OG image stay Swedish (one file each, fetched without the visitor's cookie).
   Zod's own field messages on the forms (an invalid email, a too-short message) come from the
   contract in English, as before.
@@ -67,6 +74,8 @@ bun --filter @repo/www analyze   # bundle report in .next/analyze/
 | `/book/[offering]` | http://www.brand.localhost:3000/book/session (one page per `OFFERING_KEYS` entry) |
 | `/book/done` | the confirmation after a booking or request (`?ref=`, `?manage=`, `?kind=`, `?paid=`) |
 | `/book/manage/[token]` | the manage page behind the link in the confirmation mail |
+| `/kontakt` | the contact page and its three-step form (see **Contact page**); `?from=<www path>` names the page a link sat on |
+| `/kontakt/tack` | the form's done page: the reference and the tailored next step (`?ref=`, `?for=`, `?need=`, `?when=`) |
 | `/inifran` | the Ledarskap inifrån hub (see **Ledarskap inifrån**) |
 | `/inifran/[service]` | one of `coachning`, `mentorskap`, `livsstil`, `grupp` |
 | `/inifran/forskning` | the research behind the track |
@@ -83,15 +92,15 @@ All copy lives in data files; the views and pages only arrange sections.
 - `src/content/home.tsx` — every word on the landing page, in page order: hero (photo, headline,
   two calls to action, three stats), the statement, the four offers, the manifesto paragraph, the
   about section (portrait plus three reasons), the three steps, the CV (`credentials`), the FAQ
-  and the contact form's copy, in both languages (`HOME.sv`, `HOME.en`, one `HomeContent` shape).
+  and the closing contact teaser, in both languages (`HOME.sv`, `HOME.en`, one `HomeContent` shape).
   `nav` is the header's in-page links and `SECTION_IDS` the anchors they scroll to (the same in
   both languages); `src/content/home.test.ts` keeps them in step, checks both languages share
   every key, and that the copy carries no exclamation mark. `meta` feeds the page metadata; the
   web manifest uses the Swedish one.
 - `src/views/home-view.tsx` arranges the sections. The www-specific ones live in
   `src/components/*-section.tsx` (hero, statement, offers, manifesto, why, steps, credentials)
-  next to the small `ArrowLink` and `Eyebrow` pieces; the FAQ and the contact form reuse the
-  shared `Faq` and `Newsletter` blocks from `@repo/ui`.
+  next to the small `ArrowLink` and `Eyebrow` pieces; the FAQ reuses the shared `Faq` block from
+  `@repo/ui`, and the closing `#contact` section is a short teaser linking `/kontakt`.
 - Photos and the five clips live under `public/media/` (JPEG + WebP at full size and an `-800`
   width, MP4 without audio plus posters), described in `src/content/media.ts` (`MEDIA`, `CLIPS`,
   `OFFERING_MEDIA`, alt texts in both languages: `mediaFor(locale)`, `clipsFor(locale)`). `<Picture>` (`src/components/picture.tsx`) renders them
@@ -99,10 +108,14 @@ All copy lives in data files; the views and pages only arrange sections.
   pause/play button. The originals sit in `assets/originals/`, outside `public/`, and the service
   worker precaches only the offline page, icons and logo (`globPublicPatterns` in
   `next.config.ts`), never the media.
-- `src/content/terms.ts`, `src/content/privacy.ts` — the legal templates, one `LegalSection` per
-  heading, still English placeholders (their page titles too). Replace `[Company]`, `[Jurisdiction]`
-  and `[Contact email]`, update `updatedAt`, and have counsel review them — in Swedish and
-  English, since the rest of the site is both. Each page shows the notice in `src/content/legal-notice.ts` until you remove it.
+- `src/content/terms.ts`, `src/content/privacy.ts` — the legal templates in Swedish and English
+  (`TERMS`, `PRIVACY`: one `LegalDoc` per language, the same section ids and paragraph counts,
+  checked by `privacy.test.ts`; the Swedish written with the terms Swedish policies use —
+  personuppgiftsansvarig, rättslig grund, berättigat intresse, samtycke, lagringstid, de
+  registrerades rättigheter, IMY — not word for word). Replace `[Company]`, `[Jurisdiction]`,
+  `[Contact email]` and the privacy policy's `[legal basis …]` in both languages, update
+  `updatedAt`, and have counsel review them. Each page shows the notice in
+  `src/content/legal-notice.ts` (`LEGAL_CHROME`) until you remove it.
 
 ## Booking
 
@@ -181,21 +194,35 @@ retuning, and remember the blog changes with it. Headlines are set in `fontDispl
 shared block says `font-semibold`. www's own motion, breakpoints and high-contrast rules stay in
 its stylesheet. The other apps keep the shared palette and Inter.
 
-## Contact form (the api's waitlist)
+## Contact page
 
-`src/components/waitlist-form.tsx` (client) renders the `Newsletter` block, relabelled "Be om ett introsamtal" / "Request an intro call", with `useActionState`
-over the `joinWaitlist` server action in `src/app/actions.ts`. The action reads the browser's ip
-(`requestInfo` from `@repo/session`), builds an anonymous api client keyed on it
-(`src/lib/api.ts`, service token only) and calls `waitlist.join`. The logic lives in
-`src/lib/actions.ts` (`joinWaitlistCore`, tested with `bun test`): invalid email → field error,
-success → `JOINED` ("Tack. En bekräftelse är på väg, och Yasmina hör av sig." / its English twin;
-the api still mails its waitlist welcome, so a reply has to come from a person), a rate-limit
-refusal → the page's own `TOO_MANY_REQUESTS` in the page's language (never the api's text),
-anything else is logged and shown as a generic failure. The api answers the same for a new and a
-repeated email, so the form never reveals who is on the list. The form works without JavaScript. Likewise, so pages read without JavaScript, the app ships no
-root `loading.tsx` (React would outline the large pages behind an inline script).
+`/kontakt` is the top of the sales funnel (see **Leads.** in `CLAUDE.md` and
+`docs/architecture/leads.md`). A hero (`portraitOffice`, who Yasmina is, what happens after you
+write, "Du får svar inom två arbetsdagar.") beside the form, `src/components/contact/contact-form.tsx`,
+in three steps on the booking journey's own stepper and step helpers: who the visitor writes for
+(private person or organisation), what they need and how soon (plus an optional description of at
+most 2000 characters), then their details — name, email, phone (required only for a call),
+organisation and role (shown only for an organisation), the preferred contact method, a required
+consent box and a separate newsletter box, neither pre-ticked. The fourth step is
+`/kontakt/tack`: the reference, the tailored next step (`leadNextStep` from
+`@repo/api-contract/leads`, the same rule as the confirmation mail — a start call, the intro call
+or a session, a proposal with the matching request form, or two blog posts and `/inifran`) and
+"Vad händer nu".
 
-The api limits joins per `x-api-client-id`; www sends one per browser ip. That is reliably the
+The action `sendLead` (`src/app/actions.ts`) reads the browser's ip (`requestInfo` from
+`@repo/session`), builds an anonymous api client keyed on it (`src/lib/api.ts`, service token only,
+`x-locale` = the page's language) and calls `leads.create`; the logic is `sendLeadCore` in
+`src/lib/leads.ts` (tested with `bun test`): every refusal is that field's own message in the
+page's language, a private person's organisation and role are never sent, the limiter's refusal is
+the page's own `TOO_MANY_REQUESTS`, anything else is logged and shown as a generic failure, and a
+success redirects to `/kontakt/tack?ref=…&for=…&need=…&when=…` (the reference and the three fixed
+answers only; the done page re-checks them). The form works without JavaScript: every step then
+shows at once and the one submit button posts it. Every contact link on the site, the booking
+pages and the blog points at `/kontakt`; the home page's `#contact` section is a teaser for it.
+Pages read without JavaScript, so the app ships no root `loading.tsx` (React would outline the
+large pages behind an inline script).
+
+The api limits contact requests per `x-api-client-id`; www sends one per browser ip. That is reliably the
 browser's own behind a proxy that sets `x-real-ip` or overwrites `x-forwarded-for`. With no proxy,
 `next start` fills `x-forwarded-for` from the socket, but a direct client can send its own header,
 so the key is best-effort; behind a proxy that sets neither, every visitor shares the proxy's
@@ -218,8 +245,8 @@ The banner reads the cookie after mount (a one-frame check on first visit).
 The header's `StaticLocaleSwitcher` (`@repo/ui/components/static-locale-switcher`) switches this
 page's language (see **Language**) and, through the shared `locale` cookie, the signed-in apps'
 too. Until hydrated it renders an invisible, `aria-hidden`, `inert` placeholder of the same size
-(the header must not shift when it appears), then adopts the cookie's own value; picking a
-language writes the cookie itself (`writeLocaleCookie`, the same `document.cookie = …` pattern
+(the header must not shift when it appears), then adopts the cookie's own value; choosing a
+language in its menu writes the cookie itself (`writeLocaleCookie`, the same `document.cookie = …` pattern
 `CookieConsent` above already uses, built from `@repo/i18n/cookie`'s `localeCookie`) and, with
 `reloadOnChange`, reloads the page. It takes the same build-time `cookieDomain` the consent banner
 does: building without `COOKIE_DOMAIN` writes a host-only cookie, so the choice holds on `www` only
@@ -228,15 +255,15 @@ build sets it).
 
 Every server action sends that same locale to the api as `x-locale` (`getLocale()` in
 `src/app/actions.ts`), never the api's English default for a Swedish page: the api stores it
-against the new waitlist row or booking order and sends its mails in that language. See
+against the new lead or booking order and sends its mails in that language. See
 `docs/guides/i18n.md` and the root `CLAUDE.md`'s **i18n.** paragraph for the shared layer.
 
 ## Environment
 
 | Var | Needed for | Dev default | Production |
 |---|---|---|---|
-| `API_URL` | the waitlist action | `http://api.brand.localhost:3007` | required — `next start` refuses without it (`src/instrumentation.ts`) |
-| `API_SERVICE_TOKEN` | the waitlist action | the dev token | required, as above |
+| `API_URL` | the contact and booking actions | `http://api.brand.localhost:3007` | required — `next start` refuses without it (`src/instrumentation.ts`) |
+| `API_SERVICE_TOKEN` | the contact and booking actions | the dev token | required, as above |
 | `COOKIE_DOMAIN` | the consent cookie (build time) | `.brand.localhost` | optional — see above |
 | `SITE_DOMAIN` | every cross-app link (build time) | `brand.localhost` with dev ports | your parent domain |
 

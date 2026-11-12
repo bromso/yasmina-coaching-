@@ -5,15 +5,17 @@ import {
   Icon as IconifyIcon,
   type IconProps as IconifyIconProps,
 } from "@iconify/react"
-import { lucideBundle } from "@repo/ui/lib/icon-bundle"
+import { circleFlagsBundle, lucideBundle } from "@repo/ui/lib/icon-bundle"
 import { cn } from "@repo/ui/lib/utils"
 
-// Register the offline icon bundle once per runtime. This module is a client
-// module (@iconify/react requires it), but client components still render
-// their HTML during SSR — so bundled icons render synchronously, server-side,
-// and fully offline. Names outside the bundle fall back to the Iconify API.
-// Regenerate the bundle with `bun icons:bundle` after adding new icons.
+// Register the offline icon bundles (Lucide, and the language menu's Circle
+// Flags) once per runtime. This module is a client module (@iconify/react
+// requires it), but client components still render their HTML during SSR — so
+// bundled icons render synchronously, server-side, and fully offline. Names
+// outside the bundles fall back to the Iconify API (blocked by the shared CSP).
+// Regenerate the bundles with `bun icons:bundle` after adding new icons.
 addCollection(lucideBundle)
+addCollection(circleFlagsBundle)
 
 // Iconify's own `IconProps` (SVG intrinsic props & IconifyIconProps) is used
 // directly instead of `React.ComponentProps<"svg">`: several props (`mode`,

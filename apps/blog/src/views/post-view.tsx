@@ -31,7 +31,7 @@ export type PostViewProps = {
   ui: BlogUi
   /** `""` for Swedish, `/en` for English. */
   prefix: string
-  /** www's free intro-call form (`/#contact`), the closing call to action's target. */
+  /** www's contact page (`/kontakt`), the closing call to action's target. */
   ctaHref: string
 }
 

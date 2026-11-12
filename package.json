@@ -140,6 +140,7 @@
     "@changesets/cli": "^2.31.1",
     "@commitlint/cli": "^20.5.3",
     "@commitlint/config-conventional": "^20.5.3",
+    "@iconify-json/circle-flags": "^1.2.14",
     "@iconify-json/lucide": "^1.2.151",
     "@iconify/utils": "^3.1.7",
     "@repo/typescript-config": "workspace:*",

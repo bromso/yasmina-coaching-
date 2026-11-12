@@ -60,6 +60,7 @@ export const urlFor = (app: keyof typeof URLS, path: string) => `${URLS[app]}${p
 export async function resolvePath(page: Page, entry: A11yPage): Promise<string> {
   if (!entry.setup) return entry.path
   if (entry.setup === "adminBooking") return resolveBookingPath(page)
+  if (entry.setup === "adminLead") return resolveLeadPath(page)
   const list = entry.setup === "adminUser" ? "/admin/users" : "/admin/workspaces"
   await page.goto(urlFor("auth", list))
   const link = page.locator(`main a[href^="${list}/"]`).first()
@@ -97,5 +98,39 @@ async function resolveBookingPath(page: Page): Promise<string> {
     .evaluateAll((links) => links.map((a) => a.getAttribute("href") ?? ""))
   const href = hrefs.find((h) => /^\/admin\/bookings\/\d+$/.test(h))
   if (!href) throw new Error("no /admin/bookings/<id> link to follow")
+  return href
+}
+
+/**
+ * `/admin/leads/<id>` for a contact request this fixture sends through the api's REST surface (the
+ * same call the www contact form makes), so `/admin/leads` has a link to follow.
+ */
+async function resolveLeadPath(page: Page): Promise<string> {
+  const response = await page.request.post(`${URLS.api}/openapi/leads`, {
+    headers: {
+      authorization: `Bearer ${shared.API_SERVICE_TOKEN}`,
+      "x-api-client-id": "a11y-sweep",
+    },
+    data: {
+      audience: "organisation",
+      need: "team",
+      timeline: "quarter",
+      message: "A request the accessibility sweep made, to render the detail page.",
+      name: "Ada Lovelace",
+      email: uniqueEmail("a11y-lead"),
+      phone: "070-123 45 67",
+      organisation: "Accessibility AB",
+      role: "Head of unit",
+      contactMethod: "phone",
+      consent: true,
+    },
+  })
+  if (!response.ok()) throw new Error(`leads.create failed: ${response.status()}`)
+  await page.goto(urlFor("auth", "/admin/leads"))
+  const hrefs = await page
+    .locator('main a[href^="/admin/leads/"]')
+    .evaluateAll((links) => links.map((a) => a.getAttribute("href") ?? ""))
+  const href = hrefs.find((h) => /^\/admin\/leads\/\d+$/.test(h))
+  if (!href) throw new Error("no /admin/leads/<id> link to follow")
   return href
 }

@@ -152,6 +152,15 @@ import {
 } from "./files"
 import { WorkspaceIdSchema } from "./ids"
 import { JobApplyErrors, JobApplyResultSchema, JobApplySchema } from "./jobs"
+import {
+  AdminLeadListSchema,
+  AdminLeadPageSchema,
+  AdminLeadSchema,
+  AdminLeadUpdateSchema,
+  LEAD_CREATE_ERRORS,
+  LeadCreateResultSchema,
+  LeadCreateSchema,
+} from "./leads-schema"
 import { CreateNoteSchema, ListNotesSchema, NoteIdSchema, NotePageSchema, NoteSchema } from "./note"
 import {
   ListNotificationsSchema,
@@ -261,6 +270,8 @@ export * from "./dev"
 export * from "./email-change"
 export * from "./files"
 export * from "./jobs"
+export * from "./leads"
+export * from "./leads-schema"
 export * from "./note"
 export * from "./notifications"
 export * from "./notifications-schema"
@@ -1442,6 +1453,15 @@ export const contract = {
       .input(SupportCreateSchema)
       .output(SupportCreateResultSchema),
   },
+  // The coaching site's contact form (`/kontakt`, see docs/architecture/leads.md). Service token
+  // only, no session: a lead is address-keyed, never linked to an account.
+  leads: {
+    create: oc
+      .route({ method: "POST", path: "/leads", summary: "Send a contact request" })
+      .errors(LEAD_CREATE_ERRORS)
+      .input(LeadCreateSchema)
+      .output(LeadCreateResultSchema),
+  },
   // The coaching site's booking calendar (see docs/architecture/booking.md). Service token only,
   // no session: a visitor books with their email; a token link in the confirmation mail manages
   // the booking afterwards. Every write runs the per-client, per-address and api-wide limiters.
@@ -1759,6 +1779,36 @@ export const contract = {
         .errors(ADMIN_ERRORS)
         .input(AdminIdSchema)
         .output(z.file()),
+    },
+    leads: {
+      list: oc
+        .route({ method: "GET", path: "/admin/leads", summary: "Contact requests, newest first" })
+        .errors(ADMIN_ERRORS)
+        .input(AdminLeadListSchema)
+        .output(AdminLeadPageSchema),
+      get: oc
+        .route({ method: "GET", path: "/admin/leads/{id}", summary: "One contact request" })
+        .errors(ADMIN_ERRORS)
+        .input(AdminIdSchema)
+        .output(AdminLeadSchema),
+      update: oc
+        .route({
+          method: "PATCH",
+          path: "/admin/leads/{id}",
+          summary: "Set a contact request's status or notes",
+        })
+        .errors(ADMIN_ERRORS)
+        .input(AdminLeadUpdateSchema)
+        .output(OkSchema),
+      delete: oc
+        .route({
+          method: "DELETE",
+          path: "/admin/leads/{id}",
+          summary: "Delete a contact request, its answers and notes",
+        })
+        .errors(ADMIN_ERRORS)
+        .input(AdminIdSchema)
+        .output(OkSchema),
     },
     bookings: {
       calendar: oc

@@ -314,5 +314,34 @@
     "preview": "Planen för {workspace} har ändrats",
     "heading": "Arbetsytans plan har ändrats",
     "body": "{workspace} har nu planen {plan, select, free {Free} pro {Pro} team {Team} other {{plan}}}."
+  },
+  "leadNew": {
+    "subject": "Ny kontaktförfrågan {reference}: {need}",
+    "preview": "Ny kontaktförfrågan från {name}",
+    "heading": "Ny kontaktförfrågan",
+    "reference": "Referens: {reference}",
+    "audience": "Skriver för: {audience}",
+    "need": "Vill ha hjälp med: {need}",
+    "timeline": "Hur bråttom: {timeline}",
+    "name": "Namn: {name}",
+    "email": "E-post: {email}",
+    "phone": "Telefon: {phone}",
+    "organisation": "Organisation: {organisation}",
+    "role": "Roll: {role}",
+    "contactMethod": "Vill bli kontaktad via: {contactMethod}",
+    "newsletter": "Nyhetsbrev: {newsletter, select, yes {Ja} other {Nej}}",
+    "page": "Sida: {page}",
+    "messageLabel": "Meddelande:",
+    "button": "Öppna i adminpanelen",
+    "footer": "Svara på det här mejlet för att nå {email} direkt."
+  },
+  "leadReceived": {
+    "subject": "Tack för att du hörde av dig ({reference})",
+    "preview": "Tack för att du hörde av dig ({reference})",
+    "heading": "Tack för att du hörde av dig",
+    "body": "Ditt meddelande har referensen {reference}, och du får svar inom två arbetsdagar.",
+    "next": "{kind, select, inner {Vill du komma igång redan nu kan du boka ett startsamtal direkt i kalendern.} coaching {Yasmina hör av sig för att boka ett kostnadsfritt introsamtal. Vill du hellre välja en tid själv kan du boka ett coachingsamtal direkt.} proposal {Yasmina återkommer med ett förslag. Har du redan datum i tankarna kan du skicka dem med förfrågningsformuläret.} other {Det är ingen brådska. Under tiden kan du läsa mer om Ledarskap inifrån.}}",
+    "button": "{kind, select, inner {Boka ett startsamtal} coaching {Boka ett coachingsamtal} proposal {Föreslå datum} other {Läs om Ledarskap inifrån}}",
+    "footer": "Vill du lägga till något kan du svara på det här mejlet."
   }
 }

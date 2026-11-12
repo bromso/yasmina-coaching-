@@ -1,8 +1,15 @@
-import type { LegalSection } from "@repo/ui/blocks/legal-page"
+import type { Locale } from "@repo/i18n/locales"
+import type { LegalDoc } from "@/content/legal-notice"
 
-/** Template terms. Replace every `[Placeholder]` and have counsel review before publishing. */
-export const terms: { updatedAt: string; sections: LegalSection[] } = {
-  updatedAt: "2026-10-02",
+/**
+ * Template terms, in Swedish (the site's default) and English, with the same sections and
+ * placeholders. Replace every `[Placeholder]` in both and have counsel review them before
+ * publishing.
+ */
+const en: LegalDoc = {
+  title: "Terms of service",
+  metaTitle: "Terms",
+  updatedAt: "2026-11-11",
   sections: [
     {
       id: "acceptance",
@@ -68,3 +75,81 @@ export const terms: { updatedAt: string; sections: LegalSection[] } = {
     },
   ],
 }
+
+const sv: LegalDoc = {
+  title: "Användarvillkor",
+  metaTitle: "Villkor",
+  updatedAt: "2026-11-11",
+  sections: [
+    {
+      id: "acceptance",
+      title: "Godkännande",
+      paragraphs: [
+        "De här villkoren gäller när du använder de tjänster som [Company] driver. Genom att skapa ett konto eller använda tjänsterna godkänner du dem.",
+        "Om du använder tjänsterna för en organisations räkning godkänner du villkoren för den organisationen.",
+      ],
+    },
+    {
+      id: "accounts",
+      title: "Konton",
+      paragraphs: [
+        "Du ansvarar för att hålla dina inloggningsuppgifter säkra och för allt som görs med ditt konto.",
+        "Meddela oss genast på [Contact email] om du tror att någon har använt ditt konto utan ditt tillstånd.",
+      ],
+    },
+    {
+      id: "acceptable-use",
+      title: "Tillåten användning",
+      paragraphs: [
+        "Använd inte tjänsterna för att bryta mot lagen, göra intrång i andras rättigheter, skicka skräppost eller störa tjänsterna eller andra användare.",
+        "Vi kan stänga av åtkomst som utsätter tjänsterna eller andra användare för risk.",
+      ],
+    },
+    {
+      id: "content",
+      title: "Innehåll",
+      paragraphs: [
+        "Du behåller äganderätten till det innehåll du lämnar. Du ger [Company] den licens som behövs för att lagra och visa det för att kunna driva tjänsterna.",
+        "Du ansvarar för att du har rätt till det innehåll du lämnar.",
+      ],
+    },
+    {
+      id: "termination",
+      title: "Uppsägning",
+      paragraphs: [
+        "Du kan när som helst sluta använda tjänsterna och radera ditt konto.",
+        "Vi kan stänga av eller avsluta din åtkomst om du bryter mot villkoren, med förvarning när det är rimligt.",
+      ],
+    },
+    {
+      id: "liability",
+      title: "Ansvar",
+      paragraphs: [
+        "Tjänsterna tillhandahålls i befintligt skick. I den utsträckning lagen i [Jurisdiction] tillåter ansvarar [Company] inte för indirekta skador eller följdskador.",
+        "Inget i de här villkoren begränsar ett ansvar som enligt lag inte kan begränsas.",
+      ],
+    },
+    {
+      id: "changes",
+      title: "Ändringar",
+      paragraphs: [
+        "Vi kan uppdatera villkoren. Då ändrar vi datumet ovan, och vid väsentliga ändringar meddelar vi dig innan de börjar gälla.",
+      ],
+    },
+    {
+      id: "contact",
+      title: "Kontakt",
+      paragraphs: [
+        "Frågor om villkoren: [Contact email]. Villkoren regleras av lagen i [Jurisdiction].",
+      ],
+    },
+  ],
+}
+
+/** Both languages, one shape: the same section ids, in the same order. */
+export const TERMS: Record<Locale, LegalDoc> = { sv, en }
+
+export const termsFor = (locale: Locale): LegalDoc => TERMS[locale]
+
+/** The English template, as earlier callers read it. */
+export const terms = en

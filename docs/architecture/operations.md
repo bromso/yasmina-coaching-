@@ -16,7 +16,7 @@ base64url, 22 chars) follows one browser request end to end: `createSecurityProx
 well-formed incoming `x-request-id` or generates one, setting it on the forwarded request and the
 response; `@repo/session`'s clients (`createAuth`'s, `anonymousApi`, the `*FromRequest` helpers),
 `createTelemetryRoute`, `createAnalyticsRoute`, `createFileRoute`, `createEventsRoute`, and the
-request-scoped api clients in `apps/www`'s waitlist action, `apps/help`'s contact action,
+request-scoped api clients in `apps/www`'s contact and booking actions, `apps/help`'s contact action,
 `apps/jobs`'s apply action and `apps/app`'s chat proxy all forward it as `x-request-id`. The api
 and `apps/ai` (`@repo/service-kit`'s `withRequest`, shared so the two never drift) accept that
 header only from a caller that already passed the service-bearer guard — an untrusted caller

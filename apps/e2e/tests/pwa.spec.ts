@@ -70,13 +70,14 @@ test("offline: an uncached page shows the offline page; a visited public page st
   page,
   context,
 }) => {
+  // www is Swedish by default, the legal pages too (`apps/www/src/content/terms.ts`).
   await page.goto(`${URLS.www}/terms`)
   await controlled(page)
   await page.goto(`${URLS.www}/terms`) // now through the worker, so it lands in the pages cache
   await context.setOffline(true)
   try {
     await page.goto(`${URLS.www}/terms`)
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Terms of service")
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Användarvillkor")
     await page.goto(`${URLS.www}/privacy`)
     await expect(page.getByRole("heading", { name: "You're offline" })).toBeVisible()
   } finally {
@@ -84,5 +85,5 @@ test("offline: an uncached page shows the offline page; a visited public page st
   }
   // Back online, "Try again" (an inline handler: the shared CSP must allow it) loads the real page.
   await page.getByRole("button", { name: "Try again" }).click()
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Privacy policy")
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Integritetspolicy")
 })

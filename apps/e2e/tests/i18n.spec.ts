@@ -3,28 +3,40 @@ import { URLS } from "../e2e.env"
 import { PASSWORD, signIn, uniqueEmail } from "../fixtures/accounts"
 import { latestMailTo, linkIn } from "../fixtures/mail"
 
-/** The header's `<select>`, found by its accessible name in either language (i18n G1, auth only). */
-function localeSelect(page: Page) {
-  return page.getByLabel("Language", { exact: true }).or(page.getByLabel("Språk", { exact: true }))
+/** The header's language menu trigger, named "Language: <current>" / "Språk: <current>". */
+function localeMenu(page: Page) {
+  return page.getByRole("button", { name: /^(Language|Språk): / })
 }
 
-function localeSubmit(page: Page) {
-  return page
-    .getByRole("button", { name: "Change", exact: true })
-    .or(page.getByRole("button", { name: "Byt", exact: true }))
+/** Opens the header's language menu and activates a language: it applies at once (no button). */
+async function chooseLanguage(page: Page, name: "English" | "Svenska") {
+  await localeMenu(page).click()
+  await page.getByRole("menuitem", { name, exact: true }).click()
 }
 
-/** Picks Svenska in the switcher and submits — works with or without JavaScript (no auto-submit). */
-async function switchToSwedish(page: Page) {
-  await localeSelect(page).selectOption("sv")
-  await localeSubmit(page).click()
+/** Picks Svenska in the language menu (with JavaScript, by keyboard) or its disclosure (without). */
+async function switchToSwedish(page: Page, { javaScript = true } = {}) {
+  if (javaScript) {
+    // By keyboard: Enter opens the menu on its first item (English, the current one), ArrowDown
+    // moves to Svenska without changing anything, Enter activates it.
+    await localeMenu(page).focus()
+    await page.keyboard.press("Enter")
+    await expect(page.getByRole("menuitem", { name: "English", exact: true })).toBeFocused()
+    await page.keyboard.press("ArrowDown")
+    await expect(page.getByRole("menuitem", { name: "Svenska", exact: true })).toBeFocused()
+    await expect(page.locator("html")).toHaveAttribute("lang", "en")
+    await page.keyboard.press("Enter")
+  } else {
+    // The server-rendered shell: a <details> whose languages are submit buttons in a form.
+    await page.getByRole("banner").locator("summary").click()
+    await page.getByRole("banner").getByRole("button", { name: "Svenska", exact: true }).click()
+  }
   await expect(page.locator("html")).toHaveAttribute("lang", "sv")
 }
 
 /**
- * Personal info's Language card: a second control sharing the header switcher's "Language" /
- * "Språk" accessible name, told apart by its own submit label — "Save language" / "Spara språk"
- * (`account.language.submit`), never "Change" / "Byt" (the header's `account.locale.submit`).
+ * Personal info's Language card: a select (a settings field, unlike the header's menu) labelled
+ * "Language" / "Språk", found inside the form with its own "Save language" / "Spara språk" button.
  */
 function languageCard(page: Page) {
   return page.locator("form", {
@@ -138,8 +150,8 @@ test("picking Svenska switches the page, carries to sign-up mail, and the saved 
   await expect(page.getByRole("heading", { name: "Personuppgifter", exact: true })).toBeVisible()
   await expect(page.getByRole("link", { name: "Personuppgifter", exact: true })).toBeVisible()
 
-  // www: Swedish by default; the switcher (in the navigation's panel, behind "Utforska") writes
-  // the shared cookie and reloads, and the page comes back in English — then back in Swedish.
+  // www: Swedish by default; the language menu (in the navigation's panel, behind "Utforska")
+  // writes the shared cookie and reloads, and the page comes back in English — then back in Swedish.
   // The choice sits on the shared cookie domain, so a fresh visit of the sign-in link already
   // arrives Swedish.
   const visitor = await browser.newContext()
@@ -152,8 +164,7 @@ test("picking Svenska switches the page, carries to sign-up mail, and the saved 
     ).toBeVisible()
 
     await tab.getByRole("button", { name: "Utforska" }).click()
-    await localeSelect(tab).selectOption("en")
-    await localeSubmit(tab).click()
+    await chooseLanguage(tab, "English")
     await expect(tab.locator("html")).toHaveAttribute("lang", "en")
     await expect(
       tab.getByRole("heading", { level: 1, name: "Lead the way you would want to be led" })
@@ -161,8 +172,7 @@ test("picking Svenska switches the page, carries to sign-up mail, and the saved 
     await expect(tab.getByRole("button", { name: "Explore", exact: true })).toBeVisible()
 
     await tab.getByRole("button", { name: "Explore", exact: true }).click()
-    await localeSelect(tab).selectOption("sv")
-    await localeSubmit(tab).click()
+    await chooseLanguage(tab, "Svenska")
     await expect(tab.locator("html")).toHaveAttribute("lang", "sv")
     await expect(tab.getByRole("button", { name: "Utforska", exact: true })).toBeVisible()
 
@@ -180,10 +190,10 @@ test("picking Svenska switches the page, carries to sign-up mail, and the saved 
 test.describe("without JavaScript", () => {
   test.use({ javaScriptEnabled: false })
 
-  test("the switcher's form submit changes the language", async ({ page }) => {
+  test("the switcher's disclosure posts the form and changes the language", async ({ page }) => {
     await page.goto(`${URLS.auth}/login`)
     await expect(page.getByText("Welcome back", { exact: true })).toBeVisible()
-    await switchToSwedish(page)
+    await switchToSwedish(page, { javaScript: false })
     await expect(page.getByText("Välkommen tillbaka", { exact: true })).toBeVisible()
   })
 })

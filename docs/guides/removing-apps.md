@@ -35,8 +35,9 @@ these assumes `www` serves them:
 - **The consent banner's privacy link.** Every layout except `www`'s own passes
   `privacyHref={`${siteUrl("www")}/privacy`}` to `CookieConsent`.
 - **The waitlist welcome mail.** `apps/api/src/server.ts` builds its link from `siteUrl("www")`.
-- **The waitlist form itself.** It lives on `www` and calls `waitlist.join`. If you drop it, the api
-  procedure simply goes unused.
+- **The contact page.** `www`'s `/kontakt` calls `leads.create`, and the lead mails link back to
+  `siteUrl("www")` (`leadReceived`'s next step). `www` no longer renders a waitlist form;
+  `waitlist.join` is unused by the apps but still served.
 
 If your new site lives at a different host, change those `siteUrl("www")` calls. If it lives at
 `www.<your domain>`, leave them, and leave `www` in `SITES` so `siteUrl("www")` still resolves.

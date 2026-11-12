@@ -1,11 +1,12 @@
 import { z } from "zod"
+// A narrow sibling import (never from "./index"): analytics.ts stays zod-only and otherwise
+// import-free, but reuses the one app list rather than defining a second one (ruling R1).
+import { LEAD_AUDIENCES, LEAD_NEEDS, LEAD_TIMELINES } from "./leads"
 // Re-exported below so every existing `@repo/api-contract/analytics` import of `collapseRoute`
 // keeps working unchanged. The implementation itself lives in the zod-free `./route` — never
 // here — because this module reaches browser bundles (via `@repo/telemetry/browser`) that must
 // not pull zod in; see route.ts's own comment for the measured regression this avoids.
 import { collapseRoute } from "./route"
-// A narrow sibling import (never from "./index"): analytics.ts stays zod-only and otherwise
-// import-free, but reuses the one app list rather than defining a second one (ruling R1).
 import { TelemetryAppSchema } from "./telemetry"
 
 /**
@@ -30,6 +31,16 @@ export const ANALYTICS_EVENTS = {
   },
   two_factor_enabled: { client: false, props: {} },
   pricing_viewed: { client: true, props: {} },
+  // The coaching site's contact form (`leads.create`): the three fixed answers only, never who
+  // sent it (no user or workspace id, no address, nothing typed).
+  lead_submitted: {
+    client: false,
+    props: {
+      audience: z.enum(LEAD_AUDIENCES),
+      need: z.enum(LEAD_NEEDS),
+      timeline: z.enum(LEAD_TIMELINES),
+    },
+  },
 } as const
 
 export type AnalyticsEventName = keyof typeof ANALYTICS_EVENTS

@@ -22,7 +22,7 @@ once per language and lists only that language's posts.
 |---|---|
 | `/`, `/en` | The index: a hero, then the newest posts (12 per page, the newest featured) |
 | `/page/<n>`, `/en/page/<n>` | The index's further pages |
-| `/<slug>`, `/en/<slug>` | One post: cover, header, body, table of contents, a call to action (www's free intro-call form, `/#contact`), newer/older links, related posts, BlogPosting JSON-LD (with `inLanguage`), OG/Twitter images, and hreflang links to its translation |
+| `/<slug>`, `/en/<slug>` | One post: cover, header, body, table of contents, a call to action (www's contact page, `/kontakt`), newer/older links, related posts, BlogPosting JSON-LD (with `inLanguage`), OG/Twitter images, and hreflang links to its translation |
 | `/tags/<tag>`, `/en/tags/<tag>` | Every published post of that language with that tag, unpaginated |
 | `/authors/<author>`, `/en/authors/<author>` | Every published post of that language by that author, unpaginated |
 | `/rss.xml`, `/atom.xml`, `/feed.json` and the same under `/en/` | Full-content feeds per language (RSS 2.0, Atom, JSON Feed 1.1), each naming its language |

@@ -15,7 +15,6 @@
   },
   "locale": {
     "label": "Language",
-    "submit": "Change",
     "error": "Your language could not be saved. Try again."
   },
   "status": {

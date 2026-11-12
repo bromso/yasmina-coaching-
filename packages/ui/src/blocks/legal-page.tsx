@@ -8,12 +8,24 @@ export type LegalPageProps = {
   updatedAt: string
   sections: LegalSection[]
   notice?: ReactNode
+  /** The visible words, English by default: "Last updated" and the contents nav's name. */
+  labels?: { lastUpdated?: string; contents?: string }
+  /** The BCP 47 locale the date is written in (default `en-US`), e.g. `sv-SE`. */
+  dateLocale?: string
   className?: string
 }
 
 /** A terms/privacy-style page: title, last-updated date, an optional notice, a contents nav, and sections. */
-export function LegalPage({ title, updatedAt, sections, notice, className }: LegalPageProps) {
-  const formatted = new Date(updatedAt).toLocaleDateString("en-US", {
+export function LegalPage({
+  title,
+  updatedAt,
+  sections,
+  notice,
+  labels,
+  dateLocale = "en-US",
+  className,
+}: LegalPageProps) {
+  const formatted = new Date(updatedAt).toLocaleDateString(dateLocale, {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -23,7 +35,7 @@ export function LegalPage({ title, updatedAt, sections, notice, className }: Leg
     <article className={cn("container max-w-3xl py-16", className)}>
       <h1 className="font-semibold text-4xl tracking-tight">{title}</h1>
       <p className="mt-2 text-muted-foreground text-sm">
-        Last updated <time dateTime={updatedAt}>{formatted}</time>
+        {labels?.lastUpdated ?? "Last updated"} <time dateTime={updatedAt}>{formatted}</time>
       </p>
       {notice && (
         <div
@@ -33,7 +45,7 @@ export function LegalPage({ title, updatedAt, sections, notice, className }: Leg
           {notice}
         </div>
       )}
-      <nav aria-label="Contents" className="my-8">
+      <nav aria-label={labels?.contents ?? "Contents"} className="my-8">
         <ol className="flex flex-col gap-1 text-sm">
           {sections.map((section) => (
             <li key={section.id}>

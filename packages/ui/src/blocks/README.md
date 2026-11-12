@@ -44,8 +44,8 @@ same way `apps/account`'s forms already do with `@repo/ui/components/form-feedba
 
 `apps/www`'s home page is the reference composition: `apps/www/src/content/home.tsx` holds every
 word, and `apps/www/src/views/home-view.tsx` only arranges the blocks, in landing-page order (`Hero` →
-`LogoCloud` → `FeatureGrid` → `Testimonials` → `Pricing` → `Faq` → `Cta` → `Newsletter`, the last via
-`apps/www/src/components/waitlist-form.tsx`, which owns the `useActionState` over the server action).
+`LogoCloud` → `FeatureGrid` → `Testimonials` → `Pricing` → `Faq` → `Cta` → `Newsletter`; www's own
+home page no longer renders `Newsletter`, its contact section links the `/kontakt` page instead).
 `apps/www/src/app/terms/page.tsx` and `privacy/page.tsx` render `LegalPage` straight from
 `src/content/terms.ts` and `privacy.ts`. Start there when combining them on a new page.
 

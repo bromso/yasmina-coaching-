@@ -22,6 +22,7 @@ const VALID_PROPS: Record<AnalyticsEventName, Record<string, unknown>> = {
   plan_changed: { plan: "pro", interval: "month" },
   two_factor_enabled: {},
   pricing_viewed: {},
+  lead_submitted: { audience: "organisation", need: "team", timeline: "quarter" },
 }
 
 describe("ANALYTICS_EVENTS", () => {
@@ -34,6 +35,16 @@ describe("ANALYTICS_EVENTS", () => {
       expect(parseEventProps(name, { ...VALID_PROPS[name], nope: "x" })).toBeNull()
     })
   }
+
+  test("lead_submitted carries the three fixed answers only, never free text", () => {
+    expect(
+      parseEventProps("lead_submitted", { audience: "private", need: "x", timeline: "month" })
+    ).toBeNull()
+    expect(
+      parseEventProps("lead_submitted", { ...VALID_PROPS.lead_submitted, email: "a@b.c" })
+    ).toBeNull()
+    expect(ANALYTICS_EVENTS.lead_submitted.client).toBe(false)
+  })
 
   test("signed_up.method only accepts the known providers", () => {
     expect(parseEventProps("signed_up", { method: "password" })).toEqual({ method: "password" })

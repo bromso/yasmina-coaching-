@@ -314,5 +314,34 @@
     "preview": "The plan for {workspace} changed",
     "heading": "Your workspace's plan changed",
     "body": "{workspace} is now on the {plan, select, free {Free} pro {Pro} team {Team} other {{plan}}} plan."
+  },
+  "leadNew": {
+    "subject": "New contact request {reference}: {need}",
+    "preview": "New contact request from {name}",
+    "heading": "New contact request",
+    "reference": "Reference: {reference}",
+    "audience": "Writing for: {audience}",
+    "need": "Wants help with: {need}",
+    "timeline": "How soon: {timeline}",
+    "name": "Name: {name}",
+    "email": "Email: {email}",
+    "phone": "Phone: {phone}",
+    "organisation": "Organisation: {organisation}",
+    "role": "Role: {role}",
+    "contactMethod": "Prefers to be contacted by: {contactMethod}",
+    "newsletter": "Newsletter: {newsletter, select, yes {Yes} other {No}}",
+    "page": "Page: {page}",
+    "messageLabel": "Message:",
+    "button": "Open in admin",
+    "footer": "Reply to this email to answer {email} directly."
+  },
+  "leadReceived": {
+    "subject": "Thank you for getting in touch ({reference})",
+    "preview": "Thank you for getting in touch ({reference})",
+    "heading": "Thank you for getting in touch",
+    "body": "Your message has the reference {reference}, and you will hear back within two working days.",
+    "next": "{kind, select, inner {If you would like to start now, you can book a start call straight in the calendar.} coaching {Yasmina will get in touch to set up a free intro call. If you would rather pick a time yourself, you can book a coaching session directly.} proposal {Yasmina will come back to you with a proposal. If you already have dates in mind, you can send them with the request form.} other {There is no hurry. In the meantime, you can read more about Ledarskap inifrån.}}",
+    "button": "{kind, select, inner {Book a start call} coaching {Book a coaching session} proposal {Suggest dates} other {Read about Ledarskap inifrån}}",
+    "footer": "If you want to add something, reply to this email."
   }
 }

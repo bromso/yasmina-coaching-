@@ -120,8 +120,8 @@ export const Mobile: Story = {
 
 /**
  * WCAG 1.4.10 at 320 CSS px (`mobile1`): the row keeps the brand, the primary action and the
- * hamburger; the secondary controls (locale form, theme toggle) wrap onto their own row below it.
- * Nothing scrolls sideways and every control stays in the page — the locale switcher a real form.
+ * hamburger; the secondary controls (language menu, theme toggle) wrap onto their own row below
+ * it. Nothing scrolls sideways and every control stays in the page, the language's name visible.
  */
 export const Narrow: Story = {
   args: { controls: signedInControls, end: userMenu },
@@ -133,10 +133,11 @@ export const Narrow: Story = {
     const brand = canvas.getByRole("link", { name: BRAND_NAME })
     const menu = canvas.getByRole("button", { name: "Account menu for Ada Lovelace" })
     const hamburger = canvas.getByRole("button", { name: "Open menu" })
-    const select = canvas.getByRole("combobox", { name: "Language" })
+    const select = canvas.getByRole("button", { name: "Language: English" })
     const theme = canvas.getByRole("button", { name: "Toggle theme" })
     for (const el of [brand, menu, hamburger, select, theme]) await expect(el).toBeVisible()
-    await expect(select.closest("form")).not.toBeNull()
+    await expect(select).toHaveAttribute("aria-haspopup", "menu")
+    await expect(select).toHaveTextContent("English")
     // Row one: brand, menu and hamburger share a line; the controls sit below it.
     const rowOne = brand.getBoundingClientRect()
     const middle = (rect: DOMRect) => rect.top + rect.height / 2

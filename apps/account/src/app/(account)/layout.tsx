@@ -134,7 +134,6 @@ export default async function AccountLayout({
               options={LOCALE_OPTIONS}
               action={setLocale}
               label={t("account.locale.label")}
-              submitLabel={t("account.locale.submit")}
             />
             <ThemeToggle label={t("ui.themeToggle")} />
           </>

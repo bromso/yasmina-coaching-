@@ -5,23 +5,22 @@ import { requestInfo } from "@repo/session"
 import type { FormState } from "@repo/ui/components/form-feedback"
 import { headers } from "next/headers"
 import { redirect } from "next/navigation"
-import { joinWaitlistCore } from "@/lib/actions"
 import { anonymousApi } from "@/lib/api"
 import {
   type BookingFormState,
-  type BookingOutcome,
   bookCore,
   cancelBookingCore,
   requestBookingCore,
   reserveSeatsCore,
 } from "@/lib/booking"
+import { sendLeadCore } from "@/lib/leads"
 import { getLocale } from "@/lib/locale"
 
 /**
  * The api for one POST, in the page's language: service token, rate-limit key per browser ip,
  * the request id forwarded, and `x-locale` = the page's locale (`getLocale()`, the `locale`
  * cookie), so the api's declared error messages (shown verbatim on the booking forms) and every
- * mail it sends — the waitlist welcome, the booking confirmations — match the page the visitor
+ * mail it sends — the contact form's confirmation, the booking confirmations — match the page the visitor
  * read. The api stores it on the order, so later mails about a booking follow too.
  */
 async function api() {
@@ -31,15 +30,18 @@ async function api() {
   return { client, locale }
 }
 
-export async function joinWaitlist(_prev: FormState, fd: FormData): Promise<FormState> {
-  const { client, locale } = await api()
-  return joinWaitlistCore({ api: client.waitlist, locale }, fd)
+/** A success leaves the page through `redirect()` (which throws); a failure feeds the form. */
+function settle<T extends { ok: true; redirectTo: string } | (FormState & { ok: false })>(
+  outcome: T
+): Exclude<T, { ok: true }> {
+  if (outcome.ok) redirect(outcome.redirectTo)
+  return outcome as Exclude<T, { ok: true }>
 }
 
-/** A success leaves the page through `redirect()` (which throws); a failure feeds the form. */
-function settle(outcome: BookingOutcome): BookingFormState {
-  if (outcome.ok) redirect(outcome.redirectTo)
-  return outcome
+/** `/kontakt`: send the contact form, then land on `/kontakt/tack` with its next step. */
+export async function sendLead(_prev: FormState, fd: FormData): Promise<FormState> {
+  const { client, locale } = await api()
+  return settle(await sendLeadCore({ api: client.leads, locale }, fd))
 }
 
 /** `/book/<instant offering>`: book the picked slots. */

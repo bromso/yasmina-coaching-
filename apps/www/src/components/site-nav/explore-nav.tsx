@@ -129,7 +129,8 @@ export function ExploreNav({
   useEffect(() => {
     if (!open) return
     const onKey = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return
+      // A menu inside the panel (the language menu) already handled this Escape: it closes alone.
+      if (event.key !== "Escape" || event.defaultPrevented) return
       setOpen(false)
       toggleRef.current?.focus()
     }

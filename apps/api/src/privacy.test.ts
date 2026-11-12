@@ -320,6 +320,54 @@ describe("account.export", () => {
     expect(JSON.parse(await theirs.text()).jobApplications).toEqual([])
   })
 
+  test("the file lists bookings made with the account's verified address only, no tokens", async () => {
+    const user = await signUpVerified(app)
+    const request = (email: string) =>
+      clientFor(app).booking.request({
+        offering: "workshop",
+        customer: { name: "Ada", email, organisation: "Analytical Engines AB" },
+        location: "on_site",
+        preferredDates: [{ date: "2099-03-02", part: "morning" }],
+        attendees: 8,
+        venue: "Stadshuset",
+        message: "A team day, please.",
+      })
+    const { reference } = await request(user.email.toUpperCase())
+    await request("someone-else-booking@example.com")
+    const ready = await readyExport(user.client)
+    const text = await (await user.client.account.export.download({ id: ready.id })).text()
+    expect(JSON.parse(text).bookings).toEqual([
+      {
+        reference,
+        offering: "workshop",
+        kind: "request",
+        status: "pending",
+        audience: "organisation",
+        name: "Ada",
+        email: user.email,
+        organisation: "Analytical Engines AB",
+        phone: null,
+        location: "on_site",
+        startsAt: null,
+        endsAt: null,
+        notes: "A team day, please.",
+        preferredDates: [{ date: "2099-03-02", part: "morning" }],
+        attendees: 8,
+        venue: "Stadshuset",
+        createdAt: expect.any(String),
+        cancelledAt: null,
+      },
+    ])
+    expect(text).not.toContain("token")
+    expect(text).not.toContain("someone-else-booking")
+
+    const unverified = await signUp(app)
+    await request(unverified.email)
+    const pending = await readyExport(unverified.client)
+    const theirs = await unverified.client.account.export.download({ id: pending.id })
+    expect(JSON.parse(await theirs.text()).bookings).toEqual([])
+  })
+
   test("the file carries suspension status and dates, never the reason or who suspended it", async () => {
     const user = await signUpVerified(app)
     const until = new Date(Date.now() + DAY).toISOString()

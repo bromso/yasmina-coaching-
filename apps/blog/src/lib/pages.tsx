@@ -171,7 +171,8 @@ export function postRoute(locale: BlogLocale) {
             authors={authorsFor(locale)}
             ui={ui}
             prefix={prefix}
-            ctaHref={`${siteUrl("www")}/#contact`}
+            // `?from=` names this post for the lead's `page` (www keeps a lowercase path only).
+            ctaHref={`${siteUrl("www")}/kontakt?from=/blog${prefix}/${post.slug}`}
           />
         </>
       )

@@ -723,7 +723,8 @@ the root layout renders `<html lang>` and wraps the tree in `NextIntlClientProvi
 
 - **Two switchers.** The header's `LocaleSwitcher` posts to `setLocale` (`src/app/actions.ts`),
   which redirects back to the page (`localeReturnPath`, this origin only) with `?locale_error=1`
-  on failure. Personal info's **Language** card (`LanguageForm`) posts the same control to
+  on failure. Personal info's **Language** card (`LanguageForm`) posts a `LocaleSelect` (a
+  select and a **Save language** button, a settings field rather than the header's menu) to
   `setLanguage` (`personal-info/actions.ts`, core `setLocaleCore`) through `useActionState`: an
   unsupported value is a field error, a failed save a form message, and a success revalidates the
   whole layout and confirms in the language just chosen.

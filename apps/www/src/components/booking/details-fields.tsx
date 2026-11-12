@@ -22,25 +22,42 @@ export const choiceClass =
 export const choiceInputClass =
   "size-4 shrink-0 accent-primary transition-transform duration-200 ease-out motion-safe:checked:scale-110"
 
+/**
+ * A group of fields (radios, checkboxes, date pairs) under its legend. Given `field`, the error for
+ * that name renders under the group and the `<fieldset>` itself carries `aria-invalid` and
+ * `aria-describedby` (the hint, then the error), so a screen reader announces both on entering the
+ * group, as it does for a single input with `fieldAria`.
+ */
 export function Fieldset({
   legend,
   hint,
   error,
+  field,
   children,
   className,
 }: {
   legend: string
   hint?: string
   error?: React.ReactNode
+  /** The posted name whose error belongs to the whole group. */
+  field?: { name: string; state: FormState }
   children: React.ReactNode
   className?: string
 }) {
+  const hintId = field && hint ? `${field.name}-hint` : undefined
   return (
-    <fieldset className={cn("grid gap-3", className)}>
+    <fieldset
+      className={cn("grid gap-3", className)}
+      {...(field ? fieldAria(field.name, field.state, hintId) : {})}
+    >
       <legend className="font-medium text-sm">{legend}</legend>
-      {hint && <p className="-mt-1 text-muted-foreground text-sm">{hint}</p>}
+      {hint && (
+        <p id={hintId} className="-mt-1 text-muted-foreground text-sm">
+          {hint}
+        </p>
+      )}
       {children}
-      {error}
+      {error ?? (field && <FieldError name={field.name} state={field.state} />)}
     </fieldset>
   )
 }
@@ -59,10 +76,7 @@ export function AudienceField({ audiences, audience, onChange, state }: Audience
     return <input type="hidden" name="audience" value={audiences[0] ?? audience} />
   }
   return (
-    <Fieldset
-      legend={copy.details.audienceLegend}
-      error={<FieldError name="audience" state={state} />}
-    >
+    <Fieldset legend={copy.details.audienceLegend} field={{ name: "audience", state: state }}>
       <div className="grid gap-2 sm:grid-cols-2">
         {audiences.map((option) => (
           <label key={option} className={choiceClass}>
@@ -166,10 +180,7 @@ export function LocationField({ locations, state }: LocationFieldProps) {
   const copy = useBookingCopy()
   const selected = value(state, "location", locations[0] ?? "")
   return (
-    <Fieldset
-      legend={copy.details.locationLegend}
-      error={<FieldError name="location" state={state} />}
-    >
+    <Fieldset legend={copy.details.locationLegend} field={{ name: "location", state: state }}>
       <div className="grid gap-2 sm:grid-cols-2">
         {locations.map((location) => (
           <label key={location} className={choiceClass}>

@@ -15,7 +15,7 @@ export type A11yPage = {
   /** Overrides `variantsFor`'s default. */
   variants?: Variant[]
   /** A page whose path is only known at run time (an id), resolved by the sweep. */
-  setup?: "adminUser" | "adminWorkspace" | "adminBooking"
+  setup?: "adminUser" | "adminWorkspace" | "adminBooking" | "adminLead"
 }
 
 const APPS: AppId[] = ["www", "app", "auth", "account", "docs", "help", "jobs", "blog"]
@@ -31,8 +31,9 @@ const notFound = (app: AppId, auth: A11yPage["auth"] = "none"): A11yPage => ({
 export const A11Y_PAGES: A11yPage[] = [
   // www (Swedish by default; the landing page is also checked in English, the `locale` cookie set)
   { app: "www", path: "/", auth: "none", variants: ["light", "dark", "en-light", "en-dark"] },
-  { app: "www", path: "/terms", auth: "none" },
-  { app: "www", path: "/privacy", auth: "none" },
+  // The legal pages are Swedish by default and English through the `locale` cookie.
+  { app: "www", path: "/terms", auth: "none", variants: ["light", "dark", "en-light"] },
+  { app: "www", path: "/privacy", auth: "none", variants: ["light", "dark", "en-light"] },
   // Ledarskap inifrån: the hub (also in English), the four services (one route) and the research.
   {
     app: "www",
@@ -56,6 +57,14 @@ export const A11Y_PAGES: A11yPage[] = [
   { app: "www", path: "/book/inner_group", route: "/book/[offering]", auth: "none" },
   { app: "www", path: "/book/workshop", route: "/book/[offering]", auth: "none" },
   { app: "www", path: "/book/done?ref=BK-1&kind=request", auth: "none" },
+  // The contact form (also in English) and its done page with the explore step (the longest).
+  { app: "www", path: "/kontakt", auth: "none", variants: ["light", "dark", "en-light"] },
+  {
+    app: "www",
+    path: "/kontakt/tack?ref=LEAD-1&for=private&need=unsure&when=exploring",
+    route: "/kontakt/tack",
+    auth: "none",
+  },
   notFound("www"),
   // app (signed in, with a workspace and a note)
   { app: "app", path: "/", auth: "user" },
@@ -98,6 +107,8 @@ export const A11Y_PAGES: A11yPage[] = [
   { app: "auth", path: "/admin/bookings/[id]", auth: "superadmin", setup: "adminBooking" },
   { app: "auth", path: "/admin/bookings/availability", auth: "superadmin" },
   { app: "auth", path: "/admin/bookings/groups", auth: "superadmin" },
+  { app: "auth", path: "/admin/leads", auth: "superadmin" },
+  { app: "auth", path: "/admin/leads/[id]", auth: "superadmin", setup: "adminLead" },
   // account (signed in)
   { app: "account", path: "/", auth: "user" },
   { app: "account", path: "/personal-info", auth: "user" },

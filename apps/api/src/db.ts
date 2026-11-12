@@ -17,6 +17,7 @@ import { exportsQueries } from "./queries/exports"
 import { identitiesQueries } from "./queries/identities"
 import { invitationsQueries } from "./queries/invitations"
 import { jobsQueries } from "./queries/jobs"
+import { leadsQueries } from "./queries/leads"
 import { membershipsQueries } from "./queries/memberships"
 import { notesQueries } from "./queries/notes"
 import { notificationPreferencesQueries } from "./queries/notification-preferences"
@@ -68,6 +69,7 @@ function queries(sql: SQL, afterCommit: AfterCommit = runNow) {
     exports: exportsQueries(sql),
     support: supportQueries(sql),
     applications: applicationsQueries(sql),
+    leads: leadsQueries(sql),
     passkeys: passkeysQueries(sql),
     apiKeys: apiKeysQueries(sql),
     webhooks: webhooksQueries(sql),

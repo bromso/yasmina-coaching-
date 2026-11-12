@@ -233,9 +233,9 @@ and show an error. Then it writes the cookie through `localeCookieOptions(locale
 production })` (`@repo/session/cookie`), Next's form of `@repo/i18n`'s `localeCookieAttributes`: one
 year, `Path=/`, `SameSite=Lax`, `Domain` = `COOKIE_DOMAIN`, `Secure` in production (as the session
 cookie), not `HttpOnly` — the static apps' switcher writes it from the browser.
-`@repo/ui/components/locale-switcher` (`LocaleSwitcher`) is the control that posts to it: a select
-and a button, applied only by the button (never on the select's `change`, which arrow keys fire on
-every step).
+`@repo/ui/components/locale-switcher` (`LocaleSwitcher`) is the control that posts to it: a
+language menu whose languages are submit buttons `name="locale"`, applied as soon as one is
+activated (a `<details>` disclosure inside the form without JavaScript).
 
 ## Environment
 
