@@ -33,12 +33,15 @@ test("the old legal pages redirect to the legal app in the reader's language", a
     const swedish = await request.get(`${URLS.www}${path}`, { maxRedirects: 0 })
     expect(swedish.status()).toBe(308)
     expect(swedish.headers().location).toBe(`${URLS.legal}${sv}`)
+    // The target follows the cookie: never cached, or a language switch would not reach it.
+    expect(swedish.headers()["cache-control"]).toBe("private, no-store")
     const english = await request.get(`${URLS.www}${path}`, {
       maxRedirects: 0,
       headers: { cookie: "locale=en" },
     })
     expect(english.status()).toBe(308)
     expect(english.headers().location).toBe(`${URLS.legal}${en}`)
+    expect(english.headers()["cache-control"]).toBe("private, no-store")
   }
 })
 

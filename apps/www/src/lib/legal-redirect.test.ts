@@ -49,6 +49,8 @@ test("the route handlers answer 308 to the legal app: sv, en, and no cookie", ()
     )(new Request(`https://www.example.com${LEGACY_LEGAL_PATHS[page]}`, { headers }))
     expect(response.status).toBe(308)
     expect(response.headers.get("location")).toBe(location)
+    // The target follows the cookie, so no browser or shared cache may keep it.
+    expect(response.headers.get("cache-control")).toBe("private, no-store")
   }
 })
 

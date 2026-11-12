@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test"
 import { shared, URLS } from "../e2e.env"
 import { expectAccessible } from "../fixtures/a11y"
 import { ensureAdmin, uniqueEmail } from "../fixtures/accounts"
+import { calendarDay, needsEarlyStart } from "../fixtures/booking"
 
 /**
  * "Ledarskap inifrån": the hub leads to a service page whose fixed start-call price is shown, the
@@ -26,6 +27,8 @@ test("from the hub to a booked start call", async ({ page }) => {
   await expect(grid).toBeVisible()
   const day = grid.locator("button[data-day]:not([disabled])").first()
   await expect(day).toBeVisible({ timeout: 15_000 })
+  // Whether this private client must consent to an early start depends on the day picked.
+  const earlyStart = needsEarlyStart(await calendarDay(day))
   await day.click()
   const slot = page
     .getByRole("button", { pressed: false })
@@ -38,8 +41,10 @@ test("from the hub to a booked start call", async ({ page }) => {
   await page.getByLabel("Namn", { exact: true }).fill("Ada Lovelace")
   await page.getByLabel("E-post", { exact: true }).fill(email)
   await page.getByRole("checkbox", { name: /jag har läst villkoren/i }).check()
-  // The first free day is inside the 14-day withdrawal period: the private client consents.
-  await page.getByRole("checkbox", { name: /tjänsten börjar inom ångerfristen/i }).check()
+  // Inside the withdrawal period (`withdrawalLastDay`) the private client consents; past it, no box.
+  const earlyStartBox = page.getByRole("checkbox", { name: /tjänsten börjar inom ångerfristen/i })
+  if (earlyStart) await earlyStartBox.check()
+  else await expect(earlyStartBox).toBeHidden()
   await page.getByRole("button", { name: /fortsätt till betalning/i }).click()
 
   // Payment: the start call has a fixed price, so all four methods are offered. Pay with the

@@ -27,6 +27,9 @@ export function legalTarget(
  * The `GET` handler of `app/privacy/route.ts` and `app/terms/route.ts`: a permanent (308) redirect
  * to the legal app, in the language the `locale` cookie picks the way `getLocale()` does (English
  * only for `en`). A route handler rather than a page, so the redirect ships no page bundle.
+ * `Cache-Control: private, no-store`: a 308 without freshness headers is cached by browsers
+ * indefinitely, and its target depends on the cookie, so a reader who switched language would
+ * keep landing on the old one.
  */
 export function legalRedirect(
   page: LegacyLegalPage,
@@ -36,7 +39,10 @@ export function legalRedirect(
     const locale = localeFromCookie(parseLocaleCookie(request.headers.get("cookie")))
     return new Response(null, {
       status: 308,
-      headers: { location: legalTarget(page, locale, env) },
+      headers: {
+        location: legalTarget(page, locale, env),
+        "cache-control": "private, no-store",
+      },
     })
   }
 }

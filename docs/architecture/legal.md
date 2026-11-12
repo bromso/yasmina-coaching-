@@ -84,8 +84,10 @@ www's old `/privacy` and `/terms` are route handlers (`apps/www/src/app/{privacy
 over `src/lib/legal-redirect.ts`), not pages: a permanent `308` to `legalUrl(page, locale)`, the
 locale from the `locale` cookie as on every www page (`sv` → `/integritet`, `/villkor`; `en` →
 `/en/privacy`, `/en/terms`). A redirect is not a page, so it needs no bundle budget and no a11y
-manifest entry. The response sends no `Vary: Cookie`, so a shared cache in front of www must not
-cache it.
+manifest entry. Its target depends on the cookie, so it sends `Cache-Control: private, no-store`:
+a 308 without freshness headers is cached by browsers indefinitely, and a reader who switched
+language would keep landing on the old page. Neither the browser nor a shared cache keeps it
+(pinned in `legal-redirect.test.ts` and `www.spec.ts`).
 
 ## Terms consent and the terms version
 

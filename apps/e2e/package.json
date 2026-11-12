@@ -13,6 +13,7 @@
     "@oslojs/encoding": "catalog:",
     "@oslojs/otp": "catalog:",
     "@playwright/test": "catalog:",
+    "@repo/api-contract": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/node": "catalog:",
     "lighthouse": "^13.6.0",

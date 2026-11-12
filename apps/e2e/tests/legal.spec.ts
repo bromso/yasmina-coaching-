@@ -83,8 +83,10 @@ test("the two indexes are drafts too, and robots.txt disallows the app", async (
   expect(await robots.text()).toMatch(/Disallow: \/$/m)
 })
 
-// www's old paths are 308s that follow the `locale` cookie (the redirect itself is pinned in
-// www.spec.ts); here a browser follows them all the way to the legal page.
+// www's old paths are 308s that follow the `locale` cookie, sent `Cache-Control: private,
+// no-store` so the browser asks again after a language switch (status, target and header are
+// pinned in www.spec.ts). Here one browser context follows them all the way to the legal page,
+// first in Swedish, then, the cookie changed, in English: a cached 308 would fail the second half.
 for (const [path, sv, en] of [
   ["/privacy", PAGES[0].sv, PAGES[0].en],
   ["/terms", PAGES[1].sv, PAGES[1].en],
@@ -151,6 +153,6 @@ for (const [app, path] of [
 test("account: every footer legal link resolves on a signed-in page", async ({ page }) => {
   await signUp(page, uniqueEmail("legal-footer"))
   await page.goto(URLS.account)
-  await expect(page).toHaveURL(new RegExp(`^${URLS.account}`))
+  await expect(page).toHaveURL((url) => url.href.startsWith(`${URLS.account}/`))
   await expectFooterLegalLinks(page)
 })
