@@ -1,0 +1,50 @@
+---
+title: "Accessibility statement"
+description: "How accessible the site is, known gaps and how to report a problem."
+locale: en
+page: accessibility
+changes:
+  - date: 2026-11-12
+    summary: "First version."
+---
+This statement describes how accessible the website is, what we know does not work yet and how to tell us when something is hard to use. It covers the website, the blog, sign-in, the app, the account pages and these legal pages.
+
+## How accessible the website is
+
+Our goal is for the website to meet WCAG 2.2 at level AA. We know of a few gaps, which are listed further down. [TO FILL: whether the website is judged fully or partially compliant with WCAG 2.2 AA]
+
+## How we check accessibility
+
+Every time the website changes, automated tests run in a real browser:
+
+- Every page is checked with the axe tool against WCAG 2.0, 2.1 and 2.2 at levels A and AA, in both the light and the dark theme, and in Swedish and English where the page exists in both languages.
+- A few paths through sign-in and the account are done with the keyboard alone: signing in, renaming a workspace and using the account menu. The tests check that you can always see where you are on the page, and that a menu keeps focus inside it and returns it when you press Escape.
+- Every page is shown 320 pixels wide, as on a small phone, and must not make you scroll sideways.
+- The start page and a blog post are shown with the reduced-motion setting on, and nothing on the page may keep moving.
+
+Automated tests do not find everything. How the pages work with a screen reader, whether image descriptions are meaningful and how easy the texts are to understand need a person to judge. [TO FILL: whether the website has been reviewed manually, for example with a screen reader, and if so when and by whom]
+
+## Known gaps
+
+We know about one gap and are working on fixing it. The second item is a test finding we have reviewed:
+
+- The tables on the legal pages can be reached with the Tab key but have no name, so a screen reader does not say what the table is about when you get there.
+- When the account menu is open, the rest of the page is hidden from screen readers while focus stays in the menu. The test tool flags this, but since the hidden content cannot be reached while the menu is open, we have judged that it does not stop anyone.
+
+[TO FILL: confirm the list of known gaps and when they will be fixed]
+
+## Report a problem
+
+If you come across something that is hard to use, or you need content in another format, write to [TO FILL: email address for accessibility questions] or use the [contact form](www:/kontakt). Tell us which page it was and what happened.
+
+We reply [TO FILL: how soon we reply to a report].
+
+## Why we publish this statement
+
+The Swedish Act on Accessibility to Digital Public Services (2018:1937) applies to the public sector, and we are not covered by it. We publish this statement voluntarily and follow the model public bodies use. [TO FILL: check Act 2018:1937 on who the act applies to]
+
+[TO FILL: check whether the Act on the Accessibility of Certain Products and Services (2023:254) applies to booking on the website, and whether the exemption for microenterprises providing services applies to us]
+
+## Latest review
+
+This statement was written on 12 November 2026 and is based on the automated tests above. We update it when we find or fix a gap.

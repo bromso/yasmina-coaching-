@@ -11,6 +11,7 @@
     { "name": "🛟 Help", "path": "./apps/help" },
     { "name": "💼 Jobs", "path": "./apps/jobs" },
     { "name": "📝 Blog", "path": "./apps/blog" },
+    { "name": "⚖️ Legal", "path": "./apps/legal" },
     { "name": "⚙️ API", "path": "./apps/api" },
     { "name": "✨ AI", "path": "./apps/ai" },
     { "name": "📕 Storybook", "path": "./apps/story" },

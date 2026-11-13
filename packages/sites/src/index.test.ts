@@ -4,6 +4,7 @@ import {
   footerGroups,
   relabelFooter,
   relabelNav,
+  resolveSiteHref,
   robotsFor,
   SITES,
   siteDomain,
@@ -120,7 +121,7 @@ describe("relabelNav / relabelFooter", () => {
   })
 })
 
-test("SITES covers the eight apps with their dev ports", () => {
+test("SITES covers the nine apps with their dev ports", () => {
   expect(Object.keys(SITES)).toEqual([
     "www",
     "app",
@@ -130,9 +131,11 @@ test("SITES covers the eight apps with their dev ports", () => {
     "help",
     "jobs",
     "blog",
+    "legal",
   ])
   expect(SITES.jobs).toEqual({ label: "Jobs", port: 3006 })
   expect(SITES.blog).toEqual({ label: "Blog", port: 3009 })
+  expect(SITES.legal).toEqual({ label: "Legal", port: 3010 })
 })
 
 test("sitemapFor and robotsFor use the site domain", () => {
@@ -158,4 +161,16 @@ test("a fully private app: disallow everything (no competing allow) and an empty
     { userAgent: "*", disallow: ["/"] },
   ])
   expect(sitemapFor("app", [], {})).toEqual([])
+})
+
+test("resolveSiteHref turns a site link into the app's absolute URL and leaves the rest alone", () => {
+  expect(resolveSiteHref("www:/book", {})).toBe("http://www.brand.localhost:3000/book")
+  expect(resolveSiteHref("www:/", {})).toBe("http://www.brand.localhost:3000")
+  expect(resolveSiteHref("WWW:/book", {})).toBe("http://www.brand.localhost:3000/book")
+  expect(resolveSiteHref("www:/inifran", { SITE_DOMAIN: "brand.com" })).toBe(
+    "https://www.brand.com/inifran"
+  )
+  for (const href of ["/villkor", "#cookies", "https://www.arn.se", "mailto:a@b.se", "nope:/x"])
+    expect(resolveSiteHref(href, {})).toBe(href)
+  expect(resolveSiteHref(undefined, {})).toBeUndefined()
 })

@@ -89,8 +89,8 @@ The blog ships ten posts by Yasmina in Swedish, each with its English translatio
   (frontmatter, author, tag, slug, language, translation, duplicates) included — into one thrown
   `ContentError`. `blog.inLocale(locale)` is one language's posts; `src/lib/source.ts` is the
   fumadocs loader underneath it.
-- **`src/lib/site-links.ts`** / **`src/components/blog-link.tsx`** — a post's `www:/book` link,
-  resolved to `siteUrl("www")` + `/book` at build time, in the page and in the feeds.
+- **`src/components/blog-link.tsx`** — a post's `www:/book` link, resolved by `@repo/sites`'
+  `resolveSiteHref` to `siteUrl("www")` + `/book` at build time, in the page and in the feeds.
 - **`src/lib/feed-render.ts`** / **`feed-entries.ts`** / **`feed-types.ts`** — render each
   published post's MDX body to full HTML (`react-dom/server.edge`, through
   `@repo/ui/components/mdx/static`) and build each language's three feeds from

@@ -1,6 +1,6 @@
 import type { ProviderId } from "@repo/api-contract"
 import type { User } from "@repo/session"
-import { siteUrl } from "@repo/sites"
+import { type LegalLocale, legalUrl } from "@repo/sites/legal"
 import { Alert, AlertDescription } from "@repo/ui/components/alert"
 import { AuthLayout } from "@/components/auth-layout"
 import { LoginForm } from "@/components/login-form"
@@ -8,6 +8,7 @@ import { SignedInCard } from "@/components/signed-in-card"
 import { SocialButtons } from "@/components/social-buttons"
 
 export function LoginView({
+  locale,
   next,
   notice,
   errorMessage,
@@ -16,6 +17,8 @@ export function LoginView({
   continueHref,
   reauth = false,
 }: {
+  /** The page's language, for the legal app's terms and privacy links. */
+  locale: LegalLocale
   next?: string
   notice?: string
   /** A failed provider sign-in, from `?error=…`. */
@@ -44,7 +47,10 @@ export function LoginView({
             </Alert>
           ) : null}
           <LoginForm
-            legalBaseUrl={siteUrl("www")}
+            legal={{
+              termsHref: legalUrl("terms", locale),
+              privacyHref: legalUrl("privacy", locale),
+            }}
             next={next}
             social={
               providers.length > 0 ? (

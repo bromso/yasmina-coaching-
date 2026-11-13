@@ -1721,7 +1721,7 @@ section is the detail.
   or mask what the purpose does not need, restrict and review who may read log data) and
   Garante/CNIL employee-monitoring decisions (transparency to the people monitored, proportionality
   of what is recorded) — hence admin-and-up only, every plan (a safety feature, not an upsell), 90
-  days, no ip or user agent ever shown, and the `/privacy` template's own line about it.
+  days, no ip or user agent ever shown, and the legal app's privacy page (`apps/legal/content/pages/integritet.mdx`, `en-privacy.mdx`) says so.
 
 ## Required two-step verification
 

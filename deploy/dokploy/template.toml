@@ -3,7 +3,7 @@
 site_domain = "undefined.guru"
 host_prefix = "yas-"
 admin_email = "yasmina@yasminapetersson.se"
-git_ref = "feature/blog"
+git_ref = "main"
 
 [config]
 env = [
@@ -22,6 +22,8 @@ env = [
   "BOOKING_EMAIL=${admin_email}",
   "SUPPORT_EMAIL=${admin_email}",
   "SUPERADMIN_EMAILS=${admin_email}",
+  "# The legal pages stay drafts (a notice on every page, noindex) until a lawyer approves them; then false.",
+  "LEGAL_DRAFT=true",
   "# The staging lock: replace with your own line from: htpasswd -nbB <user> '<password>'",
   "# keep the single quotes, they stop the $ signs in the hash being read as variables.",
   "BASIC_AUTH_USERS='replace-me'",

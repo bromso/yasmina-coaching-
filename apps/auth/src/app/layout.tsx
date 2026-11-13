@@ -4,6 +4,7 @@ import { messagesFor } from "@repo/i18n/messages"
 import { createLogger } from "@repo/log"
 import { loadEnv } from "@repo/session"
 import { BRAND_NAME, footerGroups, relabelFooter, relabelNav, siteNav, siteUrl } from "@repo/sites"
+import { type LegalLocale, legalUrl } from "@repo/sites/legal"
 import { NotificationBell } from "@repo/ui/blocks/notification-bell"
 import { SiteFooter, SiteFooterLegal } from "@repo/ui/blocks/site-footer"
 import { SiteHeader } from "@repo/ui/blocks/site-header"
@@ -66,11 +67,16 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 }
 
-const legal = (labels: { terms: string; privacy: string }) => (
+/** The footer's legal line: the legal app's pages in the reader's language. */
+const legal = (
+  locale: LegalLocale,
+  labels: Record<"privacy" | "terms" | "accessibility", string>
+) => (
   <SiteFooterLegal
     links={[
-      { label: labels.terms, href: `${siteUrl("www")}/terms` },
-      { label: labels.privacy, href: `${siteUrl("www")}/privacy` },
+      { label: labels.privacy, href: legalUrl("privacy", locale) },
+      { label: labels.terms, href: legalUrl("terms", locale) },
+      { label: labels.accessibility, href: legalUrl("accessibility", locale) },
     ]}
   />
 )
@@ -248,12 +254,16 @@ export default async function RootLayout({
                   (id) => t(`ui.footerGroups.${id}`)
                 )}
                 navLabel={t("ui.footerNav")}
-                legal={legal({ terms: t("auth.layout.terms"), privacy: t("auth.layout.privacy") })}
+                legal={legal(locale, {
+                  privacy: t("ui.footerLegal.privacy"),
+                  terms: t("ui.footerLegal.terms"),
+                  accessibility: t("ui.footerLegal.accessibility"),
+                })}
               />
               <CookieConsent
                 domain={COOKIE_DOMAIN}
                 initial={initialConsent}
-                privacyHref={`${siteUrl("www")}/privacy`}
+                privacyHref={legalUrl("privacy", locale)}
                 labels={{
                   region: t("ui.cookieConsent.region"),
                   text: t("ui.cookieConsent.text"),

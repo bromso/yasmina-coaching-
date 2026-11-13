@@ -10,6 +10,8 @@ import {
   BOOKING_CONFLICT_MESSAGE,
   BOOKING_DATE_PATTERN,
   BOOKING_DAY_PARTS,
+  BOOKING_EARLY_START_FIELD,
+  BOOKING_EARLY_START_MESSAGE,
   BOOKING_HORIZON_DAYS,
   BOOKING_LEAD_HOURS,
   BOOKING_LOCATIONS,
@@ -20,6 +22,8 @@ import {
   BOOKING_NAME_MIN,
   BOOKING_NOTES_MAX,
   BOOKING_ORGANISATION_MAX,
+  BOOKING_PACKAGE_FULL_FIELD,
+  BOOKING_PACKAGE_FULL_MESSAGE,
   BOOKING_PHONE_MAX,
   BOOKING_RATE_MESSAGE,
   BOOKING_SEATS_FULL_MESSAGE,
@@ -29,12 +33,14 @@ import {
   BOOKING_TIME_PATTERN,
   BOOKING_TIMEZONE,
   BOOKING_VENUE_MAX,
+  BOOKING_WITHDRAWAL_DAYS,
   type BookingAudience,
   type BookingDayPart,
   type BookingLocation,
   type BookingStatus,
   bookingReference,
   DEFAULT_AVAILABILITY_RULES,
+  earlyStartRequired,
   GROUP_EVENT_DESCRIPTION_MAX,
   GROUP_EVENT_MAX_CAPACITY,
   GROUP_EVENT_MAX_REPEATS,
@@ -50,7 +56,11 @@ import {
   type Offering,
   type OfferingKey,
   type OfferingKind,
+  opensNewContract,
   REQUEST_OFFERING_KEYS,
+  startsWithinWithdrawal,
+  withdrawalLastDay,
+  zonedDay,
 } from "./booking-limits"
 
 // Like support.ts: this file imports only zod, ./auth and the Zod-free ./booking-limits, never the
@@ -76,6 +86,8 @@ export {
   BOOKING_CONFLICT_MESSAGE,
   BOOKING_DATE_PATTERN,
   BOOKING_DAY_PARTS,
+  BOOKING_EARLY_START_FIELD,
+  BOOKING_EARLY_START_MESSAGE,
   BOOKING_HORIZON_DAYS,
   BOOKING_LEAD_HOURS,
   BOOKING_LOCATIONS,
@@ -86,6 +98,8 @@ export {
   BOOKING_NAME_MIN,
   BOOKING_NOTES_MAX,
   BOOKING_ORGANISATION_MAX,
+  BOOKING_PACKAGE_FULL_FIELD,
+  BOOKING_PACKAGE_FULL_MESSAGE,
   BOOKING_PHONE_MAX,
   BOOKING_RATE_MESSAGE,
   BOOKING_SEATS_FULL_MESSAGE,
@@ -95,8 +109,10 @@ export {
   BOOKING_TIME_PATTERN,
   BOOKING_TIMEZONE,
   BOOKING_VENUE_MAX,
+  BOOKING_WITHDRAWAL_DAYS,
   bookingReference,
   DEFAULT_AVAILABILITY_RULES,
+  earlyStartRequired,
   GROUP_EVENT_DESCRIPTION_MAX,
   GROUP_EVENT_MAX_CAPACITY,
   GROUP_EVENT_MAX_REPEATS,
@@ -109,10 +125,16 @@ export {
   OFFERING_KEYS,
   OFFERING_KINDS,
   OFFERINGS,
+  opensNewContract,
   REQUEST_OFFERING_KEYS,
+  startsWithinWithdrawal,
+  withdrawalLastDay,
+  zonedDay,
 }
 
 const Id = z.number().int().positive()
+/** A manage link's token as the customer holds it (the api stores only its hash). */
+const ManageToken = z.string().min(20).max(200)
 const CoercedId = z.coerce.number().int().positive()
 const Iso = z.iso.datetime()
 /** `YYYY-MM-DD` in `BOOKING_TIMEZONE`. */
@@ -182,6 +204,20 @@ export const BookingSummarySchema = z.object({
 })
 export type BookingSummary = z.infer<typeof BookingSummarySchema>
 
+/**
+ * The visitor ticked "I have read the terms and the privacy policy". Only `true` is accepted; the
+ * version accepted is never part of the input — `apps/api` stamps `TERMS_VERSION`
+ * (`@repo/api-contract/legal`) itself.
+ */
+const TermsAccepted = z.literal(true)
+
+/**
+ * The visitor ticked "I want the service to start within the withdrawal period…" (lag (2005:59)
+ * 2 kap. 11 § 1). Optional: `apps/api` decides from the actual slots whether a booking needs it
+ * (`earlyStartRequired`), never from the client, and stamps the time itself.
+ */
+const EarlyStart = z.boolean().optional()
+
 export const BookingCreateSchema = z
   .object({
     offering: InstantOfferingKeySchema,
@@ -191,6 +227,17 @@ export const BookingCreateSchema = z
     customer: BookingCustomerSchema,
     location: BookingLocationSchema,
     notes: z.string().trim().max(BOOKING_NOTES_MAX).optional(),
+    termsAccepted: TermsAccepted,
+    earlyStart: EarlyStart,
+    /**
+     * A further session of a programme already bought: the package's manage token (the "Book
+     * another" link on its manage page, `?manage=<token>`), which proves the order is the
+     * package holder's. `apps/api` honours it only for a package of the same offering with room
+     * for every slot; the sessions are then part of that purchase (no new right of withdrawal, no
+     * early-start consent) and appear on its manage page. Any other token is ignored and the
+     * order is a new purchase, answered exactly as one, so nothing tells whether a package exists.
+     */
+    manageToken: ManageToken.optional(),
   })
   .superRefine((v, ctx) => {
     const offering = OFFERINGS[v.offering]
@@ -214,7 +261,6 @@ export const BookingCreateSchema = z
 export type BookingCreateInput = z.infer<typeof BookingCreateSchema>
 
 export const BookingPackageSummarySchema = z.object({
-  id: Id,
   offering: OfferingKeySchema,
   sessionsTotal: z.number().int().positive(),
   /** Sessions already placed on the calendar (confirmed, not cancelled). */
@@ -260,6 +306,8 @@ export const BookingReserveSchema = z.object({
   audience: BookingAudienceSchema,
   customer: BookingCustomerSchema,
   notes: z.string().trim().max(BOOKING_NOTES_MAX).optional(),
+  termsAccepted: TermsAccepted,
+  earlyStart: EarlyStart,
 })
 export type BookingReserveInput = z.infer<typeof BookingReserveSchema>
 
@@ -282,6 +330,7 @@ export const BookingRequestSchema = z
     attendees: z.number().int().min(1).max(BOOKING_ATTENDEES_MAX).optional(),
     venue: z.string().trim().max(BOOKING_VENUE_MAX).optional(),
     message: z.string().trim().min(BOOKING_MESSAGE_MIN).max(BOOKING_MESSAGE_MAX),
+    termsAccepted: TermsAccepted,
   })
   .superRefine((v, ctx) => {
     if (!OFFERINGS[v.offering].locations.includes(v.location)) {
@@ -296,7 +345,7 @@ export const BookingRequestResultSchema = z.object({
 
 // ── Manage (token link) ────────────────────────────────────────────────────────────────────────
 
-export const BookingManageSchema = z.object({ token: z.string().min(20).max(200) })
+export const BookingManageSchema = z.object({ token: ManageToken })
 export const BookingManageResultSchema = z.object({
   customer: z.object({
     name: z.string(),
@@ -319,12 +368,29 @@ export const BOOKING_CANCEL_ERRORS = {
   ...BOOKING_MANAGE_ERRORS,
   CONFLICT: { message: BOOKING_CANCEL_LATE_MESSAGE },
 } as const
+/**
+ * A private booking within the withdrawal period without `earlyStart`: a field error, its
+ * `data.field` the form field the message belongs to.
+ */
+const BOOKING_EARLY_START_ERROR = {
+  BAD_REQUEST: {
+    message: BOOKING_EARLY_START_MESSAGE,
+    data: z.object({ field: z.literal(BOOKING_EARLY_START_FIELD) }),
+  },
+} as const
 export const BOOKING_CREATE_ERRORS = {
   ...BOOKING_ERRORS,
+  // The early-start refusal, or (`BOOKING_PACKAGE_FULL_MESSAGE`) a further programme session the
+  // token's package has no room for: both field errors, `data.field` naming the form field.
+  BAD_REQUEST: {
+    message: BOOKING_EARLY_START_MESSAGE,
+    data: z.object({ field: z.enum([BOOKING_EARLY_START_FIELD, BOOKING_PACKAGE_FULL_FIELD]) }),
+  },
   CONFLICT: { message: BOOKING_SLOT_TAKEN_MESSAGE },
 } as const
 export const BOOKING_RESERVE_ERRORS = {
   ...BOOKING_ERRORS,
+  ...BOOKING_EARLY_START_ERROR,
   NOT_FOUND: { message: "Not found" },
   CONFLICT: { message: BOOKING_SEATS_FULL_MESSAGE },
 } as const

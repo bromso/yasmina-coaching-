@@ -26,7 +26,7 @@ const KNOWN_SUBPATH_EXCEPTIONS = new Set(["apps/app/src/components/live-notes.ts
 const repoRoot = resolve(import.meta.dir, "..")
 
 describe("the repo's client files", () => {
-  test("import no value from the root of @repo/api-contract, @repo/public-api-contract or @repo/sites, nor a Zod-carrying subpath", () => {
+  test("import no value from the root of @repo/api-contract, @repo/public-api-contract or @repo/sites, nor legalUrl, nor a Zod-carrying subpath", () => {
     const { violations, usedExceptions } = scanClientImports(repoRoot, KNOWN_SUBPATH_EXCEPTIONS)
     expect(violations).toEqual([])
     const stale = [...KNOWN_SUBPATH_EXCEPTIONS].filter((key) => !usedExceptions.has(key))
@@ -35,13 +35,17 @@ describe("the repo's client files", () => {
 })
 
 describe("the client-safe @repo/api-contract subpaths", () => {
-  // Subpaths documented as allowed in client code (the invitation domain rules; apps/account uses
-  // them server-side today — and the notification vocabulary): each must stay Zod-free, or the rule above would fail the first
-  // client file that imports one. Checked here so a regression names the subpath itself.
+  // Subpaths documented as allowed in client code (the invitation domain rules, which apps/account
+  // uses server-side today; the terms version; the notification vocabulary): each must stay
+  // Zod-free, or the rule above would fail the first client file that imports one. Checked here
+  // so a regression names the subpath itself.
   const contractSrc = join(repoRoot, "packages/api-contract/src")
-  test.each(["invite-domains", "notifications"])("./%s reaches no bare package", (subpath) => {
-    expect(findBarePackageImport(join(contractSrc, `${subpath}.ts`), contractSrc)).toBeNull()
-  })
+  test.each(["invite-domains", "legal", "notifications"])(
+    "./%s reaches no bare package",
+    (subpath) => {
+      expect(findBarePackageImport(join(contractSrc, `${subpath}.ts`), contractSrc)).toBeNull()
+    }
+  )
 })
 
 describe("moduleImports", () => {
@@ -178,6 +182,11 @@ describe("scanClientImports", () => {
       "apps/x/src/components/namespace.tsx": client('import * as sites from "@repo/sites"'),
       "apps/x/src/components/mixed.tsx": client('import d, { siteUrl } from "@repo/sites"'),
       "apps/x/src/components/reexport.tsx": client('export { siteUrl } from "@repo/sites"'),
+      // `legalUrl` reads `SITE_DOMAIN` too; the rest of `@repo/sites/legal` is client-safe.
+      "apps/x/src/components/legal-url.tsx": client(
+        'import { LEGAL_PAGES, legalUrl } from "@repo/sites/legal"'
+      ),
+      "apps/x/src/components/legal-all.tsx": client('import * as legal from "@repo/sites/legal"'),
       "apps/x/src/components/commented.tsx": `/* A block comment first. */\n${client(
         'import { siteUrl } from "@repo/sites"'
       )}`,
@@ -198,6 +207,7 @@ describe("scanClientImports", () => {
         [
           'import type { Env } from "@repo/sites"',
           'import { BRAND_NAME } from "@repo/sites/brand"',
+          'import { LEGAL_PAGES, legalPath, type LegalLocale } from "@repo/sites/legal"',
           'import { LIMIT } from "@repo/api-contract/limits"',
           'import { type Plan } from "@repo/api-contract"',
           'import type { Lib } from "@/lib/url"',
@@ -230,6 +240,8 @@ describe("scanClientImports", () => {
     expect(firstFiles(["apps/x/src/components/allowed.tsx::/schemas"])).toEqual([
       "apps/x/src/components/commented.tsx",
       "apps/x/src/components/contract-root.tsx",
+      "apps/x/src/components/legal-all.tsx",
+      "apps/x/src/components/legal-url.tsx",
       "apps/x/src/components/mixed.tsx",
       "apps/x/src/components/mixed.tsx",
       "apps/x/src/components/namespace.tsx",
@@ -248,6 +260,16 @@ describe("scanClientImports", () => {
       rule: "sites root",
       chain: ["apps/x/src/components/namespace.tsx"],
       value: "* as sites",
+    })
+    expect(violations).toContainEqual({
+      rule: "sites legalUrl",
+      chain: ["apps/x/src/components/legal-url.tsx"],
+      value: "legalUrl",
+    })
+    expect(violations).toContainEqual({
+      rule: "sites legalUrl",
+      chain: ["apps/x/src/components/legal-all.tsx"],
+      value: "* as legal",
     })
     expect(violations).toContainEqual({
       rule: "api-contract root",

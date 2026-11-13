@@ -1,6 +1,6 @@
 # boilerplate-bun
 
-A Bun-workspaces monorepo boilerplate: eight Next.js apps, each on its own subdomain, a shared UI
+A Bun-workspaces monorepo boilerplate: nine Next.js apps, each on its own subdomain, a shared UI
 package with Storybook, and two Bun services — a typed API and an AI service. Clone it, delete
 what you don't need, and build your product on top.
 

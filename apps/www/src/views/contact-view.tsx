@@ -1,4 +1,5 @@
 import type { Locale } from "@repo/i18n/locales"
+import { legalUrl } from "@repo/sites/legal"
 import { Eyebrow } from "@repo/ui/components/eyebrow"
 import { Picture } from "@repo/ui/components/picture"
 import { SunPanel } from "@repo/ui/components/sun-panel"
@@ -55,7 +56,7 @@ export function ContactView({ page, locale }: ContactViewProps) {
             </p>
           </div>
           <SunPanel className="min-w-0 p-4 sm:p-8 lg:p-10">
-            <ContactForm locale={locale} page={page} />
+            <ContactForm locale={locale} page={page} privacyHref={legalUrl("privacy", locale)} />
           </SunPanel>
         </div>
       </section>

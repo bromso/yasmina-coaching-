@@ -190,6 +190,9 @@
     "extraSessionsHeading": "Further sessions",
     "button": "Manage your booking",
     "memberBooking": "Once you have started, book your sessions here: ",
+    "terms": "The terms for your booking: ",
+    "withdrawal": "As a private client you have a 14-day right of withdrawal. The terms explain how it works once a session has taken place.",
+    "earlyStart": "You asked for the service to start within the withdrawal period. The right of withdrawal ends once the service has been fully performed.",
     "footer": "You can cancel online until {hours} hours before a session from that link. Reply to this email to reschedule."
   },
   "bookingRequestReceived": {
@@ -197,7 +200,8 @@
     "preview": "We've received your request ({reference})",
     "heading": "We've received your request",
     "body": "Thanks for your request. Yasmina will reply to this address within a few days with a proposed time for your {offeringLabel}.",
-    "button": "View your request"
+    "button": "View your request",
+    "terms": "The terms for your booking: "
   },
   "bookingDeclined": {
     "subject": "About your request ({reference})",

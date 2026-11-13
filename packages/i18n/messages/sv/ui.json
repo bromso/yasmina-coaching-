@@ -32,6 +32,11 @@
   },
   "siteNav": "Webbplats",
   "footerNav": "Sidfot",
+  "footerLegal": {
+    "privacy": "Integritet",
+    "terms": "Villkor",
+    "accessibility": "Tillgänglighet"
+  },
   "menu": {
     "open": "Öppna menyn",
     "title": "Meny",
@@ -45,7 +50,8 @@
     "docs": "Dokumentation",
     "help": "Hjälp",
     "jobs": "Jobb",
-    "blog": "Blogg"
+    "blog": "Blogg",
+    "legal": "Juridik"
   },
   "footerGroups": {
     "product": "Produkt",

@@ -190,6 +190,9 @@
     "extraSessionsHeading": "Ytterligare tillfällen",
     "button": "Hantera din bokning",
     "memberBooking": "När du är igång bokar du dina samtal här: ",
+    "terms": "Villkoren för bokningen: ",
+    "withdrawal": "Som privatperson har du 14 dagars ångerrätt. Villkoren beskriver hur den fungerar när ett tillfälle redan har hållits.",
+    "earlyStart": "Du har bett att tjänsten börjar inom ångerfristen. Ångerrätten upphör när tjänsten har fullgjorts.",
     "footer": "Du kan avboka online via den länken fram till {hours} timmar före ett tillfälle. Svara på det här mejlet om du vill boka om."
   },
   "bookingRequestReceived": {
@@ -197,7 +200,8 @@
     "preview": "Vi har tagit emot din förfrågan ({reference})",
     "heading": "Vi har tagit emot din förfrågan",
     "body": "Tack för din förfrågan. Yasmina återkommer till den här adressen inom några dagar med ett förslag på tid för din {offeringLabel}.",
-    "button": "Visa din förfrågan"
+    "button": "Visa din förfrågan",
+    "terms": "Villkoren för bokningen: "
   },
   "bookingDeclined": {
     "subject": "Angående din förfrågan ({reference})",

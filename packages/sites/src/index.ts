@@ -16,6 +16,7 @@ export const SITES = {
   help: { label: "Help", port: 3005 },
   jobs: { label: "Jobs", port: 3006 },
   blog: { label: "Blog", port: 3009 },
+  legal: { label: "Legal", port: 3010 },
 } as const
 
 export type SiteId = keyof typeof SITES
@@ -74,6 +75,20 @@ export function siteUrl(id: SiteId, env: Env = process.env): string {
   return host.endsWith(".localhost") || host === "localhost"
     ? `http://${id}.${host}:${SITES[id].port}`
     : `https://${hostPrefix(env)}${id}.${host}`
+}
+
+/**
+ * A content link to another app of the site, `<app>:/<path>` (`www:/book`), as the absolute URL it
+ * stands for: `siteUrl("www")` + `/book`, read at build time so one MDX page works on every domain.
+ * Every other href (root-relative, `https:`, `mailto:`, `#…`) comes back unchanged, and so does an
+ * unknown app id. The blog and the legal app render their MDX `a` through it. Server-only, like
+ * `siteUrl`: it reads `SITE_DOMAIN`.
+ */
+export function resolveSiteHref(href: string | undefined, env?: Env): string | undefined {
+  const match = href?.match(/^([a-z]+):(\/.*)$/i)
+  const id = match?.[1]?.toLowerCase()
+  if (!match || !id || !Object.hasOwn(SITES, id)) return href
+  return `${siteUrl(id as SiteId, env)}${match[2] === "/" ? "" : match[2]}`
 }
 
 const NAV: readonly SiteId[] = ["app", "docs", "blog", "help", "jobs"]

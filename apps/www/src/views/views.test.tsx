@@ -5,6 +5,7 @@ import { describe, expect, mock, test } from "bun:test"
 mock.module("server-only", () => ({}))
 
 const { renderToStaticMarkup } = await import("react-dom/server")
+const { legalUrl } = await import("@repo/sites/legal")
 const { INNER, INNER_SERVICE_IDS } = await import("@/content/inner")
 const { BOOKING } = await import("@/content/booking")
 const { formatKr, INNER_PRICES } = await import("@/content/inner-pricing")
@@ -14,9 +15,11 @@ const { InnerResearchView } = await import("./inner-research-view")
 const { InnerServiceView } = await import("./inner-service-view")
 const { OfferingView } = await import("./offering-view")
 const { DoneView } = await import("./done-view")
+const { ManageView } = await import("./manage-view")
 const { LocaleProvider } = await import("@/components/booking/locale-provider")
 const { PaymentError, PaymentStep } = await import("@/components/booking/payment-step")
 const { stepWithError, withClientErrors } = await import("@/components/booking/step-panel")
+const { EarlyStartField, TermsField } = await import("@/components/booking/details-fields")
 type PaymentStepProps = import("@/components/booking/payment-step").PaymentStepProps
 
 const LOCALES = ["sv", "en"] as const
@@ -152,6 +155,140 @@ describe("OfferingView", () => {
     const html = render(<OfferingView offering="keynote" locale="sv" {...props} />)
     expect(html).toContain("/media/keynote-poster")
   })
+
+  // Every journey kind (instant, group, request) carries the terms box, its links in the page's
+  // language, computed on the server; it is a plain required checkbox, so it posts without JS.
+  for (const locale of LOCALES) {
+    for (const offering of ["session", "group", "workshop"] as const) {
+      test(`${offering} (${locale}): the terms box links the terms and the privacy policy`, () => {
+        const html = render(<OfferingView offering={offering} locale={locale} {...props} />)
+        const copy = BOOKING[locale].form.terms
+        expect(html).toMatch(/<input type="checkbox" required=""[^>]* name="terms" value="on"/)
+        expect(html).toContain(`href="${legalUrl("terms", locale)}"`)
+        expect(html).toContain(`href="${legalUrl("privacy", locale)}"`)
+        expect(html).toContain(copy.before)
+        expect(html).toContain(copy.terms)
+        expect(html).toContain(copy.privacy)
+      })
+    }
+  }
+})
+
+describe("the box for a start within the withdrawal period", () => {
+  const minDate = "2026-11-08"
+  const box = /<input type="checkbox" required=""[^>]* name="earlyStart" value="on"/
+
+  // Nothing is picked in the server's render (nor without JavaScript), so a private client's
+  // instant or group journey shows the box: any offered session could fall inside the period.
+  for (const locale of LOCALES) {
+    for (const offering of ["session", "group", "inner_start_coaching"] as const) {
+      test(`${offering} (${locale}): a private client sees the box and its label`, () => {
+        const html = render(
+          <OfferingView offering={offering} audience="private" locale={locale} minDate={minDate} />
+        )
+        expect(html).toMatch(box)
+        expect(html).toContain(BOOKING[locale].form.earlyStart)
+      })
+    }
+    test(`session (${locale}): an organisation never sees it`, () => {
+      const html = render(
+        <OfferingView
+          offering="session"
+          audience="organisation"
+          locale={locale}
+          minDate={minDate}
+        />
+      )
+      expect(html).not.toContain('name="earlyStart"')
+    })
+    for (const offering of ["inner_session", "inner_mentoring_session"] as const) {
+      test(`${offering} (${locale}): a member's session never shows it`, () => {
+        const html = render(
+          <OfferingView offering={offering} audience="private" locale={locale} minDate={minDate} />
+        )
+        expect(html).not.toContain('name="earlyStart"')
+      })
+    }
+    test(`package_6 (${locale}): a further session of a programme never shows it`, () => {
+      const html = render(
+        <OfferingView
+          offering="package_6"
+          manageToken={"t".repeat(43)}
+          audience="private"
+          locale={locale}
+          minDate={minDate}
+        />
+      )
+      expect(html).not.toContain('name="earlyStart"')
+    })
+    test(`workshop (${locale}): a request never shows it`, () => {
+      const html = render(
+        <OfferingView
+          offering="workshop"
+          audience="organisation"
+          locale={locale}
+          minDate={minDate}
+        />
+      )
+      expect(html).not.toContain('name="earlyStart"')
+    })
+  }
+})
+
+describe("the consent boxes after a refusal", () => {
+  const links = {
+    terms: "https://legal.example.com/villkor",
+    privacy: "https://legal.example.com/p",
+  }
+  const refused = (values: Record<string, string>) => ({
+    ok: false as const,
+    fieldErrors: { terms: "Terms message", earlyStart: "Early-start message" },
+    values,
+  })
+  const boxes = (state: ReturnType<typeof refused>) =>
+    render(
+      <LocaleProvider locale="sv">
+        <TermsField state={state} links={links} />
+        <EarlyStartField state={state} />
+      </LocaleProvider>
+    )
+  const input = (html: string, name: string) =>
+    new RegExp(`<input[^>]* name="${name}"[^>]*>`).exec(html)?.[0] ?? ""
+
+  test("each refused box is invalid and described by its own message", () => {
+    const html = boxes(refused({ terms: "", earlyStart: "" }))
+    for (const [name, message] of [
+      ["terms", "Terms message"],
+      ["earlyStart", "Early-start message"],
+    ] as const) {
+      const tag = input(html, name)
+      expect(tag).toContain('aria-invalid="true"')
+      expect(tag).toContain(`aria-describedby="${name}-error"`)
+      expect(tag).not.toContain('checked=""')
+      expect(html).toContain(
+        `<p id="${name}-error" class="text-destructive text-sm">${message}</p>`
+      )
+    }
+  })
+
+  test("a box ticked before the refusal stays ticked", () => {
+    const html = boxes(refused({ terms: "on", earlyStart: "on" }))
+    for (const name of ["terms", "earlyStart"]) {
+      expect(input(html, name)).toContain('checked=""')
+      expect(input(html, name)).toContain('aria-invalid="true"')
+    }
+  })
+
+  test("the terms box's name is the sentence alone: the new-tab note describes each link", () => {
+    const html = boxes(refused({}))
+    const label = /<label[^>]*>[\s\S]*?<\/label>/.exec(html)?.[0] ?? ""
+    expect(label).toContain(BOOKING.sv.form.terms.terms)
+    expect(label).not.toContain(BOOKING.sv.form.terms.newTab)
+    const note = /<span id="([^"]+)" hidden="">\(öppnas i en ny flik\)<\/span>/.exec(html)
+    const id = note?.[1] ?? "missing"
+    expect(count(label, new RegExp(`aria-describedby="${id}"`, "g"))).toBe(2)
+    expect(count(html, /\(öppnas i en ny flik\)/g)).toBe(1)
+  })
 })
 
 describe("the booking journeys' steps", () => {
@@ -178,7 +315,13 @@ describe("the booking journeys' steps", () => {
     test(`${locale}: members' sessions and programme extras have three steps and no payment`, () => {
       for (const node of [
         <OfferingView key="m" offering="inner_session" locale={locale} {...props} />,
-        <OfferingView key="p" offering="package_6" packageId="12" locale={locale} {...props} />,
+        <OfferingView
+          key="p"
+          offering="package_6"
+          manageToken={"t".repeat(43)}
+          locale={locale}
+          {...props}
+        />,
       ]) {
         const html = render(node)
         expect(html).toContain(`aria-label="${form.stepOf(1, 3)}"`)
@@ -390,7 +533,7 @@ describe("ContactView", () => {
       for (const label of Object.values(copy.form.need.labels)) expect(html).toContain(esc(label))
       for (const label of Object.values(copy.form.timeline.labels))
         expect(html).toContain(esc(label))
-      expect(html).toContain('href="/privacy"')
+      expect(html).toContain(`href="${legalUrl("privacy", locale)}"`)
     })
   }
 
@@ -503,35 +646,21 @@ describe("ContactDoneView", () => {
   })
 })
 
-describe("the legal pages render in both languages", () => {
-  test("privacy and terms, with the page's own words around the sections", async () => {
-    const { LegalPage } = await import("@repo/ui/blocks/legal-page")
-    const { LEGAL_CHROME } = await import("@/content/legal-notice")
-    const { PRIVACY } = await import("@/content/privacy")
-    const { TERMS } = await import("@/content/terms")
-    for (const locale of LOCALES) {
-      const chrome = LEGAL_CHROME[locale]
-      for (const doc of [PRIVACY[locale], TERMS[locale]]) {
-        const html = render(
-          <LegalPage
-            title={doc.title}
-            updatedAt={doc.updatedAt}
-            sections={doc.sections}
-            notice={chrome.notice}
-            labels={{ lastUpdated: chrome.lastUpdated, contents: chrome.contents }}
-            dateLocale={chrome.dateLocale}
-          />
-        )
-        expect(count(html, /<h1[\s>]/g)).toBe(1)
-        expect(html).toContain(esc(doc.title))
-        expect(html).toContain(`aria-label="${chrome.contents}"`)
-        expect(html).toContain(chrome.lastUpdated)
-        for (const section of doc.sections) expect(html).toContain(`id="${section.id}"`)
-      }
-    }
-    const sv = render(
-      <LegalPage title="x" updatedAt="2026-11-11" sections={[]} dateLocale="sv-SE" />
+describe("the manage page's link to the next session", () => {
+  test("carries the manage token, never the package's id", () => {
+    const token = "t".repeat(43)
+    const html = render(
+      <ManageView
+        token={token}
+        locale="sv"
+        data={{
+          customer: { name: "Ada Lovelace", email: "ada@example.com", organisation: null },
+          bookings: [],
+          package: { offering: "package_6", sessionsTotal: 6, sessionsBooked: 2 },
+        }}
+      />
     )
-    expect(sv).toContain("11 november 2026")
+    expect(html).toContain(`href="/book/package_6?manage=${token}"`)
+    expect(html).not.toContain("?package=")
   })
 })

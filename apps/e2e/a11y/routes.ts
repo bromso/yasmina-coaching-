@@ -1,8 +1,8 @@
 // Every page the accessibility sweep visits (tests/a11y-pages.spec.ts), as plain data: the planner
 // test scripts/a11y.test.ts imports it before `bun install`, so no Playwright import here. A new
-// page.tsx in one of the eight Next apps fails that test until it is listed here or in EXCLUDED.
+// page.tsx in one of the nine Next apps fails that test until it is listed here or in EXCLUDED.
 
-export type AppId = "www" | "app" | "auth" | "account" | "docs" | "help" | "jobs" | "blog"
+export type AppId = "www" | "app" | "auth" | "account" | "docs" | "help" | "jobs" | "blog" | "legal"
 export type Variant = "light" | "dark" | "sv-light" | "sv-dark" | "en-light" | "en-dark"
 
 export type A11yPage = {
@@ -18,7 +18,7 @@ export type A11yPage = {
   setup?: "adminUser" | "adminWorkspace" | "adminBooking" | "adminLead"
 }
 
-const APPS: AppId[] = ["www", "app", "auth", "account", "docs", "help", "jobs", "blog"]
+const APPS: AppId[] = ["www", "app", "auth", "account", "docs", "help", "jobs", "blog", "legal"]
 const TRANSLATED: AppId[] = ["auth", "app", "account"]
 
 const notFound = (app: AppId, auth: A11yPage["auth"] = "none"): A11yPage => ({
@@ -31,9 +31,6 @@ const notFound = (app: AppId, auth: A11yPage["auth"] = "none"): A11yPage => ({
 export const A11Y_PAGES: A11yPage[] = [
   // www (Swedish by default; the landing page is also checked in English, the `locale` cookie set)
   { app: "www", path: "/", auth: "none", variants: ["light", "dark", "en-light", "en-dark"] },
-  // The legal pages are Swedish by default and English through the `locale` cookie.
-  { app: "www", path: "/terms", auth: "none", variants: ["light", "dark", "en-light"] },
-  { app: "www", path: "/privacy", auth: "none", variants: ["light", "dark", "en-light"] },
   // Ledarskap inifrån: the hub (also in English), the four services (one route) and the research.
   {
     app: "www",
@@ -174,6 +171,18 @@ export const A11Y_PAGES: A11yPage[] = [
   { app: "blog", path: "/authors/yasmina", route: "/authors/[author]", auth: "none" },
   { app: "blog", path: "/en/authors/yasmina", route: "/en/authors/[author]", auth: "none" },
   notFound("blog"),
+  // legal (Swedish at the root, English under /en: both indexes and all four pages in each)
+  { app: "legal", path: "/", auth: "none" },
+  { app: "legal", path: "/en", auth: "none" },
+  { app: "legal", path: "/integritet", route: "/[slug]", auth: "none" },
+  { app: "legal", path: "/villkor", route: "/[slug]", auth: "none" },
+  { app: "legal", path: "/tillganglighet", route: "/[slug]", auth: "none" },
+  { app: "legal", path: "/foretaget", route: "/[slug]", auth: "none" },
+  { app: "legal", path: "/en/privacy", route: "/en/[slug]", auth: "none" },
+  { app: "legal", path: "/en/terms", route: "/en/[slug]", auth: "none" },
+  { app: "legal", path: "/en/accessibility", route: "/en/[slug]", auth: "none" },
+  { app: "legal", path: "/en/company", route: "/en/[slug]", auth: "none" },
+  notFound("legal"),
 ]
 
 export const EXCLUDED: Array<{ app: AppId; route: string; reason: string }> = [
@@ -219,7 +228,7 @@ export function variantsFor(page: A11yPage): Variant[] {
 
 const routeKey = (page: A11yPage) => page.route ?? page.path.split("?")[0] ?? page.path
 
-// `apps/<app>/src/app/<…>/page.tsx` → the app and its route pattern; null outside the eight apps.
+// `apps/<app>/src/app/<…>/page.tsx` → the app and its route pattern; null outside the nine apps.
 export function routeOf(file: string): { app: AppId; route: string } | null {
   const match = file.match(/^apps\/([^/]+)\/src\/app\/(.*?)\/?page\.tsx$/)
   if (!match) return null

@@ -584,8 +584,8 @@ jurisdiction and facts:
   procedures explaining why; a longer period still needs either a specific legal obligation or a
   documented Data Protection Impact Assessment — "the limitation period of offences alone" is
   explicitly called out as *not* sufficient justification on its own; users must be told that
-  logging happens, what it records and for how long (see the **Audit logs** section this phase
-  added to `apps/www`'s `/privacy` template); access to the logs themselves should stay restricted
+  logging happens, what it records and for how long (see the security-log section of the legal
+  app's privacy page, `apps/legal/content/pages/integritet.mdx`); access to the logs themselves should stay restricted
   to strict need (superadmin only, here); and logs should ideally be timestamped and signed at
   creation — this codebase does the first and not the second (see **The tamper-evidence gap**
   below).

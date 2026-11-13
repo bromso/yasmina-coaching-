@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from "bun:test"
 import { ORPCError } from "@orpc/client"
 import { BOOKING_CANCEL_LATE_MESSAGE, BOOKING_RATE_MESSAGE } from "@repo/api-contract"
+import { TERMS_VERSION } from "@repo/api-contract/legal"
 import {
   bookingCancelledSubject,
   bookingConfirmedSubject,
@@ -9,6 +10,7 @@ import {
   bookingRequestReceivedSubject,
 } from "@repo/email"
 import { createMemoryRateLimiter } from "@repo/service-kit"
+import { legalUrl } from "@repo/sites/legal"
 import { clientFor, mailsTo, signUpVerified, start } from "./test-server"
 
 const ROOT = "booking-root@example.com"
@@ -81,6 +83,8 @@ describe("booking.availability", () => {
 describe("booking.book", () => {
   test("a session: stores it confirmed, mails the customer (in their language) and Yasmina", async () => {
     const result = await clientFor(app, undefined, "sv").booking.book({
+      termsAccepted: true,
+      earlyStart: true,
       offering: "session",
       slots: ["2026-01-06T08:00:00.000Z"],
       audience: "private",
@@ -146,6 +150,8 @@ describe("booking.book", () => {
 
     const [error] = await safeCall(() =>
       anon().booking.book({
+        termsAccepted: true,
+        earlyStart: true,
         offering: "session",
         slots: ["2026-01-06T08:00:00.000Z"],
         audience: "private",
@@ -165,6 +171,8 @@ describe("booking.book", () => {
     ]) {
       const [error] = await safeCall(() =>
         anon().booking.book({
+          termsAccepted: true,
+          earlyStart: true,
           offering: "session",
           slots: [slot],
           audience: "private",
@@ -178,17 +186,15 @@ describe("booking.book", () => {
 
   test("a package books several slots at once, creates the package and lists the rest later", async () => {
     const result = await anon().booking.book({
+      termsAccepted: true,
       offering: "package_6",
       slots: ["2026-01-07T08:00:00.000Z", "2026-01-14T08:00:00.000Z"],
       audience: "organisation",
       customer: { ...customer, organisation: "Varbergs kommun" },
       location: "varberg",
     })
-    expect(result.package).toMatchObject({
-      offering: "package_6",
-      sessionsTotal: 6,
-      sessionsBooked: 2,
-    })
+    // The package's id is never shown: only the manage token proves it is the customer's.
+    expect(result.package).toEqual({ offering: "package_6", sessionsTotal: 6, sessionsBooked: 2 })
     expect(result.bookings.map((b) => b.startsAt)).toEqual([
       "2026-01-07T08:00:00.000Z",
       "2026-01-14T08:00:00.000Z",
@@ -218,6 +224,8 @@ describe("booking.book", () => {
       const slot = day?.slots[0]?.startsAt
       expect(slot).toBeDefined()
       const result = await anon().booking.book({
+        termsAccepted: true,
+        earlyStart: true,
         offering,
         slots: [slot as string],
         audience: "private",
@@ -238,6 +246,8 @@ describe("booking.book", () => {
   test("two slots of one order that overlap each other are refused together", async () => {
     const [error] = await safeCall(() =>
       anon().booking.book({
+        termsAccepted: true,
+        earlyStart: true,
         offering: "package_6",
         slots: ["2026-01-08T08:00:00.000Z", "2026-01-08T08:30:00.000Z"],
         audience: "private",
@@ -252,6 +262,8 @@ describe("booking.book", () => {
   test("the contract refuses a location the offering does not list, and too many slots", async () => {
     const [wrongPlace] = await safeCall(() =>
       anon().booking.book({
+        termsAccepted: true,
+        earlyStart: true,
         offering: "session",
         slots: ["2026-01-06T12:00:00.000Z"],
         audience: "private",
@@ -262,6 +274,8 @@ describe("booking.book", () => {
     expect(wrongPlace?.code).toBe("BAD_REQUEST")
     const [tooMany] = await safeCall(() =>
       anon().booking.book({
+        termsAccepted: true,
+        earlyStart: true,
         offering: "session",
         slots: ["2026-01-06T12:00:00.000Z", "2026-01-06T13:30:00.000Z"],
         audience: "private",
@@ -276,6 +290,8 @@ describe("booking.book", () => {
 describe("booking.manage", () => {
   test("cancel: allowed until 24 h before, mails both sides; late or wrong token is refused", async () => {
     const result = await anon().booking.book({
+      termsAccepted: true,
+      earlyStart: true,
       offering: "session",
       slots: ["2026-01-09T10:00:00.000Z"],
       audience: "private",
@@ -316,6 +332,7 @@ describe("booking.manage", () => {
 describe("booking.request and the admin decision", () => {
   const request = {
     offering: "workshop" as const,
+    termsAccepted: true as const,
     customer: { ...customer, organisation: "Falkenbergs kommun" },
     location: "on_site" as const,
     preferredDates: [
@@ -374,6 +391,9 @@ describe("booking.request and the admin decision", () => {
     })
     const [mail] = await mailsTo(app, "ada@example.com", bookingConfirmedSubject(result.reference))
     expect(mail?.text).toContain("Tuesday 10 February 2026, 09:00–13:00")
+    // An organisation's request: the terms, never the private client's right of withdrawal.
+    expect(mail?.text).toContain(`The terms for your booking: ${legalUrl("terms", "en")}`)
+    expect(mail?.text).not.toContain("right of withdrawal")
     const newToken = tokenOf(mail?.text.match(/\/book\/manage\/[^\s)]+/)?.[0] ?? "")
     expect(newToken).not.toBe(oldToken)
     const [dead] = await safeCall(() => anon().booking.manage.get({ token: oldToken }))
@@ -386,6 +406,8 @@ describe("booking.request and the admin decision", () => {
     expect(calendar.bookings.map((b) => b.id)).toContain(id)
     const [overlap] = await safeCall(() =>
       anon().booking.book({
+        termsAccepted: true,
+        earlyStart: true,
         offering: "session",
         slots: ["2026-02-10T09:00:00.000Z"],
         audience: "private",
@@ -418,6 +440,8 @@ describe("booking.request and the admin decision", () => {
     expect(mail?.text).toContain("Fully booked in February.")
 
     const booked = await anon().booking.book({
+      termsAccepted: true,
+      earlyStart: true,
       offering: "session",
       slots: ["2026-01-13T08:00:00.000Z"],
       audience: "private",
@@ -517,7 +541,13 @@ describe("group events", () => {
     expect(events[0]?.seriesKey).toBe(events[1]?.seriesKey as string)
     expect(events[0]?.seatsLeft).toBe(2)
 
-    const first = await anon().booking.reserve({ eventIds: ids, audience: "private", customer })
+    const first = await anon().booking.reserve({
+      termsAccepted: true,
+      earlyStart: true,
+      eventIds: ids,
+      audience: "private",
+      customer,
+    })
     expect(first.bookings).toHaveLength(2)
     expect(first.bookings[0]?.groupEvent).toEqual({
       id: ids[0] as number,
@@ -529,6 +559,8 @@ describe("group events", () => {
 
     const bob = { name: "Bob", email: "bob@example.com" }
     const bobSeat = await anon().booking.reserve({
+      termsAccepted: true,
+      earlyStart: true,
       eventIds: [ids[0] as number],
       audience: "private",
       customer: bob,
@@ -538,6 +570,8 @@ describe("group events", () => {
     ).toBe(0)
     const [full] = await safeCall(() =>
       anon().booking.reserve({
+        termsAccepted: true,
+        earlyStart: true,
         eventIds: [ids[0] as number],
         audience: "private",
         customer: { name: "Cy", email: "cy@example.com" },
@@ -612,6 +646,8 @@ describe("group events per offering", () => {
     expect(listed.events[0]?.offering).toBe("inner_group")
 
     const seat = await anon().booking.reserve({
+      termsAccepted: true,
+      earlyStart: true,
       eventIds: inner.ids,
       audience: "private",
       customer,
@@ -641,6 +677,8 @@ describe("group events per offering", () => {
     })
     const [error] = await safeCall(() =>
       anon().booking.reserve({
+        termsAccepted: true,
+        earlyStart: true,
         eventIds: [plain.ids[0] as number, inner.ids[0] as number],
         audience: "private",
         customer: { name: "Mixed", email: "mixed@example.com" },
@@ -663,6 +701,7 @@ describe("limits", () => {
     })
     try {
       await clientFor(strict).booking.request({
+        termsAccepted: true,
         offering: "keynote",
         customer: { ...customer, organisation: "SKR" },
         location: "on_site",
@@ -671,6 +710,7 @@ describe("limits", () => {
       })
       const [error] = await safeCall(() =>
         clientFor(strict, undefined, "sv").booking.request({
+          termsAccepted: true,
           offering: "keynote",
           customer: { ...customer, organisation: "SKR" },
           location: "on_site",
@@ -684,6 +724,517 @@ describe("limits", () => {
     } finally {
       await strict.stop()
     }
+  })
+})
+
+describe("the terms", () => {
+  const WITHDRAWAL_SV = "Som privatperson har du 14 dagars ångerrätt."
+  const WITHDRAWAL_EN = "As a private client you have a 14-day right of withdrawal."
+
+  test("a booking stores the version the api stamps and when, and its mail links the terms", async () => {
+    clock = new Date("2026-03-02T08:00:00.000Z")
+    const result = await clientFor(app, undefined, "sv").booking.book({
+      termsAccepted: true,
+      offering: "session",
+      slots: ["2026-03-24T09:00:00.000Z"],
+      audience: "private",
+      customer: { ...customer, email: "terms-book@example.com" },
+      location: "video",
+    })
+    const row = await app.db.booking.find(idOf(result.reference))
+    expect(row?.terms_version).toBe(TERMS_VERSION)
+    expect(row?.terms_accepted_at).toBe("2026-03-02T08:00:00.000Z")
+    await app.drain()
+    const [mail] = app.mailer.sent.filter((m) => m.to === "terms-book@example.com")
+    expect(mail?.text).toContain(`Villkoren för bokningen: ${legalUrl("terms", "sv")}`)
+    expect(mail?.text).toContain(WITHDRAWAL_SV)
+  })
+
+  test("an organisation's booking links the terms without the private right of withdrawal", async () => {
+    clock = new Date("2026-03-02T08:00:00.000Z")
+    const result = await anon().booking.book({
+      termsAccepted: true,
+      offering: "session",
+      slots: ["2026-03-10T11:00:00.000Z"],
+      audience: "organisation",
+      customer: { ...customer, email: "terms-org@example.com", organisation: "Varbergs kommun" },
+      location: "video",
+    })
+    const [mail] = await mailsTo(
+      app,
+      "terms-org@example.com",
+      bookingConfirmedSubject(result.reference)
+    )
+    expect(mail?.text).toContain(`The terms for your booking: ${legalUrl("terms", "en")}`)
+    expect(mail?.text).not.toContain(WITHDRAWAL_EN)
+  })
+
+  test("seats and requests store the acceptance too; the request mail links the terms", async () => {
+    clock = new Date("2026-03-02T08:00:00.000Z")
+    const root = await admin()
+    const { ids } = await root.admin.bookings.groupEvents.create({
+      title: "Terms evening",
+      startsAt: "2026-03-26T16:00:00.000Z",
+      durationMinutes: 120,
+      capacity: 5,
+      location: "varberg",
+    })
+    const seat = await anon().booking.reserve({
+      termsAccepted: true,
+      eventIds: ids,
+      audience: "private",
+      customer: { ...customer, email: "terms-seat@example.com" },
+    })
+    const seatRow = await app.db.booking.find(idOf(seat.reference))
+    expect(seatRow?.terms_version).toBe(TERMS_VERSION)
+    expect(seatRow?.terms_accepted_at).toBe("2026-03-02T08:00:00.000Z")
+    const [seatMail] = await mailsTo(
+      app,
+      "terms-seat@example.com",
+      bookingConfirmedSubject(seat.reference)
+    )
+    expect(seatMail?.text).toContain(`The terms for your booking: ${legalUrl("terms", "en")}`)
+    expect(seatMail?.text).toContain(WITHDRAWAL_EN)
+
+    const request = await anon().booking.request({
+      termsAccepted: true,
+      offering: "keynote",
+      customer: { ...customer, email: "terms-request@example.com", organisation: "SKR" },
+      location: "on_site",
+      preferredDates: [{ date: "2026-04-01", part: "morning" }],
+      message: "Opening keynote at our conference.",
+    })
+    const requestRow = await app.db.booking.find(idOf(request.reference))
+    expect(requestRow?.terms_version).toBe(TERMS_VERSION)
+    expect(requestRow?.terms_accepted_at).toBe("2026-03-02T08:00:00.000Z")
+    const [requestMail] = await mailsTo(
+      app,
+      "terms-request@example.com",
+      bookingRequestReceivedSubject(request.reference)
+    )
+    expect(requestMail?.text).toContain(`The terms for your booking: ${legalUrl("terms", "en")}`)
+    expect(requestMail?.text).not.toContain(WITHDRAWAL_EN)
+  })
+
+  test("a write without the acceptance is refused by the contract, and nothing is stored", async () => {
+    const before = app.mailer.sent.length
+    const inputs = [
+      () =>
+        anon().booking.book({
+          offering: "session",
+          slots: ["2026-01-13T08:00:00.000Z"],
+          audience: "private",
+          customer,
+          location: "video",
+        } as never),
+      () =>
+        anon().booking.book({
+          termsAccepted: false,
+          offering: "session",
+          slots: ["2026-01-13T08:00:00.000Z"],
+          audience: "private",
+          customer,
+          location: "video",
+        } as never),
+      () => anon().booking.reserve({ eventIds: [1], audience: "private", customer } as never),
+      () =>
+        anon().booking.request({
+          offering: "keynote",
+          customer: { ...customer, organisation: "SKR" },
+          location: "on_site",
+          preferredDates: [{ date: "2026-03-01", part: "morning" }],
+          message: "Opening keynote at our conference.",
+        } as never),
+    ]
+    for (const call of inputs) {
+      const [error] = await safeCall(call)
+      expect(error?.code).toBe("BAD_REQUEST")
+    }
+    await app.drain()
+    expect(app.mailer.sent.length).toBe(before)
+  })
+})
+
+describe("a start within the withdrawal period", () => {
+  // Monday 2 March, 09:00 in Stockholm: the period's last day is Monday 16 March.
+  const BOOKED = new Date("2026-03-02T08:00:00.000Z")
+  const EARLY_EN = "You asked for the service to start within the withdrawal period."
+  const WITHDRAWAL_EN = "As a private client you have a 14-day right of withdrawal."
+  const book = (
+    email: string,
+    slot: string,
+    extra: { audience?: "private" | "organisation"; earlyStart?: boolean } = {},
+    locale?: "sv" | "en"
+  ) =>
+    clientFor(app, undefined, locale).booking.book({
+      termsAccepted: true,
+      offering: "session",
+      slots: [slot],
+      audience: extra.audience ?? "private",
+      customer: {
+        ...customer,
+        email,
+        organisation: extra.audience === "organisation" ? "SKR" : undefined,
+      },
+      location: "video",
+      ...(extra.earlyStart === undefined ? {} : { earlyStart: extra.earlyStart }),
+    })
+
+  test("a private booking inside the period without the consent is a field error; nothing is stored", async () => {
+    clock = BOOKED
+    const before = app.mailer.sent.length
+    for (const earlyStart of [undefined, false]) {
+      const [error] = await safeCall(() =>
+        // Monday 16 March 10:00 in Stockholm, the 14th day.
+        book("early-refused@example.com", "2026-03-16T09:00:00.000Z", { earlyStart })
+      )
+      expect(error?.code).toBe("BAD_REQUEST")
+      expect(error?.data).toEqual({ field: "earlyStart" })
+      expect(error?.message).toBe(
+        "Confirm that the session may take place within the withdrawal period, or choose a later time."
+      )
+    }
+    const [swedish] = await safeCall(() =>
+      book("early-refused@example.com", "2026-03-16T09:00:00.000Z", {}, "sv")
+    )
+    expect(swedish?.message).toBe(
+      "Bekräfta att tillfället får äga rum inom ångerfristen, eller välj en tid längre fram."
+    )
+    await app.drain()
+    expect(app.mailer.sent.length).toBe(before)
+    // The slot is still free: nothing was written.
+    const day = await anon().booking.availability({
+      offering: "session",
+      from: "2026-03-16",
+      to: "2026-03-16",
+    })
+    expect(day.days[0]?.slots.map((s) => s.startsAt)).toContain("2026-03-16T09:00:00.000Z")
+  })
+
+  test("with the consent it books, stamps the time and the mail says the right ends after the session", async () => {
+    clock = BOOKED
+    const result = await book(
+      "early-given@example.com",
+      "2026-03-16T13:00:00.000Z",
+      { earlyStart: true },
+      "sv"
+    )
+    const row = await app.db.booking.find(idOf(result.reference))
+    expect(row?.early_start_requested_at).toBe("2026-03-02T08:00:00.000Z")
+    await app.drain()
+    const [mail] = app.mailer.sent.filter((m) => m.to === "early-given@example.com")
+    expect(mail?.text).toContain(
+      "Du har bett att tjänsten börjar inom ångerfristen. Ångerrätten upphör när tjänsten har fullgjorts."
+    )
+    expect(mail?.text).not.toContain("Som privatperson har du 14 dagars ångerrätt.")
+  })
+
+  test("15 days away needs no consent and stores none, even when it was ticked", async () => {
+    clock = BOOKED
+    // Tuesday 17 March in Stockholm, the 15th day.
+    const plain = await book("early-later@example.com", "2026-03-17T09:00:00.000Z")
+    expect((await app.db.booking.find(idOf(plain.reference)))?.early_start_requested_at).toBeNull()
+    const ticked = await book("early-later-ticked@example.com", "2026-03-17T13:00:00.000Z", {
+      earlyStart: true,
+    })
+    expect((await app.db.booking.find(idOf(ticked.reference)))?.early_start_requested_at).toBeNull()
+    const [mail] = await mailsTo(
+      app,
+      "early-later-ticked@example.com",
+      bookingConfirmedSubject(ticked.reference)
+    )
+    expect(mail?.text).toContain(WITHDRAWAL_EN)
+    expect(mail?.text).not.toContain(EARLY_EN)
+  })
+
+  test("a programme is judged by its first session; every row of the order is stamped", async () => {
+    clock = BOOKED
+    // The first session on the period's last day, the rest after it.
+    const slots = [
+      "2026-03-16T08:00:00.000Z",
+      "2026-03-23T09:00:00.000Z",
+      "2026-03-30T08:00:00.000Z",
+    ]
+    const programme = (email: string, earlyStart?: boolean) =>
+      anon().booking.book({
+        termsAccepted: true,
+        offering: "package_6",
+        slots,
+        audience: "private",
+        customer: { ...customer, email },
+        location: "video",
+        ...(earlyStart === undefined ? {} : { earlyStart }),
+      })
+    const [error] = await safeCall(() => programme("early-programme-refused@example.com"))
+    expect(error?.code).toBe("BAD_REQUEST")
+    expect(error?.data).toEqual({ field: "earlyStart" })
+    const result = await programme("early-programme@example.com", true)
+    expect(result.bookings).toHaveLength(3)
+    for (const booking of result.bookings) {
+      const row = await app.db.booking.find(booking.id)
+      expect(row?.early_start_requested_at).toBe("2026-03-02T08:00:00.000Z")
+    }
+    // Every session after the period: nothing needed.
+    const later = await anon().booking.book({
+      termsAccepted: true,
+      offering: "package_6",
+      slots: ["2026-03-25T09:00:00.000Z", "2026-04-01T08:00:00.000Z"],
+      audience: "private",
+      customer: { ...customer, email: "early-programme-later@example.com" },
+      location: "video",
+    })
+    expect(
+      (await app.db.booking.find(later.bookings[0]?.id as number))?.early_start_requested_at
+    ).toBeNull()
+  })
+
+  test("a member's session consumes the membership: no consent, no stamp, neither mail line", async () => {
+    clock = BOOKED
+    // The 14th day, inside the period: a new purchase would need the consent here.
+    const result = await anon().booking.book({
+      termsAccepted: true,
+      offering: "inner_session",
+      slots: ["2026-03-16T10:00:00.000Z"],
+      audience: "private",
+      customer: { ...customer, email: "early-member@example.com" },
+      location: "video",
+    })
+    expect((await app.db.booking.find(idOf(result.reference)))?.early_start_requested_at).toBeNull()
+    const [mail] = await mailsTo(
+      app,
+      "early-member@example.com",
+      bookingConfirmedSubject(result.reference)
+    )
+    expect(mail?.text).toContain("The terms for your booking:")
+    expect(mail?.text).not.toContain(WITHDRAWAL_EN)
+    expect(mail?.text).not.toContain(EARLY_EN)
+  })
+
+  test("a further session of a programme, with its manage token, books onto that package", async () => {
+    clock = BOOKED
+    const order = (email: string, slots: string[], extra: { manageToken?: string } = {}) =>
+      anon().booking.book({
+        termsAccepted: true,
+        offering: "package_6",
+        slots,
+        audience: "private",
+        customer: { ...customer, email },
+        location: "video",
+        ...extra,
+      })
+    // The programme itself, its first session after the period: a new purchase.
+    const bought = await order("early-extra@example.com", ["2026-03-25T13:00:00.000Z"])
+    const manageToken = tokenOf(bought.manageUrl)
+    const first = await app.db.booking.find(bought.bookings[0]?.id as number)
+    const packageId = first?.package_id as number
+
+    // The next session, inside the period and without the box: on the same package, under the
+    // same manage token, so it shows on the original manage page.
+    const next = await order("early-extra@example.com", ["2026-03-12T13:00:00.000Z"], {
+      manageToken,
+    })
+    const row = await app.db.booking.find(idOf(next.reference))
+    expect(row?.package_id).toBe(packageId)
+    expect(row?.manage_token_hash).toBe(first?.manage_token_hash as string)
+    expect(row?.early_start_requested_at).toBeNull()
+    expect(next.manageUrl).toBe(bought.manageUrl)
+    expect(next.package).toEqual({ offering: "package_6", sessionsTotal: 6, sessionsBooked: 2 })
+    const manage = await anon().booking.manage.get({ token: manageToken })
+    expect(manage.bookings).toHaveLength(2)
+    expect(manage.package).toEqual({ offering: "package_6", sessionsTotal: 6, sessionsBooked: 2 })
+    const [mail] = await mailsTo(
+      app,
+      "early-extra@example.com",
+      bookingConfirmedSubject(next.reference)
+    )
+    expect(mail?.text).toContain(bought.manageUrl)
+    expect(mail?.text).not.toContain(WITHDRAWAL_EN)
+    expect(mail?.text).not.toContain(EARLY_EN)
+
+    // Another offering's package is not this order's to extend: a new purchase.
+    const [other] = await safeCall(() =>
+      anon().booking.book({
+        termsAccepted: true,
+        offering: "package_10",
+        slots: ["2026-03-13T13:00:00.000Z"],
+        audience: "private",
+        customer: { ...customer, email: "early-extra@example.com" },
+        location: "video",
+        manageToken,
+      })
+    )
+    expect(other?.data).toEqual({ field: "earlyStart" })
+  })
+
+  test("the right address without the token is a new purchase, answered like any other", async () => {
+    clock = BOOKED
+    const bought = await anon().booking.book({
+      termsAccepted: true,
+      offering: "package_6",
+      slots: ["2026-03-26T13:00:00.000Z"],
+      audience: "private",
+      customer: { ...customer, email: "early-owner@example.com" },
+      location: "video",
+    })
+    const owned = await app.db.booking.find(bought.bookings[0]?.id as number)
+    const attempt = (slot: string, extra: { manageToken?: string; earlyStart?: boolean }) =>
+      safeCall(() =>
+        anon().booking.book({
+          termsAccepted: true,
+          offering: "package_6",
+          slots: [slot],
+          audience: "private",
+          customer: { ...customer, email: "early-owner@example.com" },
+          location: "video",
+          // A package id in the input is not part of the contract: stripped, never honoured.
+          ...({ packageId: owned?.package_id } as object),
+          ...extra,
+        })
+      )
+    // Inside the period, a missing or a forged token gets the same refusal as any new order.
+    const forged = "x".repeat(43)
+    const [missing] = await attempt("2026-03-12T08:00:00.000Z", {})
+    const [wrong] = await attempt("2026-03-12T08:00:00.000Z", { manageToken: forged })
+    expect(missing?.data).toEqual({ field: "earlyStart" })
+    expect({ code: wrong?.code, message: wrong?.message, data: wrong?.data }).toEqual({
+      code: missing?.code,
+      message: missing?.message,
+      data: missing?.data,
+    })
+    // With the box ticked, a forged token books a new package of its own, under a new token.
+    const [, made] = await attempt("2026-03-12T08:00:00.000Z", {
+      manageToken: forged,
+      earlyStart: true,
+    })
+    const row = await app.db.booking.find(idOf(made?.reference as string))
+    expect(row?.package_id).not.toBe(owned?.package_id)
+    expect(row?.manage_token_hash).not.toBe(owned?.manage_token_hash as string)
+    expect(row?.early_start_requested_at).toBe(BOOKED.toISOString())
+    expect(made?.manageUrl).not.toBe(bought.manageUrl)
+    expect(made?.package).toEqual({ offering: "package_6", sessionsTotal: 6, sessionsBooked: 1 })
+    expect(await app.db.booking.packages.sessionsBooked(owned?.package_id as number)).toBe(1)
+  })
+
+  test("a package with too little room refuses the extension, writes nothing and makes no package", async () => {
+    clock = BOOKED
+    // Five of six sessions placed: one left.
+    const five = await anon().booking.book({
+      termsAccepted: true,
+      offering: "package_6",
+      slots: [
+        "2026-04-14T07:00:00.000Z",
+        "2026-04-15T07:00:00.000Z",
+        "2026-04-16T07:00:00.000Z",
+        "2026-04-17T07:00:00.000Z",
+        "2026-04-20T07:00:00.000Z",
+      ],
+      audience: "private",
+      customer: { ...customer, email: "early-full@example.com" },
+      location: "video",
+    })
+    const manageToken = tokenOf(five.manageUrl)
+    const packageId = (await app.db.booking.find(five.bookings[0]?.id as number))
+      ?.package_id as number
+    const packages = async () =>
+      Number(
+        ((await app.db.sql`SELECT COUNT(*) AS n FROM booking_packages`) as Array<{ n: number }>)[0]
+          ?.n
+      )
+    await app.drain()
+    const before = { packages: await packages(), mails: app.mailer.sent.length }
+    const extend = (slots: string[], locale?: "sv" | "en") =>
+      safeCall(() =>
+        clientFor(app, undefined, locale).booking.book({
+          termsAccepted: true,
+          offering: "package_6",
+          slots,
+          audience: "private",
+          customer: { ...customer, email: "early-full@example.com" },
+          location: "video",
+          earlyStart: true,
+          manageToken,
+        })
+      )
+    const two = ["2026-04-21T07:00:00.000Z", "2026-04-22T07:00:00.000Z"]
+    const [error] = await extend(two)
+    expect(error?.code).toBe("BAD_REQUEST")
+    expect(error?.data).toEqual({ field: "slots" })
+    expect(error?.message).toBe("The package has no room for that many sessions.")
+    const [swedish] = await extend(two, "sv")
+    expect(swedish?.message).toBe("Paketet har inte plats för så många tillfällen.")
+    await app.drain()
+    expect(app.mailer.sent.length).toBe(before.mails)
+    expect(await packages()).toBe(before.packages)
+    expect(await app.db.booking.packages.sessionsBooked(packageId)).toBe(5)
+    const free = await anon().booking.availability({
+      offering: "package_6",
+      from: "2026-04-21",
+      to: "2026-04-22",
+    })
+    expect(free.days.flatMap((d) => d.slots.map((x) => x.startsAt))).toEqual(
+      expect.arrayContaining(two)
+    )
+
+    // Two orders racing for the last session: the calendar lock lets one through, the other
+    // finds the package full.
+    const outcomes = await Promise.all([
+      extend(["2026-04-21T07:00:00.000Z"]),
+      extend(["2026-04-22T07:00:00.000Z"]),
+    ])
+    const refused = outcomes.filter(([e]) => e)
+    expect(outcomes.filter(([, ok]) => ok)).toHaveLength(1)
+    expect(refused.map(([e]) => e?.data)).toEqual([{ field: "slots" }])
+    expect(await app.db.booking.packages.sessionsBooked(packageId)).toBe(6)
+    expect(await packages()).toBe(before.packages)
+
+    // Full: even one more session is refused the same way, never sold as a new package.
+    const [full] = await extend(["2026-04-23T07:00:00.000Z"])
+    expect(full?.data).toEqual({ field: "slots" })
+    expect(await packages()).toBe(before.packages)
+  })
+
+  test("an organisation never needs it", async () => {
+    clock = BOOKED
+    const result = await book("early-org@example.com", "2026-03-03T09:00:00.000Z", {
+      audience: "organisation",
+    })
+    expect((await app.db.booking.find(idOf(result.reference)))?.early_start_requested_at).toBeNull()
+  })
+
+  test("seats at a group event inside the period need it too, judged by the event's own date", async () => {
+    clock = BOOKED
+    const root = await admin()
+    const { ids } = await root.admin.bookings.groupEvents.create({
+      title: "Early evening",
+      startsAt: "2026-03-05T16:00:00.000Z",
+      durationMinutes: 120,
+      capacity: 5,
+      location: "varberg",
+    })
+    const reserve = (email: string, earlyStart?: boolean) =>
+      anon().booking.reserve({
+        termsAccepted: true,
+        eventIds: ids,
+        audience: "private",
+        customer: { ...customer, email },
+        ...(earlyStart === undefined ? {} : { earlyStart }),
+      })
+    const [error] = await safeCall(() => reserve("early-seat-refused@example.com"))
+    expect(error?.code).toBe("BAD_REQUEST")
+    expect(error?.data).toEqual({ field: "earlyStart" })
+    const seats = (await anon().booking.groupEvents({})).events.find((e) => e.id === ids[0])
+    expect(seats?.seatsLeft).toBe(5)
+
+    const seat = await reserve("early-seat@example.com", true)
+    const row = await app.db.booking.find(idOf(seat.reference))
+    expect(row?.early_start_requested_at).toBe("2026-03-02T08:00:00.000Z")
+    const [mail] = await mailsTo(
+      app,
+      "early-seat@example.com",
+      bookingConfirmedSubject(seat.reference)
+    )
+    expect(mail?.text).toContain(EARLY_EN)
+    expect(mail?.text).not.toContain(WITHDRAWAL_EN)
   })
 })
 

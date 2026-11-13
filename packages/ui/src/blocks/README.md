@@ -46,8 +46,8 @@ same way `apps/account`'s forms already do with `@repo/ui/components/form-feedba
 word, and `apps/www/src/views/home-view.tsx` only arranges the blocks, in landing-page order (`Hero` →
 `LogoCloud` → `FeatureGrid` → `Testimonials` → `Pricing` → `Faq` → `Cta` → `Newsletter`; www's own
 home page no longer renders `Newsletter`, its contact section links the `/kontakt` page instead).
-`apps/www/src/app/terms/page.tsx` and `privacy/page.tsx` render `LegalPage` straight from
-`src/content/terms.ts` and `privacy.ts`. Start there when combining them on a new page.
+`LegalPage` has no caller in the apps today (the legal text lives in `apps/legal`, as MDX); its
+story is `apps/story/stories/LegalPage.stories.tsx`.
 
 ## Other blocks
 

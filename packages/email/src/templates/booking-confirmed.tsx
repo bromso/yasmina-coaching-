@@ -19,6 +19,19 @@ export type BookingConfirmedProps = {
   cancelCutoffHours: number
   /** Where a member books their sessions after a start call (`/book/inner_session`, …). */
   memberBookingUrl?: string
+  /** The terms page on the legal app, in the customer's language. */
+  termsUrl: string
+  /**
+   * A private client's new purchase: adds the line on the 14-day right of withdrawal. False for an
+   * organisation and for a booking that opens no new contract (a member's session).
+   */
+  withdrawal: boolean
+  /**
+   * The client asked for the session to start within the withdrawal period: the line saying the
+   * right ends once the service has been fully performed, in place of the generic one. Only with
+   * `withdrawal`: a booking that opens no right never says it ends.
+   */
+  earlyStart?: boolean
   brand?: string
   locale?: Locale
 }
@@ -37,6 +50,9 @@ export function BookingConfirmed({
   extraSessions,
   cancelCutoffHours,
   memberBookingUrl,
+  termsUrl,
+  withdrawal,
+  earlyStart = false,
   brand,
   locale = DEFAULT_LOCALE,
 }: BookingConfirmedProps) {
@@ -72,6 +88,13 @@ export function BookingConfirmed({
         </Text>
       ) : null}
       <Text>{t("bookingConfirmed.footer", { hours: cancelCutoffHours })}</Text>
+      <Text>
+        {t("bookingConfirmed.terms")}
+        <EmailLink href={termsUrl}>{termsUrl}</EmailLink>
+      </Text>
+      {withdrawal ? (
+        <Text>{t(earlyStart ? "bookingConfirmed.earlyStart" : "bookingConfirmed.withdrawal")}</Text>
+      ) : null}
     </Layout>
   )
 }

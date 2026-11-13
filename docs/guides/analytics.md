@@ -170,7 +170,8 @@ If a provider is configured, those account-linked product events are forwarded t
 
 ## Privacy text
 
-The `/privacy` template (`apps/www/src/content/privacy.ts`) has an **Analytics** section stating
+The legal app's privacy page (`apps/legal/content/pages/integritet.mdx` and `en-privacy.mdx`,
+its visitor-statistics, account-events and cookie sections) states
 exactly this: what is collected without consent (the page path, the referrer's host, a one-day
 visitor hash, and — for a signed-in account — the product events it takes, linked to the account
 whatever the visitor chose), what consent `all` adds (user and workspace ids on pageviews and

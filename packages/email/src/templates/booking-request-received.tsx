@@ -4,14 +4,17 @@ import { translatorFor } from "@repo/i18n/translate"
 import { button, EmailHeading, EmailLink, greeting, Layout } from "./layout"
 
 /**
- * Only the reference, the offering and the link: this mail goes to whatever address was typed
- * into the booking form, so it carries none of the customer's own text (see `supportReceived`).
+ * Only the reference, the offering, the link and the terms: this mail goes to whatever address was
+ * typed into the booking form, so it carries none of the customer's own text (see
+ * `supportReceived`).
  */
 export type BookingRequestReceivedProps = {
   reference: string
   offeringLabel: string
   manageUrl: string
   name?: string
+  /** The terms page on the legal app, in the customer's language. */
+  termsUrl: string
   brand?: string
   locale?: Locale
 }
@@ -25,6 +28,7 @@ export function BookingRequestReceived({
   offeringLabel,
   manageUrl,
   name,
+  termsUrl,
   brand,
   locale = DEFAULT_LOCALE,
 }: BookingRequestReceivedProps) {
@@ -44,6 +48,10 @@ export function BookingRequestReceived({
       <Text>
         {t("layout.orLink")}
         <EmailLink href={manageUrl}>{manageUrl}</EmailLink>
+      </Text>
+      <Text>
+        {t("bookingRequestReceived.terms")}
+        <EmailLink href={termsUrl}>{termsUrl}</EmailLink>
       </Text>
     </Layout>
   )

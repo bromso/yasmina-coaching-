@@ -68,7 +68,7 @@ export function ManageView({ token, data, cancelledId, locale }: ManageViewProps
             <p>{booking.manage.packageProgress(pkg.sessionsBooked, pkg.sessionsTotal)}</p>
             {pkg.sessionsBooked < pkg.sessionsTotal && (
               <Button asChild className="min-h-11 w-fit px-5">
-                <a href={`/book/${pkg.offering}?package=${pkg.id}`}>
+                <a href={`/book/${pkg.offering}?manage=${encodeURIComponent(token)}`}>
                   {booking.manage.bookAnother}
                   <Icon icon="lucide:arrow-right" aria-hidden="true" />
                 </a>

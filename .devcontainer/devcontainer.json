@@ -150,6 +150,7 @@
     3007,
     3008,
     3009,
+    3010,
     6006,
     "mailpit:8025"
   ],
@@ -164,6 +165,7 @@
     "3007": { "label": "api (Bun)", "onAutoForward": "silent" },
     "3008": { "label": "ai (Bun)", "onAutoForward": "silent" },
     "3009": { "label": "blog", "onAutoForward": "silent" },
+    "3010": { "label": "legal", "onAutoForward": "silent" },
     "6006": { "label": "Storybook", "onAutoForward": "notify" },
     "8025": { "label": "Mailpit (inbox)", "onAutoForward": "silent" }
   },

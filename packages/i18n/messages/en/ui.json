@@ -32,6 +32,11 @@
   },
   "siteNav": "Site",
   "footerNav": "Footer",
+  "footerLegal": {
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "accessibility": "Accessibility"
+  },
   "menu": {
     "open": "Open menu",
     "title": "Menu",
@@ -45,7 +50,8 @@
     "docs": "Docs",
     "help": "Help",
     "jobs": "Jobs",
-    "blog": "Blog"
+    "blog": "Blog",
+    "legal": "Legal"
   },
   "footerGroups": {
     "product": "Product",

@@ -179,6 +179,27 @@
       "webRoot": "${workspaceFolder}/apps/blog",
       "browserLaunchLocation": "ui"
     },
+    {
+      "name": "Next: Legal",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "bun run dev",
+      "cwd": "${workspaceFolder}/apps/legal",
+      "serverReadyAction": {
+        "pattern": "Local:\\s+https?://\\S+:3010",
+        "action": "startDebugging",
+        "name": "Chrome: Legal",
+        "killOnServerStop": true
+      }
+    },
+    {
+      "name": "Chrome: Legal",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://legal.brand.localhost:3010",
+      "webRoot": "${workspaceFolder}/apps/legal",
+      "browserLaunchLocation": "ui"
+    },
 
     // ===== Bun services (oven.bun-vscode): breakpoints in src/, hot reload like `bun run dev` =====
     {
@@ -251,7 +272,8 @@
         "Next: Docs",
         "Next: Help",
         "Next: Jobs",
-        "Next: Blog"
+        "Next: Blog",
+        "Next: Legal"
       ],
       "stopAll": true
     }

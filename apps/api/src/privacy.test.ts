@@ -13,6 +13,7 @@ import {
   IMPERSONATING_MESSAGE,
   TWO_FACTOR_REAUTH_REASON,
 } from "@repo/api-contract"
+import { TERMS_VERSION } from "@repo/api-contract/legal"
 import { emails } from "@repo/email"
 import { createMemoryRateLimiter } from "@repo/service-kit"
 import { BRAND_NAME } from "@repo/sites/brand"
@@ -324,6 +325,7 @@ describe("account.export", () => {
     const user = await signUpVerified(app)
     const request = (email: string) =>
       clientFor(app).booking.request({
+        termsAccepted: true,
         offering: "workshop",
         customer: { name: "Ada", email, organisation: "Analytical Engines AB" },
         location: "on_site",
@@ -356,6 +358,9 @@ describe("account.export", () => {
         venue: "Stadshuset",
         createdAt: expect.any(String),
         cancelledAt: null,
+        termsVersion: TERMS_VERSION,
+        termsAcceptedAt: expect.any(String),
+        earlyStartRequestedAt: null,
       },
     ])
     expect(text).not.toContain("token")
@@ -366,6 +371,34 @@ describe("account.export", () => {
     const pending = await readyExport(unverified.client)
     const theirs = await unverified.client.account.export.download({ id: pending.id })
     expect(JSON.parse(await theirs.text()).bookings).toEqual([])
+  })
+
+  test("a booking inside the withdrawal period exports when its client asked to start early", async () => {
+    const user = await signUpVerified(app)
+    const today = new Date().toISOString().slice(0, 10)
+    const week = new Date(Date.now() + 8 * DAY).toISOString().slice(0, 10)
+    const { days } = await clientFor(app).booking.availability({
+      offering: "session",
+      from: today,
+      to: week,
+    })
+    const slot = days.flatMap((d) => d.slots)[0]
+    if (!slot) throw new Error("no free slot in the next week")
+    const { reference } = await clientFor(app).booking.book({
+      termsAccepted: true,
+      earlyStart: true,
+      offering: "session",
+      slots: [slot.startsAt],
+      audience: "private",
+      customer: { name: "Ada", email: user.email },
+      location: "video",
+    })
+    const ready = await readyExport(user.client)
+    const text = await (await user.client.account.export.download({ id: ready.id })).text()
+    const [exported] = JSON.parse(text).bookings
+    expect(exported).toMatchObject({ reference, audience: "private", startsAt: slot.startsAt })
+    expect(exported.earlyStartRequestedAt).toEqual(expect.any(String))
+    expect(Date.parse(exported.earlyStartRequestedAt)).not.toBeNaN()
   })
 
   test("the file carries suspension status and dates, never the reason or who suspended it", async () => {

@@ -34,9 +34,13 @@ const MANIFEST_COLOURS = {
  */
 const ALLOWED_COLOURS: { file: string; literals: string[]; reason: string }[] = [
   ...[
-    ...NEXT_APPS.filter((app) => app !== "blog").map((app) => `apps/${app}/src/app/layout.tsx`),
-    // The blog's two root layouts share one document component, which sets the viewport.
+    ...NEXT_APPS.filter((app) => app !== "blog" && app !== "legal").map(
+      (app) => `apps/${app}/src/app/layout.tsx`
+    ),
+    // The blog's and the legal app's two root layouts each share one document component, which
+    // sets the viewport.
     "apps/blog/src/components/blog-document.tsx",
+    "apps/legal/src/components/legal-document.tsx",
   ].map((file) => ({ file, ...THEME_COLOR })),
   ...NEXT_APPS.map((app) => ({ file: `apps/${app}/src/app/manifest.ts`, ...MANIFEST_COLOURS })),
   {

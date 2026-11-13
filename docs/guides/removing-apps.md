@@ -1,6 +1,6 @@
 # Removing apps
 
-The starter ships eight Next apps, two Bun services, Storybook and an end-to-end suite. You may not
+The starter ships nine Next apps, two Bun services, Storybook and an end-to-end suite. You may not
 want all of them. This guide says which can go, and gives the exact edits for each removal. Both
 recipes come from real removals done on throwaway branches, run until `bun run ci` and the
 Playwright suite passed. Every file listed here was touched in that run, and every failure listed
@@ -26,14 +26,15 @@ and no env vars (see [deploying.md](deploying.md), **Topology** and **Run**).
 Swap in your own marketing site, or move these pages elsewhere, but keep them reachable. Each of
 these assumes `www` serves them:
 
-- **`/terms` and `/privacy`.** Every layout's footer `legal` links point at
-  `${siteUrl("www")}/terms` and `/privacy`: `apps/app/src/app/layout.tsx`,
-  `apps/auth/src/app/layout.tsx`, `apps/account/src/app/(account)/layout.tsx`, and the shells' layouts.
-  The pages themselves are `apps/www/src/app/terms/page.tsx` and `apps/www/src/app/privacy/page.tsx`.
+- **`/terms` and `/privacy`.** These are only `308` redirects now
+  (`apps/www/src/app/{terms,privacy}/route.ts`): the legal text lives in `apps/legal`, and every
+  footer's legal line links it through
+  `legalUrl(page, locale)` from `@repo/sites/legal`, so replacing `www` leaves those links working.
+  Keep the two redirects on your new site if old links to `www/terms` and `www/privacy` exist.
 - **The brand link.** Every layout passes `<Brand href={siteUrl("www")} />` to `SiteHeader` and
   `SiteFooter`.
-- **The consent banner's privacy link.** Every layout except `www`'s own passes
-  `privacyHref={`${siteUrl("www")}/privacy`}` to `CookieConsent`.
+- **The consent banner's privacy link** is `legalUrl("privacy", locale)` in every layout, the
+  legal app's page, so it does not depend on `www`.
 - **The waitlist welcome mail.** `apps/api/src/server.ts` builds its link from `siteUrl("www")`.
 - **The contact page.** `www`'s `/kontakt` calls `leads.create`, and the lead mails link back to
   `siteUrl("www")` (`leadReceived`'s next step). `www` no longer renders a waitlist form;
@@ -85,7 +86,7 @@ after these edits. The Playwright suite does not drive the shells, and it passed
 (17 tests).
 
 Last, update the prose: `CLAUDE.md`, `README.md`, `LLMS.txt` and
-[deploying.md](deploying.md)'s topology all list the eight apps.
+[deploying.md](deploying.md)'s topology all list the nine apps.
 
 ### Why some names stay in `@repo/api-contract`
 

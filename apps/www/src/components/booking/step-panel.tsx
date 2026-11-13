@@ -154,6 +154,26 @@ export function checkDetails(
   return errors
 }
 
+/** The terms box before booking: ticked, or its message. The server checks it again. */
+export function checkTerms(
+  form: HTMLFormElement | null,
+  check: BookingFormCopy["check"]
+): Record<string, string> {
+  return fieldText(form, "terms") === "on" ? {} : { terms: check.terms }
+}
+
+/**
+ * The withdrawal-period box before booking, when the form shows it (`EarlyStartField`): ticked, or
+ * its message. The server checks it again from the actual start times.
+ */
+export function checkEarlyStart(
+  form: HTMLFormElement | null,
+  check: BookingFormCopy["check"]
+): Record<string, string> {
+  const box = form?.querySelector<HTMLInputElement>('input[name="earlyStart"]')
+  return !box || box.checked ? {} : { earlyStart: check.earlyStart }
+}
+
 /** Moves focus to the first field with an error, the way a server answer would be read. */
 export function focusFirstError(form: HTMLFormElement | null, names: string[]) {
   const first = names[0]

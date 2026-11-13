@@ -93,10 +93,11 @@ with each other, for a string nobody outside your own machine ever sees. Leave i
 - **Placeholder descriptions.** Every layout's `<meta description>` and manifest `description`
   field, and `apps/www/src/content/home.tsx`'s copy, are generic starter text — rewrite them for
   your product.
-- **`/terms` and `/privacy`.** `apps/www/src/content/terms.ts` and `privacy.ts` are template legal
-  copy, in Swedish and English, with literal `[Company]` / `[Contact email]` placeholders. They don't read `BRAND_NAME` and
-  won't pick up a rename; replace the placeholders and have counsel review before publishing either
-  page.
+- **The legal pages.** `apps/legal/content/pages/*.mdx` are drafts in Swedish and English, with
+  `[ATT FYLLA: …]` / `[TO FILL: …]` placeholders (`bun --filter @repo/legal placeholders` lists
+  them). They name the business in prose and don't read `BRAND_NAME`, so they won't pick up a
+  rename; edit them and have counsel review before turning off `LEGAL_DRAFT` (see
+  `docs/architecture/legal.md`).
 
 ## What to leave
 

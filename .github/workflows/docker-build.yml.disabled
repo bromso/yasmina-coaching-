@@ -7,11 +7,13 @@
 #   SITE_DOMAIN   required — the parent domain, e.g. acme.com. The job fails without it rather than
 #                 publish images whose links point at brand.localhost.
 #   COOKIE_DOMAIN optional — the consent cookie's domain on the static apps (www, docs, help, jobs,
-#                 blog), `.`-prefixed, e.g. .acme.com. Empty → a host-only consent cookie, so the
+#                 blog, legal), `.`-prefixed, e.g. .acme.com. Empty → a host-only consent cookie, so the
 #                 choice is not shared across subdomains. (app, auth and account read COOKIE_DOMAIN
 #                 at runtime.)
 #   CONTENT_REPO_URL optional — docs only: the "Edit on GitHub" base, e.g.
 #                 https://github.com/<owner>/<repo>/blob/main/apps/docs/content/docs. Empty → no link.
+#   LEGAL_DRAFT   optional — legal only: `false` publishes the legal pages (no draft notice, no
+#                 noindex); anything else, empty included, keeps them drafts.
 # See docs/guides/deploying.md.
 name: Docker Build & Push
 
@@ -48,6 +50,7 @@ jobs:
           - { dockerfile: next, app: help, port: 3005 }
           - { dockerfile: next, app: jobs, port: 3006 }
           - { dockerfile: next, app: blog, port: 3009 }
+          - { dockerfile: next, app: legal, port: 3010 }
           - { dockerfile: bun-service, app: api, port: 3007 }
           - { dockerfile: bun-service, app: ai, port: 3008 }
     steps:
@@ -98,6 +101,7 @@ jobs:
             SITE_DOMAIN=${{ vars.SITE_DOMAIN }}
             COOKIE_DOMAIN=${{ vars.COOKIE_DOMAIN }}
             CONTENT_REPO_URL=${{ vars.CONTENT_REPO_URL }}
+            LEGAL_DRAFT=${{ vars.LEGAL_DRAFT }}
             APT_REFRESH=${{ steps.date.outputs.date }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}

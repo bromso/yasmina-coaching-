@@ -33,6 +33,11 @@ ENV COOKIE_DOMAIN=${COOKIE_DOMAIN}
 # Unused by every other app.
 ARG CONTENT_REPO_URL=
 ENV CONTENT_REPO_URL=${CONTENT_REPO_URL}
+# legal only: baked in at build (every route is static). Anything but `false` (empty included)
+# keeps the pages drafts — the notice, noindex and robots.txt disallowing everything; `false`
+# publishes them once the lawyer has approved the text. Unused by every other app.
+ARG LEGAL_DRAFT=
+ENV LEGAL_DRAFT=${LEGAL_DRAFT}
 COPY . .
 RUN bun run --filter "@repo/${APP}" build
 

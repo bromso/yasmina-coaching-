@@ -1,5 +1,6 @@
 import { translatorFor } from "@repo/i18n/translate"
 import { BRAND_NAME, footerGroups, relabelFooter, siteUrl } from "@repo/sites"
+import { legalUrl } from "@repo/sites/legal"
 import { SiteFooter, SiteFooterLegal } from "@repo/ui/blocks/site-footer"
 import { Analytics } from "@repo/ui/components/analytics"
 import { Brand } from "@repo/ui/components/brand"
@@ -65,8 +66,9 @@ export function BlogDocument({
   const legal = (
     <SiteFooterLegal
       links={[
-        { label: ui.legal.terms, href: `${www}/terms` },
-        { label: ui.legal.privacy, href: `${www}/privacy` },
+        { label: ui.legal.privacy, href: legalUrl("privacy", locale) },
+        { label: ui.legal.terms, href: legalUrl("terms", locale) },
+        { label: ui.legal.accessibility, href: legalUrl("accessibility", locale) },
       ]}
     />
   )
@@ -101,7 +103,7 @@ export function BlogDocument({
           />
           <CookieConsent
             domain={cookieDomain}
-            privacyHref={`${www}/privacy`}
+            privacyHref={legalUrl("privacy", locale)}
             labels={{
               region: t("cookieConsent.region"),
               text: t("cookieConsent.text"),

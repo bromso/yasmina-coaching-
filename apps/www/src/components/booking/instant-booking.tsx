@@ -4,7 +4,9 @@ import {
   BOOKING_HORIZON_DAYS,
   type BookingAudience,
   type BookingLocation,
+  earlyStartRequired,
   type OfferingKey,
+  opensNewContract,
 } from "@repo/api-contract/booking-limits"
 import { Button } from "@repo/ui/components/button"
 import { Calendar } from "@repo/ui/components/calendar"
@@ -15,8 +17,11 @@ import { book } from "@/app/actions"
 import {
   AudienceField,
   CustomerFields,
+  EarlyStartField,
   LocationField,
   NotesField,
+  TermsField,
+  type TermsLinks,
   value,
 } from "@/components/booking/details-fields"
 import { LazyPaymentStep } from "@/components/booking/lazy-payment-step"
@@ -24,6 +29,8 @@ import { useBookingCopy, useLocale } from "@/components/booking/locale-provider"
 import { StepIndicator } from "@/components/booking/step-indicator"
 import {
   checkDetails,
+  checkEarlyStart,
+  checkTerms,
   fieldText,
   PAYMENT_FIELDS,
   primaryClass,
@@ -54,14 +61,19 @@ type InstantBookingProps = {
   /** How many sessions the offering covers; a package lets the visitor place up to this many now. */
   sessions: number
   initialAudience: BookingAudience
-  /** `?package=<id>` from a manage page: one extra session on an existing programme. */
-  packageId?: string
+  /**
+   * A "Book another" link's manage token, verified by the page: one further session on a
+   * programme already bought. Posted back so the action and the api can check it again.
+   */
+  manageToken?: string
   /** The offering's name, for the payment step's summary. */
   title: string
   /** Its fixed price, or `null` when it is priced in writing (invoice only). */
   price: OfferingAmount | null
   /** `member` (a members' session or an extra programme session) has no payment step. */
   flow: "instant" | "member"
+  /** The terms and privacy pages the terms box links, from the server. */
+  legalLinks: TermsLinks
 }
 
 /** One free slot as `/api/booking/availability` hands it back: ISO UTC instants. */
@@ -88,7 +100,17 @@ const gridDate = (day: string) => {
 /** Each step's fields, so a refusal from the server reopens the step that holds the field. */
 const STEP_FIELDS = [
   ["slots"],
-  ["audience", "name", "email", "organisation", "phone", "location", "notes"],
+  [
+    "audience",
+    "name",
+    "email",
+    "organisation",
+    "phone",
+    "location",
+    "notes",
+    "terms",
+    "earlyStart",
+  ],
   PAYMENT_FIELDS,
 ]
 
@@ -108,16 +130,17 @@ export function InstantBooking({
   locations,
   sessions,
   initialAudience,
-  packageId,
+  manageToken,
   title,
   price,
   flow,
+  legalLinks,
 }: InstantBookingProps) {
   const copy = useBookingCopy()
   const locale = useLocale()
   const text = copy.instant
   const intl = INTL_LOCALE[locale]
-  const maxSlots = packageId ? 1 : sessions
+  const maxSlots = manageToken ? 1 : sessions
   const [state, action, pending] = useActionState(book, initialState)
   const [today, setToday] = useState<string | null>(null)
   const [month, setMonth] = useState<Date>(() => new Date())
@@ -215,8 +238,32 @@ export function InstantBooking({
               ? text.noSlotsThisDay
               : ""
 
+  // A private client's new purchase with a session inside the withdrawal period needs their
+  // consent; a member's session or a programme's further session never does: it is part of a
+  // purchase already made. Before any time is picked (the server's render, or no JavaScript) one
+  // always could be, so the box shows then.
+  // A refusal naming the box (the api judges by its own clock) shows it whatever this one says.
+  const needsEarlyStart =
+    (audience === "private" &&
+      !manageToken &&
+      opensNewContract(offering) &&
+      (picked.length === 0 ||
+        earlyStartRequired(
+          offering,
+          audience,
+          picked.map((slot) => slot.startsAt),
+          new Date()
+        ))) ||
+    Boolean(!shown.ok && shown.fieldErrors?.earlyStart)
+
+  /** The details step's own checks, the terms and withdrawal-period boxes included. */
+  const detailsErrors = () => ({
+    ...checkDetails(formRef.current, copy.check),
+    ...checkTerms(formRef.current, copy.check),
+    ...checkEarlyStart(formRef.current, copy.check),
+  })
   const toPayment = () => {
-    if (fail(checkDetails(formRef.current, copy.check))) return
+    if (fail(detailsErrors())) return
     setDetails({
       email: fieldText(formRef.current, "email"),
       location: fieldText(formRef.current, "location"),
@@ -249,20 +296,20 @@ export function InstantBooking({
       </noscript>
       {/* On the payment step the error shows beside the pay button instead. */}
       {step !== 3 && <FormMessage state={state} />}
-      {packageId && (
+      {manageToken && (
         <p className="rounded-2xl border border-border bg-background/70 px-4 py-3 text-sm">
           {text.packageExtraNote}
         </p>
       )}
 
       <input type="hidden" name="offering" value={offering} />
-      {packageId && <input type="hidden" name="packageId" value={packageId} />}
+      {manageToken && <input type="hidden" name="manageToken" value={manageToken} />}
       {picked.map((slot) => (
         <input key={slot.startsAt} type="hidden" name="slots" value={slot.startsAt} />
       ))}
 
       <StepPanel n={1} active={step === 1} heading={steps[0] ?? ""}>
-        {!packageId && sessions > 1 && (
+        {!manageToken && sessions > 1 && (
           <p className="text-muted-foreground text-sm">{text.packageHint(sessions)}</p>
         )}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[auto_1fr]">
@@ -433,6 +480,8 @@ export function InstantBooking({
         />
         <LocationField locations={locations} state={shown} />
         <NotesField state={shown} />
+        <TermsField state={shown} links={legalLinks} />
+        {needsEarlyStart && <EarlyStartField state={shown} />}
         <p className="text-muted-foreground text-xs">{text.legal}</p>
         <StepNav backLabel={copy.stepper.back} onBack={() => goTo(1)}>
           {pays ? (
@@ -447,7 +496,7 @@ export function InstantBooking({
               disabled={pending || picked.length === 0}
               className={primaryClass}
               onClick={(event) => {
-                if (fail(checkDetails(formRef.current, copy.check))) event.preventDefault()
+                if (fail(detailsErrors())) event.preventDefault()
               }}
             >
               {pending ? text.submitting : text.submit}

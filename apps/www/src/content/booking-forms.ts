@@ -43,6 +43,14 @@ export type BookingFormCopy = {
     message: string
     date: string
     method: string
+    /** The terms box left unticked. */
+    terms: string
+    /** The box for a start within the withdrawal period, shown and left unticked. */
+    earlyStart: string
+    /** A further programme session: the package has no room for every picked time. */
+    packageFull: string
+    /** A further programme session whose manage link could not be checked just now. */
+    manageUnavailable: string
   }
   payment: {
     summary: {
@@ -125,6 +133,23 @@ export type BookingFormCopy = {
     locationLegend: string
     notesLabel: string
   }
+  /**
+   * The terms box: "I have read the [terms] and the [privacy policy]", the two bracketed parts
+   * linking the legal app's pages (their hrefs come from the server, see `TermsField`).
+   */
+  terms: {
+    before: string
+    terms: string
+    between: string
+    privacy: string
+    /** Read after each link's name: both open in a new tab, so the booking is not lost. */
+    newTab: string
+  }
+  /**
+   * A private client's consent to a session within the 14-day withdrawal period (lag (2005:59)
+   * 2 kap. 11 § 1): shown only when a picked session falls inside it, see `EarlyStartField`.
+   */
+  earlyStart: string
   timezoneNote: string
   /**
    * The calendar's own words (react-day-picker defaults to US English): the month buttons' names
@@ -223,6 +248,12 @@ const sv: BookingFormCopy = {
     message: "Berätta kort vad du vill uppnå.",
     date: "Välj minst ett datum, från och med i morgon.",
     method: "Välj hur du vill betala.",
+    terms: "Du behöver godkänna villkoren för att boka.",
+    earlyStart:
+      "Bekräfta att tillfället får äga rum inom ångerfristen, eller välj en tid längre fram.",
+    packageFull: "Paketet har inte plats för så många tillfällen.",
+    manageUnavailable:
+      "Vi kunde inte kontrollera ditt paket just nu. Försök igen från länken i din bokningsbekräftelse.",
   },
   payment: {
     summary: {
@@ -322,6 +353,15 @@ const sv: BookingFormCopy = {
     locationLegend: "Var",
     notesLabel: "Något Yasmina bör veta innan ni ses? (valfritt)",
   },
+  terms: {
+    before: "Jag har läst ",
+    terms: "villkoren",
+    between: " och ",
+    privacy: "integritetspolicyn",
+    newTab: "(öppnas i en ny flik)",
+  },
+  earlyStart:
+    "Jag vill att tjänsten börjar inom ångerfristen och förstår att ångerrätten upphör när tjänsten har fullgjorts.",
   timezoneNote: "Tiderna visas i svensk tid (Europe/Stockholm).",
   calendar: { previous: "Föregående månad", next: "Nästa månad", today: "I dag", selected: "Vald" },
   noScriptLink: { label: "Be om ett introsamtal", href: contactFrom("/book") },
@@ -422,6 +462,12 @@ const en: BookingFormCopy = {
     message: "Tell Yasmina briefly what you want to achieve.",
     date: "Pick at least one date, from tomorrow onwards.",
     method: "Choose how you want to pay.",
+    terms: "You need to accept the terms to book.",
+    earlyStart:
+      "Confirm that the session may take place within the withdrawal period, or choose a later time.",
+    packageFull: "The package has no room for that many sessions.",
+    manageUnavailable:
+      "We couldn't check your package just now. Please try again from the link in your booking confirmation.",
   },
   payment: {
     summary: {
@@ -521,6 +567,15 @@ const en: BookingFormCopy = {
     locationLegend: "Where",
     notesLabel: "Anything Yasmina should know before you meet? (optional)",
   },
+  terms: {
+    before: "I have read the ",
+    terms: "terms",
+    between: " and the ",
+    privacy: "privacy policy",
+    newTab: "(opens in a new tab)",
+  },
+  earlyStart:
+    "I want the service to start within the withdrawal period, and I understand the right of withdrawal ends once the service has been fully performed.",
   timezoneNote: "Times are shown in Swedish time (Europe/Stockholm).",
   calendar: {
     previous: "Previous month",

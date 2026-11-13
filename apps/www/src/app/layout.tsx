@@ -2,6 +2,7 @@ import { MEMBER_OFFERING_KEYS, OFFERING_KEYS, OFFERINGS } from "@repo/api-contra
 import { LOCALE_NAMES, LOCALES, type Locale } from "@repo/i18n/locales"
 import { translatorFor } from "@repo/i18n/translate"
 import { BRAND_NAME, footerGroups, relabelFooter, siteUrl } from "@repo/sites"
+import { legalUrl } from "@repo/sites/legal"
 import { SiteFooter, SiteFooterLegal } from "@repo/ui/blocks/site-footer"
 import { SiteHeaderShell } from "@repo/ui/blocks/site-header-shell"
 import { Analytics } from "@repo/ui/components/analytics"
@@ -113,8 +114,9 @@ export default async function RootLayout({
   const legal = (
     <SiteFooterLegal
       links={[
-        { label: site.legal.terms, href: `${siteUrl("www")}/terms` },
-        { label: site.legal.privacy, href: `${siteUrl("www")}/privacy` },
+        { label: site.legal.privacy, href: legalUrl("privacy", locale) },
+        { label: site.legal.terms, href: legalUrl("terms", locale) },
+        { label: site.legal.accessibility, href: legalUrl("accessibility", locale) },
         { label: site.legal.contact, href: `${siteUrl("www")}${CONTACT_HREF}` },
       ]}
     />
@@ -172,7 +174,7 @@ export default async function RootLayout({
           />
           <CookieConsent
             domain={cookieDomain}
-            privacyHref="/privacy"
+            privacyHref={legalUrl("privacy", locale)}
             labels={{
               region: t("cookieConsent.region"),
               text: t("cookieConsent.text"),

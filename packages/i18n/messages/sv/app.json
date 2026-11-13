@@ -7,8 +7,6 @@
     "workspaceNew": "Skapa en arbetsyta"
   },
   "layout": {
-    "terms": "Villkor",
-    "privacy": "Integritet",
     "impersonating": "(agerar som användaren)",
     "deletionScheduled": "Ditt konto raderas den {date}.",
     "cancelDeletion": "Avbryt raderingen"

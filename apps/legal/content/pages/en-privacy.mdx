@@ -1,0 +1,197 @@
+---
+title: "Privacy and cookies"
+description: "What the site collects, why, how long it is kept and what rights you have."
+locale: en
+page: privacy
+changes:
+  - date: 2026-11-12
+    summary: "First version."
+---
+This page describes the personal data we handle when you visit the site, book coaching, send an enquiry or use an account. It covers the website, the blog, sign-in, the app, the account pages and these legal pages.
+
+## Who is responsible
+
+The controller is [TO FILL: company name], company registration number [TO FILL: registration number]. Send questions about your personal data to [TO FILL: email address for privacy questions]. More contact details are on the [Company and contact details](/en/company) page.
+
+## What we handle and why
+
+[TO FILL: for each activity below, whether the data is a statutory or contractual requirement or needed to enter into a contract, and what happens if you do not provide it (Art. 13(2)(e))]
+
+### When you book coaching
+
+When you book a session, take a seat at a group event or send a booking request, we keep what you enter: your name, email address, phone number if you give one, your organisation if you book for an employer, what you book, the time or the dates you prefer, the location, the number of participants and the venue if you give them, and your own notes. If you choose to pay by invoice we keep the payment method and, for an organisation, its registration number, invoice reference and invoice address. We also keep the language you used and a hash of your IP address, which we use to limit abuse. The hash is not anonymous, because the IP address it came from can be worked out. [TO FILL: whether the IP address must be hashed with a secret salt]
+
+Before you book, you tick a box saying you have read the terms and this policy. We then store which version of the terms you accepted (the date of their latest change) and when you accepted them. We keep this so we can show which terms applied to your booking. If you book a session during the withdrawal period as a private client, you also tick a box asking for the service to start within the withdrawal period. We then store when you did, so we can show that you asked for it.
+
+You receive a confirmation with a link where you can see and cancel your booking. The link is your key, and we store only a hash of it. Yasmina receives an email about the booking and can add her own notes to it.
+
+The booking is kept by your email address and is never linked to an account, even if you are signed in when you book.
+
+- **Purpose:** to take and carry out the booking, send confirmations and invoice.
+- **Legal basis:** [TO FILL: legal basis for bookings, suggested contract under Art. 6(1)(b)]
+- **How long:** [TO FILL: how long bookings are kept, today they are not deleted automatically] The record of which terms you accepted, and of when you asked for the service to start within the withdrawal period, is kept for as long as the booking.
+- **Bookkeeping:** [TO FILL: whether invoices and accounting records from bookings are kept under the Swedish Bookkeeping Act, where, by whom and for how long]
+
+### When you send an enquiry through the contact form
+
+The [contact form](www:/kontakt) keeps your answers about who you are, what you need and when, your message, your name, email address, phone number, organisation and role if you give them, how you want to be contacted, when you agreed to be contacted, whether you want a newsletter, the language and the page you wrote from, and a hash of your IP address, in the same way as for bookings. The enquiry is kept by your email address and is never linked to an account. Yasmina receives every answer by email and can note how the enquiry is going. You receive a receipt with a reference number, without the text you wrote.
+
+We send no newsletters today. If you tick the box we only store your choice.
+
+- **Purpose:** to answer your enquiry and suggest a next step.
+- **Legal basis:** [TO FILL: legal basis for enquiries, consent or steps before a contract]
+- **How long:** 12 months from when the enquiry arrived. After that it is deleted automatically.
+
+### When you have an account
+
+An account holds your email address, your name, a password that we store only as a hash, whether your email address is confirmed, the language you chose and your profile picture if you upload one. If you use two-step verification we store its secret encrypted, and your recovery codes. If you add a passkey we store its public key, the name you gave it and when it was last used. [TO FILL: whether sign-in with Google, GitHub or Apple is offered at launch] If you sign in that way we store which service you used and your id there.
+
+For every sign-in we store when it was created and last used, the browser's user agent and the IP address. You see them under signed-in devices, so you can spot and sign out a device you don't recognise.
+
+- **Purpose:** so you can sign in and use the account safely.
+- **Legal basis:** [TO FILL: legal basis for accounts, suggested contract under Art. 6(1)(b)]
+- **How long:** for as long as you have the account. A sign-in lasts 30 days. Expired sign-ins are deleted the next time you sign in. One-time links to confirm an email, reset a password or sign in are deleted within an hour of being used or expiring.
+
+### Workspaces, notes and plans
+
+In the app your work belongs to a workspace. We store the workspace's name and logo, who its members are and their roles, invitations (email address, role and who invited) and the notes members write. An invitation can be used for seven days.
+
+If the workspace has a paid plan we store the plan, the billing period and its status. We also store the payment provider's customer id and the email address invoices go to. [TO FILL: which payment provider is used for plans at launch, Stripe or none]
+
+A workspace's admins can create API keys and webhooks. For an API key we store its name, a hash of the key, its scopes, who created it and when it was last used. For a webhook we store the address it sends to, an encrypted secret and a log of its deliveries. Webhooks never carry anyone's email address.
+
+- **Purpose:** so the workspace works for all its members and the plan can be charged.
+- **Legal basis:** [TO FILL: legal basis for workspaces and plans]
+- **How long:** for as long as the workspace exists. The webhook log is kept for 30 days. An invitation stays, even after its seven days, until it is revoked, replaced by a new invitation to the same address or the workspace is deleted. An accepted invitation is deleted when the invited person's account is deleted. [TO FILL: whether unused invitations should be deleted after a set time]
+
+### Notifications
+
+When something happens that concerns you, for example your role changes, you get a notification in your account and sometimes an email. A notification holds ids and names, never email addresses. Under Notifications you choose which of the optional types are also emailed.
+
+- **Purpose:** to tell you about things that happen to your account and your workspaces.
+- **Legal basis:** [TO FILL: legal basis for notifications]
+- **How long:** read notifications are deleted after 30 days and all notifications after 90 days.
+
+### Emails we send
+
+We send confirmations, receipts, sign-in links and notifications by email. Each email first goes into a queue with the recipient's address and the email's content, where it stays until it has been sent.
+
+- **Purpose:** to send the emails that bookings, enquiries, the account and notifications give rise to, and to be able to resend an email that did not arrive.
+- **Legal basis:** [TO FILL: legal basis for the mail queue, or whether it follows the basis of what the email is about]
+- **How long:** once the email has been sent, its address and content are removed from the queue at once. All that remains is a record that an email was sent, which is deleted after 7 days. If an email cannot be sent after several attempts, its address and content are kept for 30 days, so the failure can be looked into.
+
+### Data export and deleting your account
+
+Under Data & privacy in your account you can ask for an export of your data. The export is a JSON file with your account, your workspaces and the enquiries and bookings you made with your account's confirmed email address, including which version of the terms you accepted and when, and when you asked for the service to start within the withdrawal period. You can download it for 7 days, after which it is deleted. You can ask for a new export once a day.
+
+You can also delete your account there. The account is deleted 7 days after you ask, and until then you can change your mind. Every sign-in ends at once.
+
+Bookings and contact-form enquiries are kept by email address and are never linked to an account. So they are not deleted when you delete your account, and are kept on their own schedules above. If you want them deleted sooner, write to [TO FILL: email address for privacy questions].
+
+- **Purpose:** so you can get a copy of your data and delete your account.
+- **Legal basis:** [TO FILL: legal basis for export and deletion, suggested legal obligation under Art. 6(1)(c)]
+- **How long:** the export file for 7 days. An account you asked to delete remains for 7 days.
+
+### Visitor statistics
+
+We count visits without cookies. Each page view is stored with the part of the site and the page, the site the visitor came from and a visitor id. The visitor id is a hash of the IP address and browser together with a random value that changes every day. So we can count visitors per day but not follow anyone from one day to the next, and the IP address and browser are never stored. If you have accepted all cookies and are signed in, the page view also gets your user id and your workspace's id. Page views from browsers that send Do Not Track are not counted.
+
+- **Purpose:** to understand how the site is used and improve it.
+- **Legal basis:** [TO FILL: legal basis for visitor statistics, suggested legitimate interest under Art. 6(1)(f)]
+- **How long:** single page views for 90 days. The random value is deleted the day after. Daily totals, with nothing about individual visitors, are kept with no end date.
+
+### Account events
+
+When you use the account we record some events: that the account is created and its email address confirmed, that a workspace is created, that someone is invited or joins, that a note is created, that the plan changes and that two-step verification is turned on. These events are stored with your user id and, where the event concerns a workspace, the workspace's id. A note created with an API key is stored without a user id, and plan changes are stored with the workspace's id only. That happens whatever you choose in the cookie banner and whether or not your browser sends Do Not Track. When an enquiry arrives we store only its three answers about who, what and when, with nothing about who wrote it.
+
+- **Purpose:** to follow how the service is used, for example how many new accounts get started with a workspace.
+- **Legal basis:** [TO FILL: legal basis for events stored with a user id without consent]
+- **How long:** single events for 90 days. If the account is deleted before then, the events remain but without your user id. Daily totals, with nothing about individual people, are kept with no end date.
+
+### Error reports and performance
+
+When a page crashes or loads slowly, the browser sends a report: which page (with ids and keys taken out of the address), the error message and load-time measurements. The browser's user agent is sent only if you accepted all cookies. Reports never contain an IP address, a user id or anything you typed.
+
+- **Purpose:** to find and fix errors.
+- **Legal basis:** [TO FILL: legal basis for error reports, suggested legitimate interest under Art. 6(1)(f)]
+- **How long:** error reports for 30 days, measurements for 7 days.
+
+### Security log
+
+We log administrative and security events, for example changes to a workspace, suspending an account, and an administrator signing in as a user to give support. Such a support sign-in needs a reason, lasts at most an hour and is logged. The log holds who did what and when, with the IP address and user agent.
+
+- **Purpose:** to protect accounts and to be able to look into abuse.
+- **Legal basis:** [TO FILL: legal basis for the security log, suggested legitimate interest under Art. 6(1)(f)]
+- **How long:** the IP address and user agent are removed after 90 days and the whole entry after 365 days.
+
+### Backups
+
+A backup is a copy of the whole database, with all the data above. It can hold data already deleted from the database, until the backup itself is deleted. [TO FILL: whether database backups are taken at launch and where they are stored]
+
+- **Purpose:** to be able to restore the site after a failure or an accident.
+- **Legal basis:** [TO FILL: legal basis for backups]
+- **How long:** [TO FILL: how long backups are kept, the code's default is 14 days]
+
+## Recipients and processors
+
+These handle data on our behalf:
+
+- **Hosting:** the server that runs the site and the database. [TO FILL: hosting provider and the country the server is in]
+- **Email service:** the service that sends our emails. [TO FILL: Resend or which SMTP service is used]
+- **Yasmina's email:** bookings and enquiries are emailed to Yasmina. [TO FILL: which email provider Yasmina uses]
+- **File storage:** profile pictures, logos and exports. [TO FILL: whether files are stored on the server or with an S3-compatible storage service, and which]
+- **Payments:** [TO FILL: whether Stripe is used for plans at launch]
+- **Signing in with other services:** [TO FILL: whether Google, GitHub or Apple sign-in is used at launch]
+
+[TO FILL: whether a data processing agreement is in place with each processor]
+
+## Transfers outside the EU/EEA
+
+[TO FILL: whether any recipient handles data outside the EU/EEA, which ones, and the safeguard that applies, for example an EU Commission adequacy decision or standard contractual clauses]
+
+## Your rights
+
+Under the General Data Protection Regulation (GDPR) you have the right to:
+
+- know what data we hold about you and get a copy of it (Article 15). With an account you can download an export yourself.
+- have inaccurate data corrected (Article 16). You change your name, email and profile picture yourself in your account.
+- have your data erased (Article 17), unless we have to keep it for another reason.
+- ask us to restrict processing while something is looked into (Article 18).
+- receive data you gave us in a machine-readable format, where the processing is based on consent or a contract (Article 20).
+- not be subject to a decision based solely on automated processing (Article 22). We make no such decisions.
+
+Where processing is based on your consent, you can withdraw it at any time. [TO FILL: check the reference to Article 7(3) on withdrawing consent]
+
+**Right to object.** You have the right to object at any time to processing based on our legitimate interest (Article 21). We then stop, unless we can show compelling legitimate grounds that override your interests. You can always object to direct marketing.
+
+To use your rights, write to [TO FILL: email address for privacy questions]. We reply [TO FILL: how soon we reply, the GDPR normally allows one month].
+
+## Complaints to IMY
+
+If you think we handle your data incorrectly, please contact us first. You also have the right to complain to a supervisory authority (Article 77 GDPR). In Sweden that is the Swedish Authority for Privacy Protection (Integritetsskyddsmyndigheten, IMY), at [imy.se](https://www.imy.se). [TO FILL: check the reference to IMY as the supervisory authority]
+
+## Cookies
+
+A cookie is a small text file the site stores in your browser. Under Chapter 9, Section 28 of the Swedish Electronic Communications Act (2022:482), we may store something in your browser only if you have been told why and have agreed, unless it is needed for a service you have explicitly asked for.
+
+We set only our own cookies, and each one is needed for the site to work. The visitor statistics work without cookies. Your choice in the cookie banner affects two things: if you accept all, page views get your user id when you are signed in, and error reports get your browser's user agent. Account events are stored with your user id whatever you choose (see Account events above).
+
+The table also covers what we keep in the browser's local storage and cache.
+
+| Name | What it does | How long | Type |
+| --- | --- | --- | --- |
+| `session` | Keeps you signed in. Shared between our sites. | 30 days | Necessary |
+| `workspace` | Remembers which workspace you are working in. | 1 year | Necessary |
+| `locale` | Remembers the language you chose. | 1 year | Necessary |
+| `consent` | Remembers what you chose in the cookie banner. | 180 days | Necessary |
+| `two_factor` | Keeps track of the sign-in while you enter your two-step verification code. | 5 minutes | Necessary |
+| `oauth` | Protects the sign-in when you sign in with another service. | 10 minutes | Necessary |
+| `admin_session` | Used only by our administrators while they give support signed in as a user. | 1 hour | Necessary |
+| `theme` (local storage) | Remembers whether you chose a light or dark theme. Saved only once you choose. | Until you clear the browser's storage | Necessary |
+| Page cache (service worker) | Keeps copies of pages you visited on the website, the blog and the legal pages, so they can be read offline. In the app, sign-in and account pages only program files are cached, never pages with your data. | Pages for 7 days, program files and images for 30 days | Necessary |
+
+[TO FILL: check that the cookies, the theme choice and the page cache in the table count as necessary under Chapter 9, Section 28, second paragraph]
+
+## Changes to this policy
+
+When we change the policy we update the date at the top and say what changed in the change log at the bottom of the page. If a change matters to you, we also tell you [TO FILL: how larger changes are announced, for example by email to account holders].

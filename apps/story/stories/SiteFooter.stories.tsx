@@ -1,8 +1,12 @@
 import { BRAND_NAME } from "@repo/sites"
+import { legalPath } from "@repo/sites/legal"
 import { SiteFooter, SiteFooterLegal } from "@repo/ui/blocks/site-footer"
 import { Brand } from "@repo/ui/components/brand"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, within } from "storybook/test"
+
+/** The legal app's production origin; the paths come from `legalPath`, as an app's `legalUrl` does. */
+const LEGAL = "https://legal.brand.com"
 
 /** Shaped like `footerGroups()` from `@repo/sites`, with literal hrefs. */
 const groups = [
@@ -41,8 +45,9 @@ const meta = {
       <SiteFooterLegal
         year={2026}
         links={[
-          { label: "Terms", href: "https://www.brand.com/terms" },
-          { label: "Privacy", href: "https://www.brand.com/privacy" },
+          { label: "Privacy", href: `${LEGAL}${legalPath("privacy", "en")}` },
+          { label: "Terms", href: `${LEGAL}${legalPath("terms", "en")}` },
+          { label: "Accessibility", href: `${LEGAL}${legalPath("accessibility", "en")}` },
           { label: "Contact", href: "https://www.brand.com/kontakt" },
         ]}
       />
@@ -65,10 +70,12 @@ export const Default: Story = {
     )
     const legal = canvas.getByText(/^© 2026/)
     await expect(legal).toBeVisible()
-    await expect(legal).toHaveTextContent(`© 2026 ${BRAND_NAME} · Terms · Privacy · Contact`)
+    await expect(legal).toHaveTextContent(
+      `© 2026 ${BRAND_NAME} · Privacy · Terms · Accessibility · Contact`
+    )
     await expect(within(legal).getByRole("link", { name: "Privacy" })).toHaveAttribute(
       "href",
-      "https://www.brand.com/privacy"
+      `${LEGAL}${legalPath("privacy", "en")}`
     )
   },
 }
@@ -86,8 +93,8 @@ export const Narrow: Story = {
     await expect(doc.scrollWidth).toBeLessThanOrEqual(doc.clientWidth)
     await expect(canvas.getAllByRole("contentinfo")).toHaveLength(1)
     const links = within(canvas.getByRole("contentinfo")).getAllByRole("link")
-    // The brand, six group links and three legal links.
-    await expect(links).toHaveLength(10)
+    // The brand, six group links and four legal links.
+    await expect(links).toHaveLength(11)
     for (const link of links) {
       await expect(link).toBeVisible()
       const rect = link.getBoundingClientRect()

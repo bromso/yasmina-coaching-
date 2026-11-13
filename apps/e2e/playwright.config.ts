@@ -72,5 +72,6 @@ export default defineConfig({
     next("help", 3005),
     next("jobs", 3006),
     next("blog", 3009),
+    next("legal", 3010),
   ].filter((_server, index) => !VISUAL || [0, 2, 9].includes(index)),
 })

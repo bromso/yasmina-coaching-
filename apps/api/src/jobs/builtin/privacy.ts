@@ -320,6 +320,11 @@ export function buildExport(
       venue: row.venue,
       createdAt: row.created_at,
       cancelledAt: row.cancelled_at,
+      // Their own consent: which terms they accepted, and when.
+      termsVersion: row.terms_version,
+      termsAcceptedAt: row.terms_accepted_at,
+      // And when they asked for a session to start within the withdrawal period, if they did.
+      earlyStartRequestedAt: row.early_start_requested_at,
     })),
   }
 }

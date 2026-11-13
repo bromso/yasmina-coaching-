@@ -10,6 +10,7 @@ import { StaticMdxImage } from "./mdx-image"
 import { MdxLi, MdxOl, MdxParagraph, MdxUl } from "./prose"
 import { SchemaTable } from "./schema-table"
 import { Step, Steps } from "./steps"
+import { MdxTable, MdxTbody, MdxTd, MdxTh, MdxThead, MdxTr } from "./table"
 import { Tab, TabsStacked } from "./tabs-stacked"
 
 function staticHeading(as: "h2" | "h3" | "h4") {
@@ -34,8 +35,8 @@ function staticHeading(as: "h2" | "h3" | "h4") {
  * images are always `loading="lazy"` regardless of what the author set (`StaticMdxImage`), and
  * `pre`/`Tabs`/`Tab` are `CodeBlockFrame`/`TabsStacked`/`Tab` — the exact same pre-hydration
  * output `CodeBlock` and `Tabs` fall back to, just without the hooks that gate it there. `code`,
- * `Callout`, `Cards`, `Card`, `Endpoint` and `SchemaTable` are identical to the interactive map:
- * all six are already pure.
+ * the table elements, `Callout`, `Cards`, `Card`, `Endpoint` and `SchemaTable` are identical to
+ * the interactive map: all are already pure.
  */
 // biome-ignore lint/suspicious/noExplicitAny: matches mdxComponents' own Record<string, ComponentType<any>>
 export const mdxStaticComponents: Record<string, ComponentType<any>> = {
@@ -50,6 +51,12 @@ export const mdxStaticComponents: Record<string, ComponentType<any>> = {
   li: MdxLi,
   img: StaticMdxImage,
   a: MdxLink,
+  table: MdxTable,
+  thead: MdxThead,
+  tbody: MdxTbody,
+  tr: MdxTr,
+  th: MdxTh,
+  td: MdxTd,
   Callout,
   Tabs: TabsStacked,
   Tab,

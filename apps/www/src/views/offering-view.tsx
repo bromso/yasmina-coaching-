@@ -4,6 +4,7 @@ import {
   type OfferingKey,
 } from "@repo/api-contract/booking-limits"
 import type { Locale } from "@repo/i18n/locales"
+import { legalUrl } from "@repo/sites/legal"
 import { Eyebrow } from "@repo/ui/components/eyebrow"
 import { Icon } from "@repo/ui/components/icon"
 import { MediaClip } from "@repo/ui/components/motion/media-clip"
@@ -21,8 +22,11 @@ import { flowFor } from "@/lib/booking-flow"
 type OfferingViewProps = {
   offering: OfferingKey
   audience: BookingAudience
-  /** `?package=<id>`: an extra session on an existing programme (instant kinds only). */
-  packageId?: string
+  /**
+   * `?manage=<token>`, once the page has verified it (`packageExtension`): a further session on a
+   * programme already bought (instant kinds only). Unverified, it is left out.
+   */
+  manageToken?: string
   /** Tomorrow in the booking zone, the request form's earliest date. */
   minDate: string
   locale: Locale
@@ -36,7 +40,7 @@ type OfferingViewProps = {
 export function OfferingView({
   offering,
   audience,
-  packageId,
+  manageToken,
   minDate,
   locale,
 }: OfferingViewProps) {
@@ -46,8 +50,10 @@ export function OfferingView({
   const clipKey = OFFERING_CLIPS[offering]
   const clip = clipKey ? clipsFor(locale)[clipKey] : undefined
   const frame = "aspect-[16/10] w-full object-cover lg:aspect-[4/3]"
-  const flow = flowFor(offering, packageId)
+  const flow = flowFor(offering, Boolean(manageToken))
   const price = amountFor(offering)
+  // The terms box's links: `legalUrl` reads the environment, so it runs here, on the server.
+  const legalLinks = { terms: legalUrl("terms", locale), privacy: legalUrl("privacy", locale) }
   return (
     <main id="main">
       <section aria-labelledby="offering-title" className="container py-16 lg:py-24">
@@ -111,10 +117,11 @@ export function OfferingView({
                   locations={spec.locations}
                   sessions={spec.sessions}
                   initialAudience={audience}
-                  packageId={packageId}
+                  manageToken={manageToken}
                   title={copy.title}
                   price={price}
                   flow={flow === "member" ? "member" : "instant"}
+                  legalLinks={legalLinks}
                 />
               )}
               {spec.kind === "group" && (
@@ -124,10 +131,16 @@ export function OfferingView({
                   initialAudience={audience}
                   title={copy.title}
                   price={price}
+                  legalLinks={legalLinks}
                 />
               )}
               {spec.kind === "request" && (
-                <RequestForm offering={offering} locations={spec.locations} minDate={minDate} />
+                <RequestForm
+                  offering={offering}
+                  locations={spec.locations}
+                  minDate={minDate}
+                  legalLinks={legalLinks}
+                />
               )}
             </LocaleProvider>
           </SunPanel>

@@ -89,7 +89,7 @@ describe("a11y route manifest", () => {
     expect(uncovered(["apps/www/src/app/brand-new/page.tsx"])).toEqual(["www /brand-new"])
   })
 
-  test("every page.tsx of the eight Next apps is covered or excluded with a reason", () => {
+  test("every page.tsx of the nine Next apps is covered or excluded with a reason", () => {
     const files = [...new Glob("apps/*/src/app/**/page.tsx").scanSync(".")]
     expect(files.length).toBeGreaterThan(30)
     expect(uncovered(files)).toEqual([])

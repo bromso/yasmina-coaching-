@@ -15,9 +15,12 @@ export type BookingFlow = (typeof BOOKING_FLOWS)[number]
 
 const members: readonly OfferingKey[] = MEMBER_OFFERING_KEYS
 
-/** The journey of `offering`; `packageId` (an extra session on a programme) is a member's one. */
-export function flowFor(offering: OfferingKey, packageId?: string): BookingFlow {
-  if (members.includes(offering) || packageId) return "member"
+/**
+ * The journey of `offering`; `extending` (a further session on a programme, its manage token
+ * verified by the server) is a member's one.
+ */
+export function flowFor(offering: OfferingKey, extending = false): BookingFlow {
+  if (members.includes(offering) || extending) return "member"
   return OFFERINGS[offering].kind
 }
 

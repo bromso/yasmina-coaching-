@@ -1,4 +1,5 @@
 import { describe, expect, mock, test } from "bun:test"
+import { legalUrl } from "@repo/sites/legal"
 import { authTranslator } from "@/lib/i18n"
 import { loginNotice } from "@/lib/login-notice"
 import { renderIn } from "@/test-intl"
@@ -9,7 +10,13 @@ mock.module("server-only", () => ({}))
 const { LoginView } = await import("./login-view")
 
 const view = (props: Partial<Parameters<typeof LoginView>[0]> = {}) => (
-  <LoginView providers={[]} user={null} continueHref="http://app.brand.localhost:3001" {...props} />
+  <LoginView
+    locale="sv"
+    providers={[]}
+    user={null}
+    continueHref="http://app.brand.localhost:3001"
+    {...props}
+  />
 )
 
 describe("LoginView", () => {
@@ -32,6 +39,8 @@ describe("LoginView", () => {
       ">Skapa ett</a>",
       ">användarvillkor</a>",
       ">integritetspolicy</a>",
+      `href="${legalUrl("terms", "sv")}"`,
+      `href="${legalUrl("privacy", "sv")}"`,
       "Du är utloggad.",
     ]) {
       expect(html).toContain(text)
@@ -41,7 +50,7 @@ describe("LoginView", () => {
   })
 
   test("in English it reads as it always has", () => {
-    const html = renderIn("en", view())
+    const html = renderIn("en", view({ locale: "en" }))
     for (const text of [
       "Welcome back",
       "Sign in with your email",
@@ -54,6 +63,8 @@ describe("LoginView", () => {
       ">Sign up</a>",
       "By clicking continue, you agree to our ",
       ">Terms of Service</a>",
+      `href="${legalUrl("terms", "en")}"`,
+      `href="${legalUrl("privacy", "en")}"`,
     ]) {
       expect(html).toContain(text)
     }

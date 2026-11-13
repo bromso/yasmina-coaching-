@@ -4,6 +4,10 @@
  * `@repo/api-contract/booking-limits`); `booking.ts` re-exports everything here for server code.
  */
 
+import { isSwedishNonWorkingDay, shiftDay } from "./swedish-calendar"
+
+export { isSwedishNonWorkingDay, shiftDay, swedishHolidays } from "./swedish-calendar"
+
 /** Every availability rule and every slot a visitor sees is in this zone; storage is UTC. */
 export const BOOKING_TIMEZONE = "Europe/Stockholm"
 
@@ -246,6 +250,91 @@ export const BOOKING_SEATS_FULL_MESSAGE = "That session is fully booked."
 export const BOOKING_CANCEL_LATE_MESSAGE = `Sessions can be cancelled online until ${BOOKING_CANCEL_CUTOFF_HOURS} hours before they start. Reply to your confirmation email instead.`
 /** `admin.bookings.confirm`'s refusal when the chosen time collides with another booking. */
 export const BOOKING_CONFLICT_MESSAGE = "That time overlaps another booking."
+/**
+ * `booking.book` / `booking.reserve`'s refusal of a private booking starting within the withdrawal
+ * period without the `earlyStart` consent; its `data.field` names the form field.
+ */
+export const BOOKING_EARLY_START_MESSAGE =
+  "Confirm that the session may take place within the withdrawal period, or choose a later time."
+export const BOOKING_EARLY_START_FIELD = "earlyStart"
+/**
+ * `booking.book`'s refusal of a further programme session whose manage token names the package
+ * but the package has no room for every posted slot; its `data.field` names the slots field.
+ */
+export const BOOKING_PACKAGE_FULL_MESSAGE = "The package has no room for that many sessions."
+export const BOOKING_PACKAGE_FULL_FIELD = "slots"
+
+/**
+ * A private client's right of withdrawal, in days (lag (2005:59) 2 kap. 12 §): counted in calendar
+ * days in `BOOKING_TIMEZONE` from the day of booking, see `withdrawalLastDay`.
+ */
+export const BOOKING_WITHDRAWAL_DAYS = 14
+
+const dayFormats = new Map<string, Intl.DateTimeFormat>()
+
+/**
+ * The `YYYY-MM-DD` of an instant in `timeZone` (the booking zone by default): the one calendar-day
+ * rule the slot engine (`apps/api`), the booking pages (`apps/www`) and the withdrawal period share.
+ */
+export function zonedDay(at: Date, timeZone: string = BOOKING_TIMEZONE): string {
+  let format = dayFormats.get(timeZone)
+  if (!format) {
+    format = new Intl.DateTimeFormat("en-CA", {
+      timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    })
+    dayFormats.set(timeZone, format)
+  }
+  return format.format(at)
+}
+
+/**
+ * The last day of the withdrawal period of a booking made at `now`: the booking's day in the
+ * booking zone plus `BOOKING_WITHDRAWAL_DAYS`, moved on past a Saturday, a Sunday, a public holiday
+ * or midsommar-, jul- or nyårsafton to the next working day (lag (1930:173) om beräkning av
+ * lagstadgad tid).
+ */
+export function withdrawalLastDay(now: Date): string {
+  let day = shiftDay(zonedDay(now), BOOKING_WITHDRAWAL_DAYS)
+  while (isSwedishNonWorkingDay(day)) day = shiftDay(day, 1)
+  return day
+}
+
+/**
+ * Whether a session starting at `startsAt` (ISO) falls within the withdrawal period of a booking
+ * made at `now`: its calendar day in the booking zone is from today through `withdrawalLastDay`.
+ */
+export function startsWithinWithdrawal(startsAt: string, now: Date): boolean {
+  const day = zonedDay(new Date(startsAt))
+  return day >= zonedDay(now) && day <= withdrawalLastDay(now)
+}
+
+/**
+ * Whether booking `offering` is a new purchase, and so a new contract with its own right of
+ * withdrawal. A member's session (`MEMBER_OFFERING_KEYS`) is not: it is part of the membership the
+ * start call already bought, and the right attaches to that contract, not to each session.
+ */
+export function opensNewContract(offering: string): boolean {
+  return !(MEMBER_OFFERING_KEYS as readonly string[]).includes(offering)
+}
+
+/**
+ * Whether a booking needs the consent to start within the withdrawal period (lag (2005:59)
+ * 2 kap. 11 § 1): a private client's new purchase (`opensNewContract`) whose first session falls
+ * inside it. Organisations have no right of withdrawal, so they never do.
+ */
+export function earlyStartRequired(
+  offering: string,
+  audience: string,
+  startsAts: readonly string[],
+  now: Date
+): boolean {
+  if (audience !== "private" || startsAts.length === 0 || !opensNewContract(offering)) return false
+  const first = [...startsAts].sort((a, b) => Date.parse(a) - Date.parse(b))[0] as string
+  return startsWithinWithdrawal(first, now)
+}
 
 /** The reference a booking is known by, in mail and on the admin pages: `BK-<id>`. */
 export const bookingReference = (id: number) => `BK-${id}`

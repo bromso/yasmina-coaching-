@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test"
 import { shared, URLS } from "../e2e.env"
 import { expectAccessible } from "../fixtures/a11y"
 import { ensureAdmin, uniqueEmail } from "../fixtures/accounts"
+import { availabilityRange, calendarDay, needsEarlyStart } from "../fixtures/booking"
 import { latestMail, linkIn } from "../fixtures/mail"
 
 /**
@@ -36,6 +37,7 @@ test("a workshop request: admin confirms, the customer gets a new manage link an
       attendees: 12,
       venue: "Stadshuset",
       message: "A team day for our new preventive unit.",
+      termsAccepted: true,
     },
   })
   expect(response.ok()).toBe(true)
@@ -103,8 +105,9 @@ test("a visitor books a coaching session from the calendar and gets the confirma
   })
   page.on("pageerror", (error) => consoleErrors.push(error.message))
   // The calendar's own data source on this origin answers before the page is even opened.
+  const { from, to } = availabilityRange()
   const availability = await page.request.get(
-    `${URLS.www}/api/booking/availability?offering=session&from=2026-11-01&to=2026-11-30`
+    `${URLS.www}/api/booking/availability?offering=session&from=${from}&to=${to}`
   )
   expect(availability.status(), await availability.text()).toBe(200)
   await page.goto(`${URLS.www}/book`)
@@ -119,6 +122,8 @@ test("a visitor books a coaching session from the calendar and gets the confirma
   await expect(grid).toBeVisible()
   const day = grid.locator("button[data-day]:not([disabled])").first()
   await expect(day, consoleErrors.join("\n")).toBeVisible({ timeout: 15_000 })
+  // Whether this private client must consent to an early start depends on the day picked.
+  const earlyStart = needsEarlyStart(await calendarDay(day))
   await day.click()
   const slot = page
     .getByRole("button", { pressed: false })
@@ -133,6 +138,24 @@ test("a visitor books a coaching session from the calendar and gets the confirma
   // Step 2: who is booking. "Name" and "Email" are the details form's own (still English) labels.
   await page.getByLabel("Namn", { exact: true }).fill("Ada Lovelace")
   await page.getByLabel("E-post", { exact: true }).fill(email)
+  // The terms box: unticked, the next step is refused with its own message; ticked, it opens.
+  await page.getByRole("button", { name: /fortsätt till betalning/i }).click()
+  await expect(page.getByText("Du behöver godkänna villkoren för att boka.")).toBeVisible()
+  await page.getByRole("checkbox", { name: /jag har läst villkoren/i }).check()
+  // Inside the withdrawal period (`withdrawalLastDay`), a private client must also ask for the
+  // session to take place within it: unticked, refused with its own message. Past it, no box.
+  const earlyStartBox = page.getByRole("checkbox", { name: /tjänsten börjar inom ångerfristen/i })
+  if (earlyStart) {
+    await page.getByRole("button", { name: /fortsätt till betalning/i }).click()
+    await expect(
+      page.getByText(
+        "Bekräfta att tillfället får äga rum inom ångerfristen, eller välj en tid längre fram."
+      )
+    ).toBeVisible()
+    await earlyStartBox.check()
+  } else {
+    await expect(earlyStartBox).toBeHidden()
+  }
   await expectAccessible(page, {
     label: "www /book/session details",
     route: "www:/book/[offering]",
@@ -160,6 +183,8 @@ test("a visitor books a coaching session from the calendar and gets the confirma
   const confirmed = await latestMail(email, /bokning är bekräftad/i, { after: started })
   // Swedish times are written "kl. 09.00"; the slot button shows "09:00".
   expect(confirmed.text).toContain(time.replace(":", "."))
+  // It links the terms the visitor accepted, on the legal app, in the booking's language.
+  expect(confirmed.text).toContain(`Villkoren för bokningen: ${URLS.legal}/villkor`)
   const manageUrl = linkIn(confirmed, /\/book\/manage\//)
   await page.goto(manageUrl)
   await expect(page.getByText(/bekräftad/i).first()).toBeVisible()

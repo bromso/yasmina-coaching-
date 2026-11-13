@@ -6,7 +6,8 @@
   "private": true,
   "exports": {
     ".": "./src/index.ts",
-    "./brand": "./src/brand.ts"
+    "./brand": "./src/brand.ts",
+    "./legal": "./src/legal.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

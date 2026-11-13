@@ -1,12 +1,13 @@
 # @repo/content
 
 Content helpers shared by `apps/blog` and `apps/docs`: pure TypeScript, no React, no Next and no
-fumadocs — both apps pair this package with fumadocs-mdx themselves. Six subpaths, like
+fumadocs — both apps pair this package with fumadocs-mdx themselves. Seven subpaths, like
 `@repo/telemetry`:
 
 ```ts
 import { postFrontmatterSchema, docFrontmatterSchema, TAG_PATTERN, SLUG_PATTERN } from "@repo/content/schema"
 import { createBlog, isPublished, DEFAULT_PAGE_SIZE, ContentError } from "@repo/content/posts"
+import { createLegal, findPlaceholders } from "@repo/content/legal"
 import { rssFeed, atomFeed, jsonFeed } from "@repo/content/feeds"
 import { checkLinks } from "@repo/content/links"
 import { blogPostingJsonLd } from "@repo/content/seo"
@@ -59,6 +60,28 @@ tags, then newest, never the post itself), `neighbours(slug)` (the newest post h
 published counterpart in another language, either direction).
 
 `readingMinutes(text)` is `ceil(words / 200)`, minimum 1.
+
+## `legal`
+
+`createLegal(inputs, pages, { rootLocale })` builds the bilingual legal pages (terms, privacy, …)
+from already-parsed files (`LegalInput[]`: `file`, `slug`, `frontmatter`, `text`) and a
+`LegalPageMap` (`{ privacy: { sv: "integritet", en: "privacy" } }`: a page id to its slug per
+language). Frontmatter is `legalFrontmatterSchema` (in `schema`): `title`, `description`,
+`locale`, `page` and a non-empty `changes` log (`{ date, summary }`), newest first. A page's
+`updated` is its newest change; its url is `/<slug>` in the root language and `/en/<slug>`
+otherwise (`localePrefix`).
+
+It collects every problem, each naming its file, and throws one `ContentError`: invalid
+frontmatter, an unknown `page`, a slug that is not the map's, a duplicate page and language, a
+page missing in either language, an unsorted change log, a translation whose newest change
+differs from the root language's (both languages are updated together), and a malformed or
+wrong-language placeholder.
+
+A placeholder marks text still to be supplied: `[ATT FYLLA: <what>]` in a Swedish file,
+`[TO FILL: <what>]` in an English one (`findPlaceholders`, `PLACEHOLDER_PATTERN`). Anything that
+begins that way but is not exactly that form fails, so a typo cannot ship. The returned `Legal`
+exposes `docs()` (in the page map's order), `doc(page, locale)`, `inLocale(locale)`,
+`translation(doc)` and `placeholders()` (every open one, with its file).
 
 ## `feeds`
 

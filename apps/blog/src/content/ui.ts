@@ -105,7 +105,7 @@ export type BlogUi = {
     related: string
   }
   cta: { title: string; text: string; button: string }
-  legal: { terms: string; privacy: string }
+  legal: { privacy: string; terms: string; accessibility: string }
   /** The 404 page (`src/app/global-not-found.tsx`). */
   notFound: { title: string; description: string; back: string }
 }
@@ -151,7 +151,7 @@ export const UI: Record<BlogLocale, BlogUi> = {
       text: "Introsamtalet tar 30 minuter och kostar ingenting. Vi pratar om var du står och om coaching kan hjälpa, innan du bestämmer dig.",
       button: "Be om ett kostnadsfritt introsamtal",
     },
-    legal: { terms: "Villkor", privacy: "Integritet" },
+    legal: { privacy: "Integritet", terms: "Villkor", accessibility: "Tillgänglighet" },
     notFound: {
       title: "Sidan finns inte",
       description: "Sidan du letar efter finns inte, eller har flyttat.",
@@ -198,7 +198,7 @@ export const UI: Record<BlogLocale, BlogUi> = {
       text: "The intro call takes 30 minutes and is free. We talk about where you are and whether coaching can help, before you decide.",
       button: "Ask for a free intro call",
     },
-    legal: { terms: "Terms", privacy: "Privacy" },
+    legal: { privacy: "Privacy", terms: "Terms", accessibility: "Accessibility" },
     notFound: {
       title: "Page not found",
       description: "The page you're looking for doesn't exist or has moved.",

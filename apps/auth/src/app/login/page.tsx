@@ -45,6 +45,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
   const providers = user && !reauth ? [] : await getProviders(requestInfo(await headers()).ip)
   return (
     <LoginView
+      locale={locale}
       next={next}
       notice={notice}
       errorMessage={errorMessage}
